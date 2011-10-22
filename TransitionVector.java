@@ -15,28 +15,33 @@ class TransitionVector
 		fWidth = width;
 	}
 
-	Iterator<Transition> findTransition(long timestamp)
+	AbstractTransitionIterator findTransition(long timestamp)
 	{
 		// Binary search
 		int low = 0;
-		int high = fTransitionCount + 1;	// The +1 handles the case where we search for the last transition
+		int high = fTransitionCount - 1;
 
-		while (high - low > 1)
+		while (high > low)
 		{
 			int mid = (low + high) / 2;
-			long elemKey = fTimestamps[mid - 1];
+			long elemKey = fTimestamps[mid];
 			if (timestamp == elemKey)
 			{
-				low = mid - 1;
+				low = mid;
 				break;
 			}
 			else if (timestamp < elemKey)
-				high = mid;
+				high = mid  - 1;
 			else
-				low = mid;
+				low = mid + 1;
 		}
-		
-		return new TransitionIterator(low > 0 ? low - 1 : 0);
+
+		// If this was not an exact match, then we need to find the
+		// transition before this timestamp.  Walk backwards.
+		while (fTimestamps[low] > timestamp && low > 0)
+			low--;
+
+		return new ConcreteTransitionIterator(low);
 	}
 
 	long getMaxTimestamp()
@@ -52,9 +57,9 @@ class TransitionVector
 		return fWidth;
 	}
 
-	private class TransitionIterator implements Iterator<Transition>
+	private class ConcreteTransitionIterator implements AbstractTransitionIterator
 	{
-		TransitionIterator(int index)
+		ConcreteTransitionIterator(int index)
 		{
 			fIndex = index;
 			int offset = index * fWidth;
@@ -63,17 +68,9 @@ class TransitionVector
 			fCurrentWord = fValues[fWordOffset] >> fBitOffset;
 			fTransition.setWidth(fWidth);
 		}
-	
-		public boolean hasNext()
-		{
-			return fIndex < fTransitionCount;
-		}
-		
-		public Transition next()
-		{
-			if (!hasNext())
-				return null;
-		
+
+        public Transition current()
+        {
 			for (int i = 0; i < fWidth; i++)
 			{
 				fTransition.setValue(i, fCurrentWord & 3);
@@ -89,11 +86,41 @@ class TransitionVector
 			}
 			
 			fTransition.setTimestamp(fTimestamps[fIndex]);
-			fIndex++;
-			
-			return fTransition;
+            return fTransition;
+        }
+
+		public boolean hasNext()
+		{
+			return fIndex < fTransitionCount;
 		}
 		
+		public Transition next()
+		{
+			if (!hasNext())
+				return null;
+
+            Transition t = current();
+			fIndex++;
+			
+			return t;
+		}
+
+        public long getNextTimestamp()
+        {
+            if (fIndex >= fTransitionCount - 1)
+                return -1;
+        
+            return fTimestamps[fIndex + 1];
+        }
+
+        public long getPrevTimestamp()
+        {
+            if (fIndex <= 0)
+                return -1;
+            
+            return fTimestamps[fIndex - 1];
+        }
+        
 		public void remove()
 		{
 			throw new UnsupportedOperationException();

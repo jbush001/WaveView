@@ -28,9 +28,11 @@ SOURCES = \
 	ColorPreferencesView.java \
 	ASCIIValueFormatter.java  \
 	TransitionVector.java \
-	Transition.java 
+	Transition.java \
+	AbstractTransitionIterator.java \
+	BitVector.java
 
-waveview.jar:  $(SOURCES) manifest CLASSDIR
+waveview.jar: $(SOURCES) manifest CLASSDIR
 	javac -g $(SOURCES) -d CLASSDIR
 	jar cvfm waveview.jar manifest -C CLASSDIR .
 	jar uvf	waveview.jar -C resources .

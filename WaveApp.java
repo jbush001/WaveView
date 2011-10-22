@@ -147,6 +147,7 @@ public class WaveApp extends JPanel implements ActionListener
 			}
 			catch (Query.QueryParseException exc)
 			{
+				/// @todo need to display an error dialog...
 				System.out.println("error parsing expression\n" + exc.toString());
 			}
 		}

@@ -67,7 +67,7 @@ class BitVector
 	// XXX make this more generic
 	public void parseString(String string, int radix)
 	{
-		if (fValues.length != string.length())
+		if (fValues == null || fValues.length != string.length())
 			fValues = new byte[string.length()];
 
 		switch (radix)
@@ -160,34 +160,58 @@ class BitVector
 	
 	// Return 1 if this is greater than the other bit vector, -1 if it is
 	// less than, 0 if equal
+	// @bug This is probably not completely correct for X and Z values...
 	public int compare(BitVector other)
 	{
-// 		int myOffset = 0;
-// 		int otherOffset = 0;
-// 	
-// 		if (getWidth() > other.getWidth())
-// 		{
-// 			// The other one is wider than me.  Check if its leading digits
-// 			// have any ones.  If so, it is bigger
-// 			for (int i = 0; i < -difference; i++)
-// 				if (other.fValues[i] != VALUE_0)
-// 					return -1;
-// 		}
-// 		else if (difference > 0)
-// 		{
-// 			// I am wider than the other number.  Check if my leading digits
-// 			// have any ones.  If so, I am bigger.
-// 			for (int i = 0; i < difference; i++)
-// 				if (fValues[i] != VALUE_0)
-// 					return -1;
-// 		}
-// 
-// 		// Now compare remaining digits directly.
-// 		for (int i = 0; i < other.getWidth(); i++)
-// 		{
-// 			if (value1.fValues[i] < fValues[i])
-// 				return true;
-// 		}
+		int myIndex = 0;
+		int otherIndex = 0;
+ 		
+		int difference = getWidth() - other.getWidth();
+ 		if (difference < 0)
+ 		{
+ 			// The other one is wider than me.  Check if its leading digits
+ 			// have any ones.  If so, it is bigger
+ 			for (int i = 0; i < -difference; i++, otherIndex++)
+ 				if (other.fValues[otherIndex] == VALUE_1)
+ 					return -1;
+ 		}
+ 		else if (difference > 0)
+		{
+			// I am wider than the other number.  Check if my leading digits
+			// have any ones.  If so, I am bigger.
+			for (int i = 0; i < difference; i++, myIndex++)
+				if (fValues[myIndex] == VALUE_1)
+					return -1;
+		}
+
+		// Now compare remaining digits directly.
+		while (myIndex < getWidth())
+		{
+			switch (other.fValues[otherIndex])
+			{
+				case VALUE_0:
+					if (fValues[myIndex] == VALUE_1)
+						return 1;
+					
+					// If my value is Z or X, ignore
+					break;
+					
+				case VALUE_1:
+					if (fValues[myIndex] == VALUE_0)
+						return -1;
+					
+					// If my value is Z or X, ignore
+					break;
+
+				case VALUE_X:
+				case VALUE_Z:
+					// Ignore...
+					break;
+			}
+			
+			myIndex++;
+			otherIndex++;
+		}
 
 		return 0;
 	}
@@ -298,6 +322,7 @@ class BitVector
 		return result.toString();
 	}
 
-	
+	// Index 0 is the most significant bit of this signal
+	// Thi sis usually the opposite of the way RTL numbers the signals.otyn['fvglh;,jk
 	private byte[] fValues;
 }

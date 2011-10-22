@@ -16,7 +16,7 @@ class TraceDataModel
 		return new ConcreteTraceBuilder();
 	}
 
-	Iterator<Transition> findTransition(int netId, long timestamp)
+	AbstractTransitionIterator findTransition(int netId, long timestamp)
 	{
 		return fAllNets.elementAt(netId).findTransition(timestamp);
 	}
@@ -92,7 +92,7 @@ class TraceDataModel
 			return fShortName;
 		}
 	
-		Iterator<Transition> findTransition(long timestamp)
+		AbstractTransitionIterator findTransition(long timestamp)
 		{
 			return fTransitionVector.findTransition(timestamp);
 		}

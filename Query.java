@@ -34,10 +34,21 @@ public class Query
 	public long getNextMatch(long startTimestamp)
 	{
 		long currentTimestamp = startTimestamp;
-				
-		while (!fExpression.evaluate(currentTimestamp, fQueryHint) && fQueryHint.hasForwardTimestamp)
-			currentTimestamp = fQueryHint.forwardTimestamp;
 
+		while (true)
+		{
+			while (!fExpression.evaluate(currentTimestamp, fQueryHint) && fQueryHint.hasForwardTimestamp)
+				currentTimestamp = fQueryHint.forwardTimestamp;
+	
+			if (currentTimestamp == startTimestamp && fQueryHint.forwardTimestamp != -1)
+			{
+				currentTimestamp = fQueryHint.forwardTimestamp;
+				continue;
+			}
+			else
+				break;
+		}
+		
 		return currentTimestamp;
 	}
 
@@ -53,16 +64,28 @@ public class Query
 	{
 		long currentTimestamp = startTimestamp;
 	
-		fExpression.evaluate(currentTimestamp, fQueryHint);
-		do
+		while (true)
 		{
-			if (!fQueryHint.hasBackwardTimestamp)
-				return -1;
+			fExpression.evaluate(currentTimestamp, fQueryHint);
+			do
+			{
+				if (!fQueryHint.hasBackwardTimestamp)
+					return -1;
+	
+				currentTimestamp = fQueryHint.backwardTimestamp;
+			}
+			while (!fExpression.evaluate(currentTimestamp, fQueryHint));
 
-			currentTimestamp = fQueryHint.backwardTimestamp;
+			if (currentTimestamp == startTimestamp && fQueryHint.backwardTimestamp != -1)
+			{
+				currentTimestamp = fQueryHint.backwardTimestamp;
+				continue;
+			}
+			else
+				break;
 		}
-		while (!fExpression.evaluate(currentTimestamp, fQueryHint));
-
+		
+		
 		return currentTimestamp;
 	}
 
@@ -130,6 +153,13 @@ public class Query
 	boolean isNum(int value)
 	{
 		return value >= '0' && value <= '9';
+	}
+
+	boolean isHexDigit(int value)
+	{
+		return (value >= '0' && value <= '9')
+			|| (value >= 'a' && value <='f')
+			|| (value >= 'A' && value <= 'F');
 	}
 
 	boolean isAlphaNum(int value)
@@ -222,7 +252,7 @@ public class Query
 					break;
 					
 				case STATE_SCAN_LITERAL:
-					if (isNum(c))
+					if (isHexDigit(c))
 						fCurrentTokenValue += (char) c;
 					else
 					{
@@ -473,24 +503,26 @@ public class Query
 	
 		public boolean evaluate(long timestamp, QueryHint outHint)
 		{
-			Iterator<Transition> i = fTraceDataModel.findTransition(fNetId, timestamp);
-			Transition t = i.next();
+			AbstractTransitionIterator i = fTraceDataModel.findTransition(fNetId, timestamp);
+			Transition t = i.current();
 
-// 			if (transitionIndex >= fNetModel.getTransitionCount() - 1)
-// 				outHint.hasForwardTimestamp = false;
-// 			else
-// 			{
-// 				outHint.hasForwardTimestamp = true;
-// 				outHint.forwardTimestamp = fNetModel.getTransitionTimestamp(transitionIndex + 1) + 1;
-// 			}
-// 
-// 			if (transitionIndex <= 1)
-// 				outHint.hasBackwardTimestamp = false;
-// 			else
-// 			{
-// 				outHint.hasBackwardTimestamp = true;
-// 				outHint.backwardTimestamp = fNetModel.getTransitionTimestamp(transitionIndex - 1);
-// 			}
+            long nextTimestamp = i.getNextTimestamp();
+ 			if (nextTimestamp < 0)
+ 				outHint.hasForwardTimestamp = false;
+ 			else
+ 			{
+ 				outHint.hasForwardTimestamp = true;
+ 				outHint.forwardTimestamp = nextTimestamp;
+ 			}
+ 
+            long prevTimestamp = i.getPrevTimestamp();
+ 			if (prevTimestamp < 0)
+ 				outHint.hasBackwardTimestamp = false;
+ 			else
+ 			{
+ 				outHint.hasBackwardTimestamp = true;
+ 				outHint.backwardTimestamp = prevTimestamp;
+ 			}
 
 			return doCompare(t, fExpected);
 		}
