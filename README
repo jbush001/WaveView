@@ -1,0 +1,2 @@
+WaveView is a Java based waveform viewer.  It currently reads VCD (value
+change dump files).
