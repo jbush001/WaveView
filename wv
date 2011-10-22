@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo $0
+java -jar "`dirname "$0"`/waveview.jar" $1
