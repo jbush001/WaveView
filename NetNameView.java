@@ -46,6 +46,9 @@ class NetNameView extends JList implements TraceViewModelListener
 
 		protected void paintComponent(Graphics g)
 		{
+			AppPreferences prefs = AppPreferences.getInstance();
+			setBackground(prefs.kBackgroundColor);
+
 			super.paintComponent(g);
 			
 			if (fCurrentNet == -1)
@@ -66,25 +69,27 @@ class NetNameView extends JList implements TraceViewModelListener
 			}
 
 			if (fCurrentNetIsSelected)
-				g.setColor(AppPreferences.getInstance().kListSelectionBgColor);
+				g.setColor(prefs.kListSelectionBgColor);
 			else
-				g.setColor(AppPreferences.getInstance().kBackgroundColor);
+				g.setColor(prefs.kBackgroundColor);
 
 			g.fillRect(0, 0, getWidth(), kCellHeight);
 			g.setFont(fLabelFont);
-			g.setColor(fCurrentNetIsSelected ? AppPreferences.getInstance().kListSelectionFgColor 
-				: AppPreferences.getInstance().kTraceColor);
+			g.setColor(fCurrentNetIsSelected ? prefs.kListSelectionFgColor 
+				: prefs.kTraceColor);
 
 			int netId = fTraceViewModel.getVisibleNet(fCurrentNet);
 			String name = fTraceDataModel.getShortNetName(netId);
 			g.drawString(name, 1, fLabelBaseline);		
 
-			g.setColor(fCurrentNetIsSelected ? AppPreferences.getInstance().kListSelectionFgColor 
-				: AppPreferences.getInstance().kValueColor);
+			g.setColor(fCurrentNetIsSelected ? prefs.kListSelectionFgColor 
+				: prefs.kValueColor);
 			g.setFont(fValueFont);
 			
-			Transition t = fTraceDataModel.findTransition(netId, fTraceViewModel.getCursorPosition()).next();
-			g.drawString(fTraceViewModel.getValueFormatter(fCurrentNet).format(t), 1, fValueBaseline);	
+			Transition t = fTraceDataModel.findTransition(netId, 
+				fTraceViewModel.getCursorPosition()).next();
+			g.drawString(fTraceViewModel.getValueFormatter(fCurrentNet).format(t), 
+				1, fValueBaseline);	
 		}
 
 		public String getToolTipText(MouseEvent event)

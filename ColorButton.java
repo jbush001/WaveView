@@ -24,7 +24,9 @@ class ColorButton extends JPanel
 
 	private void showColorChooser()
 	{
-		fColor = JColorChooser.showDialog(this, "Color", fColor); 
+		Color newColor = JColorChooser.showDialog(this, "Color", fColor); 
+		if (newColor != null)
+			fColor = newColor;
 	}
 
 	protected void paintComponent(Graphics g)

@@ -55,6 +55,7 @@ class ColorPreferencePane extends PreferencePane
 		prefs.kListSelectionBgColor = fListSelectionBgColorButton.getColor();
 		prefs.kListSelectionFgColor = fListSelectionFgColorButton.getColor();
 		prefs.kValueColor = fValueColorButton.getColor();
+		prefs.writeColors();
 	}
 
 	private ColorButton fTraceColorButton;

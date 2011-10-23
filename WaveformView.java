@@ -130,6 +130,9 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
 
 	protected void paintComponent(Graphics g)
 	{
+		AppPreferences prefs = AppPreferences.getInstance();
+		setBackground(prefs.kBackgroundColor);
+	
 		super.paintComponent(g);
 
 		Rectangle visibleRect = getVisibleRect();
@@ -137,7 +140,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
 		// Draw selection 
 		if (fTraceViewModel.getCursorPosition() != fTraceViewModel.getSelectionStart())
 		{
-			g.setColor(AppPreferences.getInstance().kSelectionColor);
+			g.setColor(prefs.kSelectionColor);
 			int selectionStart =  timestampToCoordinate(fTraceViewModel.getSelectionStart());
 			int selectionEnd =  timestampToCoordinate(fTraceViewModel.getCursorPosition());
 			int leftEdge = Math.min(selectionStart, selectionEnd);
@@ -177,7 +180,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
 
 		// Draw the cursor (a vertical line that runs from the top to the 
 		// bottom of the trace).
-		g.setColor(AppPreferences.getInstance().kCursorColor);
+		g.setColor(prefs.kCursorColor);
 		int cursorX = timestampToCoordinate(fTraceViewModel.getCursorPosition());
 		g.drawLine(cursorX, visibleRect.y, cursorX, visibleRect.y + visibleRect.height);
 	}
