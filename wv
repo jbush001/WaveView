@@ -1,5 +1,4 @@
 #!/bin/sh
 # This script can be used to invoke the waveform viewer from a shell
 
-echo $0
 java -jar "`dirname "$0"`/waveview.jar" $1

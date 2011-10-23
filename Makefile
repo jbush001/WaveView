@@ -25,17 +25,23 @@ SOURCES = \
 	MultiNetPainter.java \
 	TraceLoader.java \
 	AppPreferences.java \
-	ColorPreferencesView.java \
+	ColorPreferencePane.java \
 	ASCIIValueFormatter.java  \
 	TransitionVector.java \
 	Transition.java \
 	AbstractTransitionIterator.java \
-	BitVector.java
+	BitVector.java \
+	ColorButton.java \
+	PreferenceWindow.java
 
 waveview.jar: $(SOURCES) manifest CLASSDIR
 	javac -g $(SOURCES) -d CLASSDIR
 	jar cvfm waveview.jar manifest -C CLASSDIR .
 	jar uvf	waveview.jar -C resources .
+
+clean:
+	rm -rf CLASSDIR
+	rm waveview.jar
 
 CLASSDIR: 
 	mkdir CLASSDIR

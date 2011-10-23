@@ -186,16 +186,8 @@ public class WaveApp extends JPanel implements ActionListener
 		else if (cmd.equals("prefs"))
 		{
 			if (fPrefsWindow == null)
-			{
-				fPrefsWindow = new JFrame("Preferences");
-				JTabbedPane contentPane = new JTabbedPane();
-				contentPane.addTab("Colors", null, new ColorPreferencesView(), "tree view");
-				contentPane.setOpaque(true);
-				fPrefsWindow.setPreferredSize(new Dimension(500, 400));
-				fPrefsWindow.setContentPane(contentPane);
-				fPrefsWindow.pack();
-			}
-			
+				fPrefsWindow = new PreferenceWindow();
+
 			fPrefsWindow.setVisible(true);
 		}
     }
