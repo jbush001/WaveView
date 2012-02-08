@@ -148,9 +148,9 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
 			g.fillRect(leftEdge, 0, rightEdge - leftEdge, getHeight());
 		}
 
-		drawMarkers(g, visibleRect);
-
 		drawTimingLines(g, visibleRect);
+
+		drawMarkers(g, visibleRect);
 
 		// Draw nets
 		int waveformIndex = visibleRect.y / kWaveformSpacing;
