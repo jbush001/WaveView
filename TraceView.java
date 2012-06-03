@@ -11,10 +11,11 @@ import java.io.File;
 
 public class TraceView extends JPanel implements ActionListener
 {
-	public TraceView(TraceViewModel viewModel, TraceDataModel dataModel)
+	public TraceView(TraceViewModel viewModel, TraceDataModel dataModel, WaveApp waveApp)
 	{
 		super(new BorderLayout());
 
+		fWaveApp = waveApp;
 		fTraceViewModel = viewModel;
 		fTraceDataModel = dataModel;
 		fWaveformView = new WaveformView(viewModel, dataModel);
@@ -70,6 +71,9 @@ public class TraceView extends JPanel implements ActionListener
 		subItem = new JMenuItem("Custom Formatter...");
 		subItem.addActionListener(this);
 		item.add(subItem);
+		fPopupMenu.add(item);
+		item = new JMenuItem("Find...");
+		item.addActionListener(this);
 		fPopupMenu.add(item);
 
 		fNetNameView.addMouseListener(new MouseAdapter() {
@@ -142,6 +146,20 @@ public class TraceView extends JPanel implements ActionListener
 						JOptionPane.showMessageDialog(this, "Error opening configuration file"); 
 					}
 				}
+			}
+			else if (e.getActionCommand().equals("Find..."))
+			{
+				String traceString = "";
+				for (int i = 0; i < indices.length; i++)
+				{
+					if (i != 0)
+						traceString += " and ";
+				
+					traceString += fTraceDataModel.getFullNetName(fTraceViewModel
+						.getVisibleNet(indices[i])) + " = xxx ";
+				}
+				
+				fWaveApp.showQueryDialog(traceString);
 			}
 			else 
 			{
@@ -225,4 +243,5 @@ public class TraceView extends JPanel implements ActionListener
 	private JPopupMenu fPopupMenu;
 	private TraceViewModel fTraceViewModel;
 	private TraceDataModel fTraceDataModel;
+	private WaveApp fWaveApp;
 }

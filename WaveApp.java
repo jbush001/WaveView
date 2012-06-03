@@ -40,7 +40,7 @@ public class WaveApp extends JPanel implements ActionListener
 		toolBar.add(button);
 		add(toolBar, BorderLayout.PAGE_START);
 
-		fTraceView = new TraceView(viewModel, dataModel);
+		fTraceView = new TraceView(viewModel, dataModel, this);
 		add(fTraceView, BorderLayout.CENTER);
 
 		setPreferredSize(new Dimension(900,600));
@@ -136,21 +136,7 @@ public class WaveApp extends JPanel implements ActionListener
 		else if (cmd.equals("prevMarker"))
 			fTraceViewModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
 		else if (cmd.equals("findbyvalue"))
-		{
-			String description = (String) JOptionPane.showInputDialog(
-				SwingUtilities.getWindowAncestor(this), "Enter search string", "New Search",
-				JOptionPane.PLAIN_MESSAGE, null, null, null);
-			try
-			{
-				fCurrentQuery = new Query(fTraceDataModel, description);
-				findNext();
-			}
-			catch (Query.QueryParseException exc)
-			{
-				/// @todo need to display an error dialog...
-				System.out.println("error parsing expression\n" + exc.toString());
-			}
-		}
+			showQueryDialog(null);
 		else if (cmd.equals("findnext"))
 			findNext();
 		else if (cmd.equals("findprev"))
@@ -220,7 +206,37 @@ public class WaveApp extends JPanel implements ActionListener
 		setConfigurationFile(createConfigFileName(file));
 		buildNetMenu();
 	}
-	
+
+	void showQueryDialog(String initialQuery)
+	{
+		if (initialQuery == null)
+			initialQuery = fLastQuery;
+
+		// XXX make a proper query window with a textarea
+		String query = (String) JOptionPane.showInputDialog(
+			SwingUtilities.getWindowAncestor(this), "Enter search string", 
+			initialQuery);
+		if (query != null)
+		{
+			fLastQuery = query;
+			doQuery(query);
+		}
+	}
+
+	void doQuery(String queryString)
+	{
+		try
+		{
+			fCurrentQuery = new Query(fTraceDataModel, queryString);
+			findNext();
+		}
+		catch (Query.QueryParseException exc)
+		{
+			JOptionPane.showMessageDialog(null, exc.toString(),"Error parsing query", 
+				JOptionPane.ERROR_MESSAGE);
+		}
+	}
+
 	void findNext()
 	{
 		if (fCurrentQuery != null)
@@ -444,6 +460,7 @@ public class WaveApp extends JPanel implements ActionListener
 	private JMenu fRecentFilesMenu;
 	private TraceSettingsFile fTraceSettingsFile;
 	private NetSearchView fSearchPane;
+	private String fLastQuery;
 
 	private static void createAndShowGUI(String[] args)
 	{
