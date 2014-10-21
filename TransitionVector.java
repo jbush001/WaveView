@@ -35,29 +35,19 @@ class TransitionVector
 	{
 		// Binary search
 		int low = 0;
-		int high = fTransitionCount - 1;
+		int high = fTransitionCount;
 
-		while (high > low)
+		while (low < high)
 		{
 			int mid = (low + high) / 2;
 			long elemKey = fTimestamps[mid];
-			if (timestamp == elemKey)
-			{
-				low = mid;
-				break;
-			}
-			else if (timestamp < elemKey)
-				high = mid  - 1;
+			if (timestamp < elemKey)
+				high = mid;
 			else
 				low = mid + 1;
 		}
 
-		// If this was not an exact match, then we need to find the
-		// transition before this timestamp.  Walk backwards.
-		while (fTimestamps[low] > timestamp && low > 0)
-			low--;
-
-		return new ConcreteTransitionIterator(low);
+		return new ConcreteTransitionIterator(low - 1);
 	}
 
 	long getMaxTimestamp()
