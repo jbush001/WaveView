@@ -5,7 +5,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 // 
-//     http://www.apache.org/licenses/LICENSE-2.0
+//	   http://www.apache.org/licenses/LICENSE-2.0
 // 
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,8 +75,8 @@ class TransitionVector
 			fTransition.setWidth(fWidth);
 		}
 
-        public Transition current()
-        {
+		public Transition current()
+		{
 			for (int i = 0; i < fWidth; i++)
 			{
 				fTransition.setValue(i, fCurrentWord & 3);
@@ -92,8 +92,8 @@ class TransitionVector
 			}
 			
 			fTransition.setTimestamp(fTimestamps[fIndex]);
-            return fTransition;
-        }
+			return fTransition;
+		}
 
 		public boolean hasNext()
 		{
@@ -105,28 +105,28 @@ class TransitionVector
 			if (!hasNext())
 				return null;
 
-            Transition t = current();
+			Transition t = current();
 			fIndex++;
 			
 			return t;
 		}
 
-        public long getNextTimestamp()
-        {
-            if (fIndex >= fTransitionCount - 1)
-                return -1;
-        
-            return fTimestamps[fIndex + 1];
-        }
+		public long getNextTimestamp()
+		{
+			if (fIndex >= fTransitionCount - 1)
+				return -1;
+		
+			return fTimestamps[fIndex + 1];
+		}
 
-        public long getPrevTimestamp()
-        {
-            if (fIndex <= 0)
-                return -1;
-            
-            return fTimestamps[fIndex - 1];
-        }
-        
+		public long getPrevTimestamp()
+		{
+			if (fIndex <= 0)
+				return -1;
+			
+			return fTimestamps[fIndex - 1];
+		}
+		
 		public void remove()
 		{
 			throw new UnsupportedOperationException();
@@ -187,5 +187,5 @@ class TransitionVector
 	private long[] fTimestamps;
 	private int[] fValues;
 	private int fTransitionCount;
-	private int fAllocSize;	// Used only while building
+	private int fAllocSize; // Used only while building
 }
