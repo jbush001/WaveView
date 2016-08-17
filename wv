@@ -1,4 +1,0 @@
-#!/bin/sh
-# This script can be used to invoke the waveform viewer from a shell
-
-java -Xmx512m -jar "`dirname "$0"`/waveview.jar" $1
