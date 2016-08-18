@@ -123,12 +123,19 @@ class VCDLoader implements TraceLoader
                 break;
             case 'u':    // Microseconds
                 s = s.substring(0, s.length() - 2);
-                fNanoSecondsPerIncrement = 10;
+                fNanoSecondsPerIncrement = 1000;
                 break;
-            default:    // Seconds
+
+            case 's':   // Seconds
                 fNanoSecondsPerIncrement = 1000000000;
                 s = s.substring(0, s.length() - 1);
                 break;
+
+            // XXX need to handle other units
+
+            default:
+                throw new Exception("Line " + fTokenizer.lineno() + ": unknown timescale value "
+                    + getTokenString());
         }
 
         fNanoSecondsPerIncrement *= Long.parseLong(s);

@@ -21,7 +21,6 @@ Install Gradle (using MacPorts https://www.macports.org/)
 # Building
 
     gradle build
-    gradle test
 
 # Running
 
