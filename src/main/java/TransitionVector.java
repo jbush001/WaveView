@@ -18,7 +18,7 @@ import java.util.*;
 
 ///
 /// A compact representation of a time series of value changes on a single net
-/// This is really a convenience class to be used inside TraceDataModel.
+/// This is a convenience class to be used inside TraceDataModel.
 ///
 /// @bug This doesn't propertly handle nets that are uninitalized at the beginning
 /// of the trace.  They are assumed to have the value of the first transition.
@@ -31,6 +31,9 @@ class TransitionVector
         fWidth = width;
     }
 
+    /// @returns Iterator at transition. If there isn't a transition at this transition,
+    ///   returns the transition before it. If this is before the first transition, returns
+    ///   the first transition.
     AbstractTransitionIterator findTransition(long timestamp)
     {
         // Binary search
@@ -141,6 +144,8 @@ class TransitionVector
         private Transition fTransition = new Transition();
     }
 
+    /// The timestamp must be after the last transition that was
+    /// appended
     public void appendTransition(long timestamp, BitVector values)
     {
         if (fTransitionCount == fAllocSize)

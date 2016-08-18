@@ -140,7 +140,7 @@ public class WaveApp extends JPanel implements ActionListener
                 fMarkersWindow = new JFrame("Markers");
                 MarkerListView contentPane = new MarkerListView(fTraceViewModel);
                 contentPane.setOpaque(true);
-                fMarkersWindow.setPreferredSize(new Dimension(300, 600));
+                fMarkersWindow.setPreferredSize(new Dimension(400, 300));
                 fMarkersWindow.setContentPane(contentPane);
                 fMarkersWindow.pack();
             }

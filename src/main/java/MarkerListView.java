@@ -122,7 +122,7 @@ class MarkerTableModel extends AbstractTableModel
             case 0:
                 return "" + fTraceViewModel.getIdForMarker(row);
             case 1:
-                return "" + fTraceViewModel.getTimestampForMarker(row);
+                return "" + fTraceViewModel.getTimestampForMarker(row) + " ns";
             case 2:
                 return "" + fTraceViewModel.getDescriptionForMarker(row);
         }

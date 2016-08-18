@@ -84,10 +84,9 @@ public class TimescaleView extends JPanel implements TraceViewModelListener, Act
 
     public void scaleChanged(double newScale)
     {
-        // Make sure minor ticks are at least 10 pixels wide
-        fMinorTickInterval = 1;
-        while (fMinorTickInterval / fTraceViewModel.getHorizontalScale() < kMinMinorTickSize)
-            fMinorTickInterval *= 10;
+        // Make sure minor ticks are large enough
+        fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
+            fTraceViewModel.getHorizontalScale() * kMinMinorTickSize)));
 
         if (fMinorTickInterval < 100)
         {
@@ -109,6 +108,9 @@ public class TimescaleView extends JPanel implements TraceViewModelListener, Act
             fUnitMagnitude = 1000000000;
             fUnit = "s";
         }
+
+        // XXX if things zoom out a lot more, second will be too small.
+        // Not sure the best approach for that.
 
         Dimension d = getPreferredSize();
         d.width = (int)(fTraceDataModel.getMaxTimestamp() / fTraceViewModel.getHorizontalScale());
@@ -140,12 +142,12 @@ public class TimescaleView extends JPanel implements TraceViewModelListener, Act
             int x = (int)(ts / fTraceViewModel.getHorizontalScale());
             if ((ts / fMinorTickInterval) % kMinorTicksPerMajorTick == 0)
             {
-                g.drawLine(x, 5, x, 25);
+                g.drawLine(x, 5, x, kTimescaleHeight);
                 g.drawString(Long.toString(ts / fUnitMagnitude) + " " + fUnit, x + 3, kMinorTickTop
                     - metrics.getDescent() - 2);
             }
             else
-                g.drawLine(x, kMinorTickTop, x, 25);
+                g.drawLine(x, kMinorTickTop, x, kTimescaleHeight);
         }
 
         // Draw Markers
@@ -160,7 +162,11 @@ public class TimescaleView extends JPanel implements TraceViewModelListener, Act
             int labelWidth = g.getFontMetrics().stringWidth(labelString);
             int x = (int) (timestamp / fTraceViewModel.getHorizontalScale());
             g.setColor(AppPreferences.getInstance().kBackgroundColor);
-            g.fillRect(x - (labelWidth / 2 + kTimestampBorder), kTimescaleHeight - 15, labelWidth + kTimestampBorder * 2, 15);
+            g.fillRect(x - (labelWidth / 2 + kTimestampBorder), kTimescaleHeight - 12,
+                labelWidth + kTimestampBorder * 2, 12);
+            g.setColor(AppPreferences.getInstance().kTraceColor);
+            g.drawRect(x - (labelWidth / 2 + kTimestampBorder), kTimescaleHeight - 12,
+                labelWidth + kTimestampBorder * 2, 12);
             g.setColor(AppPreferences.getInstance().kTraceColor);
             g.drawString(labelString, x - labelWidth / 2, kTimescaleHeight - 3);
             markerIndex++;
@@ -168,18 +174,23 @@ public class TimescaleView extends JPanel implements TraceViewModelListener, Act
 
         if (fShowTimestamp)
         {
-            String timeString = "" + (double) fTraceViewModel.getCursorPosition() / fUnitMagnitude + " " + fUnit;
+            String timeString = "" + (double) fTraceViewModel.getCursorPosition()
+                / fUnitMagnitude + " " + fUnit;
             int timeWidth = g.getFontMetrics().stringWidth(timeString);
-            int cursorX = (int) (fTraceViewModel.getCursorPosition() / fTraceViewModel.getHorizontalScale());
+            int cursorX = (int) (fTraceViewModel.getCursorPosition()
+                / fTraceViewModel.getHorizontalScale());
             int labelLeft = cursorX + timeWidth > visibleRect.x + visibleRect.width
                 ? cursorX - timeWidth : cursorX;
 
             g.setColor(AppPreferences.getInstance().kBackgroundColor);
-            g.fillRect(labelLeft - kTimestampBorder, kTimescaleHeight - 15, timeWidth + kTimestampBorder * 2, 15);
+            g.fillRect(labelLeft - kTimestampBorder, kTimescaleHeight - 15,
+                timeWidth + kTimestampBorder * 2, 15);
             g.setColor(AppPreferences.getInstance().kTraceColor);
-            g.drawRect(labelLeft - kTimestampBorder, kTimescaleHeight - 15, timeWidth + kTimestampBorder * 2, 15);
+            g.drawRect(labelLeft - kTimestampBorder, kTimescaleHeight - 15,
+                timeWidth + kTimestampBorder * 2, 15);
             g.setColor(AppPreferences.getInstance().kTraceColor);
-            g.drawString(timeString, labelLeft + kTimestampBorder, kTimescaleHeight - kTimestampBorder);
+            g.drawString(timeString, labelLeft + kTimestampBorder,
+                kTimescaleHeight - kTimestampBorder);
         }
     }
 
@@ -192,7 +203,7 @@ public class TimescaleView extends JPanel implements TraceViewModelListener, Act
     private boolean fShowTimestamp;
     private int fUnitMagnitude = 1;
     private String fUnit = "s";
-    private int fMinorTickInterval = 0;    // In time units
+    private int fMinorTickInterval = 0;     // In nanoseconds
     private TraceViewModel fTraceViewModel;
     private TraceDataModel fTraceDataModel;
     private int fOldCursor;

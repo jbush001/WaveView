@@ -96,7 +96,7 @@ class VCDLoader implements TraceLoader
         if (net == null)
         {
             // We've never seen this net before
-            // First, strip off the width declaration
+            // Strip off the width declaration
             int openBracket = netName.indexOf('[');
             if (openBracket != -1)
                 netName = netName.substring(0, openBracket);

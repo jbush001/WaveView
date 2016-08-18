@@ -14,10 +14,6 @@
 // limitations under the License.
 //
 
-//
-// TraceViewModel contains view state for a waveform capture
-//
-
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
@@ -33,6 +29,11 @@ interface TraceViewModelListener
     public void scaleChanged(double newScale);
     public void markerChanged(long timestamp);
 };
+
+///
+/// TraceViewModel contains view state for a waveform capture
+/// (e.g. Cursor position, scale, visible nets, etc.)
+///
 
 public class TraceViewModel
 {
@@ -61,6 +62,7 @@ public class TraceViewModel
         fTraceListeners.remove(listener);
     }
 
+    // @param scale Nanoseconds per pixel
     public void setHorizontalScale(double scale)
     {
         fHorizontalScale = scale;
@@ -68,6 +70,7 @@ public class TraceViewModel
             listener.scaleChanged(scale);
     }
 
+    // @returns Nanoseconds per pixel
     public double getHorizontalScale()
     {
         return fHorizontalScale;

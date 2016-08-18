@@ -123,7 +123,6 @@ class AppPreferences
         kSelectionColor = readColor("selectionColor", new Color(230, 230, 230));
         kCursorColor = readColor("cursorColor", Color.red);
         kBackgroundColor = readColor("backgroundColor", Color.white);
-        System.out.println("read background color = " + kBackgroundColor);
         kTimingMarkerColor = readColor("timingMarkerColor", new Color(230, 230, 230));
         kMarkerColor = readColor("markerColor", Color.green);
         kListSelectionBgColor = readColor("listSelectionBgColor", Color.blue);
