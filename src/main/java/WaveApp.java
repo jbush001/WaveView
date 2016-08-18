@@ -152,7 +152,7 @@ public class WaveApp extends JPanel implements ActionListener
         else if (cmd.equals("prevMarker"))
             fTraceViewModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("findbyvalue"))
-            showQueryDialog(null);
+            showQueryDialog();
         else if (cmd.equals("findnext"))
             findNext();
         else if (cmd.equals("findprev"))
@@ -223,23 +223,39 @@ public class WaveApp extends JPanel implements ActionListener
         buildNetMenu();
     }
 
-    void showQueryDialog(String initialQuery)
+    void showQueryDialog()
     {
-        if (initialQuery == null)
-            initialQuery = fLastQuery;
+        // The initial query string is formed by the selected nets and
+        // their values at the cursor position.
+        StringBuffer initialQuery = new StringBuffer();
+        boolean first = true;
+        long cursorPosition = fTraceViewModel.getCursorPosition();
 
-        // XXX make a proper query window with a textarea
+        for (int index : fTraceView.getSelectedNets())
+        {
+            int netId = fTraceViewModel.getVisibleNet(index);
+            if (first)
+                first = false;
+            else
+                initialQuery.append(" and ");
+
+            initialQuery.append(fTraceDataModel.getFullNetName(netId));
+            Transition t = fTraceDataModel.findTransition(netId,
+                cursorPosition).next();
+            initialQuery.append(" = ");
+            initialQuery.append(fTraceViewModel.getValueFormatter(index)
+                .format(t));
+        }
+
+        // XXX make a proper find window with a textarea
         String query = (String) JOptionPane.showInputDialog(
             SwingUtilities.getWindowAncestor(this), "Enter search string",
             initialQuery);
         if (query != null)
-        {
-            fLastQuery = query;
-            doQuery(query);
-        }
+            doFind(query);
     }
 
-    void doQuery(String queryString)
+    void doFind(String queryString)
     {
         try
         {
@@ -476,7 +492,6 @@ public class WaveApp extends JPanel implements ActionListener
     private JMenu fRecentFilesMenu;
     private TraceSettingsFile fTraceSettingsFile;
     private NetSearchView fSearchPane;
-    private String fLastQuery;
 
     private static void createAndShowGUI(String[] args)
     {

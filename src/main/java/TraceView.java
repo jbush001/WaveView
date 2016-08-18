@@ -88,9 +88,6 @@ public class TraceView extends JPanel implements ActionListener
         subItem.addActionListener(this);
         item.add(subItem);
         fPopupMenu.add(item);
-        item = new JMenuItem("Find...");
-        item.addActionListener(this);
-        fPopupMenu.add(item);
 
         fNetNameView.addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent event) {
@@ -162,20 +159,6 @@ public class TraceView extends JPanel implements ActionListener
                         JOptionPane.showMessageDialog(this, "Error opening configuration file");
                     }
                 }
-            }
-            else if (e.getActionCommand().equals("Find..."))
-            {
-                String traceString = "";
-                for (int i = 0; i < indices.length; i++)
-                {
-                    if (i != 0)
-                        traceString += " and ";
-
-                    traceString += fTraceDataModel.getFullNetName(fTraceViewModel
-                        .getVisibleNet(indices[i])) + " = xxx ";
-                }
-
-                fWaveApp.showQueryDialog(traceString);
             }
             else
             {
@@ -250,6 +233,11 @@ public class TraceView extends JPanel implements ActionListener
         newRect.x = (int)(lowTimestamp / fTraceViewModel.getHorizontalScale());
         newRect.width = (int)(highTimestamp / fTraceViewModel.getHorizontalScale()) - newRect.x;
         fWaveformView.scrollRectToVisible(newRect);
+    }
+
+    public int[] getSelectedNets()
+    {
+        return fNetNameView.getSelectedIndices();
     }
 
     private WaveformView fWaveformView;
