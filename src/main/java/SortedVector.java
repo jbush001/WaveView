@@ -37,6 +37,7 @@ class SortedVector<T> extends Vector<T>
         super(initialCapacity, capacityIncrement);
     }
 
+    /// XXX why pass key and not just call getKey on the value?
     void addSorted(long key, T value)
     {
         if (false)
@@ -75,16 +76,16 @@ class SortedVector<T> extends Vector<T>
         int low = 0;
         int high = size();
 
-        while (high - low > 1)
+        while (low < high)
         {
             int mid = (low + high) / 2;
-            long elemKey = ((Keyed) elementAt(mid - 1)).getKey();
+            long elemKey = ((Keyed) elementAt(mid)).getKey();
             if (key == elemKey)
-                return mid - 1;
+                return mid;
             else if (key < elemKey)
                 high = mid;
             else
-                low = mid;
+                low = mid + 1;
         }
 
         if (low > 0)

@@ -19,39 +19,40 @@ import org.junit.*;
 
 public class SortedVectorTest
 {
-	class KeyedElement implements SortedVector.Keyed
-	{
-		public KeyedElement(long keyval)
-		{
-			fKeyValue = keyval;
-		}
+    class KeyedElement implements SortedVector.Keyed
+    {
+        public KeyedElement(long keyval)
+        {
+            fKeyValue = keyval;
+        }
 
-		public long getKey()
-		{
-			return fKeyValue;
-		}
+        public long getKey()
+        {
+            return fKeyValue;
+        }
 
-		long fKeyValue;
-	}
+        long fKeyValue;
+    }
 
     @Test public void testAddLookup1()
-	{
-		SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
+    {
+        SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
 
         // Note: odd number of elements
-		vec.addSorted(100, new KeyedElement(100));
-		vec.addSorted(110, new KeyedElement(110));
-		vec.addSorted(115, new KeyedElement(115));
-		vec.addSorted(116, new KeyedElement(116));
-		vec.addSorted(117, new KeyedElement(117));
+        vec.addSorted(100, new KeyedElement(100));
+        vec.addSorted(110, new KeyedElement(110));
+        vec.addSorted(115, new KeyedElement(115));
+        vec.addSorted(116, new KeyedElement(116));
+        vec.addSorted(117, new KeyedElement(117));
 
-		assertEquals(vec.lookupValue(100), 0);
-		assertEquals(vec.lookupValue(110), 1);
-		assertEquals(vec.lookupValue(115), 2);
-		assertEquals(vec.lookupValue(116), 3);
-
-        // XXX broken
-        // assertEquals(vec.lookupValue(117), 4);
+        assertEquals(vec.lookupValue(10), 0);
+        assertEquals(vec.lookupValue(100), 0);
+        assertEquals(vec.lookupValue(110), 1);
+        assertEquals(vec.lookupValue(112), 1);
+        assertEquals(vec.lookupValue(115), 2);
+        assertEquals(vec.lookupValue(116), 3);
+        assertEquals(vec.lookupValue(117), 4);
+        assertEquals(vec.lookupValue(120), 4);
     }
 
     // XXX test with even number of elements
