@@ -28,9 +28,7 @@ public class TransitionVectorTest
         vec.appendTransition(112, new BitVector("00010000", 2));
         vec.appendTransition(115, new BitVector("00010000", 2));
 
-        // XXX failing test
-        // assertEquals(vec.findTransition(99).current().getTimestamp(), 100);
-
+        assertEquals(vec.findTransition(99).current().getTimestamp(), 100);
         assertEquals(vec.findTransition(100).current().getTimestamp(), 100);
         assertEquals(vec.findTransition(101).current().getTimestamp(), 100);
         assertEquals(vec.findTransition(105).current().getTimestamp(), 100);

@@ -50,7 +50,7 @@ public class BitVectorTest
         BitVector bv = new BitVector("zzzzzzzz", 2);
         assertEquals(8, bv.getWidth());
         assertTrue(bv.isZ());
-        assertTrue(bv.isX());   // XXX bug?
+        assertTrue(bv.isX());
     }
 
     @Test public void testSetValue()
