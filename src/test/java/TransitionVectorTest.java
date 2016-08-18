@@ -20,7 +20,7 @@ import org.junit.*;
 public class TransitionVectorTest
 {
     @Test public void testFindTransition()
-	{
+    {
         TransitionVector vec = new TransitionVector(8);
         vec.appendTransition(100, new BitVector("00000001", 2));
         vec.appendTransition(110, new BitVector("00000010", 2));
@@ -31,15 +31,15 @@ public class TransitionVectorTest
         // XXX failing test
         // assertEquals(vec.findTransition(99).current().getTimestamp(), 100);
 
-		assertEquals(vec.findTransition(100).current().getTimestamp(), 100);
-		assertEquals(vec.findTransition(101).current().getTimestamp(), 100);
-		assertEquals(vec.findTransition(105).current().getTimestamp(), 100);
-		assertEquals(vec.findTransition(109).current().getTimestamp(), 100);
-		assertEquals(vec.findTransition(110).current().getTimestamp(), 110);
-		assertEquals(vec.findTransition(111).current().getTimestamp(), 111);
-		assertEquals(vec.findTransition(112).current().getTimestamp(), 112);
-		assertEquals(vec.findTransition(113).current().getTimestamp(), 112);
-		assertEquals(vec.findTransition(116).current().getTimestamp(), 115);
-		assertEquals(vec.findTransition(20000).current().getTimestamp(), 115);
+        assertEquals(vec.findTransition(100).current().getTimestamp(), 100);
+        assertEquals(vec.findTransition(101).current().getTimestamp(), 100);
+        assertEquals(vec.findTransition(105).current().getTimestamp(), 100);
+        assertEquals(vec.findTransition(109).current().getTimestamp(), 100);
+        assertEquals(vec.findTransition(110).current().getTimestamp(), 110);
+        assertEquals(vec.findTransition(111).current().getTimestamp(), 111);
+        assertEquals(vec.findTransition(112).current().getTimestamp(), 112);
+        assertEquals(vec.findTransition(113).current().getTimestamp(), 112);
+        assertEquals(vec.findTransition(116).current().getTimestamp(), 115);
+        assertEquals(vec.findTransition(20000).current().getTimestamp(), 115);
     }
 }

@@ -20,7 +20,7 @@ import org.junit.*;
 public class NetTreeModelTest
 {
     @Test public void test1()
-	{
+    {
         NetTreeModel model = new NetTreeModel();
         model.enterScope("scope1");
         model.addNet("child1", 1);
