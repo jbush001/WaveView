@@ -47,7 +47,7 @@ class TransitionVector
                 low = mid + 1;
         }
 
-        return new ConcreteTransitionIterator(low - 1);
+        return new ConcreteTransitionIterator(low == 0 ? 0 : low - 1);
     }
 
     long getMaxTimestamp()
@@ -67,6 +67,8 @@ class TransitionVector
     {
         ConcreteTransitionIterator(int index)
         {
+            assert index >= 0;
+
             fIndex = index;
             int offset = index * fWidth;
             fWordOffset = offset / 16;
@@ -164,7 +166,9 @@ class TransitionVector
             fValues = newValues;
         }
 
-        assert timestamp >= fTimestamps[fTransitionCount - 1];
+        if (fTransitionCount > 0)
+            assert timestamp >= fTimestamps[fTransitionCount - 1];
+
         fTimestamps[fTransitionCount] = timestamp;
         int wordOffset = fTransitionCount * fWidth / 16;
         int bitOffset = (fTransitionCount * fWidth * 2) % 32;

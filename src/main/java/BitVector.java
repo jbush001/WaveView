@@ -197,7 +197,7 @@ class BitVector
             // have any ones.  If so, I am bigger.
             for (int i = 0; i < difference; i++, myIndex++)
                 if (fValues[myIndex] == VALUE_1)
-                    return -1;
+                    return 1;
         }
 
         // Now compare remaining digits directly.

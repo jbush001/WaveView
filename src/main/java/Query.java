@@ -49,23 +49,17 @@ public class Query
     ///
     public long getNextMatch(long startTimestamp)
     {
-        long currentTimestamp = startTimestamp;
-
+        long timestamp = startTimestamp;
         while (true)
         {
-            while (!fExpression.evaluate(currentTimestamp, fQueryHint) && fQueryHint.hasForwardTimestamp)
-                currentTimestamp = fQueryHint.forwardTimestamp;
+            if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
+                return timestamp;
 
-            if (currentTimestamp == startTimestamp && fQueryHint.forwardTimestamp != -1)
-            {
-                currentTimestamp = fQueryHint.forwardTimestamp;
-                continue;
-            }
-            else
-                break;
+            if (!fQueryHint.hasForwardTimestamp)
+                return -1;
+
+            timestamp = fQueryHint.forwardTimestamp;
         }
-
-        return currentTimestamp;
     }
 
     ///
@@ -78,31 +72,17 @@ public class Query
     ///
     public long getPreviousMatch(long startTimestamp)
     {
-        long currentTimestamp = startTimestamp;
-
+        long timestamp = startTimestamp;
         while (true)
         {
-            fExpression.evaluate(currentTimestamp, fQueryHint);
-            do
-            {
-                if (!fQueryHint.hasBackwardTimestamp)
-                    return -1;
+            if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
+                return timestamp;
 
-                currentTimestamp = fQueryHint.backwardTimestamp;
-            }
-            while (!fExpression.evaluate(currentTimestamp, fQueryHint));
+            if (!fQueryHint.hasBackwardTimestamp)
+                return -1;
 
-            if (currentTimestamp == startTimestamp && fQueryHint.backwardTimestamp != -1)
-            {
-                currentTimestamp = fQueryHint.backwardTimestamp;
-                continue;
-            }
-            else
-                break;
+            timestamp = fQueryHint.backwardTimestamp;
         }
-
-
-        return currentTimestamp;
     }
 
     class QueryParseException extends Exception
@@ -218,7 +198,7 @@ public class Query
             }
 
             if (state == STATE_INIT)
-                fTokenStart = fStringOffset;
+                fTokenStart = fStringOffset - 1;
 
             switch (state)
             {
@@ -520,27 +500,26 @@ public class Query
         public boolean evaluate(long timestamp, QueryHint outHint)
         {
             AbstractTransitionIterator i = fTraceDataModel.findTransition(fNetId, timestamp);
-            Transition t = i.current();
 
             long nextTimestamp = i.getNextTimestamp();
-             if (nextTimestamp < 0)
-                 outHint.hasForwardTimestamp = false;
-             else
-             {
-                 outHint.hasForwardTimestamp = true;
-                 outHint.forwardTimestamp = nextTimestamp;
-             }
+            if (nextTimestamp < 0)
+                outHint.hasForwardTimestamp = false;
+            else
+            {
+                outHint.hasForwardTimestamp = true;
+                outHint.forwardTimestamp = nextTimestamp;
+            }
 
             long prevTimestamp = i.getPrevTimestamp();
-             if (prevTimestamp < 0)
-                 outHint.hasBackwardTimestamp = false;
-             else
-             {
-                 outHint.hasBackwardTimestamp = true;
-                 outHint.backwardTimestamp = prevTimestamp;
-             }
+            if (prevTimestamp < 0)
+                outHint.hasBackwardTimestamp = false;
+            else
+            {
+                outHint.hasBackwardTimestamp = true;
+                outHint.backwardTimestamp = prevTimestamp;
+            }
 
-            return doCompare(t, fExpected);
+            return doCompare(i.current(), fExpected);
         }
 
         abstract protected boolean doCompare(BitVector value1, BitVector value2);
