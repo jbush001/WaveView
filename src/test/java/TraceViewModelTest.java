@@ -19,58 +19,291 @@ import org.junit.*;
 
 public class TraceViewModelTest
 {
+    class TestModelListener implements TraceViewModel.Listener
+    {
+        public static final int CURSOR_CHANGED = 1;
+        public static final int NETS_ADDED = 2;
+        public static final int NETS_REMOVED = 4;
+        public static final int SCALE_CHANGED = 8;
+        public static final int MARKER_CHANGED = 16;
+
+        public void cursorChanged(long oldTimestamp, long newTimestamp)
+        {
+            fNotifications |= CURSOR_CHANGED;
+            fLongArg0 = oldTimestamp;
+            fLongArg1 = newTimestamp;
+        }
+
+        public void netsAdded(int firstIndex, int lastIndex)
+        {
+            fNotifications |= NETS_ADDED;
+            fLongArg0 = (long) firstIndex;
+            fLongArg1 = (long) lastIndex;
+        }
+
+        public void netsRemoved(int firstIndex, int lastIndex)
+        {
+            fNotifications |= NETS_REMOVED;
+            fLongArg0 = (long) firstIndex;
+            fLongArg1 = (long) lastIndex;
+        }
+
+        public void scaleChanged(double newScale)
+        {
+            fNotifications |= SCALE_CHANGED;
+            fDoubleArg = newScale;
+        }
+
+        public void markerChanged(long timestamp)
+        {
+            fNotifications |= MARKER_CHANGED;
+            fLongArg0 = timestamp;
+        }
+
+        public int fNotifications;
+        public long fLongArg0;
+        public long fLongArg1;
+        public double fDoubleArg;
+    }
+
+
     @Test public void testRemoveMarker()
     {
         TraceViewModel tvm = new TraceViewModel();
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
 
         assertEquals(0, tvm.getMarkerAtTime(1000)); // Make sure no marker
 
         // Ensure no crash on empty set
+        listener.fNotifications = 0;
         tvm.removeMarkerAtTime(1000);
+        assertEquals(0, listener.fNotifications);
 
-        // This is both the first and last marker. Test edge
+        // Insert marker. This is both the first and last marker. Test edge
         // cases around this.
+        listener.fNotifications = 0;
         tvm.addMarker("marker0", 1000);
+        assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
+        assertEquals(1000, listener.fLongArg0);
         assertEquals(0, tvm.getMarkerAtTime(1000)); // Now there is a marker
         tvm.setHorizontalScale(10.0);   // 50 pixels each direction
 
+        listener.fNotifications = 0;
         tvm.removeMarkerAtTime(925);
         assertEquals(1, tvm.getMarkerCount()); // Marker should still be present
         tvm.removeMarkerAtTime(1075);
         assertEquals(1, tvm.getMarkerCount()); // Marker should still be present
+        assertEquals(0, listener.fNotifications);
 
         // Before marker, should remove
         tvm.removeMarkerAtTime(990);
         assertEquals(0, tvm.getMarkerCount());
+        assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
+        assertEquals(1000, listener.fLongArg0);
 
         // Reinsert the marker
+        listener.fNotifications = 0;
         tvm.addMarker("marker1", 1000);
         assertEquals(1, tvm.getMarkerCount());
+        assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
+        assertEquals(1000, listener.fLongArg0);
 
         // Marker is after, remove it
+        listener.fNotifications = 0;
         tvm.removeMarkerAtTime(1010);
         assertEquals(0, tvm.getMarkerCount());
+        assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
+        assertEquals(1000, listener.fLongArg0);
 
-        // Now create a few markers. Ensure adjacent markers aren't affected.
+        // Now create a few markers. Ensure adjacent markers aren't affected by
+        // deletions.
         tvm.addMarker("marker2", 100);
         tvm.addMarker("marker3", 200);
         tvm.addMarker("marker4", 300);
         tvm.addMarker("marker5", 400);
         assertEquals(4, tvm.getMarkerCount());
         assertEquals(100, tvm.getTimestampForMarker(0));
+        assertEquals("marker2", tvm.getDescriptionForMarker(0));
         assertEquals(200, tvm.getTimestampForMarker(1));
+        assertEquals("marker3", tvm.getDescriptionForMarker(1));
         assertEquals(300, tvm.getTimestampForMarker(2));
+        assertEquals("marker4", tvm.getDescriptionForMarker(2));
         assertEquals(400, tvm.getTimestampForMarker(3));
+        assertEquals("marker5", tvm.getDescriptionForMarker(3));
 
+        listener.fNotifications = 0;
         tvm.removeMarkerAtTime(199);
+        assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
+        assertEquals(200, listener.fLongArg0);
         assertEquals(3, tvm.getMarkerCount());
         assertEquals(100, tvm.getTimestampForMarker(0));
         assertEquals(300, tvm.getTimestampForMarker(1));
         assertEquals(400, tvm.getTimestampForMarker(2));
 
+        listener.fNotifications = 0;
         tvm.removeMarkerAtTime(301);
+        assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
+        assertEquals(300, listener.fLongArg0);
         assertEquals(2, tvm.getMarkerCount());
         assertEquals(100, tvm.getTimestampForMarker(0));
         assertEquals(400, tvm.getTimestampForMarker(1));
+
+        // Test removeAllMarkers
+        listener.fNotifications = 0;
+        tvm.removeAllMarkers();
+        assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
+        assertEquals(-1, listener.fLongArg0);
+        assertEquals(0, tvm.getMarkerCount());
+    }
+
+    @Test public void testNextPrevMarker()
+    {
+        TraceViewModel tvm = new TraceViewModel();
+
+        tvm.addMarker("marker2", 100);
+        tvm.addMarker("marker3", 200);
+        tvm.addMarker("marker4", 300);
+        tvm.addMarker("marker5", 400);
+        tvm.setCursorPosition(0);
+        tvm.nextMarker(false);
+        assertEquals(100, tvm.getCursorPosition());
+        tvm.nextMarker(false);
+        assertEquals(200, tvm.getCursorPosition());
+        tvm.nextMarker(false);
+        assertEquals(300, tvm.getCursorPosition());
+        tvm.nextMarker(false);
+        assertEquals(400, tvm.getCursorPosition());
+        tvm.nextMarker(false);
+        assertEquals(400, tvm.getCursorPosition());
+
+        tvm.setCursorPosition(500);
+        tvm.prevMarker(false);
+        assertEquals(400, tvm.getCursorPosition());
+        tvm.prevMarker(false);
+        assertEquals(300, tvm.getCursorPosition());
+        tvm.prevMarker(false);
+        assertEquals(200, tvm.getCursorPosition());
+        tvm.prevMarker(false);
+        assertEquals(100, tvm.getCursorPosition());
+        tvm.prevMarker(false);
+        assertEquals(100, tvm.getCursorPosition());
+    }
+
+    @Test public void testScaleChange()
+    {
+        TraceViewModel tvm = new TraceViewModel();
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
+
+        tvm.setHorizontalScale(123.0);
+        assertEquals(TestModelListener.SCALE_CHANGED, listener.fNotifications);
+        assertEquals(123.0, listener.fDoubleArg, 0.0);
+        assertEquals(123.0, tvm.getHorizontalScale(), 0.0);
+    }
+
+    @Test public void testCursor()
+    {
+        TraceViewModel tvm = new TraceViewModel();
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
+
+        tvm.setCursorPosition(1024);
+        assertEquals(TestModelListener.CURSOR_CHANGED, listener.fNotifications);
+        assertEquals(0, listener.fLongArg0);
+        assertEquals(1024, listener.fLongArg1);
+
+        listener.fNotifications = 0;
+        tvm.setCursorPosition(37);
+        assertEquals(TestModelListener.CURSOR_CHANGED, listener.fNotifications);
+        assertEquals(1024, listener.fLongArg0);
+        assertEquals(37, listener.fLongArg1);
+    }
+
+    @Test public void testMakeNetsVisible()
+    {
+        TraceViewModel tvm = new TraceViewModel();
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
+
+        assertEquals(0, tvm.getVisibleNetCount());
+
+        // Add a net
+        tvm.makeNetVisible(7);
+        assertEquals(TestModelListener.NETS_ADDED, listener.fNotifications);
+        assertEquals(0, listener.fLongArg0);
+        assertEquals(0, listener.fLongArg1);
+        assertEquals(1, tvm.getVisibleNetCount());
+        assertEquals(7, tvm.getVisibleNet(0));
+
+        // Add a second net
+        listener.fNotifications = 0;
+        tvm.makeNetVisible(9);
+        assertEquals(TestModelListener.NETS_ADDED, listener.fNotifications);
+        assertEquals(1, listener.fLongArg0);
+        assertEquals(1, listener.fLongArg1);
+        assertEquals(2, tvm.getVisibleNetCount());
+        assertEquals(7, tvm.getVisibleNet(0));
+        assertEquals(9, tvm.getVisibleNet(1));
+
+        // Remove first net
+        listener.fNotifications = 0;
+        tvm.removeNet(0);
+        assertEquals(TestModelListener.NETS_REMOVED, listener.fNotifications);
+        assertEquals(0, listener.fLongArg0);
+        assertEquals(0, listener.fLongArg1);
+        assertEquals(1, tvm.getVisibleNetCount());
+        assertEquals(9, tvm.getVisibleNet(0));
+
+        // Remove remaining net
+        listener.fNotifications = 0;
+        tvm.removeNet(0);
+        assertEquals(TestModelListener.NETS_REMOVED, listener.fNotifications);
+        assertEquals(0, listener.fLongArg0);
+        assertEquals(0, listener.fLongArg1);
+        assertEquals(0, tvm.getVisibleNetCount());
+
+        // Add a bunch of nets again
+        tvm.makeNetVisible(11);
+        tvm.makeNetVisible(13);
+        tvm.makeNetVisible(17);
+        tvm.makeNetVisible(19);
+        tvm.makeNetVisible(23);
+        tvm.makeNetVisible(27);
+        tvm.makeNetVisible(5, 31);  // Note: insert above last
+
+        assertEquals(7, tvm.getVisibleNetCount());
+
+        assertEquals(11, tvm.getVisibleNet(0));
+        assertEquals(13, tvm.getVisibleNet(1));
+        assertEquals(17, tvm.getVisibleNet(2));
+        assertEquals(19, tvm.getVisibleNet(3));
+        assertEquals(23, tvm.getVisibleNet(4));
+        assertEquals(31, tvm.getVisibleNet(5));
+        assertEquals(27, tvm.getVisibleNet(6));
+
+        // Rearrange a set of nets
+        int[] indices = { 1, 3, 4, 5};
+        listener.fNotifications = 0;
+        tvm.moveNets(indices, 2);
+        assertEquals(TestModelListener.NETS_REMOVED | TestModelListener.NETS_ADDED, listener.fNotifications);
+        // XXX doesn't check parameters (multiple notifications from this)
+
+        assertEquals(7, tvm.getVisibleNetCount());
+        assertEquals(11, tvm.getVisibleNet(0));
+        assertEquals(13, tvm.getVisibleNet(1));
+        assertEquals(19, tvm.getVisibleNet(2));
+        assertEquals(23, tvm.getVisibleNet(3));
+        assertEquals(31, tvm.getVisibleNet(4));
+        assertEquals(17, tvm.getVisibleNet(5));
+        assertEquals(27, tvm.getVisibleNet(6));
+
+        // Remove all nets
+        listener.fNotifications = 0;
+        tvm.removeAllNets();
+        assertEquals(TestModelListener.NETS_REMOVED, listener.fNotifications);
+        assertEquals(0, listener.fLongArg0);
+        assertEquals(7, listener.fLongArg1);
+        assertEquals(0, tvm.getVisibleNetCount());
     }
 }

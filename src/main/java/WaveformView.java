@@ -23,7 +23,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class WaveformView extends JPanel implements MouseListener, MouseMotionListener, TraceViewModelListener
+public class WaveformView extends JPanel implements MouseListener, MouseMotionListener, TraceViewModel.Listener
 {
     private static final int kWaveformHeight = 20;
     private static final int kWaveformMargin = 3;

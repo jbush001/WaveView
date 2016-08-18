@@ -22,7 +22,7 @@ import java.awt.event.*;
 ///
 /// Draws the ruler with times at the top of the trace view.
 ///
-public class TimescaleView extends JPanel implements TraceViewModelListener, ActionListener
+public class TimescaleView extends JPanel implements TraceViewModel.Listener, ActionListener
 {
     private static final int kMinorTickTop = 18;
     private static final int kMinorTicksPerMajorTick = 10;

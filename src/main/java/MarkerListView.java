@@ -28,7 +28,7 @@ import javax.swing.table.*;
 /// Displays a list of all markers and their timestamps.  The user can click on them
 /// to jump to that point in the trace.
 ///
-public class MarkerListView extends JPanel implements ActionListener, TraceViewModelListener
+public class MarkerListView extends JPanel implements ActionListener, TraceViewModel.Listener
 {
     public MarkerListView(TraceViewModel traceModel)
     {

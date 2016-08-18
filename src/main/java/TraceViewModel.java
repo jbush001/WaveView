@@ -21,15 +21,6 @@ import java.util.*;
 import java.io.*;
 import java.net.*;
 
-interface TraceViewModelListener
-{
-    public void cursorChanged(long oldTimestamp, long newTimestamp);
-    public void netsAdded(int firstIndex, int lastIndex);
-    public void netsRemoved(int firstIndex, int lastIndex);
-    public void scaleChanged(double newScale);
-    public void markerChanged(long timestamp);
-};
-
 ///
 /// TraceViewModel contains view state for a waveform capture
 /// (e.g. Cursor position, scale, visible nets, etc.)
@@ -37,6 +28,16 @@ interface TraceViewModelListener
 
 public class TraceViewModel
 {
+    interface Listener
+    {
+        public void cursorChanged(long oldTimestamp, long newTimestamp);
+        public void netsAdded(int firstIndex, int lastIndex);
+        public void netsRemoved(int firstIndex, int lastIndex);
+        public void scaleChanged(double newScale);
+        public void markerChanged(long timestamp);
+    };
+
+
     TraceViewModel()
     {
     }
@@ -48,25 +49,20 @@ public class TraceViewModel
         fVisibleNets.clear();
         fMarkers.clear();
         fNetSets.clear();
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
             listener.netsRemoved(0, oldSize);
     }
 
-    public void addListener(TraceViewModelListener listener)
+    public void addListener(Listener listener)
     {
         fTraceListeners.add(listener);
-    }
-
-    public void removeListener(TraceViewModelListener listener)
-    {
-        fTraceListeners.remove(listener);
     }
 
     // @param scale Nanoseconds per pixel
     public void setHorizontalScale(double scale)
     {
         fHorizontalScale = scale;
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
             listener.scaleChanged(scale);
     }
 
@@ -84,7 +80,7 @@ public class TraceViewModel
     public void makeNetVisible(int aboveIndex, int netId)
     {
         fVisibleNets.add(aboveIndex, new NetViewModel(netId, null));
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
         {
             listener.netsAdded(fVisibleNets.size() - 1,
                 fVisibleNets.size() - 1);
@@ -94,7 +90,7 @@ public class TraceViewModel
     public void removeNet(int listIndex)
     {
         fVisibleNets.remove(listIndex);
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
             listener.netsRemoved(listIndex, listIndex);
     }
 
@@ -102,7 +98,7 @@ public class TraceViewModel
     {
         int oldSize = fVisibleNets.size();
         fVisibleNets.clear();
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
             listener.netsRemoved(0, oldSize);
     }
 
@@ -121,7 +117,7 @@ public class TraceViewModel
         for (NetViewModel net : nets)
             fVisibleNets.add(insertionPoint++, net);
 
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
         {
             listener.netsAdded(insertionPoint - fromIndices.length,
                 insertionPoint - 1);
@@ -133,6 +129,9 @@ public class TraceViewModel
         return fVisibleNets.size();
     }
 
+    /// Return mapping of visible order to internal index
+    /// @param index Index of net in order displayed in net list
+    /// @returns netID (as referenced in TraceDataModel)
     public int getVisibleNet(int index)
     {
         return fVisibleNets.elementAt(index).index;
@@ -165,7 +164,7 @@ public class TraceViewModel
         fVisibleNets = (Vector<NetViewModel>) fNetSets.elementAt(index).fVisibleNets.clone();
 
         // There is probably a more efficient way to do this
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
         {
             listener.netsRemoved(0, oldSize);
             listener.netsAdded(0, fVisibleNets.size());
@@ -202,7 +201,7 @@ public class TraceViewModel
     {
         long old = fCursorPosition;
         fCursorPosition = timestamp;
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
             listener.cursorChanged(old, timestamp);
     }
 
@@ -241,7 +240,7 @@ public class TraceViewModel
 
     private void notifyMarkerChanged(long timestamp)
     {
-        for (TraceViewModelListener listener : fTraceListeners)
+        for (Listener listener : fTraceListeners)
             listener.markerChanged(timestamp);
     }
 
@@ -393,7 +392,7 @@ public class TraceViewModel
         ValueFormatter formatter;
     }
 
-    private Vector<TraceViewModelListener> fTraceListeners = new Vector<TraceViewModelListener>();
+    private Vector<Listener> fTraceListeners = new Vector<Listener>();
     private Vector<NetViewModel> fVisibleNets = new Vector<NetViewModel>();
     private Vector<NetSet> fNetSets = new Vector<NetSet>();
     private long fCursorPosition;

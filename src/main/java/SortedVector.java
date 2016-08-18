@@ -70,6 +70,7 @@ class SortedVector<T> extends Vector<T>
         return new SortedVectorIterator(this, lookupValue(key));
     }
 
+    // XXX better name like getIndexForKey?
     int lookupValue(long key)
     {
         // Binary search

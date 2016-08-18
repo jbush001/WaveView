@@ -25,7 +25,7 @@ import java.awt.event.*;
 import java.util.*;
 import java.awt.datatransfer.*;
 
-class NetNameView extends JList implements TraceViewModelListener
+class NetNameView extends JList implements TraceViewModel.Listener
 {
     private static final int kCellHeight = 26;
     private static final int kDragThreshold = 15;
@@ -114,7 +114,7 @@ class NetNameView extends JList implements TraceViewModelListener
         }
     }
 
-    class ListModelAdapter implements ListModel, TraceViewModelListener
+    class ListModelAdapter implements ListModel, TraceViewModel.Listener
     {
         public ListModelAdapter(TraceViewModel model)
         {

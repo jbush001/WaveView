@@ -77,7 +77,7 @@ public class NetSearchView extends JPanel implements ActionListener
         }
     }
 
-    class ListModelAdapter implements ListModel, TraceViewModelListener, DocumentListener
+    class ListModelAdapter implements ListModel, TraceViewModel.Listener, DocumentListener
     {
         public ListModelAdapter(TraceViewModel model)
         {
