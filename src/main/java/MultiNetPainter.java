@@ -145,7 +145,7 @@ class MultiNetPainter implements WaveformPainter
             if (isX)
             {
                 g.setColor(AppPreferences.getInstance().kConflictColor);
-                g.fillRect(left, top + 1, right - left, kWaveformHeight - 1);
+                g.fillRect(left, top, right - left, kWaveformHeight);
                 g.setColor(AppPreferences.getInstance().kTraceColor);
             }
 
