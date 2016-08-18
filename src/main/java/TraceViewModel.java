@@ -235,12 +235,20 @@ public class TraceViewModel
     void removeAllMarkers()
     {
         fMarkers.clear();
-        for (TraceViewModelListener listener : fTraceListeners)
-            listener.markerChanged(-1);
-
+        notifyMarkerChanged(-1);
         fNextMarkerId = 1;
     }
 
+    private void notifyMarkerChanged(long timestamp)
+    {
+        for (TraceViewModelListener listener : fTraceListeners)
+            listener.markerChanged(timestamp);
+    }
+
+    // XXX clients of this just call getCursorPosition and pass that
+    // to timestamp. Should the second parameter be removed?
+    // XXX also, if there is another marker that is very close, should
+    // we detect that somehow?
     public void addMarker(String description, long timestamp)
     {
         Marker marker = new Marker();
@@ -249,14 +257,41 @@ public class TraceViewModel
         marker.fTimestamp = timestamp;
 
         fMarkers.addSorted(timestamp, marker);
-
-        for (TraceViewModelListener listener : fTraceListeners)
-            listener.markerChanged(timestamp);
+        notifyMarkerChanged(timestamp);
     }
 
     public int getMarkerAtTime(long timestamp)
     {
         return fMarkers.lookupValue(timestamp);
+    }
+
+    public void removeMarkerAtTime(long timestamp)
+    {
+        // Because it's hard to click exactly on the marker, allow removing
+        // markers a few pixels to the right or left of the current cursor.
+        final int kMarkerRemoveSize = (int)(3.0 / getHorizontalScale());
+
+        // This finds the marker at or before the current time
+        int index = fMarkers.lookupValue(timestamp);
+        long targetTimestamp = fMarkers.elementAt(index).fTimestamp;
+
+        // First look to see to see if the marker is slightly before.
+        // If not, check to see if it is slightly after (need to look
+        // at next marker)
+        if (timestamp - targetTimestamp < kMarkerRemoveSize)
+        {
+            fMarkers.remove(index);
+            notifyMarkerChanged(targetTimestamp);
+        }
+        else if (index < fMarkers.size())
+        {
+            targetTimestamp = fMarkers.elementAt(index + 1).fTimestamp;
+            if (targetTimestamp - timestamp < kMarkerRemoveSize)
+            {
+                fMarkers.remove(index + 1);
+                notifyMarkerChanged(targetTimestamp);
+            }
+        }
     }
 
     public String getDescriptionForMarker(int index)

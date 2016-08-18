@@ -151,6 +151,8 @@ public class WaveApp extends JPanel implements ActionListener
             fTraceViewModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("prevMarker"))
             fTraceViewModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+        else if (cmd.equals("removeMarker"))
+            fTraceViewModel.removeMarkerAtTime(fTraceViewModel.getCursorPosition());
         else if (cmd.equals("findbyvalue"))
             showQueryDialog();
         else if (cmd.equals("findnext"))
@@ -466,6 +468,11 @@ public class WaveApp extends JPanel implements ActionListener
         item.setActionCommand("prevMarker");
         item.addActionListener(this);
         item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.META_DOWN_MASK));
+        markerMenu.add(item);
+
+        item = new JMenuItem("Remove Marker");
+        item.setActionCommand("removeMarker");
+        item.addActionListener(this);
         markerMenu.add(item);
 
         item = new JMenuItem("Remove all markers");

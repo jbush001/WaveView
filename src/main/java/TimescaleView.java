@@ -64,12 +64,14 @@ public class TimescaleView extends JPanel implements TraceViewModelListener, Act
 
     public void markerChanged(long timestamp)
     {
+        final int kMaxMarkerLabelWidth = 15;
         if (timestamp < 0)
             repaint();
         else
         {
             int x = (int)(timestamp / fTraceViewModel.getHorizontalScale());
-            repaint(x - 1, 0, 2, kTimescaleHeight);
+            repaint(x - (kMaxMarkerLabelWidth / 2), 0, kMaxMarkerLabelWidth,
+                kTimescaleHeight);
         }
     }
 
