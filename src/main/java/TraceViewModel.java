@@ -267,26 +267,27 @@ public class TraceViewModel
 
     public void removeMarkerAtTime(long timestamp)
     {
+        if (fMarkers.size() == 0)
+            return;
+
         // Because it's hard to click exactly on the marker, allow removing
         // markers a few pixels to the right or left of the current cursor.
-        final int kMarkerRemoveSize = (int)(3.0 / getHorizontalScale());
+        final int kMarkerRemoveSize = (int)(5.0 * getHorizontalScale());
 
-        // This finds the marker at or before the current time
         int index = fMarkers.lookupValue(timestamp);
         long targetTimestamp = fMarkers.elementAt(index).fTimestamp;
 
-        // First look to see to see if the marker is slightly before.
-        // If not, check to see if it is slightly after (need to look
-        // at next marker)
-        if (timestamp - targetTimestamp < kMarkerRemoveSize)
+        // The lookup function sometimes rounds to the lower marker, so
+        // check both the current marker and the next one.
+        if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize)
         {
             fMarkers.remove(index);
             notifyMarkerChanged(targetTimestamp);
         }
-        else if (index < fMarkers.size())
+        else if (index < fMarkers.size() - 1)
         {
             targetTimestamp = fMarkers.elementAt(index + 1).fTimestamp;
-            if (targetTimestamp - timestamp < kMarkerRemoveSize)
+            if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize)
             {
                 fMarkers.remove(index + 1);
                 notifyMarkerChanged(targetTimestamp);
@@ -397,7 +398,7 @@ public class TraceViewModel
     private Vector<NetSet> fNetSets = new Vector<NetSet>();
     private long fCursorPosition;
     private long fSelectionStart;
-    private double fHorizontalScale = 10.0;
+    private double fHorizontalScale = 10.0; // Nanoseconds per pixel
     private boolean fAdjustingCursor;
     private SortedVector<Marker> fMarkers = new SortedVector<Marker>();
     private int fNextMarkerId = 1;
