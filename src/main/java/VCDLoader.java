@@ -218,43 +218,46 @@ class VCDLoader implements TraceLoader
             if (value.equals("z") && netWidth > 1)
             {
                 for (int i = 0; i < netWidth; i++)
-                    decodedValues.setValue(i, BitVector.VALUE_Z);
+                    decodedValues.setBit(i, BitVector.VALUE_Z);
             }
             else if (value.equals("x") && netWidth > 1)
             {
                 for (int i = 0; i < netWidth; i++)
-                    decodedValues.setValue(i, BitVector.VALUE_X);
+                    decodedValues.setBit(i, BitVector.VALUE_X);
             }
             else
             {
                 // Decode and pad if necessary.
-                int stringIndex = 0;
-                for (int convertedIndex = netWidth - value.length();
-                    convertedIndex < netWidth; convertedIndex++)
+                // XXX should this be done inside BitVector
+                int bitIndex = netWidth - 1;
+                for (int i = 0; i < value.length(); i++)
                 {
-                    switch (value.charAt(stringIndex++))
+                    int bitValue;
+                    switch (value.charAt(i))
                     {
                         case 'z':
-                            decodedValues.setValue(convertedIndex, BitVector.VALUE_Z);
+                            bitValue = BitVector.VALUE_Z;
                             break;
 
                         case '1':
-                            decodedValues.setValue(convertedIndex, BitVector.VALUE_1);
+                            bitValue = BitVector.VALUE_1;
                             break;
 
                         case '0':
-                            decodedValues.setValue(convertedIndex, BitVector.VALUE_0);
+                            bitValue = BitVector.VALUE_0;
                             break;
 
                         case 'x':
-                            decodedValues.setValue(convertedIndex, BitVector.VALUE_X);
+                            bitValue = BitVector.VALUE_X;
                             break;
 
                         default:
-                            decodedValues.setValue(convertedIndex, BitVector.VALUE_X);
                             System.out.println("Warning: invalid bit value found");
+                            bitValue = BitVector.VALUE_X;
                             // XXX perhaps return error
                     }
+
+                    decodedValues.setBit(bitIndex--, bitValue);
                 }
             }
 

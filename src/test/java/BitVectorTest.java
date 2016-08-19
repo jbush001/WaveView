@@ -53,33 +53,33 @@ public class BitVectorTest
         assertTrue(bv.isX());
     }
 
-    @Test public void testSetValue()
+    @Test public void testSetBit()
     {
         BitVector bv = new BitVector(8);
-        bv.setValue(0, BitVector.VALUE_1);
-        bv.setValue(1, BitVector.VALUE_0);
-        bv.setValue(2, BitVector.VALUE_1);
-        bv.setValue(3, BitVector.VALUE_1);
-        bv.setValue(4, BitVector.VALUE_0);
-        bv.setValue(5, BitVector.VALUE_1);
-        bv.setValue(6, BitVector.VALUE_0);
-        bv.setValue(7, BitVector.VALUE_1);
+        bv.setBit(7, BitVector.VALUE_1);
+        bv.setBit(6, BitVector.VALUE_0);
+        bv.setBit(5, BitVector.VALUE_1);
+        bv.setBit(4, BitVector.VALUE_1);
+        bv.setBit(3, BitVector.VALUE_0);
+        bv.setBit(2, BitVector.VALUE_1);
+        bv.setBit(1, BitVector.VALUE_0);
+        bv.setBit(0, BitVector.VALUE_1);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
         assertEquals(0xb5, bv.intValue());
     }
 
-    @Test public void testGetValue()
+    @Test public void testGetBit()
     {
         BitVector bv = new BitVector("1x010z10", 2);
-        assertEquals(BitVector.VALUE_1, bv.getValue(0));
-        assertEquals(BitVector.VALUE_X, bv.getValue(1));
-        assertEquals(BitVector.VALUE_0, bv.getValue(2));
-        assertEquals(BitVector.VALUE_1, bv.getValue(3));
-        assertEquals(BitVector.VALUE_0, bv.getValue(4));
-        assertEquals(BitVector.VALUE_Z, bv.getValue(5));
-        assertEquals(BitVector.VALUE_1, bv.getValue(6));
-        assertEquals(BitVector.VALUE_0, bv.getValue(7));
+        assertEquals(BitVector.VALUE_1, bv.getBit(7));
+        assertEquals(BitVector.VALUE_X, bv.getBit(6));
+        assertEquals(BitVector.VALUE_0, bv.getBit(5));
+        assertEquals(BitVector.VALUE_1, bv.getBit(4));
+        assertEquals(BitVector.VALUE_0, bv.getBit(3));
+        assertEquals(BitVector.VALUE_Z, bv.getBit(2));
+        assertEquals(BitVector.VALUE_1, bv.getBit(1));
+        assertEquals(BitVector.VALUE_0, bv.getBit(0));
     }
 
     @Test public void testCompare()
@@ -105,5 +105,14 @@ public class BitVectorTest
         assertEquals(1, bv3.compare(bv2));
         assertEquals(0, bv3.compare(bv3));
         assertEquals(-1, bv3.compare(bv4));
+    }
+
+    @Test public void testToString()
+    {
+        // Length is not multiple of four.
+        BitVector vec = new BitVector("1010110101", 2);
+        assertEquals("1010110101", vec.toString(2));
+        assertEquals("693", vec.toString(10));
+        assertEquals("2B5", vec.toString(16));
     }
 }

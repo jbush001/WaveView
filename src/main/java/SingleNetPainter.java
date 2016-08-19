@@ -41,7 +41,7 @@ class SingleNetPainter implements WaveformPainter
 
             // Compute the boundaries of this segment
             int x = (int)(transition.getTimestamp() / horizontalScale);
-            int value = transition.getValue(0);
+            int value = transition.getBit(0);
 
             drawSpan(g, lastValue, lastX, x, topOffset);
 
