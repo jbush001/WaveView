@@ -28,6 +28,10 @@ import java.util.*;
 /// @todo Support >=, <=, ~, etc
 /// @todo Support proper logical operators &&, ||
 /// @todo Support partial multi-net matches
+/// @bug When searching backwards, it will snap to the beginning of the region that matches,
+///      not the end.
+/// @bug When searching with OR, searching forward may snap to the middle of a region
+///      that matches (need to test)
 ///
 public class Query
 {
@@ -91,31 +95,34 @@ public class Query
         {
             super(what);
             fErrorMessage = what;
-            fOffset = fTokenStart;
+            fStartOffset = fTokenStart;
+            fEndOffset = fTokenStart + fCurrentTokenValue.length() - 1;
             queryString = fQueryString;
         }
 
         public String toString()
         {
-            StringBuffer result = new StringBuffer();
-            result.append(fErrorMessage);
-            result.append('\n');
-            result.append(queryString);
-            result.append('\n');
-            for (int i = 0; i < fOffset; i++)
-                result.append(' ');
+            return fErrorMessage;
+        }
 
-            result.append('^');
-            return result.toString();
+        public int getStartOffset()
+        {
+            return fStartOffset;
+        }
+
+        public int getEndOffset()
+        {
+            return fEndOffset;
         }
 
         private String fErrorMessage;
         private String queryString;
-        private int fOffset;
+        private int fStartOffset;
+        private int fEndOffset;
     }
 
     private static final int TOK_IDENTIFIER = 1000;
-    private static final int TOK_EOF = 1001;
+    private static final int TOK_END = 1001;
     private static final int TOK_LITERAL = 1002;
 
     private static final int STATE_INIT = 0;
@@ -129,12 +136,12 @@ public class Query
 
     String fQueryString;
     int fStringOffset;
-    String fCurrentTokenValue;    // @todo Convert to StringBuffer
+    StringBuffer fCurrentTokenValue = new StringBuffer();
     int fCurrentTokenType;
     int fPushBackChar = -1;
     int fPushBackToken = -1;
     int fTokenStart;
-    BitVector fBitString;
+    BitVector fBitVector;
 
     void pushBackToken(int tok)
     {
@@ -178,7 +185,7 @@ public class Query
         }
 
         int state = STATE_INIT;
-        fCurrentTokenValue = "";
+        fCurrentTokenValue.setLength(0);
 
         for (;;)
         {
@@ -204,7 +211,7 @@ public class Query
             {
                 case STATE_INIT:
                     if (c == -1)
-                        return TOK_EOF;
+                        return TOK_END;
                     else if ("(<>)=|&".indexOf(c) != -1)
                         return c;
                     else if (c == '\'')
@@ -225,7 +232,7 @@ public class Query
 
                 case STATE_SCAN_IDENTIFIER:
                     if (isAlphaNum(c) || c == '_' || c == '.')
-                        fCurrentTokenValue += (char) c;
+                        fCurrentTokenValue.append((char) c);
                     else
                     {
                         fPushBackChar = c;
@@ -249,15 +256,15 @@ public class Query
 
                 case STATE_SCAN_LITERAL:
                     if (isHexDigit(c))
-                        fCurrentTokenValue += (char) c;
+                        fCurrentTokenValue.append((char) c);
                     else
                     {
                         if (fCurrentTokenType == LITERAL_TYPE_BINARY)
-                            fBitString = new BitVector(fCurrentTokenValue, 2);
+                            fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
                         else if (fCurrentTokenType == LITERAL_TYPE_HEX)
-                            fBitString = new BitVector(fCurrentTokenValue, 16);
+                            fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
                         else if (fCurrentTokenType == LITERAL_TYPE_DECIMAL)
-                            fBitString = new BitVector(fCurrentTokenValue, 10);
+                            fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
 
                         fPushBackChar = c;
                         return TOK_LITERAL;
@@ -270,13 +277,21 @@ public class Query
 
     void match(int tokenType) throws QueryParseException
     {
-        if (parseToken() != tokenType)
-            throw new QueryParseException("unexpected token, wanted " + tokenType);
+        int got = parseToken();
+        if (got != tokenType)
+        {
+            if (got == TOK_END)
+                throw new QueryParseException("unexpected end of string");
+            else
+                throw new QueryParseException("unexpected value");
+        }
     }
 
     ExpressionNode parseExpression() throws QueryParseException
     {
-        return parseOr();
+        ExpressionNode node = parseOr();
+        match(TOK_END);
+        return node;
     }
 
     ExpressionNode parseOr() throws QueryParseException
@@ -323,25 +338,23 @@ public class Query
         if (lookahead != TOK_IDENTIFIER)
             throw new QueryParseException("unexpected token, expected identifier");
 
-        int netId = fTraceDataModel.findNet(fCurrentTokenValue);
+        int netId = fTraceDataModel.findNet(fCurrentTokenValue.toString());
         if (netId < 0)
-            throw new QueryParseException("unknown net \"" + fCurrentTokenValue + "\"");
+            throw new QueryParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
 
-        // check conditional
+        // check conditional.
         lookahead = parseToken();
         switch (lookahead)
         {
             case '>':
                 match(TOK_LITERAL);
-                return new GreaterThanExpressionNode(netId, fBitString);
+                return new GreaterThanExpressionNode(netId, fBitVector);
             case '<':
                 match(TOK_LITERAL);
-                return new LessThanExpressionNode(netId, fBitString);
-
+                return new LessThanExpressionNode(netId, fBitVector);
             case '=':
                 match(TOK_LITERAL);
-                return new EqualExpressionNode(netId, fBitString);
-
+                return new EqualExpressionNode(netId, fBitVector);
             default:
                 throw new QueryParseException("Unknown conditional operator");
         }
@@ -500,7 +513,6 @@ public class Query
         public boolean evaluate(long timestamp, QueryHint outHint)
         {
             AbstractTransitionIterator i = fTraceDataModel.findTransition(fNetId, timestamp);
-
             long nextTimestamp = i.getNextTimestamp();
             if (nextTimestamp < 0)
                 outHint.hasForwardTimestamp = false;

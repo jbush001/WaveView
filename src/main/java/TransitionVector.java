@@ -84,7 +84,7 @@ class TransitionVector
         {
             for (int i = 0; i < fWidth; i++)
             {
-                fTransition.setBit(i, fCurrentWord & 3);
+                fTransition.setBit(fWidth - i - 1, fCurrentWord & 3);
                 fBitOffset += 2;
                 if (fBitOffset == 32)
                 {

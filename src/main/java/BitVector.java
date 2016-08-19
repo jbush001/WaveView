@@ -32,7 +32,7 @@ class BitVector
     {
     }
 
-    public BitVector(String string, int radix)
+    public BitVector(String string, int radix) throws NumberFormatException
     {
         parseString(string, radix);
     }
@@ -97,7 +97,7 @@ class BitVector
     /// @param radix May be 16 or 2 (hex or binary)
     /// @todo make this more generic
     /// @bug Doesn't support decimal
-    public void parseString(String string, int radix)
+    public void parseString(String string, int radix) throws NumberFormatException
     {
         if (fValues == null || fValues.length != string.length())
             fValues = new byte[string.length()];
@@ -113,11 +113,11 @@ class BitVector
                 break;
 
             default:
-                System.out.println("bad radix passed to parseString");
+                throw new NumberFormatException("bad radix passed to parseString");
         }
     }
 
-    private void parseBinaryValue(String string)
+    private void parseBinaryValue(String string) throws NumberFormatException
     {
         if (string.length() != fValues.length)
             fValues = new byte[string.length()];
@@ -135,11 +135,11 @@ class BitVector
             else if (c == 'z' || c == 'Z')
                 fValues[length - index - 1] = BitVector.VALUE_Z;
             else
-                System.out.println("number format exception parsing " + string);
+                throw new NumberFormatException("number format exception parsing " + string);
         }
     }
 
-    private void parseHexadecimalValue(String string)
+    private void parseHexadecimalValue(String string) throws NumberFormatException
     {
         if (string.length() * 4 != fValues.length)
             fValues = new byte[string.length() * 4];
@@ -186,7 +186,7 @@ class BitVector
                     fValues[(index + 1) * 4 - offset - 1] = BitVector.VALUE_Z;
             }
             else
-                System.out.println("number format exception parsing " + string);
+                throw new NumberFormatException("number format exception parsing " + string);
         }
     }
 
@@ -339,13 +339,10 @@ class BitVector
         int lowBit = getWidth();
         StringBuffer result = new StringBuffer();
 
-        System.out.println("toHexString lowBit = " + lowBit);
-
         // Partial first digit
         int partial = getWidth() % 4;
         if (partial > 0)
         {
-            System.out.println("partial = " + partial);
             lowBit -= partial;
             result.append(bitsToHexDigit(lowBit, partial));
         }
@@ -353,7 +350,6 @@ class BitVector
         // Full hex digits
         while (lowBit >= 4)
         {
-            System.out.println("full digit, lowBit = " + lowBit);
             lowBit -= 4;
             result.append(bitsToHexDigit(lowBit, 4));
         }

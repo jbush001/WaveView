@@ -28,16 +28,48 @@ public class TransitionVectorTest
         vec.appendTransition(112, new BitVector("00010000", 2));
         vec.appendTransition(115, new BitVector("00010000", 2));
 
-        assertEquals(vec.findTransition(99).current().getTimestamp(), 100);
-        assertEquals(vec.findTransition(100).current().getTimestamp(), 100);
-        assertEquals(vec.findTransition(101).current().getTimestamp(), 100);
-        assertEquals(vec.findTransition(105).current().getTimestamp(), 100);
-        assertEquals(vec.findTransition(109).current().getTimestamp(), 100);
-        assertEquals(vec.findTransition(110).current().getTimestamp(), 110);
-        assertEquals(vec.findTransition(111).current().getTimestamp(), 111);
-        assertEquals(vec.findTransition(112).current().getTimestamp(), 112);
-        assertEquals(vec.findTransition(113).current().getTimestamp(), 112);
-        assertEquals(vec.findTransition(116).current().getTimestamp(), 115);
-        assertEquals(vec.findTransition(20000).current().getTimestamp(), 115);
+        Transition t = vec.findTransition(99).current();
+        assertEquals(t.getTimestamp(), 100);
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+
+        t = vec.findTransition(100).current();
+        assertEquals(100, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+
+        t = vec.findTransition(101).current();
+        assertEquals(100, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+
+        t = vec.findTransition(105).current();
+        assertEquals(100, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+
+        t = vec.findTransition(109).current();
+        assertEquals(100, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+
+        t = vec.findTransition(110).current();
+        assertEquals(110, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000010", 2)));
+
+        t = vec.findTransition(111).current();
+        assertEquals(111, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00001000", 2)));
+
+        t = vec.findTransition(112).current();
+        assertEquals(112, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00010000", 2)));
+
+        t = vec.findTransition(113).current();
+        assertEquals(112, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00010000", 2)));
+
+        t = vec.findTransition(116).current();
+        assertEquals(115, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00010000", 2)));
+
+        t = vec.findTransition(20000).current();
+        assertEquals(115, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00010000", 2)));
     }
 }

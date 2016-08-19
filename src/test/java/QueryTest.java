@@ -27,6 +27,7 @@ public class QueryTest
         int id1 = builder.newNet("clk", -1, 1);
         int id2 = builder.newNet("dat", -1, 8);
         int id3 = builder.newNet("addr", -1, 8);
+        builder.exitModule();
         builder.appendTransition(id1, 5, new BitVector("0", 2));
         builder.appendTransition(id1, 10, new BitVector("1", 2));
         builder.appendTransition(id1, 15, new BitVector("0", 2));
@@ -74,16 +75,167 @@ public class QueryTest
         }
         catch (Query.QueryParseException exc)
         {
-            assertEquals("unknown net \"mod1.stall_pipeline\"\nmod1.stall_pipeline = 2\n^", exc.toString());
+            assertEquals("unknown net \"mod1.stall_pipeline\"", exc.toString());
+            assertEquals(0, exc.getStartOffset());
+            assertEquals(18, exc.getEndOffset());
         }
     }
 
-    // XXX test various query operators
-    // XXX test query hinting:
-    //   - With and, where one signal is more frequent than other
-    //   - With or, ...
-    //   - With comparison
-    // XXX test all query parse errors
-    // XXX test all bases (hex, decimal, binary) for literals
+    @Test public void testStrayIdentifier()
+    {
+        try
+        {
+            Query query = new Query(makeTraceDataModel(), "mod1.clk = 'h2 foo");
+            fail("Did not throw exception");
+        }
+        catch (Query.QueryParseException exc)
+        {
+            assertEquals("unexpected value", exc.toString());
+            assertEquals(15, exc.getStartOffset());
+            assertEquals(17, exc.getEndOffset());
+        }
+    }
 
+    @Test public void testMissingCompareValue()
+    {
+        try
+        {
+            Query query = new Query(makeTraceDataModel(), "mod1.clk = ");
+            fail("Did not throw exception");
+        }
+        catch (Query.QueryParseException exc)
+        {
+            assertEquals("unexpected end of string", exc.toString());
+        }
+    }
+
+    @Test public void testMissingLiteral()
+    {
+        try
+        {
+            Query query = new Query(makeTraceDataModel(), "mod1.clk = mod2");
+            fail("Did not throw exception");
+        }
+        catch (Query.QueryParseException exc)
+        {
+            assertEquals("unexpected value", exc.toString());
+            assertEquals(11, exc.getStartOffset());
+            assertEquals(14, exc.getEndOffset());
+        }
+    }
+
+    @Test public void testAnd()
+    {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("a", -1, 1);
+        int id2 = builder.newNet("b", -1, 1);
+
+        builder.appendTransition(id1, 1, new BitVector("0", 2));
+        builder.appendTransition(id2, 1, new BitVector("0", 2));
+        builder.appendTransition(id1, 5, new BitVector("1", 2));
+        builder.appendTransition(id2, 5, new BitVector("0", 2));
+        builder.appendTransition(id1, 10, new BitVector("1", 2));
+        builder.appendTransition(id2, 10, new BitVector("1", 2));
+        builder.appendTransition(id1, 15, new BitVector("0", 2));
+        builder.appendTransition(id2, 15, new BitVector("1", 2));
+        builder.appendTransition(id1, 20, new BitVector("1", 2));
+        builder.appendTransition(id2, 20, new BitVector("0", 2));
+        builder.appendTransition(id1, 25, new BitVector("1", 2));
+        builder.appendTransition(id2, 25, new BitVector("1", 2));
+        builder.appendTransition(id1, 30, new BitVector("0", 2));
+        builder.appendTransition(id2, 30, new BitVector("0", 2));
+        builder.exitModule();
+        builder.loadFinished();
+
+        try
+        {
+            Query query = new Query(traceDataModel, "mod1.a = 1 & mod1.b = 1");
+            assertEquals(10, query.getNextMatch(0));
+            assertEquals(25, query.getNextMatch(10));
+
+            // XXX this doesn't seem right: should seek back to the end of the
+            // region where it changes (30 and 15)
+            assertEquals(25, query.getPreviousMatch(40));
+            assertEquals(10, query.getPreviousMatch(25));
+        }
+        catch (Query.QueryParseException exc)
+        {
+            fail("Threw query parse exception");
+        }
+    }
+
+    @Test public void testOr()
+    {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("a", -1, 1);
+        int id2 = builder.newNet("b", -1, 1);
+
+        builder.appendTransition(id1, 1, new BitVector("0", 2));
+        builder.appendTransition(id2, 1, new BitVector("0", 2));
+        builder.appendTransition(id1, 5, new BitVector("1", 2));
+        builder.appendTransition(id2, 5, new BitVector("0", 2));
+        builder.appendTransition(id1, 10, new BitVector("0", 2));
+        builder.appendTransition(id2, 10, new BitVector("0", 2));
+        builder.appendTransition(id1, 15, new BitVector("0", 2));
+        builder.appendTransition(id2, 15, new BitVector("1", 2));
+        builder.appendTransition(id1, 20, new BitVector("0", 2));
+        builder.appendTransition(id2, 20, new BitVector("0", 2));
+        builder.appendTransition(id1, 25, new BitVector("1", 2));
+        builder.appendTransition(id2, 25, new BitVector("1", 2));
+        builder.exitModule();
+        builder.loadFinished();
+
+        try
+        {
+            Query query = new Query(traceDataModel, "mod1.a = 1 | mod1.b = 1");
+            assertEquals(5, query.getNextMatch(0));
+            assertEquals(15, query.getNextMatch(5));
+            assertEquals(25, query.getNextMatch(15));
+
+            // XXX get next match will do weird things with or...
+        }
+        catch (Query.QueryParseException exc)
+        {
+            fail("Threw query parse exception");
+        }
+    }
+
+    @Test public void testComparisons()
+    {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("value", -1, 4);
+
+        builder.appendTransition(id1, 1, new BitVector("0", 16));
+        builder.appendTransition(id1, 2, new BitVector("2", 16));
+        builder.appendTransition(id1, 3, new BitVector("3", 16));
+        builder.appendTransition(id1, 4, new BitVector("4", 16));
+        builder.appendTransition(id1, 5, new BitVector("5", 16));
+        builder.appendTransition(id1, 6, new BitVector("6", 16));
+        builder.appendTransition(id1, 7, new BitVector("7", 16));
+        builder.appendTransition(id1, 8, new BitVector("8", 16));
+        builder.appendTransition(id1, 9, new BitVector("9", 16));
+        builder.exitModule();
+        builder.loadFinished();
+
+        try
+        {
+            Query query = new Query(traceDataModel, "mod1.value > 'h5");
+            assertEquals(6, query.getNextMatch(0));
+
+            query = new Query(traceDataModel, "mod1.value < 'h5");
+            assertEquals(4, query.getPreviousMatch(10));
+        }
+        catch (Query.QueryParseException exc)
+        {
+            fail("Threw query parse exception");
+        }
+    }
+
+    // XXX test all bases (hex, decimal, binary) for literals
 }

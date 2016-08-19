@@ -21,6 +21,15 @@ public class BitVectorTest
 {
     @Test public void testParseHex()
     {
+        assertEquals(0, (new BitVector("0", 16)).intValue());
+        assertEquals(1, (new BitVector("1", 16)).intValue());
+        assertEquals(2, (new BitVector("2", 16)).intValue());
+        assertEquals(16, (new BitVector("10", 16)).intValue());
+        assertEquals(17, (new BitVector("11", 16)).intValue());
+        assertEquals(256, (new BitVector("100", 16)).intValue());
+        assertEquals(512, (new BitVector("200", 16)).intValue());
+        assertEquals(513, (new BitVector("201", 16)).intValue());
+
         BitVector bv = new BitVector("1234ABCD", 16);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
