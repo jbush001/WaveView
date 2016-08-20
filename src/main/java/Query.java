@@ -59,7 +59,7 @@ public class Query
             if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
                 return timestamp;
 
-            if (!fQueryHint.hasForwardTimestamp)
+            if (fQueryHint.forwardTimestamp < 0)
                 return -1;
 
             timestamp = fQueryHint.forwardTimestamp;
@@ -82,7 +82,7 @@ public class Query
             if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
                 return timestamp;
 
-            if (!fQueryHint.hasBackwardTimestamp)
+            if (fQueryHint.backwardTimestamp < 0)
                 return -1;
 
             timestamp = fQueryHint.backwardTimestamp;
@@ -358,12 +358,9 @@ public class Query
         }
     }
 
-    /// @bug Everywhere else uses -1 as invalid transition. Why does this have booleans?
     private class QueryHint
     {
-        boolean hasForwardTimestamp;
         long forwardTimestamp;
-        boolean hasBackwardTimestamp;
         long backwardTimestamp;
     }
 
@@ -394,8 +391,7 @@ public class Query
             boolean rightResult = fRightChild.evaluate(timestamp, fRightHint);
 
             // Forward timestamp
-            outHint.hasForwardTimestamp = true;
-            if (fLeftHint.hasForwardTimestamp && fRightHint.hasForwardTimestamp)
+            if (fLeftHint.forwardTimestamp >= 0 && fRightHint.forwardTimestamp >= 0)
             {
                 // Here we skip events that cannot possibly make the expression evaluate to true.
                 if (leftResult && rightResult)
@@ -407,16 +403,15 @@ public class Query
                 else
                     outHint.forwardTimestamp = nextForwardEvent(fRightHint.forwardTimestamp, fLeftHint.forwardTimestamp);
             }
-            else if (fLeftHint.hasForwardTimestamp)
+            else if (fLeftHint.forwardTimestamp >= 0)
                 outHint.forwardTimestamp = fLeftHint.forwardTimestamp;
-            else if (fRightHint.hasForwardTimestamp)
+            else if (fRightHint.forwardTimestamp >= 0)
                 outHint.forwardTimestamp = fRightHint.forwardTimestamp;
             else
-                outHint.hasForwardTimestamp = false;
+                outHint.forwardTimestamp = -1;
 
             // Backward timestamp
-            outHint.hasBackwardTimestamp = true;
-            if (fLeftHint.hasBackwardTimestamp && fRightHint.hasBackwardTimestamp)
+            if (fLeftHint.backwardTimestamp >= 0 && fRightHint.backwardTimestamp >= 0)
             {
                 if (leftResult && rightResult)
                     outHint.backwardTimestamp = Math.max(fRightHint.backwardTimestamp, fLeftHint.backwardTimestamp);
@@ -427,12 +422,12 @@ public class Query
                 else
                     outHint.backwardTimestamp = nextBackwardEvent(fRightHint.backwardTimestamp, fLeftHint.backwardTimestamp);
             }
-            else if (fLeftHint.hasBackwardTimestamp)
+            else if (fLeftHint.backwardTimestamp >= 0)
                 outHint.backwardTimestamp = fLeftHint.backwardTimestamp;
-            else if (fRightHint.hasBackwardTimestamp)
+            else if (fRightHint.backwardTimestamp >= 0)
                 outHint.backwardTimestamp = fRightHint.backwardTimestamp;
             else
-                outHint.hasBackwardTimestamp = false;
+                outHint.backwardTimestamp = -1;
 
             return compareResults(leftResult, rightResult);
         }
@@ -511,26 +506,14 @@ public class Query
 
         public boolean evaluate(long timestamp, QueryHint outHint)
         {
+            System.out.println("ComparisonExpressionNode.evaluate " + timestamp);
             AbstractTransitionIterator i = fTraceDataModel.findTransition(fNetId, timestamp);
-            long nextTimestamp = i.getNextTimestamp();
-            if (nextTimestamp < 0)
-                outHint.hasForwardTimestamp = false;
-            else
-            {
-                outHint.hasForwardTimestamp = true;
-                outHint.forwardTimestamp = nextTimestamp;
-            }
+            Transition t = i.next();
+            outHint.forwardTimestamp = i.getNextTimestamp();
+            outHint.backwardTimestamp = i.getPrevTimestamp();
+            System.out.println("forward " + outHint.forwardTimestamp + " backward " + outHint.backwardTimestamp);
 
-            long prevTimestamp = i.getPrevTimestamp();
-            if (prevTimestamp < 0)
-                outHint.hasBackwardTimestamp = false;
-            else
-            {
-                outHint.hasBackwardTimestamp = true;
-                outHint.backwardTimestamp = prevTimestamp;
-            }
-
-            return doCompare(i.current(), fExpected);
+            return doCompare(t, fExpected);
         }
 
         abstract protected boolean doCompare(BitVector value1, BitVector value2);

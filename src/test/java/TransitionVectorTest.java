@@ -28,47 +28,47 @@ public class TransitionVectorTest
         vec.appendTransition(112, new BitVector("00010000", 2));
         vec.appendTransition(115, new BitVector("00010000", 2));
 
-        Transition t = vec.findTransition(99).current();
+        Transition t = vec.findTransition(99).next();
         assertEquals(t.getTimestamp(), 100);
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
 
-        t = vec.findTransition(100).current();
+        t = vec.findTransition(100).next();
         assertEquals(100, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
 
-        t = vec.findTransition(101).current();
+        t = vec.findTransition(101).next();
         assertEquals(100, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
 
-        t = vec.findTransition(105).current();
+        t = vec.findTransition(105).next();
         assertEquals(100, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
 
-        t = vec.findTransition(109).current();
+        t = vec.findTransition(109).next();
         assertEquals(100, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
 
-        t = vec.findTransition(110).current();
+        t = vec.findTransition(110).next();
         assertEquals(110, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000010", 2)));
 
-        t = vec.findTransition(111).current();
+        t = vec.findTransition(111).next();
         assertEquals(111, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00001000", 2)));
 
-        t = vec.findTransition(112).current();
+        t = vec.findTransition(112).next();
         assertEquals(112, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00010000", 2)));
 
-        t = vec.findTransition(113).current();
+        t = vec.findTransition(113).next();
         assertEquals(112, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00010000", 2)));
 
-        t = vec.findTransition(116).current();
+        t = vec.findTransition(116).next();
         assertEquals(115, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00010000", 2)));
 
-        t = vec.findTransition(20000).current();
+        t = vec.findTransition(20000).next();
         assertEquals(115, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00010000", 2)));
     }
@@ -84,26 +84,26 @@ public class TransitionVectorTest
         // iterate to the next value. We call current here multiple times
         // to confirm that works correctly now.
         AbstractTransitionIterator ti = vec.findTransition(99);
-        assertEquals(100, ti.current().getTimestamp());
-        assertEquals(0, ti.current().compare(new BitVector("00000001", 2)));
         assertTrue(ti.hasNext());
+        Transition t = ti.next();
         assertEquals(110, ti.getNextTimestamp());
         assertEquals(-1, ti.getPrevTimestamp());
-
-        ti.next();
-
-        assertEquals(110, ti.current().getTimestamp());
-        assertEquals(0, ti.current().compare(new BitVector("00000010", 2)));
         assertTrue(ti.hasNext());
+        assertEquals(100, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+
+        t = ti.next();
         assertEquals(111, ti.getNextTimestamp());
         assertEquals(100, ti.getPrevTimestamp());
+        assertTrue(ti.hasNext());
+        assertEquals(110, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000010", 2)));
 
-        ti.next();
-
-        assertEquals(111, ti.current().getTimestamp());
-        assertEquals(0, ti.current().compare(new BitVector("00001000", 2)));
-        assertFalse(ti.hasNext());
+        t = ti.next();
         assertEquals(-1, ti.getNextTimestamp());
         assertEquals(110, ti.getPrevTimestamp());
+        assertFalse(ti.hasNext());
+        assertEquals(111, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00001000", 2)));
     }
 }

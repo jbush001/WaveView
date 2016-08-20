@@ -85,7 +85,8 @@ public class TraceDataModelTest
         assertEquals("mod1.mod2.net3", model.getFullNetName(net3));
 
         AbstractTransitionIterator ati  = model.findTransition(net2, 12);
-        assertEquals(10, ati.current().getTimestamp());
-        assertEquals(0, ati.current().compare(new BitVector("100", 2)));
+        Transition t = ati.next();
+        assertEquals(10, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("100", 2)));
     }
 }

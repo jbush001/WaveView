@@ -73,14 +73,6 @@ class TransitionVector
             assert index >= 0;
             fNextIndex = index;
             fTransition.setWidth(fWidth);
-
-            // Load the first entry
-            next();
-        }
-
-        public Transition current()
-        {
-            return fTransition;
         }
 
         public boolean hasNext()
