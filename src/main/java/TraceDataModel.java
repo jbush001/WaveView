@@ -42,6 +42,8 @@ class TraceDataModel
         return fMaxTimestamp;
     }
 
+
+    /// @bug Is this needed if we already have the NetTreeModel exposed?
     public int getNetFromTreeObject(Object o)
     {
         return fNetTree.getNetFromTreeObject(o);

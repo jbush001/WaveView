@@ -72,4 +72,38 @@ public class TransitionVectorTest
         assertEquals(115, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00010000", 2)));
     }
+
+    @Test public void testIterator()
+    {
+        TransitionVector vec = new TransitionVector(8);
+        vec.appendTransition(100, new BitVector("00000001", 2));
+        vec.appendTransition(110, new BitVector("00000010", 2));
+        vec.appendTransition(111, new BitVector("00001000", 2));
+
+        // Note: previously there was a bug where calling current() would
+        // iterate to the next value. We call current here multiple times
+        // to confirm that works correctly now.
+        AbstractTransitionIterator ti = vec.findTransition(99);
+        assertEquals(100, ti.current().getTimestamp());
+        assertEquals(0, ti.current().compare(new BitVector("00000001", 2)));
+        assertTrue(ti.hasNext());
+        assertEquals(110, ti.getNextTimestamp());
+        assertEquals(-1, ti.getPrevTimestamp());
+
+        ti.next();
+
+        assertEquals(110, ti.current().getTimestamp());
+        assertEquals(0, ti.current().compare(new BitVector("00000010", 2)));
+        assertTrue(ti.hasNext());
+        assertEquals(111, ti.getNextTimestamp());
+        assertEquals(100, ti.getPrevTimestamp());
+
+        ti.next();
+
+        assertEquals(111, ti.current().getTimestamp());
+        assertEquals(0, ti.current().compare(new BitVector("00001000", 2)));
+        assertFalse(ti.hasNext());
+        assertEquals(-1, ti.getNextTimestamp());
+        assertEquals(110, ti.getPrevTimestamp());
+    }
 }

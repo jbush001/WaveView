@@ -17,6 +17,7 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
+/// @todo test TraceViewModel.prevMarker/nextMarker with extendSelection
 public class TraceViewModelTest
 {
     class TestModelListener implements TraceViewModel.Listener

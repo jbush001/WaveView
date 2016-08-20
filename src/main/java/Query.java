@@ -360,6 +360,7 @@ public class Query
         }
     }
 
+    /// @bug Everywhere else uses -1 as invalid transition. Why does this have booleans?
     private class QueryHint
     {
         boolean hasForwardTimestamp;

@@ -62,6 +62,27 @@ public class BitVectorTest
         assertTrue(bv.isX());
     }
 
+    @Test public void testNumberFormatException()
+    {
+        try
+        {
+            BitVector bv = new BitVector("12345", 2);
+            fail("Did not throw exception");
+        }
+        catch (NumberFormatException exc)
+        {
+        }
+
+        try
+        {
+            BitVector bv = new BitVector("ABCDEFGH", 16);
+            fail("Did not throw exception");
+        }
+        catch (NumberFormatException exc)
+        {
+        }
+    }
+
     @Test public void testSetBit()
     {
         BitVector bv = new BitVector(8);

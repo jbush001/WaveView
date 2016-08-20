@@ -16,6 +16,7 @@
 
 import java.util.*;
 
+/// @bug Inconsistent naming. Some are XXXAtIndex, some are XXXByIndex
 public class IdentifierValueFormatter implements ValueFormatter
 {
     public class Mapping

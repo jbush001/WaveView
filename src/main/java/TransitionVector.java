@@ -71,38 +71,21 @@ class TransitionVector
         ConcreteTransitionIterator(int index)
         {
             assert index >= 0;
-
-            fIndex = index;
-            int offset = index * fWidth;
-            fWordOffset = offset / 16;
-            fBitOffset = (offset * 2) % 32;
-            fCurrentWord = fValues[fWordOffset] >> fBitOffset;
+            fNextIndex = index;
             fTransition.setWidth(fWidth);
+
+            // Load the first entry
+            next();
         }
 
         public Transition current()
         {
-            for (int i = 0; i < fWidth; i++)
-            {
-                fTransition.setBit(fWidth - i - 1, fCurrentWord & 3);
-                fBitOffset += 2;
-                if (fBitOffset == 32)
-                {
-                    fWordOffset++;
-                    fCurrentWord = fValues[fWordOffset];
-                    fBitOffset = 0;
-                }
-                else
-                    fCurrentWord >>= 2;
-            }
-
-            fTransition.setTimestamp(fTimestamps[fIndex]);
             return fTransition;
         }
 
         public boolean hasNext()
         {
-            return fIndex < fTransitionCount;
+            return fNextIndex < fTransitionCount;
         }
 
         public Transition next()
@@ -110,26 +93,46 @@ class TransitionVector
             if (!hasNext())
                 return null;
 
-            Transition t = current();
-            fIndex++;
+            int bitOffset = (fNextIndex * fWidth * 2);
+            int wordOffset = bitOffset >> 5;
+            bitOffset &= 31;
+            int currentWord = fValues[wordOffset] >> bitOffset;
 
-            return t;
+            // Copy values out of packed array
+            for (int i = 0; i < fWidth; i++)
+            {
+                fTransition.setBit(fWidth - i - 1, currentWord & 3);
+                bitOffset += 2;
+                if (bitOffset == 32)
+                {
+                    wordOffset++;
+                    currentWord = fValues[wordOffset];
+                    bitOffset = 0;
+                }
+                else
+                    currentWord >>= 2;
+            }
+
+            fTransition.setTimestamp(fTimestamps[fNextIndex]);
+            fNextIndex++;
+
+            return fTransition;
         }
 
         public long getNextTimestamp()
         {
-            if (fIndex >= fTransitionCount - 1)
+            if (fNextIndex >= fTransitionCount)
                 return -1;
 
-            return fTimestamps[fIndex + 1];
+            return fTimestamps[fNextIndex];
         }
 
         public long getPrevTimestamp()
         {
-            if (fIndex <= 0)
+            if (fNextIndex < 2)
                 return -1;
 
-            return fTimestamps[fIndex - 1];
+            return fTimestamps[fNextIndex - 2];
         }
 
         public void remove()
@@ -137,10 +140,10 @@ class TransitionVector
             throw new UnsupportedOperationException();
         }
 
-        private int fWordOffset;
-        private int fBitOffset;
-        private int fCurrentWord;
-        private int fIndex;
+        private int fNextIndex;
+
+        // Reuse the same Transition/BitVector so we don't have to keep
+        // reallocating.
         private Transition fTransition = new Transition();
     }
 
@@ -194,6 +197,8 @@ class TransitionVector
 
     private int fWidth;
     private long[] fTimestamps;
+
+    // Values are packed into this array
     private int[] fValues;
     private int fTransitionCount;
     private int fAllocSize; // Used only while building

@@ -16,6 +16,7 @@
 
 import static org.junit.Assert.*;
 import org.junit.*;
+import java.util.*;
 
 public class SortedVectorTest
 {
@@ -45,17 +46,54 @@ public class SortedVectorTest
         vec.addSorted(116, new KeyedElement(116));
         vec.addSorted(117, new KeyedElement(117));
 
-        assertEquals(vec.lookupValue(10), 0);
-        assertEquals(vec.lookupValue(100), 0);
-        assertEquals(vec.lookupValue(110), 1);
-        assertEquals(vec.lookupValue(112), 1);
-        assertEquals(vec.lookupValue(115), 2);
-        assertEquals(vec.lookupValue(116), 3);
-        assertEquals(vec.lookupValue(117), 4);
-        assertEquals(vec.lookupValue(120), 4);
+        assertEquals(0, vec.lookupValue(10));
+        assertEquals(0, vec.lookupValue(100));
+        assertEquals(1, vec.lookupValue(110));
+        assertEquals(1, vec.lookupValue(112));
+        assertEquals(2, vec.lookupValue(115));
+        assertEquals(3, vec.lookupValue(116));
+        assertEquals(4, vec.lookupValue(117));
+        assertEquals(4, vec.lookupValue(120));
     }
 
-    // XXX test with even number of elements
-    // XXX test saerching before first element (make sure it doesn't crash)
-    // XXX test searching after last element
+    @Test public void testAddLookup2()
+    {
+        SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
+
+        // Note: even number of elements
+        vec.addSorted(100, new KeyedElement(100));
+        vec.addSorted(110, new KeyedElement(110));
+        vec.addSorted(115, new KeyedElement(115));
+        vec.addSorted(116, new KeyedElement(116));
+
+        assertEquals(0, vec.lookupValue(10));
+        assertEquals(0, vec.lookupValue(100));
+        assertEquals(1, vec.lookupValue(110));
+        assertEquals(1, vec.lookupValue(112));
+        assertEquals(2, vec.lookupValue(115));
+        assertEquals(3, vec.lookupValue(116));
+        assertEquals(3, vec.lookupValue(117));
+        assertEquals(3, vec.lookupValue(120));
+    }
+
+    @Test public void testIterator()
+    {
+        SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
+        vec.addSorted(100, new KeyedElement(100));
+        vec.addSorted(110, new KeyedElement(110));
+        vec.addSorted(120, new KeyedElement(120));
+        vec.addSorted(130, new KeyedElement(130));
+        vec.addSorted(140, new KeyedElement(140));
+
+        Iterator<KeyedElement> kei = vec.find(110);
+        assertTrue(kei.hasNext());
+        assertEquals(110, kei.next().getKey());
+        assertTrue(kei.hasNext());
+        assertEquals(120, kei.next().getKey());
+        assertTrue(kei.hasNext());
+        assertEquals(130, kei.next().getKey());
+        assertTrue(kei.hasNext());
+        assertEquals(140, kei.next().getKey());
+        assertTrue(!kei.hasNext());
+    }
 }

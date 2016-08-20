@@ -17,6 +17,7 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
+/// @todo test all bases (hex, decimal, binary) for literals
 public class QueryTest
 {
     TraceDataModel makeTraceDataModel()
@@ -236,6 +237,4 @@ public class QueryTest
             fail("Threw query parse exception");
         }
     }
-
-    // XXX test all bases (hex, decimal, binary) for literals
 }

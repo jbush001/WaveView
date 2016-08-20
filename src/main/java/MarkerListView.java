@@ -27,6 +27,8 @@ import javax.swing.table.*;
 ///
 /// Displays a list of all markers and their timestamps.  The user can click on them
 /// to jump to that point in the trace.
+/// @todo Add a way to remove entries directly from this list
+/// @todo Add a way to edit the comment/description from this list
 ///
 public class MarkerListView extends JPanel implements ActionListener, TraceViewModel.Listener
 {
