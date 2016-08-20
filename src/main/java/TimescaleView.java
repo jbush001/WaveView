@@ -26,7 +26,6 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
 {
     private static final int kMinorTickTop = 18;
     private static final int kMinorTicksPerMajorTick = 10;
-    private static final int kMinMinorTickSize = 5;
     private static final int kTimescaleHeight = 25;
     private static final int kMaxTimestampLabelWidth = 65;
     private static final int kTimestampBorder = 2;
@@ -87,20 +86,18 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
     public void scaleChanged(double newScale)
     {
         // Make sure minor ticks are large enough
-        fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
-            fTraceViewModel.getHorizontalScale() * kMinMinorTickSize)));
-
-        if (fMinorTickInterval < 100)
+        long minorTickInterval = fTraceViewModel.getMinorTickInterval();
+        if (minorTickInterval < 100)
         {
             fUnitMagnitude = 1;
             fUnit = "ns";
         }
-        else if (fMinorTickInterval < 100000)
+        else if (minorTickInterval < 100000)
         {
             fUnitMagnitude = 1000;
             fUnit = "us";
         }
-        else if (fMinorTickInterval < 100000000)
+        else if (minorTickInterval < 100000000)
         {
             fUnitMagnitude = 1000000;
             fUnit = "ms";
@@ -128,8 +125,8 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         g.setColor(AppPreferences.getInstance().kTraceColor);
 
         Rectangle visibleRect = getVisibleRect();
-
         FontMetrics metrics = g.getFontMetrics();
+        long minorTickInterval = fTraceViewModel.getMinorTickInterval();
 
         // The -100 in start time keeps labels that are to the left of the window from not being drawn
         // (which causes artifacts when scrolling).  It needs to be bigger than the largest label.
@@ -138,11 +135,11 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         if (startTime < 0)
             startTime = 0;
 
-        startTime = (startTime / fMinorTickInterval) * fMinorTickInterval;    // Round to an event tick boundary
-        for (long ts = startTime; ts < endTime; ts += fMinorTickInterval)
+        startTime = (startTime / minorTickInterval) * minorTickInterval;    // Round to an event tick boundary
+        for (long ts = startTime; ts < endTime; ts += minorTickInterval)
         {
             int x = (int)(ts / fTraceViewModel.getHorizontalScale());
-            if ((ts / fMinorTickInterval) % kMinorTicksPerMajorTick == 0)
+            if ((ts / minorTickInterval) % kMinorTicksPerMajorTick == 0)
             {
                 g.drawLine(x, 5, x, kTimescaleHeight);
                 g.drawString(Long.toString(ts / fUnitMagnitude) + " " + fUnit, x + 3, kMinorTickTop
@@ -205,7 +202,6 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
     private boolean fShowTimestamp;
     private int fUnitMagnitude = 1;
     private String fUnit = "s";
-    private int fMinorTickInterval = 0;     // In nanoseconds
     private TraceViewModel fTraceViewModel;
     private TraceDataModel fTraceDataModel;
     private int fOldCursor;

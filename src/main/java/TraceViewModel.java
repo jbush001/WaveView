@@ -37,6 +37,7 @@ public class TraceViewModel
         public void markerChanged(long timestamp);
     };
 
+    private static final int kMinMinorTickSize = 5;
 
     TraceViewModel()
     {
@@ -62,6 +63,9 @@ public class TraceViewModel
     public void setHorizontalScale(double scale)
     {
         fHorizontalScale = scale;
+        fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
+            scale * kMinMinorTickSize)));
+
         for (Listener listener : fTraceListeners)
             listener.scaleChanged(scale);
     }
@@ -70,6 +74,12 @@ public class TraceViewModel
     public double getHorizontalScale()
     {
         return fHorizontalScale;
+    }
+
+    // @returns Duration between horizontal ticks, in nanoseconds
+    public long getMinorTickInterval()
+    {
+        return fMinorTickInterval;
     }
 
     public void makeNetVisible(int netId)
@@ -401,6 +411,7 @@ public class TraceViewModel
     private boolean fAdjustingCursor;
     private SortedVector<Marker> fMarkers = new SortedVector<Marker>();
     private int fNextMarkerId = 1;
+    private long fMinorTickInterval;
 };
 
 

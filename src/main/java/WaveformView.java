@@ -29,7 +29,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
     private static final int kWaveformMargin = 3;
     private static final int kWaveformSpacing = kWaveformHeight + (kWaveformMargin * 2);
     private static final int kMinorTicksPerMajorTick = 10;
-    private static final int kMinMinorTickSize = 5;
+    private static final int kMinminorTickInterval = 5;
 
     public WaveformView(TraceViewModel traceViewModel, TraceDataModel traceDataModel)
     {
@@ -115,11 +115,6 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         Dimension d = getPreferredSize();
         d.width = timestampToCoordinate(fTraceDataModel.getMaxTimestamp());
         setPreferredSize(d);
-
-        fMinorTickInterval = 1;
-        while (fMinorTickInterval / newScale < kMinMinorTickSize)
-            fMinorTickInterval *= 10;
-
         revalidate();
         repaint();
     }
@@ -229,18 +224,18 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
 
     private void drawTimingLines(Graphics g, Rectangle visibleRect)
     {
-        long startTime = (long)(visibleRect.x * fTraceViewModel.getHorizontalScale());
-        long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceViewModel.getHorizontalScale());
-
-        startTime = (startTime / fMinorTickInterval) * fMinorTickInterval;
+        double scale = fTraceViewModel.getHorizontalScale();
+        long startTime = (long)(visibleRect.x * scale);
+        long endTime = (long) ((visibleRect.x + visibleRect.width) * scale);
+        int minorTickInterval = (int) fTraceViewModel.getMinorTickInterval();
+        int majorTickInterval = minorTickInterval * kMinorTicksPerMajorTick;
+        startTime = ((startTime + majorTickInterval - 1) / majorTickInterval) * majorTickInterval;
 
         g.setColor(AppPreferences.getInstance().kTimingMarkerColor);
-
-        for (long ts = startTime; ts < endTime; ts += fMinorTickInterval)
+        for (long ts = startTime; ts < endTime; ts += majorTickInterval)
         {
-            int x = (int)(ts / fTraceViewModel.getHorizontalScale());
-            if ((ts / fMinorTickInterval) % (4 * kMinorTicksPerMajorTick) == 0)
-                g.drawLine(x, visibleRect.y, x, visibleRect.y + visibleRect.height);
+            int x = (int) (ts / scale);
+            g.drawLine(x, visibleRect.y, x, visibleRect.y + visibleRect.height);
         }
     }
 
@@ -313,6 +308,5 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
     private MultiNetPainter fMultiNetPainter = new MultiNetPainter();
     private TraceViewModel fTraceViewModel;
     private TraceDataModel fTraceDataModel;
-    private long fMinorTickInterval;
     private int fOldCursor;
 }
