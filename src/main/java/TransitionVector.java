@@ -172,10 +172,16 @@ class TransitionVector
             assert timestamp >= fTimestamps[fTransitionCount - 1];
 
         fTimestamps[fTransitionCount] = timestamp;
-        int wordOffset = fTransitionCount * fWidth / 16;
-        int bitOffset = (fTransitionCount * fWidth * 2) % 32;
 
-        for (int i = values.getWidth() - 1; i >= 0; i--)
+        int bitIndex = fTransitionCount * fWidth;
+
+        // If the passed value is smaller than the vector width, pad with zeroes
+        if (fWidth > values.getWidth())
+            bitIndex += fWidth - values.getWidth();
+
+        int wordOffset = bitIndex / 16;
+        int bitOffset = (bitIndex * 2) % 32;
+        for (int i = Math.min(values.getWidth(), fWidth) - 1; i >= 0; i--)
         {
             fValues[wordOffset] |= values.getBit(i) << bitOffset;
             bitOffset += 2;

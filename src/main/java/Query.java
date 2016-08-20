@@ -14,28 +14,21 @@
 // limitations under the License.
 //
 
-//
-// The Query class allows searching for specific logic values, including multiple values.
-// It builds an expression tree to represent the search criteria.  There are specific
-// optimizations that allow skipping events that cannot meet the criteria.
-//
-
 import java.lang.Math;
 import java.util.*;
 
 ///
-/// @todo Allow different number representations and bases
+/// The Query class allows searching for specific logic values, including multiple values.
+/// It builds an expression tree to represent the search criteria.  There are specific
+/// optimizations that allow skipping events that cannot meet the criteria.
+///
 /// @todo Support >=, <=, ~, etc
 /// @todo Support proper logical operators &&, ||
 /// @todo Support partial multi-net matches
-/// @bug When searching backwards, it will snap to the beginning of the region that matches,
-///      not the end.
-/// @bug When searching with OR, searching forward may snap to the middle of a region
-///      that matches (need to test)
 ///
 public class Query
 {
-    public Query(TraceDataModel traceModel, String queryString) throws QueryParseException
+    public Query(TraceDataModel traceModel, String queryString) throws ParseException
     {
         fTraceDataModel = traceModel;
         fQueryString = queryString;
@@ -47,6 +40,10 @@ public class Query
     /// Scan forward to find the next timestamp that matches this query's expression
     /// If the startTimestamp is already a match, it will not be returned. This will
     ///  instead scan to the next transition
+    /// @bug If startTimestamp is before the first event, and the first event matches,
+    ///      this will not return it.
+    /// @bug When searching with OR, may snap to the middle of a region that matches
+    ///      (need to verify)
     /// @returns
     ///   -1 If there are no matches in the forward direction
     ///      timestamp of the next forward match otherwise
@@ -70,6 +67,7 @@ public class Query
     /// Scan forward to find the next timestamp that matches this query's expression
     /// If the startTimestamp is already a match, it will not be returned. This will
     ///  instead scan to the previous transition
+    /// @bug This will snap to the beginning of the region that matches, not the end.
     /// @returns
     ///   -1 If there are no matches in the backward direction
     ///      timestamp of the next backward match otherwise
@@ -89,14 +87,17 @@ public class Query
         }
     }
 
-    class QueryParseException extends Exception
+    class ParseException extends Exception
     {
-        public QueryParseException(String what)
+        public ParseException(String what)
         {
             super(what);
             fErrorMessage = what;
             fStartOffset = fTokenStart;
-            fEndOffset = fTokenStart + fCurrentTokenValue.length() - 1;
+            if (fCurrentTokenValue.length() > 0)
+                fEndOffset = fTokenStart + fCurrentTokenValue.length() - 1;
+            else
+                fEndOffset = fTokenStart;
         }
 
         public String toString()
@@ -130,7 +131,7 @@ public class Query
 
     private static final int LITERAL_TYPE_DECIMAL = 0;
     private static final int LITERAL_TYPE_HEX = 1;
-    private static final int LITERAL_TYPE_BINARY = 0;
+    private static final int LITERAL_TYPE_BINARY = 2;
 
     String fQueryString;
     int fStringOffset;
@@ -173,7 +174,7 @@ public class Query
         return value == ' ' || value == '\r' || value == '\n' || value == '\t';
     }
 
-    int parseToken() throws QueryParseException
+    int parseToken() throws ParseException
     {
         if (fPushBackToken != -1)
         {
@@ -202,12 +203,10 @@ public class Query
                     c = fQueryString.charAt(fStringOffset++);
             }
 
-            if (state == STATE_INIT)
-                fTokenStart = fStringOffset - 1;
-
             switch (state)
             {
                 case STATE_INIT:
+                    fTokenStart = fStringOffset - 1;
                     if (c == -1)
                         return TOK_END;
                     else if ("(<>)=|&".indexOf(c) != -1)
@@ -222,7 +221,7 @@ public class Query
                     else if (isNum(c))
                     {
                         fPushBackChar = c;
-                        fCurrentTokenType = LITERAL_TYPE_BINARY;
+                        fCurrentTokenType = LITERAL_TYPE_DECIMAL;
                         state = STATE_SCAN_LITERAL;
                     }
 
@@ -247,22 +246,37 @@ public class Query
                     else if (c == 'd')
                         fCurrentTokenType = LITERAL_TYPE_DECIMAL;
                     else
-                        throw new QueryParseException("unknown type " + (char) c);
+                        throw new ParseException("unknown type " + (char) c);
 
                     state = STATE_SCAN_LITERAL;
                     break;
 
                 case STATE_SCAN_LITERAL:
-                    if (isHexDigit(c))
+                    if (isHexDigit(c)
+                        || ((fCurrentTokenType == LITERAL_TYPE_BINARY || fCurrentTokenType == LITERAL_TYPE_HEX)
+                        && (c == 'x' || c == 'z' || c == 'X' || c == 'Z')))
+                    {
                         fCurrentTokenValue.append((char) c);
+                    }
                     else
                     {
-                        if (fCurrentTokenType == LITERAL_TYPE_BINARY)
-                            fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
-                        else if (fCurrentTokenType == LITERAL_TYPE_HEX)
-                            fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
-                        else if (fCurrentTokenType == LITERAL_TYPE_DECIMAL)
-                            fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
+                        switch (fCurrentTokenType)
+                        {
+                            case LITERAL_TYPE_BINARY:
+                                fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
+                                break;
+
+                            case LITERAL_TYPE_HEX:
+                                fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
+                                break;
+
+                            case LITERAL_TYPE_DECIMAL:
+                                fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
+                                break;
+
+                            default:
+                                assert false;   // Should not get here
+                        }
 
                         fPushBackChar = c;
                         return TOK_LITERAL;
@@ -273,26 +287,26 @@ public class Query
         }
     }
 
-    void match(int tokenType) throws QueryParseException
+    void match(int tokenType) throws ParseException
     {
         int got = parseToken();
         if (got != tokenType)
         {
             if (got == TOK_END)
-                throw new QueryParseException("unexpected end of string");
+                throw new ParseException("unexpected end of string");
             else
-                throw new QueryParseException("unexpected value");
+                throw new ParseException("unexpected value");
         }
     }
 
-    ExpressionNode parseExpression() throws QueryParseException
+    ExpressionNode parseExpression() throws ParseException
     {
         ExpressionNode node = parseOr();
         match(TOK_END);
         return node;
     }
 
-    ExpressionNode parseOr() throws QueryParseException
+    ExpressionNode parseOr() throws ParseException
     {
         ExpressionNode left = parseAnd();
 
@@ -307,7 +321,7 @@ public class Query
         return new OrExpressionNode(left, right);
     }
 
-    ExpressionNode parseAnd() throws QueryParseException
+    ExpressionNode parseAnd() throws ParseException
     {
         ExpressionNode left = parseCondition();
 
@@ -322,7 +336,7 @@ public class Query
         return new AndExpressionNode(left, right);
     }
 
-    ExpressionNode parseCondition() throws QueryParseException
+    ExpressionNode parseCondition() throws ParseException
     {
         // if this is an '(', call parseExpression
         int lookahead = parseToken();
@@ -334,11 +348,11 @@ public class Query
         }
 
         if (lookahead != TOK_IDENTIFIER)
-            throw new QueryParseException("unexpected token, expected identifier");
+            throw new ParseException("unexpected token, expected identifier");
 
         int netId = fTraceDataModel.findNet(fCurrentTokenValue.toString());
         if (netId < 0)
-            throw new QueryParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
+            throw new ParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
 
         // check conditional.
         lookahead = parseToken();
@@ -354,7 +368,7 @@ public class Query
                 match(TOK_LITERAL);
                 return new EqualExpressionNode(netId, fBitVector);
             default:
-                throw new QueryParseException("Unknown conditional operator");
+                throw new ParseException("Unknown conditional operator");
         }
     }
 
@@ -510,7 +524,6 @@ public class Query
             Transition t = i.next();
             outHint.forwardTimestamp = i.getNextTimestamp();
             outHint.backwardTimestamp = i.getPrevTimestamp();
-
             return doCompare(t, fExpected);
         }
 

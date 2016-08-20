@@ -248,9 +248,9 @@ public class WaveApp extends JPanel implements ActionListener
             initialQuery.append(fTraceDataModel.getFullNetName(netId));
             Transition t = fTraceDataModel.findTransition(netId,
                 cursorPosition).next();
-            initialQuery.append(" = ");
-            initialQuery.append(fTraceViewModel.getValueFormatter(index)
-                .format(t));
+
+            initialQuery.append(" = 'h");
+            initialQuery.append(t.toString(16));
         }
 
         // XXX make a proper find window with a textarea
@@ -268,7 +268,7 @@ public class WaveApp extends JPanel implements ActionListener
             fCurrentQuery = new Query(fTraceDataModel, queryString);
             findNext();
         }
-        catch (Query.QueryParseException exc)
+        catch (Query.ParseException exc)
         {
             JOptionPane.showMessageDialog(null, exc.toString(),"Error parsing query",
                 JOptionPane.ERROR_MESSAGE);
@@ -280,8 +280,11 @@ public class WaveApp extends JPanel implements ActionListener
         if (fCurrentQuery != null)
         {
             long newTimestamp = fCurrentQuery.getNextMatch(fTraceViewModel.getCursorPosition());
-            fTraceViewModel.setSelectionStart(newTimestamp);
-            fTraceViewModel.setCursorPosition(newTimestamp);
+            if (newTimestamp >= 0)
+            {
+                fTraceViewModel.setSelectionStart(newTimestamp);
+                fTraceViewModel.setCursorPosition(newTimestamp);
+            }
         }
     }
 
@@ -290,8 +293,11 @@ public class WaveApp extends JPanel implements ActionListener
         if (fCurrentQuery != null)
         {
             long newTimestamp = fCurrentQuery.getPreviousMatch(fTraceViewModel.getCursorPosition());
-            fTraceViewModel.setSelectionStart(newTimestamp);
-            fTraceViewModel.setCursorPosition(newTimestamp);
+            if (newTimestamp >= 0)
+            {
+                fTraceViewModel.setSelectionStart(newTimestamp);
+                fTraceViewModel.setCursorPosition(newTimestamp);
+            }
         }
     }
 

@@ -106,4 +106,25 @@ public class TransitionVectorTest
         assertEquals(111, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00001000", 2)));
     }
+
+    /// The passed bitvector is larger than the transition vector width.
+    /// Ensure it is truncated
+    @Test public void testTruncateVector()
+    {
+        TransitionVector vec = new TransitionVector(4);
+        vec.appendTransition(100, new BitVector("00001111", 2));
+        TransitionVector.Iterator ti = vec.findTransition(0);
+        Transition t = ti.next();
+        assertEquals("1111", t.toString(2));
+    }
+
+    /// The passed bitvector is smaller than the transition vector width
+    @Test public void testPadVector()
+    {
+        TransitionVector vec = new TransitionVector(16);
+        vec.appendTransition(100, new BitVector("101", 2));
+        TransitionVector.Iterator ti = vec.findTransition(0);
+        Transition t = ti.next();
+        assertEquals("0000000000000101", t.toString(2));
+    }
 }
