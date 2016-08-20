@@ -15,6 +15,7 @@
 //
 
 import java.io.InputStream;
+import java.io.IOException;
 
 //
 // Classes override this interface to create an object that can load traces
@@ -24,6 +25,14 @@ interface TraceLoader
 {
     /// @todo Some kind of file detection APIs (register by extension, sniff, etc)
 
-    public boolean load(InputStream is, TraceBuilder builder);
+    class TraceLoaderException extends Exception
+    {
+        TraceLoaderException(String description)
+        {
+            super(description);
+        }
+    }
+
+    public void load(InputStream is, TraceBuilder builder) throws TraceLoaderException, IOException;
 }
 

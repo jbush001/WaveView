@@ -14,9 +14,10 @@
 // limitations under the License.
 //
 
-//
-// Parse a value change dump (VCD) formatted text file and push the contents into a provided trace model
-//
+///
+/// Parse a value change dump (VCD) formatted text file and push the contents into a
+/// provided trace model
+///
 
 import java.io.*;
 import java.util.*;
@@ -27,7 +28,7 @@ class VCDLoader implements TraceLoader
     {
     }
 
-    public boolean load(InputStream is, TraceBuilder builder)
+    public void load(InputStream is, TraceBuilder builder) throws TraceLoaderException, IOException
     {
         fTokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(is)));
         fTokenizer.resetSyntax();
@@ -36,61 +37,53 @@ class VCDLoader implements TraceLoader
         fTokenizer.whitespaceChars('\n', '\n');
         fTokenizer.whitespaceChars(' ', ' ');
         fTokenizer.whitespaceChars('\t', '\t');
-        try
-        {
-            fInputStream = new BufferedInputStream(is);
-            fTraceBuilder = builder;
 
-            while (parseDefinition())
-                ;
+        fInputStream = new BufferedInputStream(is);
+        fTraceBuilder = builder;
 
-            while (parseTransition())
-                ;
+        while (parseDefinition())
+            ;
 
-            builder.loadFinished();
+        while (parseTransition())
+            ;
 
-            System.out.println("parsed " + fTotalTransitions + " total transitions");
-            System.out.println("" + fNetMap.size() + " total nets");
-            return true;
-        }
-        catch (Exception exc)
-        {
-            System.out.println("caught exception " + exc);
-            exc.printStackTrace();
-            return false;
-        }
+        builder.loadFinished();
+
+        System.out.println("parsed " + fTotalTransitions + " total transitions");
+        System.out.println("" + fNetMap.size() + " total nets");
     }
 
-    private void parseScope() throws Exception
+    private void parseScope() throws TraceLoaderException, IOException
     {
-        nextToken();    // Scope type (ignore)
-        nextToken();
+        nextToken(true);    // Scope type (ignore)
+        nextToken(true);
         fTraceBuilder.enterModule(getTokenString());
         match("$end");
     }
 
-    private void parseUpscope() throws Exception
+    private void parseUpscope() throws TraceLoaderException, IOException
     {
         match("$end");
         fTraceBuilder.exitModule();
     }
 
-    private void parseVar() throws Exception
+    private void parseVar() throws TraceLoaderException, IOException
     {
-        nextToken();    // type
-        nextToken();    // size
+        nextToken(true);    // type
+        nextToken(true);    // size
         int width = Integer.parseInt(getTokenString());
 
-        nextToken();
+        nextToken(true);
         String id = getTokenString();
-        nextToken();
+        nextToken(true);
         String netName = getTokenString();
-        do
-        {
-            if (!nextToken())
-                break;
-        }
-        while (!getTokenString().equals("$end"));
+
+        // If this has a width like [16:0], Ignore it.
+        nextToken(true);
+        if (getTokenString().charAt(0) != '[')
+            fTokenizer.pushBack();
+
+        match("$end");
 
         Integer net = fNetMap.get(id);
         if (net == null)
@@ -110,9 +103,9 @@ class VCDLoader implements TraceLoader
         }
     }
 
-    private void parseTimescale() throws Exception
+    private void parseTimescale() throws TraceLoaderException, IOException
     {
-        nextToken();
+        nextToken(true);
 
         String s = getTokenString();
         switch (s.charAt(s.length() - 2))    // we want the prefix for the time unit: ####xs
@@ -134,7 +127,7 @@ class VCDLoader implements TraceLoader
             // XXX need to handle other units
 
             default:
-                throw new Exception("Line " + fTokenizer.lineno() + ": unknown timescale value "
+                throw new TraceLoaderException("Line " + fTokenizer.lineno() + ": unknown timescale value "
                     + getTokenString());
         }
 
@@ -142,9 +135,11 @@ class VCDLoader implements TraceLoader
         match("$end");
     }
 
-    private boolean parseDefinition() throws Exception
+    /// @returns true if there are more definitions, false if it has hit
+    /// the end of the definitions section
+    private boolean parseDefinition() throws TraceLoaderException, IOException
     {
-        nextToken();
+        nextToken(true);
         if (getTokenString().equals("$scope"))
             parseScope();
         else if (getTokenString().equals("$var"))
@@ -163,8 +158,7 @@ class VCDLoader implements TraceLoader
             // Ignore this defintion
             do
             {
-                if (!nextToken())
-                    return false;
+                nextToken(true);
             }
             while (!getTokenString().equals("$end"));
         }
@@ -172,17 +166,18 @@ class VCDLoader implements TraceLoader
         return true;
     }
 
-    private boolean parseTransition() throws Exception
+    private boolean parseTransition() throws TraceLoaderException, IOException
     {
         fTotalTransitions++;
 
-        if (!nextToken())
+        if (!nextToken(false))
             return false;
 
         if (getTokenString().charAt(0) == '#')
         {
             // If the line begins with a #, this is a timestamp.
-            fCurrentTime = Long.parseLong(getTokenString().substring(1)) * fNanoSecondsPerIncrement;
+            fCurrentTime = Long.parseLong(getTokenString().substring(1))
+                * fNanoSecondsPerIncrement;
         }
         else
         {
@@ -196,7 +191,7 @@ class VCDLoader implements TraceLoader
             {
                 // Multiple value net.  Value appears first, followed by space, then identifier
                 value = getTokenString().substring(1);
-                nextToken();
+                nextToken(true);
                 id = getTokenString();
             }
             else
@@ -209,8 +204,8 @@ class VCDLoader implements TraceLoader
             Integer net = fNetMap.get(id);
             if (net == null)
             {
-                System.out.println("unknown net " + id + " value " + value);
-                return true;
+                throw new TraceLoaderException("Line " + fTokenizer.lineno() + ": Unknown net id "
+                    + id);
             }
 
             int netWidth = fTraceBuilder.getNetWidth(net.intValue());
@@ -252,9 +247,7 @@ class VCDLoader implements TraceLoader
                             break;
 
                         default:
-                            System.out.println("Warning: invalid bit value found");
-                            bitValue = BitVector.VALUE_X;
-                            // XXX perhaps return error
+                            throw new TraceLoaderException("Line " + fTokenizer.lineno() + ": Invalid logic value");
                     }
 
                     decodedValues.setBit(bitIndex--, bitValue);
@@ -282,19 +275,32 @@ class VCDLoader implements TraceLoader
         return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
     }
 
-    private void match(String value) throws Exception
+    private void match(String value) throws TraceLoaderException, IOException
     {
-        nextToken();
+        nextToken(true);
         if (!getTokenString().equals(value))
         {
-            throw new Exception("Line " + fTokenizer.lineno() + ": parse error, expected " + value + " got "
+            throw new TraceLoaderException("Line " + fTokenizer.lineno() + ": parse error, expected " + value + " got "
                 + getTokenString());
         }
     }
 
-    private boolean nextToken() throws IOException
+    /// @param require If true and the next token is the end of file, this will throw an exception.
+    /// @returns True if token was returned, false if not
+    private boolean nextToken(boolean require) throws TraceLoaderException, IOException
     {
-        return fTokenizer.nextToken() != StreamTokenizer.TT_EOF;
+        if (fTokenizer.nextToken() == StreamTokenizer.TT_EOF)
+        {
+            if (require)
+            {
+                throw new TraceLoaderException("Line " + fTokenizer.lineno()
+                    + ": unexpected end of file");
+            }
+            else
+                return false;
+        }
+
+        return true;
     }
 
     private String getTokenString()

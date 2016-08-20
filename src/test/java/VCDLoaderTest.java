@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.io.*;
 import java.util.Vector;
 
+/// @todo test cloned nets
 public class VCDLoaderTest
 {
     // Implements TraceBuilder interface, which the VCDLoader will write into,
@@ -135,9 +136,29 @@ public class VCDLoaderTest
             fEventList.add(new Event(EXPECT_FINISHED));
         }
 
-        Vector<Integer> fNetWidths = new Vector<Integer>();
-        Vector<Event> fEventList = new Vector<Event>();
-        int fCurrentEvent = 0;
+        private Vector<Integer> fNetWidths = new Vector<Integer>();
+        private Vector<Event> fEventList = new Vector<Event>();
+        private int fCurrentEvent = 0;
+    }
+
+    public class DummyTraceBuilder implements TraceBuilder
+    {
+        public void enterModule(String name) {}
+        public void exitModule() {}
+        public int newNet(String shortName, int cloneId, int width) {
+            fNetWidths.add(new Integer(width));
+            return fNetWidths.size() - 1;
+        }
+
+        public int getNetWidth(int netId)
+        {
+            return fNetWidths.elementAt(netId);
+        }
+
+        public void appendTransition(int id, long timestamp, BitVector values) {}
+        public void loadFinished() {}
+
+        private Vector<Integer> fNetWidths = new Vector<Integer>();
     }
 
     // Simulataneously builds VCD file contents and populates the
@@ -178,6 +199,13 @@ public class VCDLoaderTest
             fVCDContents.append(getIdForIndex(index));
             fVCDContents.append(' ');
             fVCDContents.append(name);
+            if (width > 1)
+            {
+                fVCDContents.append(" [");
+                fVCDContents.append(width - 1);
+                fVCDContents.append(":0]");
+            }
+
             fVCDContents.append(" $end\n");
 
             fTraceBuilder.expectNet(name, cloneId, width);
@@ -260,9 +288,15 @@ public class VCDLoaderTest
         builder.appendTransition(0, 4, "1");
         builder.finish();
 
-        VCDLoader loader = new VCDLoader();
-        loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
-
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+        }
+        catch (Exception exc)
+        {
+            fail("caught exception");
+        }
     }
 
     // Timescale is one nanosecond
@@ -282,8 +316,15 @@ public class VCDLoaderTest
         builder.appendTransition(0, 4, "1");
         builder.finish();
 
-        VCDLoader loader = new VCDLoader();
-        loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+        }
+        catch (Exception exc)
+        {
+            fail("caught exception");
+        }
     }
 
     @Test public void testMultibit()
@@ -299,8 +340,178 @@ public class VCDLoaderTest
         builder.appendTransition(0, 5, "1101010010100010");
         builder.finish();
 
-        VCDLoader loader = new VCDLoader();
-        loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+        }
+        catch (Exception exc)
+        {
+            fail("caught exception " + exc);
+        }
     }
 
+    @Test public void testUnknownTimescale()
+    {
+        String fileContents = "\n\n$timescale\n   1qs\n$end\n";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            assertEquals("Line 4: unknown timescale value 1qs",
+                exc.getMessage());
+        }
+    }
+
+    @Test public void testUnknownNetId()
+    {
+        String fileContents = "$scope module mod1 $end\n" +
+            "$var wire 1 ! clk $end\n" +
+            "$upscope $end\n" +
+            "$enddefinitions $end\n" +
+            "#0\n" +
+            "1$\n";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            assertEquals("Line 6: Unknown net id $", exc.getMessage());
+        }
+    }
+
+    @Test public void testInvalidLogicValue()
+    {
+        String fileContents = "$scope module mod1 $end\n" +
+            "$var wire 1 ! clk $end\n" +
+            "$upscope $end\n" +
+            "$enddefinitions $end\n" +
+            "#0\n" +
+            "2!\n";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            assertEquals("Line 6: Invalid logic value",
+                exc.getMessage());
+        }
+    }
+
+    @Test public void testInvalidScope()
+    {
+        String fileContents = "$scope module mod1\n" +
+            "$var wire 1 ! clk $end\n";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            assertEquals("Line 2: parse error, expected $end got $var",
+                exc.getMessage());
+        }
+    }
+
+    @Test public void testInvalidUpscope()
+    {
+        String fileContents = "$scope module mod1 $end\n" +
+            "$var wire 1 ! clk $end\n" +
+            "$upscope\n" +
+            "$enddefinitions\n";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            assertEquals("Line 4: parse error, expected $end got $enddefinitions",
+                exc.getMessage());
+        }
+    }
+
+    @Test public void testInvalidDefinition()
+    {
+        String fileContents = "$scope module mod1 $end\n" +
+            "$var wire 1 ! clk\n" +
+            "$upscope\n" +
+            "$enddefinitions\n";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            exc.printStackTrace();
+            assertEquals("Line 3: parse error, expected $end got $upscope",
+                exc.getMessage());
+        }
+    }
+
+    @Test public void testInvalidTimescale()
+    {
+        String fileContents = "$timescale\n" +
+            "	1us\n" +
+            "$scope module mod1 $end\n";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            assertEquals("Line 3: parse error, expected $end got $scope",
+                exc.getMessage());
+        }
+    }
+
+    @Test public void testTruncatedFile()
+    {
+        String fileContents = "$scope module mod1";
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                new DummyTraceBuilder());
+            fail("Didn't throw exception");
+        }
+        catch (Exception exc)
+        {
+            exc.printStackTrace();
+            assertEquals("Line 1: unexpected end of file",
+                exc.getMessage());
+        }
+    }
 }
