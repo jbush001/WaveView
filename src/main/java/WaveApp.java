@@ -21,6 +21,10 @@ import java.util.*;
 import javax.swing.text.*;
 import java.io.*;
 
+///
+/// @todo Put trace loader in separate thread, show progress dialog, pop
+///    up error messages on exception.
+///
 public class WaveApp extends JPanel implements ActionListener
 {
     public WaveApp(TraceViewModel viewModel, TraceDataModel dataModel)

@@ -63,7 +63,7 @@ public class TraceView extends JPanel implements ActionListener
         } );
 
         // Add net context menu
-        // XXX should this be moved to NetNameView?
+        // @todo should this be moved to NetNameView?
         fPopupMenu = new JPopupMenu();
         JMenuItem item = new JMenuItem("Remove Net");
         item.addActionListener(this);

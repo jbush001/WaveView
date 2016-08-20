@@ -14,16 +14,16 @@
 // limitations under the License.
 //
 
-//
-// This is the leftmost scroll pane that displays the names of the nets next to the waveforms
-//
-
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.awt.datatransfer.*;
+
+///
+/// Displays names of nets next to waveforms, along with value at cursor
+///
 
 class NetNameView extends JList implements TraceViewModel.Listener
 {

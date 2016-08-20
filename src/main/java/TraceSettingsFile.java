@@ -21,9 +21,12 @@ import com.sun.org.apache.xml.internal.serialize.*;
 import java.util.*;
 import java.io.*;
 
-//
-// Save all settings specific to a loaded trace (mostly view properties)
-//
+///
+/// Load/Save view settings specific to a loaded trace
+/// @bug Fix warning "OutputFormat is internal proprietary API and
+/// may be removed in a future release"
+///
+
 class TraceSettingsFile
 {
     public TraceSettingsFile(String filename, TraceDataModel dataModel,

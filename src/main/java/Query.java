@@ -97,7 +97,6 @@ public class Query
             fErrorMessage = what;
             fStartOffset = fTokenStart;
             fEndOffset = fTokenStart + fCurrentTokenValue.length() - 1;
-            queryString = fQueryString;
         }
 
         public String toString()
@@ -116,7 +115,6 @@ public class Query
         }
 
         private String fErrorMessage;
-        private String queryString;
         private int fStartOffset;
         private int fEndOffset;
     }
