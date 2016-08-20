@@ -46,6 +46,14 @@ public class BitVectorTest
         assertEquals("DD492", bv.toString(16));
     }
 
+    @Test public void testParseDecimal()
+    {
+        BitVector bv = new BitVector("34923433434371324", 10);
+        assertFalse(bv.isZ());
+        assertFalse(bv.isX());
+        assertEquals("34923433434371324", bv.toString(10));
+    }
+
     @Test public void testParseX()
     {
         BitVector bv = new BitVector("xxxxxxxxxxx", 2);

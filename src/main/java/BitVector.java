@@ -75,7 +75,7 @@ class BitVector
     {
         for (int i = 0; i < fValues.length; i++)
         {
-            if (fValues[i] != BitVector.VALUE_Z)
+            if (fValues[i] != VALUE_Z)
                 return false;
         }
 
@@ -87,7 +87,7 @@ class BitVector
     {
         for (int i = 0; i < fValues.length; i++)
         {
-            if (fValues[i] == BitVector.VALUE_Z || fValues[i] == BitVector.VALUE_X)
+            if (fValues[i] == VALUE_Z || fValues[i] == VALUE_X)
                 return true;
         }
 
@@ -99,13 +99,14 @@ class BitVector
     /// @bug Doesn't support decimal
     public void parseString(String string, int radix) throws NumberFormatException
     {
-        if (fValues == null || fValues.length != string.length())
-            fValues = new byte[string.length()];
-
         switch (radix)
         {
             case 2:
                 parseBinaryValue(string);
+                break;
+
+            case 10:
+                parseDecimalValue(string);
                 break;
 
             case 16:
@@ -114,79 +115,6 @@ class BitVector
 
             default:
                 throw new NumberFormatException("bad radix passed to parseString");
-        }
-    }
-
-    private void parseBinaryValue(String string) throws NumberFormatException
-    {
-        if (string.length() != fValues.length)
-            fValues = new byte[string.length()];
-
-        int length = string.length();
-        for (int index = 0; index < length; index++)
-        {
-            char c = string.charAt(index);
-            if (c == '0')
-                fValues[length - index - 1] = BitVector.VALUE_0;
-            else if (c == '1')
-                fValues[length - index - 1] = BitVector.VALUE_1;
-            else if (c == 'x' || c == 'X')
-                fValues[length - index - 1] = BitVector.VALUE_X;
-            else if (c == 'z' || c == 'Z')
-                fValues[length - index - 1] = BitVector.VALUE_Z;
-            else
-                throw new NumberFormatException("number format exception parsing " + string);
-        }
-    }
-
-    private void parseHexadecimalValue(String string) throws NumberFormatException
-    {
-        if (string.length() * 4 != fValues.length)
-            fValues = new byte[string.length() * 4];
-
-        int length = string.length();
-        for (int index = 0; index < length; index++)
-        {
-            char c = string.charAt(length - index - 1);
-            if (c >= '0' && c <= '9')
-            {
-                int digitVal = c - '0';
-                for (int offset = 0; offset < 4; offset++)
-                {
-                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? BitVector.VALUE_1
-                        : BitVector.VALUE_0;
-                }
-            }
-            else if (c >= 'a' && c <= 'f')
-            {
-                int digitVal = c - 'a' + 10;
-                for (int offset = 0; offset < 4; offset++)
-                {
-                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? BitVector.VALUE_1
-                        : BitVector.VALUE_0;
-                }
-            }
-            else if (c >= 'A' && c <= 'F')
-            {
-                int digitVal = c - 'A' + 10;
-                for (int offset = 0; offset < 4; offset++)
-                {
-                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? BitVector.VALUE_1
-                        : BitVector.VALUE_0;
-                }
-            }
-            else if (c == 'X' || c == 'x')
-            {
-                for (int offset = 0; offset < 4; offset++)
-                    fValues[(index + 1) * 4 - offset - 1] = BitVector.VALUE_X;
-            }
-            else if (c == 'Z' || c == 'z')
-            {
-                for (int offset = 0; offset < 4; offset++)
-                    fValues[(index + 1) * 4 - offset - 1] = BitVector.VALUE_Z;
-            }
-            else
-                throw new NumberFormatException("number format exception parsing " + string);
         }
     }
 
@@ -256,7 +184,7 @@ class BitVector
         for (int index = getWidth() - 1; index >= 0; index--)
         {
             value <<= 1;
-            if (getBit(index) == BitVector.VALUE_1)
+            if (getBit(index) == VALUE_1)
                 value |= 1;
         }
 
@@ -266,7 +194,7 @@ class BitVector
     /// @returns A string representation of this BitVector with the given radix,
     ///  which may be 2, 10, or 16.
     /// @bug Radix 10 numbers are limited to 32 bits (the others are unlimited)
-    String toString(int radix)
+    public String toString(int radix)
     {
         switch (radix)
         {
@@ -274,13 +202,108 @@ class BitVector
                 return toBinaryString();
 
             case 10:
-                return Integer.toString(intValue());
+                return toDecimalString();
 
             case 16:
                 return toHexString();
 
             default:
-                return "bad radix";
+                return "bad radix"; /// @todo Exception?
+        }
+    }
+
+    public String toString()
+    {
+        return toString(2);
+    }
+
+    private void parseBinaryValue(String string) throws NumberFormatException
+    {
+        if (fValues == null || fValues.length != string.length())
+            fValues = new byte[string.length()];
+
+        int length = string.length();
+        for (int index = 0; index < length; index++)
+        {
+            char c = string.charAt(index);
+            if (c == '0')
+                fValues[length - index - 1] = VALUE_0;
+            else if (c == '1')
+                fValues[length - index - 1] = VALUE_1;
+            else if (c == 'x' || c == 'X')
+                fValues[length - index - 1] = VALUE_X;
+            else if (c == 'z' || c == 'Z')
+                fValues[length - index - 1] = VALUE_Z;
+            else
+                throw new NumberFormatException("number format exception parsing " + string);
+        }
+    }
+
+    private void parseDecimalValue(String string) throws NumberFormatException
+    {
+        BigInteger bigint = new BigInteger(string);
+        System.out.println("bigint is " + bigint.toString());
+        byte[] bytes = bigint.toByteArray();
+        int totalBits = bytes.length * 8;
+
+        if (fValues == null || fValues.length != totalBits)
+            fValues = new byte[totalBits];
+
+        for (int i = 0; i < totalBits; i++)
+        {
+            fValues[i] = (bytes[bytes.length - (i / 8) - 1] & (1 << (i % 8))) != 0
+                ? VALUE_1: VALUE_0;
+        }
+    }
+
+    private void parseHexadecimalValue(String string) throws NumberFormatException
+    {
+        if (fValues == null || fValues.length != string.length() * 4)
+            fValues = new byte[string.length() * 4];
+
+        int length = string.length();
+        for (int index = 0; index < length; index++)
+        {
+            char c = string.charAt(length - index - 1);
+            if (c >= '0' && c <= '9')
+            {
+                int digitVal = c - '0';
+                for (int offset = 0; offset < 4; offset++)
+                {
+                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? VALUE_1
+                        : VALUE_0;
+                }
+            }
+            else if (c >= 'a' && c <= 'f')
+            {
+                int digitVal = c - 'a' + 10;
+                for (int offset = 0; offset < 4; offset++)
+                {
+                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? VALUE_1
+                        : VALUE_0;
+                }
+            }
+            else if (c >= 'A' && c <= 'F')
+            {
+                int digitVal = c - 'A' + 10;
+                for (int offset = 0; offset < 4; offset++)
+                {
+                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? VALUE_1
+                        : VALUE_0;
+                }
+            }
+            else if (c == 'X' || c == 'x')
+            {
+                for (int offset = 0; offset < 4; offset++)
+                    fValues[(index + 1) * 4 - offset - 1] = VALUE_X;
+            }
+            else if (c == 'Z' || c == 'z')
+            {
+                for (int offset = 0; offset < 4; offset++)
+                    fValues[(index + 1) * 4 - offset - 1] = VALUE_Z;
+            }
+            else
+                throw new NumberFormatException("number format exception parsing " + string);
         }
     }
 
@@ -292,22 +315,38 @@ class BitVector
         {
             switch (getBit(index))
             {
-                case BitVector.VALUE_0:
+                case VALUE_0:
                     result.append('0');
                     break;
-                case BitVector.VALUE_1:
+                case VALUE_1:
                     result.append('1');
                     break;
-                case BitVector.VALUE_X:
+                case VALUE_X:
                     result.append('x');
                     break;
-                case BitVector.VALUE_Z:
+                case VALUE_Z:
                     result.append('z');
                     break;
             }
         }
 
         return result.toString();
+    }
+
+    /// @bug will crash with empty values
+    private String toDecimalString()
+    {
+        // We add one leading byte that is always zero so this will
+        // be treated as unsigned.
+        byte[] bytes = new byte[(fValues.length + 7) / 8 + 1];
+
+        for (int i = 0; i < fValues.length; i++)
+        {
+            if (fValues[i] == VALUE_1)
+                bytes[bytes.length - (i / 8) - 1] |= (1 << (i % 8));
+        }
+
+        return (new BigInteger(bytes)).toString();
     }
 
     private char bitsToHexDigit(int offset, int count)
@@ -319,14 +358,14 @@ class BitVector
             value <<= 1;
             switch (getBit(i + offset))
             {
-                case BitVector.VALUE_0:
+                case VALUE_0:
                     break;
-                case BitVector.VALUE_1:
+                case VALUE_1:
                     value |= 1;
                     break;
-                case BitVector.VALUE_X:
+                case VALUE_X:
                     return 'X';
-                case BitVector.VALUE_Z:    // XXX bug: should only be Z if all bits are Z
+                case VALUE_Z:    // XXX bug: should only be Z if all bits are Z
                     return 'Z';
             }
         }
