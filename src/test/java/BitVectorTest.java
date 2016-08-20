@@ -39,19 +39,19 @@ public class BitVectorTest
 
     @Test public void testParseBinary()
     {
-        BitVector bv = new BitVector("11011101010010010010", 2);
+        BitVector bv = new BitVector("110111010100100100101100101001001010001001", 2);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
-        assertEquals(20, bv.getWidth());
-        assertEquals("DD492", bv.toString(16));
+        assertEquals(42, bv.getWidth());
+        assertEquals("110111010100100100101100101001001010001001", bv.toString(2));
     }
 
     @Test public void testParseDecimal()
     {
-        BitVector bv = new BitVector("34923433434371324", 10);
+        BitVector bv = new BitVector("3492343343482759676947735281634934371324", 10);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
-        assertEquals("34923433434371324", bv.toString(10));
+        assertEquals("3492343343482759676947735281634934371324", bv.toString(10));
     }
 
     @Test public void testParseX()
@@ -60,6 +60,7 @@ public class BitVectorTest
         assertEquals(11, bv.getWidth());
         assertFalse(bv.isZ());
         assertTrue(bv.isX());
+        assertEquals("xxxxxxxxxxx", bv.toString(2));
     }
 
     @Test public void testParseZ()
@@ -68,6 +69,7 @@ public class BitVectorTest
         assertEquals(8, bv.getWidth());
         assertTrue(bv.isZ());
         assertTrue(bv.isX());
+        assertEquals("zzzzzzzz", bv.toString(2));
     }
 
     @Test public void testNumberFormatException()
@@ -84,6 +86,15 @@ public class BitVectorTest
         try
         {
             BitVector bv = new BitVector("ABCDEFGH", 16);
+            fail("Did not throw exception");
+        }
+        catch (NumberFormatException exc)
+        {
+        }
+
+        try
+        {
+            BitVector bv = new BitVector("1234a", 10);
             fail("Did not throw exception");
         }
         catch (NumberFormatException exc)
@@ -143,14 +154,5 @@ public class BitVectorTest
         assertEquals(1, bv3.compare(bv2));
         assertEquals(0, bv3.compare(bv3));
         assertEquals(-1, bv3.compare(bv4));
-    }
-
-    @Test public void testToString()
-    {
-        // Length is not multiple of four.
-        BitVector vec = new BitVector("1010110101", 2);
-        assertEquals("1010110101", vec.toString(2));
-        assertEquals("693", vec.toString(10));
-        assertEquals("2B5", vec.toString(16));
     }
 }

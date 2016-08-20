@@ -242,7 +242,6 @@ class BitVector
     private void parseDecimalValue(String string) throws NumberFormatException
     {
         BigInteger bigint = new BigInteger(string);
-        System.out.println("bigint is " + bigint.toString());
         byte[] bytes = bigint.toByteArray();
         int totalBits = bytes.length * 8;
 
