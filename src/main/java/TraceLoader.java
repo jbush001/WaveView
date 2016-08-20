@@ -25,14 +25,14 @@ interface TraceLoader
 {
     /// @todo Some kind of file detection APIs (register by extension, sniff, etc)
 
-    class TraceLoaderException extends Exception
+    class LoadException extends Exception
     {
-        TraceLoaderException(String description)
+        LoadException(String description)
         {
             super(description);
         }
     }
 
-    public void load(InputStream is, TraceBuilder builder) throws TraceLoaderException, IOException;
+    public void load(InputStream is, TraceBuilder builder) throws LoadException, IOException;
 }
 

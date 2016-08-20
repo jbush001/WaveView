@@ -17,7 +17,6 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-/// @todo test all bases (hex, decimal, binary) for literals
 public class QueryTest
 {
     TraceDataModel makeTraceDataModel()
@@ -337,7 +336,7 @@ public class QueryTest
             assertEquals(15, query.getNextMatch(5));
             assertEquals(25, query.getNextMatch(15));
 
-            // XXX get next match will do weird things with or...
+            /// @bug get next match will do weird things with or...
         }
         catch (Query.ParseException exc)
         {

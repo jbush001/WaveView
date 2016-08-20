@@ -20,10 +20,35 @@
 //
 interface TraceBuilder
 {
+    /// Adds another module to the fully qualified path of any nets
+    /// that are subsequently added via newNet.
     void enterModule(String name);
+
+    /// Pops up to the previous module pushed by enterModule.
     void exitModule();
+
+    /// Create a new net
+    /// @param shortName Name of the signal. It's called 'short' to distinguish
+    ///   it from a dotted name that includes the full hiearchy of containing modules.
+    /// @param cloneId If two nets (with different names) are connected together,
+    ///   the should share the same transition data. The clone ID will contain the
+    ///   ID that was returned from newNet when the original signal was added
+    /// @param width Number of bits in this signal.
+    /// @returns a unique integer identifier for the newly created net
     int newNet(String shortName, int cloneId, int width);
-    int getNetWidth(int netId);     /// @bug This is a hack.  Clean up.
-    void appendTransition(int id, long timestamp, BitVector values);
+
+    /// Return the width of a net that was previously added by newNet
+    /// @bug This is a hack.  Clean up.
+    int getNetWidth(int netId);
+
+    /// Add a new transition
+    /// @param netId Identifier of the net for which the transition takes place. This
+    ///    is the value that was returned by newNet.
+    /// @param timestamp timestamp of the transition, in nanoseconds from start.
+    /// @param values New values the signal will take after the transition.
+    void appendTransition(int netId, long timestamp, BitVector values);
+
+    /// Called when all nets and transitions have been added. No other methods
+    /// in TraceBuilder will be called after this.
     void loadFinished();
 }

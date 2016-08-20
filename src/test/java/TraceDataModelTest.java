@@ -89,4 +89,33 @@ public class TraceDataModelTest
         assertEquals(10, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("100", 2)));
     }
+
+    @Test public void testAliasTrace()
+    {
+        TraceDataModel model = new TraceDataModel();
+        TraceBuilder builder = model.startBuilding();
+
+        builder.enterModule("mod1");
+        int net1 = builder.newNet("net1", -1, 1);
+        int net2 = builder.newNet("net2", net1, 1);
+        builder.exitModule();
+        builder.appendTransition(net1, 17, new BitVector("1", 2));
+        builder.loadFinished();
+
+        NetTreeModel netTree = model.getNetTree();
+        Object root = netTree.getRoot();
+        assertEquals(2, netTree.getChildCount(root));
+        Object kid0 = netTree.getChild(root, 0);
+        Object kid1 = netTree.getChild(root, 1);
+
+        assertEquals(net1, model.getNetFromTreeObject(kid0));
+        assertEquals(net2, model.getNetFromTreeObject(kid1));
+
+        TransitionVector.Iterator ati  = model.findTransition(net1, 0);
+        assertEquals(17, ati.next().getTimestamp());
+
+        // Same transition should be in this one (they share a TransitionVector)
+        ati  = model.findTransition(net2, 0);
+        assertEquals(17, ati.next().getTimestamp());
+    }
 }

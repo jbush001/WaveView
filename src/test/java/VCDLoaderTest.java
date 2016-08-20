@@ -101,19 +101,19 @@ public class VCDLoaderTest
             assertEquals(event.fType, EXPECT_FINISHED);
         }
 
-        void expectEnter(String name)
+        void expectEnterModule(String name)
         {
             Event event = new Event(EXPECT_ENTER);
             event.fName = name;
             fEventList.add(event);
         }
 
-        void expectExit()
+        void expectExitModule()
         {
             fEventList.add(new Event(EXPECT_EXIT));
         }
 
-        void expectNet(String name, int cloneId, int width)
+        void expectNewNet(String name, int cloneId, int width)
         {
             Event event = new Event(EXPECT_NET);
             event.fName = name;
@@ -122,7 +122,7 @@ public class VCDLoaderTest
             fEventList.add(event);
         }
 
-        void expectTransition(int id, long timestamp, String bitString)
+        void expectAppendTransition(int id, long timestamp, String bitString)
         {
             Event event = new Event(EXPECT_TRANSITION);
             event.fId = id;
@@ -131,7 +131,7 @@ public class VCDLoaderTest
             fEventList.add(event);
         }
 
-        void expectFinished()
+        void expectLoadFinished()
         {
             fEventList.add(new Event(EXPECT_FINISHED));
         }
@@ -180,13 +180,13 @@ public class VCDLoaderTest
             fVCDContents.append("$scope module ");
             fVCDContents.append(name);
             fVCDContents.append(" $end\n");
-            fTraceBuilder.expectEnter(name);
+            fTraceBuilder.expectEnterModule(name);
         }
 
         void exitModule()
         {
             fVCDContents.append("$upscope $end\n");
-            fTraceBuilder.expectExit();
+            fTraceBuilder.expectExitModule();
         }
 
         int defineNet(String name, int cloneId, int width)
@@ -208,7 +208,7 @@ public class VCDLoaderTest
 
             fVCDContents.append(" $end\n");
 
-            fTraceBuilder.expectNet(name, cloneId, width);
+            fTraceBuilder.expectNewNet(name, cloneId, width);
             return index;
         }
 
@@ -239,12 +239,12 @@ public class VCDLoaderTest
             fVCDContents.append(getIdForIndex(netId));
             fVCDContents.append('\n');
 
-            fTraceBuilder.expectTransition(netId, timestamp * fTimestampMultiplier, bitString);
+            fTraceBuilder.expectAppendTransition(netId, timestamp * fTimestampMultiplier, bitString);
         }
 
         void finish()
         {
-            fTraceBuilder.expectFinished();
+            fTraceBuilder.expectLoadFinished();
             System.out.println("output is\n" + fVCDContents.toString());
         }
 
@@ -362,10 +362,14 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             assertEquals("Line 4: unknown timescale value 1qs",
                 exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
         }
     }
 
@@ -385,9 +389,13 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             assertEquals("Line 6: Unknown net id $", exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
         }
     }
 
@@ -407,10 +415,14 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             assertEquals("Line 6: Invalid logic value",
                 exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
         }
     }
 
@@ -426,10 +438,14 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             assertEquals("Line 2: parse error, expected $end got $var",
                 exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
         }
     }
 
@@ -447,10 +463,14 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             assertEquals("Line 4: parse error, expected $end got $enddefinitions",
                 exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
         }
     }
 
@@ -468,11 +488,15 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             exc.printStackTrace();
             assertEquals("Line 3: parse error, expected $end got $upscope",
                 exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
         }
     }
 
@@ -489,10 +513,14 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             assertEquals("Line 3: parse error, expected $end got $scope",
                 exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
         }
     }
 
@@ -507,11 +535,47 @@ public class VCDLoaderTest
                 new DummyTraceBuilder());
             fail("Didn't throw exception");
         }
-        catch (Exception exc)
+        catch (TraceLoader.LoadException exc)
         {
             exc.printStackTrace();
             assertEquals("Line 1: unexpected end of file",
                 exc.getMessage());
+        }
+        catch (IOException exc)
+        {
+            fail("IOException " + exc);
+        }
+    }
+
+    @Test public void testTraceAlias()
+    {
+        String fileContents = "$scope module mod1 $end\n" +
+            "$var wire 1 # foo $end\n" +
+            "$var wire 1 ! source $end\n" +
+            "$var wire 1 ! alias $end\n" +  // This one has same ID as source
+            "$upscope $end\n" +
+            "$enddefinitions $end\n" +
+            "#0\n" +
+            "1!\n";
+
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectEnterModule("mod1");
+        builder.expectNewNet("foo", -1, 1);
+        builder.expectNewNet("source", -1, 1);
+        builder.expectNewNet("alias", 1, 1);
+        builder.expectExitModule();
+        builder.expectAppendTransition(1, 0, "1");
+        builder.expectLoadFinished();
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
+                builder);
+        }
+        catch (Exception exc)
+        {
+            fail("Threw exception " + exc);
         }
     }
 }

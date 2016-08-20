@@ -24,17 +24,19 @@ public class BitVectorTest
         assertEquals(0, (new BitVector("0", 16)).intValue());
         assertEquals(1, (new BitVector("1", 16)).intValue());
         assertEquals(2, (new BitVector("2", 16)).intValue());
+        assertEquals(12, (new BitVector("c", 16)).intValue());
+        assertEquals(12, (new BitVector("C", 16)).intValue());
         assertEquals(16, (new BitVector("10", 16)).intValue());
         assertEquals(17, (new BitVector("11", 16)).intValue());
-        assertEquals(256, (new BitVector("100", 16)).intValue());
+        assertEquals(432, (new BitVector("1B0", 16)).intValue());
         assertEquals(512, (new BitVector("200", 16)).intValue());
         assertEquals(513, (new BitVector("201", 16)).intValue());
 
-        BitVector bv = new BitVector("1234ABCD", 16);
+        BitVector bv = new BitVector("123456789abcdefABCDEF", 16);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
-        assertEquals(32, bv.getWidth());
-        assertEquals("1234ABCD", bv.toString(16));
+        assertEquals(84, bv.getWidth());
+        assertEquals("123456789ABCDEFABCDEF", bv.toString(16));
     }
 
     @Test public void testParseBinary()
@@ -100,6 +102,24 @@ public class BitVectorTest
         catch (NumberFormatException exc)
         {
         }
+
+        try
+        {
+            BitVector bv = new BitVector("z", 10);
+            fail("Did not throw exception");
+        }
+        catch (NumberFormatException exc)
+        {
+        }
+
+        try
+        {
+            BitVector bv = new BitVector("x", 10);
+            fail("Did not throw exception");
+        }
+        catch (NumberFormatException exc)
+        {
+        }
     }
 
     @Test public void testSetBit()
@@ -108,14 +128,12 @@ public class BitVectorTest
         bv.setBit(7, BitVector.VALUE_1);
         bv.setBit(6, BitVector.VALUE_0);
         bv.setBit(5, BitVector.VALUE_1);
-        bv.setBit(4, BitVector.VALUE_1);
+        bv.setBit(4, BitVector.VALUE_Z);
         bv.setBit(3, BitVector.VALUE_0);
         bv.setBit(2, BitVector.VALUE_1);
-        bv.setBit(1, BitVector.VALUE_0);
+        bv.setBit(1, BitVector.VALUE_X);
         bv.setBit(0, BitVector.VALUE_1);
-        assertFalse(bv.isZ());
-        assertFalse(bv.isX());
-        assertEquals(0xb5, bv.intValue());
+        assertEquals("101z01x1", bv.toString(2));
     }
 
     @Test public void testGetBit()
