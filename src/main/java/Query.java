@@ -506,12 +506,10 @@ public class Query
 
         public boolean evaluate(long timestamp, QueryHint outHint)
         {
-            System.out.println("ComparisonExpressionNode.evaluate " + timestamp);
-            AbstractTransitionIterator i = fTraceDataModel.findTransition(fNetId, timestamp);
+            TransitionVector.Iterator i = fTraceDataModel.findTransition(fNetId, timestamp);
             Transition t = i.next();
             outHint.forwardTimestamp = i.getNextTimestamp();
             outHint.backwardTimestamp = i.getPrevTimestamp();
-            System.out.println("forward " + outHint.forwardTimestamp + " backward " + outHint.backwardTimestamp);
 
             return doCompare(t, fExpected);
         }

@@ -34,7 +34,7 @@ class TransitionVector
     /// @returns Iterator at transition. If there isn't a transition at this transition,
     ///   returns the transition before it. If this is before the first transition, returns
     ///   the first transition.
-    AbstractTransitionIterator findTransition(long timestamp)
+    Iterator findTransition(long timestamp)
     {
         // Binary search
         int low = 0;
@@ -50,7 +50,7 @@ class TransitionVector
                 low = mid + 1;
         }
 
-        return new ConcreteTransitionIterator(low == 0 ? 0 : low - 1);
+        return new Iterator(low == 0 ? 0 : low - 1);
     }
 
     long getMaxTimestamp()
@@ -66,9 +66,11 @@ class TransitionVector
         return fWidth;
     }
 
-    private class ConcreteTransitionIterator implements AbstractTransitionIterator
+    /// This augments the normal iterator with methods to obtain
+    /// the timestamp of the next and previous events.
+    public class Iterator implements java.util.Iterator<Transition>
     {
-        ConcreteTransitionIterator(int index)
+        Iterator(int index)
         {
             assert index >= 0;
             fNextIndex = index;

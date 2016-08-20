@@ -83,7 +83,7 @@ public class TransitionVectorTest
         // Note: previously there was a bug where calling current() would
         // iterate to the next value. We call current here multiple times
         // to confirm that works correctly now.
-        AbstractTransitionIterator ti = vec.findTransition(99);
+        TransitionVector.Iterator ti = vec.findTransition(99);
         assertTrue(ti.hasNext());
         Transition t = ti.next();
         assertEquals(110, ti.getNextTimestamp());
