@@ -23,10 +23,8 @@ import javax.swing.event.*;
 import java.awt.datatransfer.*;
 import javax.swing.text.*;
 
-class PreferenceWindow extends JFrame
-{
-    public PreferenceWindow()
-    {
+class PreferenceWindow extends JFrame {
+    public PreferenceWindow() {
         super("Preferences");
 
         setPreferredSize(new Dimension(500, 400));
@@ -63,13 +61,11 @@ class PreferenceWindow extends JFrame
         pack();
     }
 
-    protected void cancel()
-    {
+    protected void cancel() {
         hide();
     }
 
-    protected void ok()
-    {
+    protected void ok() {
         for (int i = 0; i < fTabbedPane.getTabCount(); i++)
             ((PreferencePane) fTabbedPane.getComponentAt(i)).saveSettings();
 

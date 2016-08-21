@@ -27,78 +27,61 @@ import javax.swing.text.*;
 /// Displays searchable lists of all nets in a design. Can be dragged onto
 /// the visible net view to see them.
 ///
-public class NetSearchView extends JPanel implements ActionListener
-{
-    class NetTreeTransferHandler extends TransferHandler
-    {
-        public int getSourceActions(JComponent component)
-        {
+public class NetSearchView extends JPanel implements ActionListener {
+    class NetTreeTransferHandler extends TransferHandler {
+        public int getSourceActions(JComponent component) {
             return MOVE;
         }
 
-        public void buildNetListRecursive(Object node, StringBuffer indexList)
-        {
-             if (fTree.getModel().isLeaf(node))
-             {
-                 indexList.append(fTraceDataModel.getFullNetName(fTraceDataModel.getNetFromTreeObject(node)));
-                 indexList.append('\n');
-                 return;
-             }
+        public void buildNetListRecursive(Object node, StringBuffer indexList) {
+            if (fTree.getModel().isLeaf(node)) {
+                indexList.append(fTraceDataModel.getFullNetName(fTraceDataModel.getNetFromTreeObject(node)));
+                indexList.append('\n');
+                return;
+            }
 
-             for (int i = 0; i < fTree.getModel().getChildCount(node); i++)
-                 buildNetListRecursive(fTree.getModel().getChild(node, i), indexList);
+            for (int i = 0; i < fTree.getModel().getChildCount(node); i++)
+                buildNetListRecursive(fTree.getModel().getChild(node, i), indexList);
         }
 
-        public Transferable createTransferable(JComponent component)
-        {
+        public Transferable createTransferable(JComponent component) {
             StringBuffer indexList = new StringBuffer();
-            for (TreePath selectedPath : fTree.getSelectionPaths())
-            {
+            for (TreePath selectedPath : fTree.getSelectionPaths()) {
                 buildNetListRecursive(selectedPath.getLastPathComponent(),
-                    indexList);
+                                      indexList);
             }
 
             return new StringSelection(indexList.toString());
         }
 
-        public void exportDone(JComponent component, Transferable transfer, int action)
-        {
+        public void exportDone(JComponent component, Transferable transfer, int action) {
             // XXX do nothing
         }
 
-        public boolean canImport(TransferHandler.TransferSupport support)
-        {
+        public boolean canImport(TransferHandler.TransferSupport support) {
             return false;
         }
 
-        public boolean importData(TransferHandler.TransferSupport support)
-        {
+        public boolean importData(TransferHandler.TransferSupport support) {
             return false;
         }
     }
 
-    class ListModelAdapter implements ListModel, TraceViewModel.Listener, DocumentListener
-    {
-        public ListModelAdapter(TraceViewModel model)
-        {
+    class ListModelAdapter implements ListModel, TraceViewModel.Listener, DocumentListener {
+        public ListModelAdapter(TraceViewModel model) {
             fTraceViewModel = model;
             model.addListener(this);
             setPattern("");
         }
 
-        public void setPattern(String pattern)
-        {
-            if (pattern.equals(""))
-            {
+        public void setPattern(String pattern) {
+            if (pattern.equals("")) {
                 fMatches.clear();
                 for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++)
                     fMatches.add(fTraceDataModel.getFullNetName(index));
-            }
-            else
-            {
+            } else {
                 fMatches.clear();
-                for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++)
-                {
+                for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++) {
                     String name = fTraceDataModel.getFullNetName(index);
                     if (name.indexOf(pattern) != -1)
                         fMatches.add(name);
@@ -109,72 +92,56 @@ public class NetSearchView extends JPanel implements ActionListener
                 fListener.contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, fMatches.size()));
         }
 
-        private void filter(Document doc)
-        {
-            try
-            {
+        private void filter(Document doc) {
+            try {
                 setPattern(doc.getText(0, doc.getEndPosition().getOffset()).trim());
-            }
-            catch (Exception exc)
-            {
+            } catch (Exception exc) {
                 System.out.println("caught exception " + exc);
             }
         }
 
-        public void insertUpdate(DocumentEvent event)
-        {
+        public void insertUpdate(DocumentEvent event) {
             filter(event.getDocument());
         }
 
-        public void removeUpdate(DocumentEvent event)
-        {
+        public void removeUpdate(DocumentEvent event) {
             filter(event.getDocument());
         }
 
-        public void changedUpdate(DocumentEvent ev)
-        {
+        public void changedUpdate(DocumentEvent ev) {
         }
 
-        public void addListDataListener(ListDataListener l)
-        {
+        public void addListDataListener(ListDataListener l) {
             fListener = l;
         }
 
-        public Object getElementAt(int index)
-        {
+        public Object getElementAt(int index) {
             return fMatches.elementAt(index);
         }
 
-        public int getSize()
-        {
+        public int getSize() {
             return fMatches.size();
         }
 
-        public void removeListDataListener(ListDataListener l)
-        {
+        public void removeListDataListener(ListDataListener l) {
             fListener = null;
         }
 
-        public void cursorChanged(long oldTimestamp, long newTimestamp)
-        {
+        public void cursorChanged(long oldTimestamp, long newTimestamp) {
         }
 
-        public void netsAdded(int firstIndex, int lastIndex)
-        {
+        public void netsAdded(int firstIndex, int lastIndex) {
             fListener.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, firstIndex, lastIndex));
         }
 
-        public void netsRemoved(int firstIndex, int lastIndex)
-        {
+        public void netsRemoved(int firstIndex, int lastIndex) {
             fListener.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, firstIndex, lastIndex));
         }
 
-        public void markerChanged(long timestamp)
-        {
+        public void markerChanged(long timestamp) {
         }
 
-        public void scaleChanged(double newScale)
-        {
+        public void scaleChanged(double newScale) {
         }
 
         private ListDataListener fListener;
@@ -182,8 +149,7 @@ public class NetSearchView extends JPanel implements ActionListener
         private Vector<String> fMatches = new Vector<String>();
     }
 
-    public NetSearchView(TraceViewModel viewModel, TraceDataModel dataModel)
-    {
+    public NetSearchView(TraceViewModel viewModel, TraceDataModel dataModel) {
         super(new BorderLayout());
         setPreferredSize(new Dimension(275, 500));
 
@@ -218,8 +184,7 @@ public class NetSearchView extends JPanel implements ActionListener
         listScroller.add(new JTextArea());
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
     }
 
     private JTree fTree;

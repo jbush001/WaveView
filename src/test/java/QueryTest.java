@@ -17,10 +17,8 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-public class QueryTest
-{
-    TraceDataModel makeTraceDataModel()
-    {
+public class QueryTest {
+    TraceDataModel makeTraceDataModel() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -41,10 +39,8 @@ public class QueryTest
         return traceDataModel;
     }
 
-    @Test public void testSimpleQuery()
-    {
-        try
-        {
+    @Test public void testSimpleQuery() {
+        try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = 1");
             assertEquals(10, query.getNextMatch(4));
             assertEquals(10, query.getNextMatch(9));
@@ -59,15 +55,12 @@ public class QueryTest
             assertEquals(-1, query.getPreviousMatch(10));
             assertEquals(-1, query.getPreviousMatch(5));
             assertEquals(-1, query.getPreviousMatch(4));
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("caught query parse exception " + exc);
         }
     }
 
-    @Test public void testLiteralBases()
-    {
+    @Test public void testLiteralBases() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -77,8 +70,7 @@ public class QueryTest
         builder.appendTransition(id1, 23, new BitVector("10", 10));
         builder.loadFinished();
 
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.value = 10");
             assertEquals(23, query.getNextMatch(0));
 
@@ -90,9 +82,7 @@ public class QueryTest
 
             query = new Query(traceDataModel, "mod1.value = 'b1010");
             assertEquals(23, query.getNextMatch(0));
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("Threw query parse exception");
         }
     }
@@ -100,8 +90,7 @@ public class QueryTest
     /// @bug This doesn't match correctly yet: Xes are ignored for
     /// matching.
     /// Verify it at least parses the query.
-    @Test public void testMatchXZ()
-    {
+    @Test public void testMatchXZ() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -113,8 +102,7 @@ public class QueryTest
 
         // Try upper and lower case versions of X and Z for hex and decimal
         // bases
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.value = 'bxxxx");
             query = new Query(traceDataModel, "mod1.value = 'bXXXX");
             query = new Query(traceDataModel, "mod1.value = 'hx");
@@ -123,139 +111,97 @@ public class QueryTest
             query = new Query(traceDataModel, "mod1.value = 'bZZZZ");
             query = new Query(traceDataModel, "mod1.value = 'hz");
             query = new Query(traceDataModel, "mod1.value = 'hZ");
-        }
-        catch (Exception exc)
-        {
+        } catch (Exception exc) {
             fail("Threw query parse exception");
         }
 
         // X and Z with decimal values should fail
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.value = 'dx");
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
             // Should throw this
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("threw query parse exception");
         }
 
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.value = 'dX");
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
             // Should throw this
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("threw query parse exception");
         }
 
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.value = 'dz");
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
             // Should throw this
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("threw query parse exception");
         }
 
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.value = 'dZ");
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
             // Should throw this
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("threw query parse exception");
         }
     }
 
-    @Test public void testUnknownNet()
-    {
-        try
-        {
+    @Test public void testUnknownNet() {
+        try {
             Query query = new Query(makeTraceDataModel(), "mod1.stall_pipeline = 2");
             fail("Did not throw exception");
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             assertEquals("unknown net \"mod1.stall_pipeline\"", exc.toString());
             assertEquals(0, exc.getStartOffset());
             assertEquals(18, exc.getEndOffset());
         }
     }
 
-    @Test public void testStrayIdentifier()
-    {
-        try
-        {
+    @Test public void testStrayIdentifier() {
+        try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = 'h2 foo");
             fail("Did not throw exception");
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             assertEquals("unexpected value", exc.toString());
             assertEquals(15, exc.getStartOffset());
             assertEquals(17, exc.getEndOffset());
         }
     }
 
-    @Test public void testMissingCompareValue()
-    {
-        try
-        {
+    @Test public void testMissingCompareValue() {
+        try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = ");
             fail("Did not throw exception");
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             assertEquals("unexpected end of string", exc.toString());
             assertEquals(10, exc.getStartOffset());
             assertEquals(10, exc.getEndOffset());
         }
     }
 
-    @Test public void testMissingLiteral()
-    {
-        try
-        {
+    @Test public void testMissingLiteral() {
+        try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = mod2");
             fail("Did not throw exception");
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             assertEquals("unexpected value", exc.toString());
             assertEquals(11, exc.getStartOffset());
             assertEquals(14, exc.getEndOffset());
         }
     }
 
-    @Test public void testUnknownLiteralType()
-    {
-        try
-        {
+    @Test public void testUnknownLiteralType() {
+        try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = 'q3z");
             fail("Did not throw exception");
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             assertEquals("unknown type q", exc.toString());
             assertEquals(11, exc.getStartOffset());
             assertEquals(11, exc.getEndOffset());
@@ -263,8 +209,7 @@ public class QueryTest
 
     }
 
-    @Test public void testAnd()
-    {
+    @Test public void testAnd() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -288,8 +233,7 @@ public class QueryTest
         builder.appendTransition(id2, 30, new BitVector("0", 2));
         builder.loadFinished();
 
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.a = 1 & mod1.b = 1");
             assertEquals(10, query.getNextMatch(0));
             assertEquals(25, query.getNextMatch(10));
@@ -298,15 +242,12 @@ public class QueryTest
             // region where it changes (30 and 15)
             assertEquals(25, query.getPreviousMatch(40));
             assertEquals(10, query.getPreviousMatch(25));
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("Threw query parse exception");
         }
     }
 
-    @Test public void testOr()
-    {
+    @Test public void testOr() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -328,23 +269,19 @@ public class QueryTest
         builder.appendTransition(id2, 25, new BitVector("1", 2));
         builder.loadFinished();
 
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.a = 1 | mod1.b = 1");
             assertEquals(5, query.getNextMatch(0));
             assertEquals(15, query.getNextMatch(5));
             assertEquals(25, query.getNextMatch(15));
 
             /// @bug get next match will do weird things with or...
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("Threw query parse exception");
         }
     }
 
-    @Test public void testComparisons()
-    {
+    @Test public void testComparisons() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -362,16 +299,13 @@ public class QueryTest
         builder.appendTransition(id1, 9, new BitVector("9", 16));
         builder.loadFinished();
 
-        try
-        {
+        try {
             Query query = new Query(traceDataModel, "mod1.value > 'h5");
             assertEquals(6, query.getNextMatch(0));
 
             query = new Query(traceDataModel, "mod1.value < 'h5");
             assertEquals(4, query.getPreviousMatch(10));
-        }
-        catch (Query.ParseException exc)
-        {
+        } catch (Query.ParseException exc) {
             fail("Threw query parse exception");
         }
     }

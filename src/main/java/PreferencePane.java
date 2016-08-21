@@ -21,10 +21,8 @@ import java.util.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
-abstract class PreferencePane extends JPanel
-{
-    public PreferencePane(LayoutManager manager)
-    {
+abstract class PreferencePane extends JPanel {
+    public PreferencePane(LayoutManager manager) {
         super(manager);
     }
 

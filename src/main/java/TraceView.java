@@ -25,10 +25,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.io.File;
 
-public class TraceView extends JPanel implements ActionListener
-{
-    public TraceView(TraceViewModel viewModel, TraceDataModel dataModel, WaveApp waveApp)
-    {
+public class TraceView extends JPanel implements ActionListener {
+    public TraceView(TraceViewModel viewModel, TraceDataModel dataModel, WaveApp waveApp) {
         super(new BorderLayout());
 
         fWaveApp = waveApp;
@@ -45,8 +43,7 @@ public class TraceView extends JPanel implements ActionListener
         fScrollPane.setColumnHeaderView(fTimescaleView);
         fScrollPane.setViewportBorder(BorderFactory.createLineBorder(Color.black));
 
-        if (false)
-        {
+        if (false) {
             JPanel corner = new JPanel();
             corner.setBorder(BorderFactory.createLineBorder(Color.black));
             corner.setBackground(Color.white);
@@ -54,8 +51,7 @@ public class TraceView extends JPanel implements ActionListener
         }
 
         fScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            public void adjustmentValueChanged(AdjustmentEvent ae)
-            {
+            public void adjustmentValueChanged(AdjustmentEvent ae) {
                 // We have to repaint when scrolling because values on partially visible
                 // nets will be centered.
                 fWaveformView.repaint();
@@ -99,26 +95,19 @@ public class TraceView extends JPanel implements ActionListener
         fTraceViewModel.setHorizontalScale(10.0);
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         int[] indices = fNetNameView.getSelectedIndices();
 
-        if (e.getActionCommand().equals("Remove Net"))
-        {
+        if (e.getActionCommand().equals("Remove Net")) {
             for (int i = indices.length - 1; i >= 0; i--)
                 fTraceViewModel.removeNet(indices[i]);
 
             fNetNameView.clearSelection();
-        }
-        else
-        {
-            if (e.getActionCommand().equals("Enum"))
-            {
-                if (indices.length > 0)
-                {
+        } else {
+            if (e.getActionCommand().equals("Enum")) {
+                if (indices.length > 0) {
                     ValueFormatter formatter = fTraceViewModel.getValueFormatter(indices[0]);
-                    if (!(formatter instanceof IdentifierValueFormatter))
-                    {
+                    if (!(formatter instanceof IdentifierValueFormatter)) {
                         formatter = new IdentifierValueFormatter();
                         fTraceViewModel.setValueFormatter(indices[0], formatter);
                     }
@@ -130,18 +119,14 @@ public class TraceView extends JPanel implements ActionListener
                     frame.pack();
                     frame.setVisible(true);
                 }
-            }
-            else if (e.getActionCommand().equals("Custom Formatter..."))
-            {
+            } else if (e.getActionCommand().equals("Custom Formatter...")) {
                 JFileChooser chooser = new JFileChooser();
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 chooser.setMultiSelectionEnabled(false);
                 int returnValue = chooser.showOpenDialog(this);
 
-                if (returnValue == JFileChooser.APPROVE_OPTION)
-                {
-                    try
-                    {
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    try {
 //                         String jarFileName = chooser.getSelectedFile().getCanonicalPath();
 //                         URL[] urls = { (new File(jarFileName)).toURL() };
 //                         URLClassLoader loader = new URLClassLoader(urls);
@@ -153,15 +138,11 @@ public class TraceView extends JPanel implements ActionListener
 //                             net.setCustomValueFormatterPath(jarFileName);
 //                             net.setValueFormatter(formatter);
 //                         }
-                    }
-                    catch (Exception exc)
-                    {
+                    } catch (Exception exc) {
                         JOptionPane.showMessageDialog(this, "Error opening configuration file");
                     }
                 }
-            }
-            else
-            {
+            } else {
                 ValueFormatter formatter = null;
                 if (e.getActionCommand().equals("Hex"))
                     formatter = new HexadecimalValueFormatter();
@@ -172,10 +153,9 @@ public class TraceView extends JPanel implements ActionListener
                 else if (e.getActionCommand().equals("ASCII"))
                     formatter = new ASCIIValueFormatter();
 
-                if (formatter != null)
-                {
-                     for (int i = 0; i < indices.length; i++)
-                         fTraceViewModel.setValueFormatter(indices[i], formatter);
+                if (formatter != null) {
+                    for (int i = 0; i < indices.length; i++)
+                        fTraceViewModel.setValueFormatter(indices[i], formatter);
                 }
             }
         }
@@ -184,18 +164,15 @@ public class TraceView extends JPanel implements ActionListener
         fNetNameView.repaint();
     }
 
-    public void zoomIn()
-    {
+    public void zoomIn() {
         setScaleKeepCentered(fTraceViewModel.getHorizontalScale() / 1.25);
     }
 
-    public void zoomOut()
-    {
+    public void zoomOut() {
         setScaleKeepCentered(fTraceViewModel.getHorizontalScale() * 1.25);
     }
 
-    public void setScaleKeepCentered(double newScale)
-    {
+    public void setScaleKeepCentered(double newScale) {
         Rectangle oldVisibleRect = fWaveformView.getVisibleRect();
         long centerTimestamp = (long)((oldVisibleRect.x + oldVisibleRect.width / 2) * fTraceViewModel.getHorizontalScale());
 
@@ -209,8 +186,7 @@ public class TraceView extends JPanel implements ActionListener
         fWaveformView.scrollRectToVisible(newVisibleRect);
     }
 
-    public void zoomToSelection()
-    {
+    public void zoomToSelection() {
         // Determine what the new size of the selection window should be.
         long selectionStartTimestamp = fTraceViewModel.getSelectionStart();
         long cursorPositionTimestamp = fTraceViewModel.getCursorPosition();
@@ -235,8 +211,7 @@ public class TraceView extends JPanel implements ActionListener
         fWaveformView.scrollRectToVisible(newRect);
     }
 
-    public int[] getSelectedNets()
-    {
+    public int[] getSelectedNets() {
         return fNetNameView.getSelectedIndices();
     }
 

@@ -20,43 +20,34 @@ import java.util.*;
 /// Vector that allows sorted inserts and binary search lookup.
 ///
 
-class SortedVector<T> extends Vector<T>
-{
-    public interface Keyed
-    {
+class SortedVector<T> extends Vector<T> {
+    public interface Keyed {
         public long getKey();
     }
 
-    public SortedVector()
-    {
+    public SortedVector() {
     }
 
-    public SortedVector(int initialCapacity)
-    {
+    public SortedVector(int initialCapacity) {
         super(initialCapacity);
     }
 
-    public SortedVector(int initialCapacity, int capacityIncrement)
-    {
+    public SortedVector(int initialCapacity, int capacityIncrement) {
         super(initialCapacity, capacityIncrement);
     }
 
-    void addSorted(T value)
-    {
+    void addSorted(T value) {
         long key = ((Keyed) value).getKey();
-        for (int i = 0; ; i++)
-        {
+        for (int i = 0; ; i++) {
             if (i == size()
-                || ((Keyed) elementAt(i)).getKey() > key)
-            {
+                    || ((Keyed) elementAt(i)).getKey() > key) {
                 insertElementAt(value, i);
                 break;
             }
         }
     }
 
-    Iterator<T> find(long key)
-    {
+    Iterator<T> find(long key) {
         return new SortedVectorIterator(this, lookupValue(key));
     }
 
@@ -65,14 +56,12 @@ class SortedVector<T> extends Vector<T>
     ///   element isn't matched exactly, return the element before this one.
     ///   If the key is before the first element, return 0.
     /// @todo better name like getIndexForKey?
-    int lookupValue(long key)
-    {
+    int lookupValue(long key) {
         // Binary search
         int low = 0;
         int high = size();
 
-        while (low < high)
-        {
+        while (low < high) {
             int mid = (low + high) / 2;
             long elemKey = ((Keyed) elementAt(mid)).getKey();
             if (key == elemKey)
@@ -89,28 +78,23 @@ class SortedVector<T> extends Vector<T>
         return 0;    // Before the first entry
     }
 
-    private class SortedVectorIterator<T> implements Iterator<T>
-    {
-        public SortedVectorIterator(SortedVector<T> vector, int index)
-        {
+    private class SortedVectorIterator<T> implements Iterator<T> {
+        public SortedVectorIterator(SortedVector<T> vector, int index) {
             fVector = vector;
             fIndex = index;
         }
 
-        public boolean hasNext()
-        {
+        public boolean hasNext() {
             return fIndex < fVector.size();
         }
 
-        public T next()
-        {
+        public T next() {
             T val = fVector.elementAt(fIndex);
             fIndex++;
             return val;
         }
 
-        public void remove()
-        {
+        public void remove() {
         }
 
         SortedVector<T> fVector;

@@ -26,10 +26,8 @@ import java.net.*;
 /// (e.g. Cursor position, scale, visible nets, etc.)
 ///
 
-public class TraceViewModel
-{
-    interface Listener
-    {
+public class TraceViewModel {
+    interface Listener {
         public void cursorChanged(long oldTimestamp, long newTimestamp);
         public void netsAdded(int firstIndex, int lastIndex);
         public void netsRemoved(int firstIndex, int lastIndex);
@@ -39,12 +37,10 @@ public class TraceViewModel
 
     private static final int kMinMinorTickSize = 5;
 
-    TraceViewModel()
-    {
+    TraceViewModel() {
     }
 
-    void clear()
-    {
+    void clear() {
         int oldSize = fVisibleNets.size();
 
         fVisibleNets.clear();
@@ -54,69 +50,58 @@ public class TraceViewModel
             listener.netsRemoved(0, oldSize);
     }
 
-    public void addListener(Listener listener)
-    {
+    public void addListener(Listener listener) {
         fTraceListeners.add(listener);
     }
 
     // @param scale Nanoseconds per pixel
-    public void setHorizontalScale(double scale)
-    {
+    public void setHorizontalScale(double scale) {
         fHorizontalScale = scale;
         fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
-            scale * kMinMinorTickSize)));
+                                                scale * kMinMinorTickSize)));
 
         for (Listener listener : fTraceListeners)
             listener.scaleChanged(scale);
     }
 
     // @returns Nanoseconds per pixel
-    public double getHorizontalScale()
-    {
+    public double getHorizontalScale() {
         return fHorizontalScale;
     }
 
     // @returns Duration between horizontal ticks, in nanoseconds
-    public long getMinorTickInterval()
-    {
+    public long getMinorTickInterval() {
         return fMinorTickInterval;
     }
 
-    public void makeNetVisible(int netId)
-    {
+    public void makeNetVisible(int netId) {
         makeNetVisible(fVisibleNets.size(), netId);
     }
 
-    public void makeNetVisible(int aboveIndex, int netId)
-    {
+    public void makeNetVisible(int aboveIndex, int netId) {
         fVisibleNets.add(aboveIndex, new NetViewModel(netId, null));
-        for (Listener listener : fTraceListeners)
-        {
+        for (Listener listener : fTraceListeners) {
             listener.netsAdded(fVisibleNets.size() - 1,
-                fVisibleNets.size() - 1);
+                               fVisibleNets.size() - 1);
         }
     }
 
-    public void removeNet(int listIndex)
-    {
+    public void removeNet(int listIndex) {
         fVisibleNets.remove(listIndex);
         for (Listener listener : fTraceListeners)
             listener.netsRemoved(listIndex, listIndex);
     }
 
-    void removeAllNets()
-    {
+    void removeAllNets() {
         int oldSize = fVisibleNets.size();
         fVisibleNets.clear();
         for (Listener listener : fTraceListeners)
             listener.netsRemoved(0, oldSize);
     }
 
-    void moveNets(int[] fromIndices, int insertionPoint)
-    {
+    void moveNets(int[] fromIndices, int insertionPoint) {
         NetViewModel[] nets = new NetViewModel[fromIndices.length];
-        for (int i = fromIndices.length - 1; i >= 0; i--)
-        {
+        for (int i = fromIndices.length - 1; i >= 0; i--) {
             nets[i] = fVisibleNets.elementAt(fromIndices[i]);
             removeNet(fromIndices[i]);
             if (fromIndices[i] < insertionPoint)
@@ -127,71 +112,59 @@ public class TraceViewModel
         for (NetViewModel net : nets)
             fVisibleNets.add(insertionPoint++, net);
 
-        for (Listener listener : fTraceListeners)
-        {
+        for (Listener listener : fTraceListeners) {
             listener.netsAdded(insertionPoint - fromIndices.length,
-                insertionPoint - 1);
+                               insertionPoint - 1);
         }
     }
 
-    public int getVisibleNetCount()
-    {
+    public int getVisibleNetCount() {
         return fVisibleNets.size();
     }
 
     /// Return mapping of visible order to internal index
     /// @param index Index of net in order displayed in net list
     /// @returns netID (as referenced in TraceDataModel)
-    public int getVisibleNet(int index)
-    {
+    public int getVisibleNet(int index) {
         return fVisibleNets.elementAt(index).index;
     }
 
-    public void setValueFormatter(int listIndex, ValueFormatter formatter)
-    {
+    public void setValueFormatter(int listIndex, ValueFormatter formatter) {
         fVisibleNets.elementAt(listIndex).formatter = formatter;
     }
 
-    public ValueFormatter getValueFormatter(int listIndex)
-    {
+    public ValueFormatter getValueFormatter(int listIndex) {
         return fVisibleNets.elementAt(listIndex).formatter;
     }
 
-    public int getNetSetCount()
-    {
+    public int getNetSetCount() {
         return fNetSets.size();
     }
 
-    public String getNetSetName(int index)
-    {
+    public String getNetSetName(int index) {
         return fNetSets.elementAt(index).fName;
     }
 
-    public void selectNetSet(int index)
-    {
+    public void selectNetSet(int index) {
         int oldSize = fVisibleNets.size();
 
         fVisibleNets = (Vector<NetViewModel>) fNetSets.elementAt(index).fVisibleNets.clone();
 
         // There is probably a more efficient way to do this
-        for (Listener listener : fTraceListeners)
-        {
+        for (Listener listener : fTraceListeners) {
             listener.netsRemoved(0, oldSize);
             listener.netsAdded(0, fVisibleNets.size());
         }
     }
 
     /// Saves the current view configuration as a named net set
-    public void saveNetSet(String name)
-    {
+    public void saveNetSet(String name) {
         NetSet newNetSet = new NetSet(name, (Vector<NetViewModel>) fVisibleNets.clone());
 
         // Determine if we should save over an existing net set...
         boolean found = false;
-        for (int i = 0; i < getNetSetCount(); i++)
-        {
-            if (getNetSetName(i).equals(name))
-            {
+        for (int i = 0; i < getNetSetCount(); i++) {
+            if (getNetSetName(i).equals(name)) {
                 fNetSets.set(i, newNetSet);
                 found = true;
                 break;
@@ -202,13 +175,11 @@ public class TraceViewModel
             fNetSets.add(newNetSet);
     }
 
-    public long getCursorPosition()
-    {
+    public long getCursorPosition() {
         return fCursorPosition;
     }
 
-    public void setCursorPosition(long timestamp)
-    {
+    public void setCursorPosition(long timestamp) {
         long old = fCursorPosition;
         fCursorPosition = timestamp;
         for (Listener listener : fTraceListeners)
@@ -216,8 +187,7 @@ public class TraceViewModel
     }
 
     // This is used to display the timestamp at the top of the cursor when the user is dragging.
-    public void setAdjustingCursor(boolean adjust)
-    {
+    public void setAdjustingCursor(boolean adjust) {
         fAdjustingCursor = adjust;
 
         /// @bug This is a hacky way to force everyone to update, but has odd side effects if
@@ -226,30 +196,25 @@ public class TraceViewModel
         setCursorPosition(fCursorPosition);
     }
 
-    public boolean getAdjustingCursor()
-    {
+    public boolean getAdjustingCursor() {
         return fAdjustingCursor;
     }
 
-    public long getSelectionStart()
-    {
+    public long getSelectionStart() {
         return fSelectionStart;
     }
 
-    public void setSelectionStart(long timestamp)
-    {
+    public void setSelectionStart(long timestamp) {
         fSelectionStart = timestamp;
     }
 
-    void removeAllMarkers()
-    {
+    void removeAllMarkers() {
         fMarkers.clear();
         notifyMarkerChanged(-1);
         fNextMarkerId = 1;
     }
 
-    private void notifyMarkerChanged(long timestamp)
-    {
+    private void notifyMarkerChanged(long timestamp) {
         for (Listener listener : fTraceListeners)
             listener.markerChanged(timestamp);
     }
@@ -258,8 +223,7 @@ public class TraceViewModel
     // to timestamp. Should the second parameter be removed?
     // XXX also, if there is another marker that is very close, should
     // we detect that somehow?
-    public void addMarker(String description, long timestamp)
-    {
+    public void addMarker(String description, long timestamp) {
         Marker marker = new Marker();
         marker.fId = fNextMarkerId++;
         marker.fDescription = description;
@@ -269,13 +233,11 @@ public class TraceViewModel
         notifyMarkerChanged(timestamp);
     }
 
-    public int getMarkerAtTime(long timestamp)
-    {
+    public int getMarkerAtTime(long timestamp) {
         return fMarkers.lookupValue(timestamp);
     }
 
-    public void removeMarkerAtTime(long timestamp)
-    {
+    public void removeMarkerAtTime(long timestamp) {
         if (fMarkers.size() == 0)
             return;
 
@@ -288,79 +250,63 @@ public class TraceViewModel
 
         // The lookup function sometimes rounds to the lower marker, so
         // check both the current marker and the next one.
-        if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize)
-        {
+        if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize) {
             fMarkers.remove(index);
             notifyMarkerChanged(targetTimestamp);
-        }
-        else if (index < fMarkers.size() - 1)
-        {
+        } else if (index < fMarkers.size() - 1) {
             targetTimestamp = fMarkers.elementAt(index + 1).fTimestamp;
-            if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize)
-            {
+            if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize) {
                 fMarkers.remove(index + 1);
                 notifyMarkerChanged(targetTimestamp);
             }
         }
     }
 
-    public String getDescriptionForMarker(int index)
-    {
+    public String getDescriptionForMarker(int index) {
         return fMarkers.elementAt(index).fDescription;
     }
 
-    public void setDescriptionForMarker(int index, String description)
-    {
+    public void setDescriptionForMarker(int index, String description) {
         fMarkers.elementAt(index).fDescription = description;
     }
 
-    public long getTimestampForMarker(int index)
-    {
+    public long getTimestampForMarker(int index) {
         return fMarkers.elementAt(index).fTimestamp;
     }
 
-    public int getIdForMarker(int index)
-    {
+    public int getIdForMarker(int index) {
         return fMarkers.elementAt(index).fId;
     }
 
-    public int getMarkerCount()
-    {
+    public int getMarkerCount() {
         return fMarkers.size();
     }
 
-    public void prevMarker(boolean extendSelection)
-    {
+    public void prevMarker(boolean extendSelection) {
         int id = getMarkerAtTime(getCursorPosition());    // Rounds back
         long timestamp = getTimestampForMarker(id);
-        if (timestamp >= getCursorPosition() && id > 0)
-        {
+        if (timestamp >= getCursorPosition() && id > 0) {
             id--;
             timestamp = getTimestampForMarker(id);
         }
 
-        if (timestamp < getCursorPosition())
-        {
+        if (timestamp < getCursorPosition()) {
             setCursorPosition(timestamp);
             if (!extendSelection)
                 setSelectionStart(timestamp);
         }
     }
 
-    public void nextMarker(boolean extendSelection)
-    {
+    public void nextMarker(boolean extendSelection) {
         int id = getMarkerAtTime(getCursorPosition());    // Rounds back
-        if (id < getMarkerCount() - 1)
-        {
+        if (id < getMarkerCount() - 1) {
             long timestamp = getTimestampForMarker(id);
-            if (timestamp <= getCursorPosition())
-            {
+            if (timestamp <= getCursorPosition()) {
                 id++;
                 timestamp = getTimestampForMarker(id );
             }
 
-            if (timestamp > getCursorPosition())
-            {
+            if (timestamp > getCursorPosition()) {
                 setCursorPosition(timestamp);
                 if (!extendSelection)
                     setSelectionStart(timestamp);
@@ -368,10 +314,8 @@ public class TraceViewModel
         }
     }
 
-    class Marker implements SortedVector.Keyed
-    {
-        public long getKey()
-        {
+    class Marker implements SortedVector.Keyed {
+        public long getKey() {
             return fTimestamp;
         }
 
@@ -380,10 +324,8 @@ public class TraceViewModel
         long fTimestamp;
     }
 
-    class NetSet
-    {
-        NetSet(String name, Vector<NetViewModel> visibleNets)
-        {
+    class NetSet {
+        NetSet(String name, Vector<NetViewModel> visibleNets) {
             fName = name;
             fVisibleNets = visibleNets;
         }
@@ -392,10 +334,8 @@ public class TraceViewModel
         Vector<NetViewModel> fVisibleNets;
     }
 
-    private class NetViewModel
-    {
-        public NetViewModel(int _index, ValueFormatter _formatter)
-        {
+    private class NetViewModel {
+        public NetViewModel(int _index, ValueFormatter _formatter) {
             index = _index;
             if (_formatter == null)
                 formatter = new HexadecimalValueFormatter();

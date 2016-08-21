@@ -18,8 +18,7 @@
 // This is a builder pattern that the loader calls into to populate
 // information from a trace into the model.
 //
-interface TraceBuilder
-{
+interface TraceBuilder {
     /// Adds another module to the fully qualified path of any nets
     /// that are subsequently added via newNet.
     void enterModule(String name);

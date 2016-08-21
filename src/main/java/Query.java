@@ -26,10 +26,8 @@ import java.util.*;
 /// @todo Support proper logical operators &&, ||
 /// @todo Support partial multi-net matches
 ///
-public class Query
-{
-    public Query(TraceDataModel traceModel, String queryString) throws ParseException
-    {
+public class Query {
+    public Query(TraceDataModel traceModel, String queryString) throws ParseException {
         fTraceDataModel = traceModel;
         fQueryString = queryString;
         fStringOffset = 0;
@@ -48,11 +46,9 @@ public class Query
     ///   -1 If there are no matches in the forward direction
     ///      timestamp of the next forward match otherwise
     ///
-    public long getNextMatch(long startTimestamp)
-    {
+    public long getNextMatch(long startTimestamp) {
         long timestamp = startTimestamp;
-        while (true)
-        {
+        while (true) {
             if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
                 return timestamp;
 
@@ -72,11 +68,9 @@ public class Query
     ///   -1 If there are no matches in the backward direction
     ///      timestamp of the next backward match otherwise
     ///
-    public long getPreviousMatch(long startTimestamp)
-    {
+    public long getPreviousMatch(long startTimestamp) {
         long timestamp = startTimestamp;
-        while (true)
-        {
+        while (true) {
             if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
                 return timestamp;
 
@@ -87,10 +81,8 @@ public class Query
         }
     }
 
-    class ParseException extends Exception
-    {
-        public ParseException(String what)
-        {
+    class ParseException extends Exception {
+        public ParseException(String what) {
             super(what);
             fErrorMessage = what;
             fStartOffset = fTokenStart;
@@ -100,18 +92,15 @@ public class Query
                 fEndOffset = fTokenStart;
         }
 
-        public String toString()
-        {
+        public String toString() {
             return fErrorMessage;
         }
 
-        public int getStartOffset()
-        {
+        public int getStartOffset() {
             return fStartOffset;
         }
 
-        public int getEndOffset()
-        {
+        public int getEndOffset() {
             return fEndOffset;
         }
 
@@ -142,42 +131,34 @@ public class Query
     int fTokenStart;
     BitVector fBitVector;
 
-    void pushBackToken(int tok)
-    {
+    void pushBackToken(int tok) {
         fPushBackToken = tok;
     }
 
-    boolean isAlpha(int value)
-    {
+    boolean isAlpha(int value) {
         return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
     }
 
-    boolean isNum(int value)
-    {
+    boolean isNum(int value) {
         return value >= '0' && value <= '9';
     }
 
-    boolean isHexDigit(int value)
-    {
+    boolean isHexDigit(int value) {
         return (value >= '0' && value <= '9')
-            || (value >= 'a' && value <='f')
-            || (value >= 'A' && value <= 'F');
+               || (value >= 'a' && value <='f')
+               || (value >= 'A' && value <= 'F');
     }
 
-    boolean isAlphaNum(int value)
-    {
+    boolean isAlphaNum(int value) {
         return isAlpha(value) || isNum(value);
     }
 
-    boolean isSpace(int value)
-    {
+    boolean isSpace(int value) {
         return value == ' ' || value == '\r' || value == '\n' || value == '\t';
     }
 
-    int parseToken() throws ParseException
-    {
-        if (fPushBackToken != -1)
-        {
+    int parseToken() throws ParseException {
+        if (fPushBackToken != -1) {
             int token = fPushBackToken;
             fPushBackToken = -1;
             return token;
@@ -186,112 +167,97 @@ public class Query
         int state = STATE_INIT;
         fCurrentTokenValue.setLength(0);
 
-        for (;;)
-        {
+        for (;;) {
             int c;
 
-            if (fPushBackChar != -1)
-            {
+            if (fPushBackChar != -1) {
                 c = fPushBackChar;
                 fPushBackChar = -1;
-            }
-            else
-            {
+            } else {
                 if (fStringOffset == fQueryString.length())
                     c = -1;
                 else
                     c = fQueryString.charAt(fStringOffset++);
             }
 
-            switch (state)
-            {
-                case STATE_INIT:
-                    fTokenStart = fStringOffset - 1;
-                    if (c == -1)
-                        return TOK_END;
-                    else if ("(<>)=|&".indexOf(c) != -1)
-                        return c;
-                    else if (c == '\'')
-                        state = STATE_SCAN_LITERAL_TYPE;
-                    else if (isAlpha(c))
-                    {
-                        fPushBackChar = c;
-                        state = STATE_SCAN_IDENTIFIER;
-                    }
-                    else if (isNum(c))
-                    {
-                        fPushBackChar = c;
-                        fCurrentTokenType = LITERAL_TYPE_DECIMAL;
-                        state = STATE_SCAN_LITERAL;
-                    }
-
-                    break;
-
-                case STATE_SCAN_IDENTIFIER:
-                    if (isAlphaNum(c) || c == '_' || c == '.')
-                        fCurrentTokenValue.append((char) c);
-                    else
-                    {
-                        fPushBackChar = c;
-                        return TOK_IDENTIFIER;
-                    }
-
-                    break;
-
-                case STATE_SCAN_LITERAL_TYPE:
-                    if (c == 'b')
-                        fCurrentTokenType = LITERAL_TYPE_BINARY;
-                    else if (c == 'h')
-                        fCurrentTokenType = LITERAL_TYPE_HEX;
-                    else if (c == 'd')
-                        fCurrentTokenType = LITERAL_TYPE_DECIMAL;
-                    else
-                        throw new ParseException("unknown type " + (char) c);
-
+            switch (state) {
+            case STATE_INIT:
+                fTokenStart = fStringOffset - 1;
+                if (c == -1)
+                    return TOK_END;
+                else if ("(<>)=|&".indexOf(c) != -1)
+                    return c;
+                else if (c == '\'')
+                    state = STATE_SCAN_LITERAL_TYPE;
+                else if (isAlpha(c)) {
+                    fPushBackChar = c;
+                    state = STATE_SCAN_IDENTIFIER;
+                } else if (isNum(c)) {
+                    fPushBackChar = c;
+                    fCurrentTokenType = LITERAL_TYPE_DECIMAL;
                     state = STATE_SCAN_LITERAL;
-                    break;
+                }
 
-                case STATE_SCAN_LITERAL:
-                    if (isHexDigit(c)
+                break;
+
+            case STATE_SCAN_IDENTIFIER:
+                if (isAlphaNum(c) || c == '_' || c == '.')
+                    fCurrentTokenValue.append((char) c);
+                else {
+                    fPushBackChar = c;
+                    return TOK_IDENTIFIER;
+                }
+
+                break;
+
+            case STATE_SCAN_LITERAL_TYPE:
+                if (c == 'b')
+                    fCurrentTokenType = LITERAL_TYPE_BINARY;
+                else if (c == 'h')
+                    fCurrentTokenType = LITERAL_TYPE_HEX;
+                else if (c == 'd')
+                    fCurrentTokenType = LITERAL_TYPE_DECIMAL;
+                else
+                    throw new ParseException("unknown type " + (char) c);
+
+                state = STATE_SCAN_LITERAL;
+                break;
+
+            case STATE_SCAN_LITERAL:
+                if (isHexDigit(c)
                         || ((fCurrentTokenType == LITERAL_TYPE_BINARY || fCurrentTokenType == LITERAL_TYPE_HEX)
-                        && (c == 'x' || c == 'z' || c == 'X' || c == 'Z')))
-                    {
-                        fCurrentTokenValue.append((char) c);
-                    }
-                    else
-                    {
-                        switch (fCurrentTokenType)
-                        {
-                            case LITERAL_TYPE_BINARY:
-                                fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
-                                break;
+                            && (c == 'x' || c == 'z' || c == 'X' || c == 'Z'))) {
+                    fCurrentTokenValue.append((char) c);
+                } else {
+                    switch (fCurrentTokenType) {
+                    case LITERAL_TYPE_BINARY:
+                        fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
+                        break;
 
-                            case LITERAL_TYPE_HEX:
-                                fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
-                                break;
+                    case LITERAL_TYPE_HEX:
+                        fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
+                        break;
 
-                            case LITERAL_TYPE_DECIMAL:
-                                fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
-                                break;
+                    case LITERAL_TYPE_DECIMAL:
+                        fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
+                        break;
 
-                            default:
-                                assert false;   // Should not get here
-                        }
-
-                        fPushBackChar = c;
-                        return TOK_LITERAL;
+                    default:
+                        assert false;   // Should not get here
                     }
 
-                    break;
+                    fPushBackChar = c;
+                    return TOK_LITERAL;
+                }
+
+                break;
             }
         }
     }
 
-    void match(int tokenType) throws ParseException
-    {
+    void match(int tokenType) throws ParseException {
         int got = parseToken();
-        if (got != tokenType)
-        {
+        if (got != tokenType) {
             if (got == TOK_END)
                 throw new ParseException("unexpected end of string");
             else
@@ -299,20 +265,17 @@ public class Query
         }
     }
 
-    ExpressionNode parseExpression() throws ParseException
-    {
+    ExpressionNode parseExpression() throws ParseException {
         ExpressionNode node = parseOr();
         match(TOK_END);
         return node;
     }
 
-    ExpressionNode parseOr() throws ParseException
-    {
+    ExpressionNode parseOr() throws ParseException {
         ExpressionNode left = parseAnd();
 
         int lookahead = parseToken();
-        if (lookahead != '|')
-        {
+        if (lookahead != '|') {
             pushBackToken(lookahead);
             return left;
         }
@@ -321,13 +284,11 @@ public class Query
         return new OrExpressionNode(left, right);
     }
 
-    ExpressionNode parseAnd() throws ParseException
-    {
+    ExpressionNode parseAnd() throws ParseException {
         ExpressionNode left = parseCondition();
 
         int lookahead = parseToken();
-        if (lookahead != '&')
-        {
+        if (lookahead != '&') {
             pushBackToken(lookahead);
             return left;
         }
@@ -336,12 +297,10 @@ public class Query
         return new AndExpressionNode(left, right);
     }
 
-    ExpressionNode parseCondition() throws ParseException
-    {
+    ExpressionNode parseCondition() throws ParseException {
         // if this is an '(', call parseExpression
         int lookahead = parseToken();
-        if (lookahead == '(')
-        {
+        if (lookahead == '(') {
             ExpressionNode node = parseExpression();
             match(')');
             return node;
@@ -356,30 +315,27 @@ public class Query
 
         // check conditional.
         lookahead = parseToken();
-        switch (lookahead)
-        {
-            case '>':
-                match(TOK_LITERAL);
-                return new GreaterThanExpressionNode(netId, fBitVector);
-            case '<':
-                match(TOK_LITERAL);
-                return new LessThanExpressionNode(netId, fBitVector);
-            case '=':
-                match(TOK_LITERAL);
-                return new EqualExpressionNode(netId, fBitVector);
-            default:
-                throw new ParseException("Unknown conditional operator");
+        switch (lookahead) {
+        case '>':
+            match(TOK_LITERAL);
+            return new GreaterThanExpressionNode(netId, fBitVector);
+        case '<':
+            match(TOK_LITERAL);
+            return new LessThanExpressionNode(netId, fBitVector);
+        case '=':
+            match(TOK_LITERAL);
+            return new EqualExpressionNode(netId, fBitVector);
+        default:
+            throw new ParseException("Unknown conditional operator");
         }
     }
 
-    private class QueryHint
-    {
+    private class QueryHint {
         long forwardTimestamp;
         long backwardTimestamp;
     }
 
-    private abstract class ExpressionNode
-    {
+    private abstract class ExpressionNode {
         /// Determine if this subexpression is true at the timestamp provided.
         /// @param timestamp Timestamp and which to evaluate.  If timestamp is right on a transition,
         ///  the value *after* the transition will be used
@@ -391,22 +347,18 @@ public class Query
         abstract public boolean evaluate(long timestamp, QueryHint outHint);
     }
 
-    private abstract class BooleanExpressionNode extends ExpressionNode
-    {
-        BooleanExpressionNode(ExpressionNode left, ExpressionNode right)
-        {
+    private abstract class BooleanExpressionNode extends ExpressionNode {
+        BooleanExpressionNode(ExpressionNode left, ExpressionNode right) {
             fLeftChild = left;
             fRightChild = right;
         }
 
-        public boolean evaluate(long timestamp, QueryHint outHint)
-        {
+        public boolean evaluate(long timestamp, QueryHint outHint) {
             boolean leftResult = fLeftChild.evaluate(timestamp, fLeftHint);
             boolean rightResult = fRightChild.evaluate(timestamp, fRightHint);
 
             // Forward timestamp
-            if (fLeftHint.forwardTimestamp >= 0 && fRightHint.forwardTimestamp >= 0)
-            {
+            if (fLeftHint.forwardTimestamp >= 0 && fRightHint.forwardTimestamp >= 0) {
                 // Here we skip events that cannot possibly make the expression evaluate to true.
                 if (leftResult && rightResult)
                     outHint.forwardTimestamp = Math.min(fRightHint.forwardTimestamp, fLeftHint.forwardTimestamp);
@@ -416,8 +368,7 @@ public class Query
                     outHint.forwardTimestamp = fLeftHint.forwardTimestamp;
                 else
                     outHint.forwardTimestamp = nextForwardEvent(fRightHint.forwardTimestamp, fLeftHint.forwardTimestamp);
-            }
-            else if (fLeftHint.forwardTimestamp >= 0)
+            } else if (fLeftHint.forwardTimestamp >= 0)
                 outHint.forwardTimestamp = fLeftHint.forwardTimestamp;
             else if (fRightHint.forwardTimestamp >= 0)
                 outHint.forwardTimestamp = fRightHint.forwardTimestamp;
@@ -425,8 +376,7 @@ public class Query
                 outHint.forwardTimestamp = -1;
 
             // Backward timestamp
-            if (fLeftHint.backwardTimestamp >= 0 && fRightHint.backwardTimestamp >= 0)
-            {
+            if (fLeftHint.backwardTimestamp >= 0 && fRightHint.backwardTimestamp >= 0) {
                 if (leftResult && rightResult)
                     outHint.backwardTimestamp = Math.max(fRightHint.backwardTimestamp, fLeftHint.backwardTimestamp);
                 else if (leftResult)
@@ -435,8 +385,7 @@ public class Query
                     outHint.backwardTimestamp = fLeftHint.backwardTimestamp;
                 else
                     outHint.backwardTimestamp = nextBackwardEvent(fRightHint.backwardTimestamp, fLeftHint.backwardTimestamp);
-            }
-            else if (fLeftHint.backwardTimestamp >= 0)
+            } else if (fLeftHint.backwardTimestamp >= 0)
                 outHint.backwardTimestamp = fLeftHint.backwardTimestamp;
             else if (fRightHint.backwardTimestamp >= 0)
                 outHint.backwardTimestamp = fRightHint.backwardTimestamp;
@@ -460,66 +409,53 @@ public class Query
         private QueryHint fRightHint = new QueryHint();
     }
 
-    private class OrExpressionNode extends BooleanExpressionNode
-    {
-        public OrExpressionNode(ExpressionNode left, ExpressionNode right)
-        {
+    private class OrExpressionNode extends BooleanExpressionNode {
+        public OrExpressionNode(ExpressionNode left, ExpressionNode right) {
             super(left, right);
         }
 
-        protected boolean compareResults(boolean value1, boolean value2)
-        {
+        protected boolean compareResults(boolean value1, boolean value2) {
             return value1 || value2;
         }
 
         // If both are false, either one changing may cause the expression to be true.
         // Therefore, pick the soonest one
-        protected long nextForwardEvent(long nextEvent1, long nextEvent2)
-        {
+        protected long nextForwardEvent(long nextEvent1, long nextEvent2) {
             return Math.min(nextEvent1, nextEvent2);
         }
 
-        protected long nextBackwardEvent(long nextEvent1, long nextEvent2)
-        {
+        protected long nextBackwardEvent(long nextEvent1, long nextEvent2) {
             return Math.max(nextEvent1, nextEvent2);
         }
     }
 
-    private class AndExpressionNode extends BooleanExpressionNode
-    {
-        public AndExpressionNode(ExpressionNode left, ExpressionNode right)
-        {
+    private class AndExpressionNode extends BooleanExpressionNode {
+        public AndExpressionNode(ExpressionNode left, ExpressionNode right) {
             super(left, right);
         }
 
-        protected boolean compareResults(boolean value1, boolean value2)
-        {
+        protected boolean compareResults(boolean value1, boolean value2) {
             return value1 && value2;
         }
 
         // If both are false, both must change for the expression to be true.
         // Therefore, pick the later one.
-        protected long nextForwardEvent(long nextEvent1, long nextEvent2)
-        {
+        protected long nextForwardEvent(long nextEvent1, long nextEvent2) {
             return Math.max(nextEvent1, nextEvent2);
         }
 
-        protected long nextBackwardEvent(long nextEvent1, long nextEvent2)
-        {
+        protected long nextBackwardEvent(long nextEvent1, long nextEvent2) {
             return Math.min(nextEvent1, nextEvent2);
         }
     }
 
-    private abstract class ComparisonExpressionNode extends ExpressionNode
-    {
-        protected ComparisonExpressionNode(int netId, BitVector expected)
-        {
+    private abstract class ComparisonExpressionNode extends ExpressionNode {
+        protected ComparisonExpressionNode(int netId, BitVector expected) {
             fNetId = netId;
             fExpected = expected;
         }
 
-        public boolean evaluate(long timestamp, QueryHint outHint)
-        {
+        public boolean evaluate(long timestamp, QueryHint outHint) {
             TransitionVector.Iterator i = fTraceDataModel.findTransition(fNetId, timestamp);
             Transition t = i.next();
             outHint.forwardTimestamp = i.getNextTimestamp();
@@ -533,54 +469,42 @@ public class Query
         private BitVector fExpected;
     }
 
-    private class EqualExpressionNode extends ComparisonExpressionNode
-    {
-        public EqualExpressionNode(int netId, BitVector match)
-        {
+    private class EqualExpressionNode extends ComparisonExpressionNode {
+        public EqualExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
-        protected boolean doCompare(BitVector value1, BitVector value2)
-        {
+        protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) == 0;
         }
     }
 
-    private class NotEqualExpressionNode extends ComparisonExpressionNode
-    {
-        public NotEqualExpressionNode(int netId, BitVector match)
-        {
+    private class NotEqualExpressionNode extends ComparisonExpressionNode {
+        public NotEqualExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
-        protected boolean doCompare(BitVector value1, BitVector value2)
-        {
+        protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) != 0;
         }
     }
 
-    private class GreaterThanExpressionNode extends ComparisonExpressionNode
-    {
-        public GreaterThanExpressionNode(int netId, BitVector match)
-        {
+    private class GreaterThanExpressionNode extends ComparisonExpressionNode {
+        public GreaterThanExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
-        protected boolean doCompare(BitVector value1, BitVector value2)
-        {
+        protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) > 0;
         }
     }
 
-    private class LessThanExpressionNode extends ComparisonExpressionNode
-    {
-        public LessThanExpressionNode(int netId, BitVector match)
-        {
+    private class LessThanExpressionNode extends ComparisonExpressionNode {
+        public LessThanExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
-        protected boolean doCompare(BitVector value1, BitVector value2)
-        {
+        protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) < 0;
         }
     }

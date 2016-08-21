@@ -22,10 +22,8 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 import javax.swing.text.*;
 
-class FindPanel extends JPanel implements ActionListener
-{
-    public FindPanel(WaveApp app)
-    {
+class FindPanel extends JPanel implements ActionListener {
+    public FindPanel(WaveApp app) {
         fWaveApp = app;
 
         setLayout(new BorderLayout());
@@ -33,19 +31,16 @@ class FindPanel extends JPanel implements ActionListener
         JLabel findLabel = new JLabel("Find:");
         fTextArea = new JTextArea(5, 30);
         fTextArea.setLineWrap(true);
-        fTextArea.getDocument().addDocumentListener(new DocumentListener(){
-            public void changedUpdate(DocumentEvent e)
-            {
+        fTextArea.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
                 invalidateText();
             }
 
-            public void removeUpdate(DocumentEvent e)
-            {
+            public void removeUpdate(DocumentEvent e) {
                 invalidateText();
             }
 
-            public void insertUpdate(DocumentEvent e)
-            {
+            public void insertUpdate(DocumentEvent e) {
                 invalidateText();
             }
         });
@@ -71,13 +66,11 @@ class FindPanel extends JPanel implements ActionListener
         add(buttonContainer, BorderLayout.SOUTH);
     }
 
-    public void setInitialQuery(String string)
-    {
+    public void setInitialQuery(String string) {
         fTextArea.setText(string);
     }
 
-    void invalidateText()
-    {
+    void invalidateText() {
         // The next time the user hits next/prev, need to regenerate the query.
         fNeedsQueryUpdate = true;
 
@@ -86,48 +79,36 @@ class FindPanel extends JPanel implements ActionListener
         fHighlighter.removeAllHighlights();
     }
 
-    private void checkUpdateQuery()
-    {
-        if (fNeedsQueryUpdate)
-        {
-            try
-            {
+    private void checkUpdateQuery() {
+        if (fNeedsQueryUpdate) {
+            try {
                 fWaveApp.setQuery(fTextArea.getText());
-            }
-            catch (Query.ParseException exc)
-            {
+            } catch (Query.ParseException exc) {
                 // Highlight error
                 fHighlighter.removeAllHighlights();
-                try
-                {
+                try {
                     fHighlighter.addHighlight(exc.getStartOffset(), exc.getEndOffset() + 1,
-                        fHighlightPainter);
-                }
-                catch (BadLocationException ble)
-                {
+                                              fHighlightPainter);
+                } catch (BadLocationException ble) {
                     // Ignore
                 }
 
                 /// @todo Should this be displayed in the window somewhere?
                 JOptionPane.showMessageDialog(null, exc.toString(),"Error parsing query",
-                    JOptionPane.ERROR_MESSAGE);
+                                              JOptionPane.ERROR_MESSAGE);
             }
 
             fNeedsQueryUpdate = false;
         }
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
 
-        if (cmd.equals("Prev"))
-        {
+        if (cmd.equals("Prev")) {
             checkUpdateQuery();
             fWaveApp.findPrev();
-        }
-        else if (cmd.equals("Next"))
-        {
+        } else if (cmd.equals("Next")) {
             checkUpdateQuery();
             fWaveApp.findNext();
         }

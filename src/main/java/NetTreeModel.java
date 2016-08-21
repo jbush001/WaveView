@@ -24,21 +24,16 @@ import javax.swing.tree.*;
 /// Maintains module/net hieararchy, where leaf nodes are nets and interior nodes
 /// are modules.
 ///
-public class NetTreeModel implements TreeModel
-{
-    public NetTreeModel()
-    {
+public class NetTreeModel implements TreeModel {
+    public NetTreeModel() {
     }
 
-    public void clear()
-    {
+    public void clear() {
         fRoot = null;
     }
 
-    public void enterScope(String name)
-    {
-        if (fNodeStack.empty() && fRoot != null)
-        {
+    public void enterScope(String name) {
+        if (fNodeStack.empty() && fRoot != null) {
             // If you call $dumpvars more than once with iverilog, it will pop the root
             // node off and re-push it.  Handle this case here.
             fNodeStack.push(fRoot);
@@ -54,77 +49,62 @@ public class NetTreeModel implements TreeModel
         fNodeStack.push(node);
     }
 
-    public void leaveScope()
-    {
+    public void leaveScope() {
         fNodeStack.pop();
     }
 
-    public void addNet(String name, int netId)
-    {
+    public void addNet(String name, int netId) {
         fNodeStack.peek().fChildren.add(new NetTreeNode(name, netId));
     }
 
-    public int getNetFromTreeObject(Object o)
-    {
+    public int getNetFromTreeObject(Object o) {
         return ((NetTreeNode)o).fNet;
     }
 
     // Tree model methods
-    public void addTreeModelListener(TreeModelListener l)
-    {
+    public void addTreeModelListener(TreeModelListener l) {
     }
 
-    public Object getChild(Object parent, int index)
-    {
+    public Object getChild(Object parent, int index) {
         return ((NetTreeNode) parent).fChildren.elementAt(index);
     }
 
-    public int getChildCount(Object parent)
-    {
+    public int getChildCount(Object parent) {
         return ((NetTreeNode) parent).fChildren.size();
     }
 
-    public int getIndexOfChild(Object parent, Object child)
-    {
+    public int getIndexOfChild(Object parent, Object child) {
         return ((NetTreeNode) parent).fChildren.indexOf(child);
     }
 
-    public Object getRoot()
-    {
+    public Object getRoot() {
         return fRoot;
     }
 
-    public boolean isLeaf(Object node)
-    {
+    public boolean isLeaf(Object node) {
         return ((NetTreeNode) node).fNet != -1;
     }
 
-    public void removeTreeModelListener(TreeModelListener l)
-    {
+    public void removeTreeModelListener(TreeModelListener l) {
     }
 
-    public void valueForPathChanged(TreePath path, Object newValue)
-    {
+    public void valueForPathChanged(TreePath path, Object newValue) {
         // XXX not implemented
     }
 
-    private class NetTreeNode
-    {
+    private class NetTreeNode {
         // Interior nodes only
-        NetTreeNode(String name)
-        {
+        NetTreeNode(String name) {
             fName = name;
         }
 
         // Leaf nodes only
-        NetTreeNode(String name, int net)
-        {
+        NetTreeNode(String name, int net) {
             fName = name;
             fNet = net;
         }
 
-        public String toString()
-        {
+        public String toString() {
             return fName;
         }
 

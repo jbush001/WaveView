@@ -14,15 +14,12 @@
 // limitations under the License.
 //
 
-public class Transition extends BitVector
-{
-    public long getTimestamp()
-    {
+public class Transition extends BitVector {
+    public long getTimestamp() {
         return fTimestamp;
     }
 
-    void setTimestamp(long timestamp)
-    {
+    void setTimestamp(long timestamp) {
         fTimestamp = timestamp;
     }
 

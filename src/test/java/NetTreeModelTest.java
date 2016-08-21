@@ -17,10 +17,8 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-public class NetTreeModelTest
-{
-    @Test public void test1()
-    {
+public class NetTreeModelTest {
+    @Test public void test1() {
         NetTreeModel model = new NetTreeModel();
         model.enterScope("scope1");
         model.addNet("child1", 17);

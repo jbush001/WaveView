@@ -17,12 +17,9 @@
 import java.util.*;
 
 /// @bug Inconsistent naming. Some are XXXAtIndex, some are XXXByIndex
-public class IdentifierValueFormatter implements ValueFormatter
-{
-    public class Mapping
-    {
-        Mapping(int _value, String _name)
-        {
+public class IdentifierValueFormatter implements ValueFormatter {
+    public class Mapping {
+        Mapping(int _value, String _name) {
             value = _value;
             name = _name;
         }
@@ -31,45 +28,36 @@ public class IdentifierValueFormatter implements ValueFormatter
         String name;
     };
 
-    public IdentifierValueFormatter()
-    {
+    public IdentifierValueFormatter() {
     }
 
-    void addMapping(int value, String name)
-    {
+    void addMapping(int value, String name) {
         fMappings.add(new Mapping(value, name));
     }
 
-    void setNameAtIndex(int index, String name)
-    {
+    void setNameAtIndex(int index, String name) {
         fMappings.elementAt(index).name = name;
     }
 
-    void setValueAtIndex(int index, int value)
-    {
+    void setValueAtIndex(int index, int value) {
         fMappings.elementAt(index).value = value;
     }
 
-    int getValueByIndex(int index)
-    {
+    int getValueByIndex(int index) {
         return fMappings.elementAt(index).value;
     }
 
-    String getNameByIndex(int index)
-    {
+    String getNameByIndex(int index) {
         return fMappings.elementAt(index).name;
     }
 
-    int getMappingCount()
-    {
+    int getMappingCount() {
         return fMappings.size();
     }
 
-    public String format(BitVector bits)
-    {
+    public String format(BitVector bits) {
         int mapIndex = bits.intValue();
-        for (Mapping m : fMappings)
-        {
+        for (Mapping m : fMappings) {
             if (m.value == mapIndex)
                 return m.name;
         }

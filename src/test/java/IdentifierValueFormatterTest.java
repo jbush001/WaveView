@@ -17,10 +17,8 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-public class IdentifierValueFormatterTest
-{
-    @Test public void testFormat()
-    {
+public class IdentifierValueFormatterTest {
+    @Test public void testFormat() {
         IdentifierValueFormatter vf = new IdentifierValueFormatter();
         vf.addMapping(11, "primero");
         vf.addMapping(13, "segundo");

@@ -18,10 +18,8 @@ import java.awt.*;
 import javax.swing.*;
 import java.awt.event.*;
 
-class ColorButton extends JPanel
-{
-    public ColorButton(String label, Color initialColor)
-    {
+class ColorButton extends JPanel {
+    public ColorButton(String label, Color initialColor) {
         setPreferredSize(new Dimension(180, 32));
         addMouseListener(new MouseAdapter() {
             public void mousePressed(MouseEvent event) {
@@ -33,20 +31,17 @@ class ColorButton extends JPanel
         fColor = initialColor;
     }
 
-    public Color getColor()
-    {
+    public Color getColor() {
         return fColor;
     }
 
-    private void showColorChooser()
-    {
+    private void showColorChooser() {
         Color newColor = JColorChooser.showDialog(this, "Color", fColor);
         if (newColor != null)
             fColor = newColor;
     }
 
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(Graphics g) {
         g.setColor(fColor);
         g.fillRect(0, 0, 32, 32);
 

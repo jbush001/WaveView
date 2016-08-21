@@ -29,10 +29,8 @@ import javax.swing.table.*;
 /// to jump to that point in the trace.
 /// @todo Add a way to remove entries directly from this list
 ///
-public class MarkerListView extends JPanel implements ActionListener, TraceViewModel.Listener
-{
-    public MarkerListView(TraceViewModel traceModel)
-    {
+public class MarkerListView extends JPanel implements ActionListener, TraceViewModel.Listener {
+    public MarkerListView(TraceViewModel traceModel) {
         setLayout(new GridLayout(1, 1));
 
         fTraceViewModel = traceModel;
@@ -42,7 +40,7 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
         fTable = new JTable(fTableModel);
 
         fTable.getColumnModel().getColumn(0).setMaxWidth(35);
-        fTable.addMouseListener(new MouseAdapter(){
+        fTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2)
                     select(e.isShiftDown());
@@ -53,8 +51,7 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
         add(panel);
     }
 
-    public void select(boolean extendSelection)
-    {
+    public void select(boolean extendSelection) {
         long timestamp = fTraceViewModel.getTimestampForMarker(fTable.getSelectedRow());
 
         fTraceViewModel.setCursorPosition(timestamp);
@@ -62,28 +59,22 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
             fTraceViewModel.setSelectionStart(timestamp);
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
     }
 
-    public void cursorChanged(long oldTimestamp, long newTimestamp)
-    {
+    public void cursorChanged(long oldTimestamp, long newTimestamp) {
     }
 
-    public void netsAdded(int firstIndex, int lastIndex)
-    {
+    public void netsAdded(int firstIndex, int lastIndex) {
     }
 
-    public void netsRemoved(int firstIndex, int lastIndex)
-    {
+    public void netsRemoved(int firstIndex, int lastIndex) {
     }
 
-    public void scaleChanged(double newScale)
-    {
+    public void scaleChanged(double newScale) {
     }
 
-    public void markerChanged(long timestamp)
-    {
+    public void markerChanged(long timestamp) {
         fTableModel.fireTableDataChanged();
         // Redraw list
         repaint();
@@ -94,52 +85,43 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
     private JTable fTable;
 }
 
-class MarkerTableModel extends AbstractTableModel
-{
+class MarkerTableModel extends AbstractTableModel {
     private static final int kNumColumns = 3;
 
-    public MarkerTableModel(TraceViewModel model)
-    {
+    public MarkerTableModel(TraceViewModel model) {
         fTraceViewModel = model;
     }
 
-    public int getColumnCount()
-    {
+    public int getColumnCount() {
         return kNumColumns;
     }
 
-    public String getColumnName(int col)
-    {
+    public String getColumnName(int col) {
         return kColumnNames[col];
     }
 
-    public int getRowCount()
-    {
+    public int getRowCount() {
         return fTraceViewModel.getMarkerCount();
     }
 
-    public Object getValueAt(int row, int col)
-    {
-        switch (col)
-        {
-            case 0:
-                return "" + fTraceViewModel.getIdForMarker(row);
-            case 1:
-                return "" + fTraceViewModel.getTimestampForMarker(row) + " ns";
-            case 2:
-                return "" + fTraceViewModel.getDescriptionForMarker(row);
+    public Object getValueAt(int row, int col) {
+        switch (col) {
+        case 0:
+            return "" + fTraceViewModel.getIdForMarker(row);
+        case 1:
+            return "" + fTraceViewModel.getTimestampForMarker(row) + " ns";
+        case 2:
+            return "" + fTraceViewModel.getDescriptionForMarker(row);
         }
 
         return "";
     }
 
-    public boolean isCellEditable(int row, int col)
-    {
+    public boolean isCellEditable(int row, int col) {
         return col == 2;    // Can edit description
     }
 
-    public void setValueAt(Object value, int row, int col)
-    {
+    public void setValueAt(Object value, int row, int col) {
         fTraceViewModel.setDescriptionForMarker(row, (String) value);
     }
 

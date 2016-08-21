@@ -18,10 +18,8 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 /// @todo does not test signal aliases...
-public class TraceDataModelTest
-{
-    @Test public void testTraceDataModel()
-    {
+public class TraceDataModelTest {
+    @Test public void testTraceDataModel() {
         TraceDataModel model = new TraceDataModel();
         TraceBuilder builder = model.startBuilding();
 
@@ -90,8 +88,7 @@ public class TraceDataModelTest
         assertEquals(0, t.compare(new BitVector("100", 2)));
     }
 
-    @Test public void testAliasTrace()
-    {
+    @Test public void testAliasTrace() {
         TraceDataModel model = new TraceDataModel();
         TraceBuilder builder = model.startBuilding();
 

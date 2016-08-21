@@ -23,10 +23,8 @@ import java.util.*;
 /// @bug This doesn't propertly handle nets that are uninitalized at the beginning
 /// of the trace.  They are assumed to have the value of the first transition.
 ///
-class TransitionVector
-{
-    TransitionVector(int width)
-    {
+class TransitionVector {
+    TransitionVector(int width) {
         assert width > 0;
         fWidth = width;
     }
@@ -36,14 +34,12 @@ class TransitionVector
     ///   the first transition.
     /// @todo Investigate using java.util.Arrays.binarySearch instead of a hand rolled
     ///   implementation here.
-    Iterator findTransition(long timestamp)
-    {
+    Iterator findTransition(long timestamp) {
         // Binary search
         int low = 0;
         int high = fTransitionCount;
 
-        while (low < high)
-        {
+        while (low < high) {
             int mid = (low + high) / 2;
             long elemKey = fTimestamps[mid];
             if (timestamp < elemKey)
@@ -55,37 +51,31 @@ class TransitionVector
         return new Iterator(low == 0 ? 0 : low - 1);
     }
 
-    long getMaxTimestamp()
-    {
+    long getMaxTimestamp() {
         if (fTransitionCount == 0)
             return 0;
 
         return fTimestamps[fTransitionCount - 1];
     }
 
-    int getWidth()
-    {
+    int getWidth() {
         return fWidth;
     }
 
     /// This augments the normal iterator with methods to obtain
     /// the timestamp of the next and previous events.
-    public class Iterator implements java.util.Iterator<Transition>
-    {
-        Iterator(int index)
-        {
+    public class Iterator implements java.util.Iterator<Transition> {
+        Iterator(int index) {
             assert index >= 0;
             fNextIndex = index;
             fTransition.setWidth(fWidth);
         }
 
-        public boolean hasNext()
-        {
+        public boolean hasNext() {
             return fNextIndex < fTransitionCount;
         }
 
-        public Transition next()
-        {
+        public Transition next() {
             if (!hasNext())
                 return null;
 
@@ -95,17 +85,14 @@ class TransitionVector
             int currentWord = fValues[wordOffset] >> bitOffset;
 
             // Copy values out of packed array
-            for (int i = 0; i < fWidth; i++)
-            {
+            for (int i = 0; i < fWidth; i++) {
                 fTransition.setBit(fWidth - i - 1, currentWord & 3);
                 bitOffset += 2;
-                if (bitOffset == 32)
-                {
+                if (bitOffset == 32) {
                     wordOffset++;
                     currentWord = fValues[wordOffset];
                     bitOffset = 0;
-                }
-                else
+                } else
                     currentWord >>= 2;
             }
 
@@ -115,24 +102,21 @@ class TransitionVector
             return fTransition;
         }
 
-        public long getNextTimestamp()
-        {
+        public long getNextTimestamp() {
             if (fNextIndex >= fTransitionCount)
                 return -1;
 
             return fTimestamps[fNextIndex];
         }
 
-        public long getPrevTimestamp()
-        {
+        public long getPrevTimestamp() {
             if (fNextIndex < 2)
                 return -1;
 
             return fTimestamps[fNextIndex - 2];
         }
 
-        public void remove()
-        {
+        public void remove() {
             throw new UnsupportedOperationException();
         }
 
@@ -145,10 +129,8 @@ class TransitionVector
 
     /// The timestamp must be after the last transition that was
     /// appended
-    public void appendTransition(long timestamp, BitVector values)
-    {
-        if (fTransitionCount == fAllocSize)
-        {
+    public void appendTransition(long timestamp, BitVector values) {
+        if (fTransitionCount == fAllocSize) {
             // Grow the array
             if (fAllocSize < 128)
                 fAllocSize = 128;
@@ -158,12 +140,11 @@ class TransitionVector
             long[] newTimestamps = new long[fAllocSize];
             int[] newValues = new int[fAllocSize * fWidth / 16];
 
-            if (fTimestamps != null)
-            {
+            if (fTimestamps != null) {
                 System.arraycopy(fTimestamps, 0, newTimestamps,
-                    0, fTransitionCount);
+                                 0, fTransitionCount);
                 System.arraycopy(fValues, 0, newValues,
-                    0, fTransitionCount * fWidth / 16);
+                                 0, fTransitionCount * fWidth / 16);
             }
 
             fTimestamps = newTimestamps;
@@ -183,12 +164,10 @@ class TransitionVector
 
         int wordOffset = bitIndex / 16;
         int bitOffset = (bitIndex * 2) % 32;
-        for (int i = Math.min(values.getWidth(), fWidth) - 1; i >= 0; i--)
-        {
+        for (int i = Math.min(values.getWidth(), fWidth) - 1; i >= 0; i--) {
             fValues[wordOffset] |= values.getBit(i) << bitOffset;
             bitOffset += 2;
-            if (bitOffset == 32)
-            {
+            if (bitOffset == 32) {
                 wordOffset++;
                 bitOffset = 0;
             }

@@ -22,25 +22,21 @@ import java.io.*;
 import java.util.Vector;
 
 /// @todo test cloned nets
-public class VCDLoaderTest
-{
+public class VCDLoaderTest {
     @Rule
     public TemporaryFolder fTempFolder = new TemporaryFolder();
 
     // Implements TraceBuilder interface, which the VCDLoader will write into,
     // but asserts if events don't match a pre-defined sequence.
-    public class ExpectTraceBuilder implements TraceBuilder
-    {
+    public class ExpectTraceBuilder implements TraceBuilder {
         static final int EXPECT_ENTER = 0;
         static final int EXPECT_EXIT = 1;
         static final int EXPECT_NET = 2;
         static final int EXPECT_TRANSITION = 3;
         static final int EXPECT_FINISHED = 4;
 
-        class Event
-        {
-            Event(int type)
-            {
+        class Event {
+            Event(int type) {
                 fType = type;
             }
 
@@ -52,24 +48,21 @@ public class VCDLoaderTest
             BitVector fValues;
         }
 
-        public void enterModule(String name)
-        {
+        public void enterModule(String name) {
             System.out.println("enterModule " + name);
 
             Event event = fEventList.elementAt(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_ENTER);
         }
 
-        public void exitModule()
-        {
+        public void exitModule() {
             System.out.println("exitModule");
 
             Event event = fEventList.elementAt(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_EXIT);
         }
 
-        public int newNet(String shortName, int cloneId, int width)
-        {
+        public int newNet(String shortName, int cloneId, int width) {
             System.out.println("newNet " + shortName + " " + cloneId + " " + width);
 
             Event event = fEventList.elementAt(fCurrentEvent++);
@@ -82,13 +75,11 @@ public class VCDLoaderTest
             return fNetWidths.size() - 1;
         }
 
-        public int getNetWidth(int netId)
-        {
+        public int getNetWidth(int netId) {
             return fNetWidths.elementAt(netId);
         }
 
-        public void appendTransition(int id, long timestamp, BitVector values)
-        {
+        public void appendTransition(int id, long timestamp, BitVector values) {
             System.out.println("appendTransition " + id + " " + timestamp + " " + values.toString(2));
 
             Event event = fEventList.elementAt(fCurrentEvent++);
@@ -97,28 +88,24 @@ public class VCDLoaderTest
             assertEquals(0, values.compare(event.fValues));
         }
 
-        public void loadFinished()
-        {
+        public void loadFinished() {
             System.out.println("loadFinished");
 
             Event event = fEventList.elementAt(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_FINISHED);
         }
 
-        void expectEnterModule(String name)
-        {
+        void expectEnterModule(String name) {
             Event event = new Event(EXPECT_ENTER);
             event.fName = name;
             fEventList.add(event);
         }
 
-        void expectExitModule()
-        {
+        void expectExitModule() {
             fEventList.add(new Event(EXPECT_EXIT));
         }
 
-        void expectNewNet(String name, int cloneId, int width)
-        {
+        void expectNewNet(String name, int cloneId, int width) {
             Event event = new Event(EXPECT_NET);
             event.fName = name;
             event.fId = cloneId;
@@ -126,8 +113,7 @@ public class VCDLoaderTest
             fEventList.add(event);
         }
 
-        void expectAppendTransition(int id, long timestamp, String bitString)
-        {
+        void expectAppendTransition(int id, long timestamp, String bitString) {
             Event event = new Event(EXPECT_TRANSITION);
             event.fId = id;
             event.fTimestamp = timestamp;
@@ -135,8 +121,7 @@ public class VCDLoaderTest
             fEventList.add(event);
         }
 
-        void expectLoadFinished()
-        {
+        void expectLoadFinished() {
             fEventList.add(new Event(EXPECT_FINISHED));
         }
 
@@ -145,8 +130,7 @@ public class VCDLoaderTest
         private int fCurrentEvent = 0;
     }
 
-    public class DummyTraceBuilder implements TraceBuilder
-    {
+    public class DummyTraceBuilder implements TraceBuilder {
         public void enterModule(String name) {}
         public void exitModule() {}
         public int newNet(String shortName, int cloneId, int width) {
@@ -154,8 +138,7 @@ public class VCDLoaderTest
             return fNetWidths.size() - 1;
         }
 
-        public int getNetWidth(int netId)
-        {
+        public int getNetWidth(int netId) {
             return fNetWidths.elementAt(netId);
         }
 
@@ -167,34 +150,28 @@ public class VCDLoaderTest
 
     // Simulataneously builds VCD file contents and populates the
     // ExpectTraceBuilder with matching events
-    class TestBuilder
-    {
-        void setTimestampMultiplier(int value)
-        {
+    class TestBuilder {
+        void setTimestampMultiplier(int value) {
             fTimestampMultiplier = value;
         }
 
-        void addString(String data)
-        {
+        void addString(String data) {
             fVCDContents.append(data);
         }
 
-        void enterModule(String name)
-        {
+        void enterModule(String name) {
             fVCDContents.append("$scope module ");
             fVCDContents.append(name);
             fVCDContents.append(" $end\n");
             fTraceBuilder.expectEnterModule(name);
         }
 
-        void exitModule()
-        {
+        void exitModule() {
             fVCDContents.append("$upscope $end\n");
             fTraceBuilder.expectExitModule();
         }
 
-        int defineNet(String name, int cloneId, int width)
-        {
+        int defineNet(String name, int cloneId, int width) {
             int index = fNetIsMultiBit.size();
             fNetIsMultiBit.add(width != 1);
             fVCDContents.append("$var wire ");
@@ -203,8 +180,7 @@ public class VCDLoaderTest
             fVCDContents.append(getIdForIndex(index));
             fVCDContents.append(' ');
             fVCDContents.append(name);
-            if (width > 1)
-            {
+            if (width > 1) {
                 fVCDContents.append(" [");
                 fVCDContents.append(width - 1);
                 fVCDContents.append(":0]");
@@ -216,13 +192,11 @@ public class VCDLoaderTest
             return index;
         }
 
-        void endDefinitions()
-        {
+        void endDefinitions() {
             fVCDContents.append("$enddefinitions $end\n");
         }
 
-        void appendTransition(int netId, long timestamp, int value)
-        {
+        void appendTransition(int netId, long timestamp, int value) {
             StringBuffer tmp = new StringBuffer();
             for (int i = 0; i < 32; i++)
                 tmp.append((value & (0x80000000 >> i)) != 0 ? '1' : '0');
@@ -230,23 +204,19 @@ public class VCDLoaderTest
             appendTransition(netId, timestamp, tmp.toString());
         }
 
-        void appendTransition(int netId, long timestamp, String bitString)
-        {
-            if (fLastTimestamp != timestamp)
-            {
+        void appendTransition(int netId, long timestamp, String bitString) {
+            if (fLastTimestamp != timestamp) {
                 fLastTimestamp = timestamp;
                 fVCDContents.append('#');
                 fVCDContents.append(timestamp);
                 fVCDContents.append('\n');
             }
 
-            if (fNetIsMultiBit.elementAt(netId))
-            {
+            if (fNetIsMultiBit.elementAt(netId)) {
                 fVCDContents.append('b');
                 fVCDContents.append(bitString);
                 fVCDContents.append(' ');
-            }
-            else
+            } else
                 fVCDContents.append(bitString);
 
             fVCDContents.append(getIdForIndex(netId));
@@ -255,24 +225,20 @@ public class VCDLoaderTest
             fTraceBuilder.expectAppendTransition(netId, timestamp * fTimestampMultiplier, bitString);
         }
 
-        void finish()
-        {
+        void finish() {
             fTraceBuilder.expectLoadFinished();
             System.out.println("output is\n" + fVCDContents.toString());
         }
 
-        File getVCDFile()
-        {
+        File getVCDFile() {
             return tempFileFrom(fVCDContents.toString());
         }
 
-        private String getIdForIndex(int index)
-        {
+        private String getIdForIndex(int index) {
             return String.valueOf((char) (index + 33));
         }
 
-        TraceBuilder getTraceBuilder()
-        {
+        TraceBuilder getTraceBuilder() {
             return fTraceBuilder;
         }
 
@@ -283,24 +249,19 @@ public class VCDLoaderTest
         long fLastTimestamp = -1;
     }
 
-    File tempFileFrom(String contents)
-    {
-        try
-        {
+    File tempFileFrom(String contents) {
+        try {
             File f = fTempFolder.newFile("test.vcd");
             (new FileOutputStream(f)).write(contents.getBytes());
             return f;
-        }
-        catch (IOException exc)
-        {
+        } catch (IOException exc) {
             fail("Caught I/O exception trying to create temporary file");
             return null;
         }
     }
 
     // Timescale is one microsecond
-    @Test public void testTimescaleUs()
-    {
+    @Test public void testTimescaleUs() {
         TestBuilder builder = new TestBuilder();
         builder.setTimestampMultiplier(1000);
         builder.addString("$timescale\n   1us\n$end\n");
@@ -315,21 +276,17 @@ public class VCDLoaderTest
         builder.appendTransition(0, 4, "1");
         builder.finish();
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
-                null);
-        }
-        catch (Exception exc)
-        {
+                        null);
+        } catch (Exception exc) {
             fail("caught exception");
         }
     }
 
     // Timescale is one nanosecond
-    @Test public void testTimescaleNs()
-    {
+    @Test public void testTimescaleNs() {
         TestBuilder builder = new TestBuilder();
         builder.setTimestampMultiplier(1);
         builder.addString("$timescale\n   1ns\n$end\n");
@@ -344,20 +301,16 @@ public class VCDLoaderTest
         builder.appendTransition(0, 4, "1");
         builder.finish();
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
-                null);
-        }
-        catch (Exception exc)
-        {
+                        null);
+        } catch (Exception exc) {
             fail("caught exception");
         }
     }
 
-    @Test public void testMultibit()
-    {
+    @Test public void testMultibit() {
         TestBuilder builder = new TestBuilder();
         builder.setTimestampMultiplier(1);
         builder.addString("$timescale\n   1ns\n$end\n");
@@ -369,216 +322,164 @@ public class VCDLoaderTest
         builder.appendTransition(0, 5, "1101010010100010");
         builder.finish();
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
-                null);
-        }
-        catch (Exception exc)
-        {
+                        null);
+        } catch (Exception exc) {
             fail("caught exception " + exc);
         }
     }
 
-    @Test public void testUnknownTimescale()
-    {
+    @Test public void testUnknownTimescale() {
         String fileContents = "\n\n$timescale\n   1qs\n$end\n";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             assertEquals("line 4: unknown timescale value 1qs",
-                exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+                         exc.getMessage());
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testUnknownNetId()
-    {
+    @Test public void testUnknownNetId() {
         String fileContents = "$scope module mod1 $end\n" +
-            "$var wire 1 ! clk $end\n" +
-            "$upscope $end\n" +
-            "$enddefinitions $end\n" +
-            "#0\n" +
-            "1$\n";
+                              "$var wire 1 ! clk $end\n" +
+                              "$upscope $end\n" +
+                              "$enddefinitions $end\n" +
+                              "#0\n" +
+                              "1$\n";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             assertEquals("line 6: Unknown net id $", exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testInvalidLogicValue()
-    {
+    @Test public void testInvalidLogicValue() {
         String fileContents = "$scope module mod1 $end\n" +
-            "$var wire 1 ! clk $end\n" +
-            "$upscope $end\n" +
-            "$enddefinitions $end\n" +
-            "#0\n" +
-            "2!\n";
+                              "$var wire 1 ! clk $end\n" +
+                              "$upscope $end\n" +
+                              "$enddefinitions $end\n" +
+                              "#0\n" +
+                              "2!\n";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             assertEquals("line 6: Invalid logic value",
-                exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+                         exc.getMessage());
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testInvalidScope()
-    {
+    @Test public void testInvalidScope() {
         String fileContents = "$scope module mod1\n" +
-            "$var wire 1 ! clk $end\n";
+                              "$var wire 1 ! clk $end\n";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             assertEquals("line 2: parse error, expected $end got $var",
-                exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+                         exc.getMessage());
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testInvalidUpscope()
-    {
+    @Test public void testInvalidUpscope() {
         String fileContents = "$scope module mod1 $end\n" +
-            "$var wire 1 ! clk $end\n" +
-            "$upscope\n" +
-            "$enddefinitions\n";
+                              "$var wire 1 ! clk $end\n" +
+                              "$upscope\n" +
+                              "$enddefinitions\n";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             assertEquals("line 4: parse error, expected $end got $enddefinitions",
-                exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+                         exc.getMessage());
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testInvalidDefinition()
-    {
+    @Test public void testInvalidDefinition() {
         String fileContents = "$scope module mod1 $end\n" +
-            "$var wire 1 ! clk\n" +
-            "$upscope\n" +
-            "$enddefinitions\n";
+                              "$var wire 1 ! clk\n" +
+                              "$upscope\n" +
+                              "$enddefinitions\n";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             exc.printStackTrace();
             assertEquals("line 3: parse error, expected $end got $upscope",
-                exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+                         exc.getMessage());
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testInvalidTimescale()
-    {
+    @Test public void testInvalidTimescale() {
         String fileContents = "$timescale\n" +
-            "	1us\n" +
-            "$scope module mod1 $end\n";
+                              "	1us\n" +
+                              "$scope module mod1 $end\n";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             assertEquals("line 3: parse error, expected $end got $scope",
-                exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+                         exc.getMessage());
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testTruncatedFile()
-    {
+    @Test public void testTruncatedFile() {
         String fileContents = "$scope module mod1";
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
-        }
-        catch (TraceLoader.LoadException exc)
-        {
+        } catch (TraceLoader.LoadException exc) {
             exc.printStackTrace();
             assertEquals("line 1: unexpected end of file",
-                exc.getMessage());
-        }
-        catch (IOException exc)
-        {
+                         exc.getMessage());
+        } catch (IOException exc) {
             fail("IOException " + exc);
         }
     }
 
-    @Test public void testTraceAlias()
-    {
+    @Test public void testTraceAlias() {
         String fileContents = "$scope module mod1 $end\n" +
-            "$var wire 1 # foo $end\n" +
-            "$var wire 1 ! source $end\n" +
-            "$var wire 1 ! alias $end\n" +  // This one has same ID as source
-            "$upscope $end\n" +
-            "$enddefinitions $end\n" +
-            "#0\n" +
-            "1!\n";
+                              "$var wire 1 # foo $end\n" +
+                              "$var wire 1 ! source $end\n" +
+                              "$var wire 1 ! alias $end\n" +  // This one has same ID as source
+                              "$upscope $end\n" +
+                              "$enddefinitions $end\n" +
+                              "#0\n" +
+                              "1!\n";
 
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectEnterModule("mod1");
@@ -589,20 +490,16 @@ public class VCDLoaderTest
         builder.expectAppendTransition(1, 0, "1");
         builder.expectLoadFinished();
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(tempFileFrom(fileContents), builder, null);
-        }
-        catch (Exception exc)
-        {
+        } catch (Exception exc) {
             fail("Threw exception " + exc);
         }
     }
 
     // Put everything together with more data and multiple signals
-    @Test public void testMixed()
-    {
+    @Test public void testMixed() {
         TestBuilder builder = new TestBuilder();
         builder.setTimestampMultiplier(1);
         builder.addString("$date\n	Mon Aug 15 22:28:13 2016\n$end\n");
@@ -619,16 +516,13 @@ public class VCDLoaderTest
         builder.exitModule();
         builder.exitModule();
         builder.endDefinitions();
-        for (int i = 0; i < 10000; i++)
-        {
+        for (int i = 0; i < 10000; i++) {
             long time = i * 5;
 
             if (i % 2 == 0)
                 builder.appendTransition(0, time, "0");
-            else
-            {
-                if (i > 5)
-                {
+            else {
+                if (i > 5) {
                     builder.appendTransition(0, time, "1");
                     builder.appendTransition(2, time, i * 8);
                     builder.appendTransition(3, time, (i * 123123123) ^ i);
@@ -643,14 +537,11 @@ public class VCDLoaderTest
 
         builder.finish();
 
-        try
-        {
+        try {
             VCDLoader loader = new VCDLoader();
             loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
-                null);
-        }
-        catch (Exception exc)
-        {
+                        null);
+        } catch (Exception exc) {
             fail("caught exception " + exc);
         }
     }

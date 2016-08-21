@@ -17,10 +17,8 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-public class BitVectorTest
-{
-    @Test public void testParseHex()
-    {
+public class BitVectorTest {
+    @Test public void testParseHex() {
         assertEquals(0, (new BitVector("0", 16)).intValue());
         assertEquals(1, (new BitVector("1", 16)).intValue());
         assertEquals(2, (new BitVector("2", 16)).intValue());
@@ -39,8 +37,7 @@ public class BitVectorTest
         assertEquals("123456789ABCDEFABCDEF", bv.toString(16));
     }
 
-    @Test public void testParseBinary()
-    {
+    @Test public void testParseBinary() {
         BitVector bv = new BitVector("110111010100100100101100101001001010001001", 2);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
@@ -48,16 +45,14 @@ public class BitVectorTest
         assertEquals("110111010100100100101100101001001010001001", bv.toString(2));
     }
 
-    @Test public void testParseDecimal()
-    {
+    @Test public void testParseDecimal() {
         BitVector bv = new BitVector("3492343343482759676947735281634934371324", 10);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
         assertEquals("3492343343482759676947735281634934371324", bv.toString(10));
     }
 
-    @Test public void testParseX()
-    {
+    @Test public void testParseX() {
         BitVector bv = new BitVector("xxxxxxxxxxx", 2);
         assertEquals(11, bv.getWidth());
         assertFalse(bv.isZ());
@@ -65,8 +60,7 @@ public class BitVectorTest
         assertEquals("xxxxxxxxxxx", bv.toString(2));
     }
 
-    @Test public void testParseZ()
-    {
+    @Test public void testParseZ() {
         BitVector bv = new BitVector("zzzzzzzz", 2);
         assertEquals(8, bv.getWidth());
         assertTrue(bv.isZ());
@@ -74,56 +68,39 @@ public class BitVectorTest
         assertEquals("zzzzzzzz", bv.toString(2));
     }
 
-    @Test public void testNumberFormatException()
-    {
-        try
-        {
+    @Test public void testNumberFormatException() {
+        try {
             BitVector bv = new BitVector("12345", 2);
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
         }
 
-        try
-        {
+        try {
             BitVector bv = new BitVector("ABCDEFGH", 16);
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
         }
 
-        try
-        {
+        try {
             BitVector bv = new BitVector("1234a", 10);
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
         }
 
-        try
-        {
+        try {
             BitVector bv = new BitVector("z", 10);
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
         }
 
-        try
-        {
+        try {
             BitVector bv = new BitVector("x", 10);
             fail("Did not throw exception");
-        }
-        catch (NumberFormatException exc)
-        {
+        } catch (NumberFormatException exc) {
         }
     }
 
-    @Test public void testSetBit()
-    {
+    @Test public void testSetBit() {
         BitVector bv = new BitVector(8);
         bv.setBit(7, BitVector.VALUE_1);
         bv.setBit(6, BitVector.VALUE_0);
@@ -136,8 +113,7 @@ public class BitVectorTest
         assertEquals("101z01x1", bv.toString(2));
     }
 
-    @Test public void testGetBit()
-    {
+    @Test public void testGetBit() {
         BitVector bv = new BitVector("1x010z10", 2);
         assertEquals(BitVector.VALUE_1, bv.getBit(7));
         assertEquals(BitVector.VALUE_X, bv.getBit(6));
@@ -149,8 +125,7 @@ public class BitVectorTest
         assertEquals(BitVector.VALUE_0, bv.getBit(0));
     }
 
-    @Test public void testCompare()
-    {
+    @Test public void testCompare() {
         BitVector bv1 = new BitVector("1", 2);      // Shorter than others
         BitVector bv2 = new BitVector("01001", 2);  // Has leading zeros
         BitVector bv3 = new BitVector("10100", 2);

@@ -18,9 +18,8 @@
 
 import java.awt.*;
 
-interface WaveformPainter
-{
+interface WaveformPainter {
     public void paint(Graphics g, TraceDataModel model, int netId,
-        int y, Rectangle visibleRect, double horizontalScale,
-        ValueFormatter formatter);
+                      int y, Rectangle visibleRect, double horizontalScale,
+                      ValueFormatter formatter);
 }

@@ -19,7 +19,6 @@
 // readable strings.
 //
 
-public interface ValueFormatter
-{
+public interface ValueFormatter {
     String format(BitVector values);
 }

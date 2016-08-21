@@ -14,10 +14,8 @@
 // limitations under the License.
 //
 
-public class ASCIIValueFormatter implements ValueFormatter
-{
-    public String format(BitVector bits)
-    {
+public class ASCIIValueFormatter implements ValueFormatter {
+    public String format(BitVector bits) {
         return Character.toString((char) bits.intValue());
     }
 }

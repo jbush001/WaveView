@@ -23,12 +23,10 @@ import java.util.*;
 import java.awt.*;
 import java.io.*;
 
-class AppPreferences
-{
+class AppPreferences {
     private static final int kMaxRecentFiles = 10;
 
-    public static AppPreferences getInstance()
-    {
+    public static AppPreferences getInstance() {
         if (fInstance == null)
             fInstance = new AppPreferences();
 
@@ -46,21 +44,17 @@ class AppPreferences
     public Color kListSelectionFgColor;
     public Color kValueColor;
 
-    public void setInitialTraceDirectory(File file)
-    {
+    public void setInitialTraceDirectory(File file) {
         fPrefs.put("initialTraceDirectory", file.toString());
     }
 
-    public File getInitialTraceDirectory()
-    {
+    public File getInitialTraceDirectory() {
         return new File(fPrefs.get("initialTraceDirectory", ""));
     }
 
-    public void addFileToRecents(String path)
-    {
+    public void addFileToRecents(String path) {
         // check if this is already in the recent files list
-        for (String recentFile : fRecentFiles)
-        {
+        for (String recentFile : fRecentFiles) {
             if (recentFile.equals(path))
                 return;    // Skip
         }
@@ -73,8 +67,7 @@ class AppPreferences
 
         // Write out to preferences file
         StringBuffer recentList = new StringBuffer();
-        for (String recentFile : fRecentFiles)
-        {
+        for (String recentFile : fRecentFiles) {
             if (recentList.length() > 0)
                 recentList.append(';');
 
@@ -84,13 +77,11 @@ class AppPreferences
         fPrefs.put("recentFiles", recentList.toString());
     }
 
-    public Vector<String> getRecentFileList()
-    {
+    public Vector<String> getRecentFileList() {
         return fRecentFiles;
     }
 
-    public void writeColors()
-    {
+    public void writeColors() {
         writeColor("traceColor", kTraceColor);
         writeColor("conflictColor", kConflictColor);
         writeColor("selectionColor", kSelectionColor);
@@ -103,17 +94,14 @@ class AppPreferences
         writeColor("valueColor", kValueColor);
     }
 
-    private AppPreferences()
-    {
+    private AppPreferences() {
         readPreferences();
     }
 
-    void readPreferences()
-    {
+    void readPreferences() {
         String recentList = fPrefs.get("recentFiles", "");
         String[] paths = recentList.split(";");
-        for (String path : paths)
-        {
+        for (String path : paths) {
             if (path.length() > 0)
                 fRecentFiles.addElement(path);
         }
@@ -130,18 +118,16 @@ class AppPreferences
         kValueColor = readColor("valueColor", Color.blue);
     }
 
-    private Color readColor(String name, Color def)
-    {
+    private Color readColor(String name, Color def) {
         int components = fPrefs.getInt(name, -1);
         if (components == -1)
             return def;
 
         return new Color((components >> 16) & 0xff, (components >> 8) & 0xff,
-            components & 0xff);
+                         components & 0xff);
     }
 
-    private void writeColor(String name, Color color)
-    {
+    private void writeColor(String name, Color color) {
         int packed = color.getBlue() | (color.getGreen() << 8) | (color.getRed() << 16);
         fPrefs.putInt(name, packed);
     }

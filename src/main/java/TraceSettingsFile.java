@@ -27,20 +27,16 @@ import java.io.*;
 /// may be removed in a future release"
 ///
 
-class TraceSettingsFile
-{
+class TraceSettingsFile {
     public TraceSettingsFile(String filename, TraceDataModel dataModel,
-        TraceViewModel viewModel)    /// @bug make order of view and data model consistent between methods
-    {
+                             TraceViewModel viewModel) {  /// @bug make order of view and data model consistent between methods
         fFilename = filename;
         fDataModel = dataModel;
         fViewModel = viewModel;
     }
 
-    public void writeConfigurationFile()
-    {
-        try
-        {
+    public void writeConfigurationFile() {
+        try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = builder.newDocument();
 
@@ -60,8 +56,7 @@ class TraceSettingsFile
             netSetsElement.appendChild(netSetElement);
 
             // Write out all of our saved net sets
-            for (int i = 0; i < fViewModel.getNetSetCount(); i++)
-            {
+            for (int i = 0; i < fViewModel.getNetSetCount(); i++) {
                 fViewModel.selectNetSet(i);
                 netSetElement = makeVisibleNetList(document);
                 netSetElement.setAttribute("name", fViewModel.getNetSetName(i));
@@ -71,8 +66,7 @@ class TraceSettingsFile
             Element markers = document.createElement("markers");
             configuration.appendChild(markers);
 
-            for (int i = 0; i < fViewModel.getMarkerCount(); i++)
-            {
+            for (int i = 0; i < fViewModel.getMarkerCount(); i++) {
                 Element markerElement = document.createElement("marker");
                 markers.appendChild(markerElement);
 
@@ -93,20 +87,16 @@ class TraceSettingsFile
             format.setIndenting(true);
             XMLSerializer serializer = new XMLSerializer(new FileOutputStream(new File(fFilename)), format);
             serializer.serialize(document);
-        }
-        catch (Exception exc)
-        {
+        } catch (Exception exc) {
             System.out.println("caught exception " + exc + " while saving state");
             exc.printStackTrace();
         }
     }
 
-    public Element makeVisibleNetList(Document document)
-    {
+    public Element makeVisibleNetList(Document document) {
         Element netSetElement = document.createElement("netset");
 
-        for (int i = 0; i < fViewModel.getVisibleNetCount(); i++)
-        {
+        for (int i = 0; i < fViewModel.getVisibleNetCount(); i++) {
             int netId = fViewModel.getVisibleNet(i);
 
             Element sigElement = document.createElement("net");
@@ -122,11 +112,9 @@ class TraceSettingsFile
             sigElement.appendChild(format);
 
             ValueFormatter formatter = fViewModel.getValueFormatter(i);
-            if (formatter instanceof IdentifierValueFormatter)
-            {
+            if (formatter instanceof IdentifierValueFormatter) {
                 IdentifierValueFormatter ivf = (IdentifierValueFormatter) formatter;
-                for (int j = 0; j < ivf.getMappingCount(); j++)
-                {
+                for (int j = 0; j < ivf.getMappingCount(); j++) {
                     Text idNode = document.createTextNode("" + ivf.getValueByIndex(j));
                     Text valueNode = document.createTextNode(ivf.getNameByIndex(j));
 
@@ -141,9 +129,7 @@ class TraceSettingsFile
                     mappingElement.appendChild(textElement);
                     textElement.appendChild(valueNode);
                 }
-            }
-            else
-            {
+            } else {
                 Class c = formatter.getClass();
                 format.appendChild(document.createTextNode(c.getName()));
             }
@@ -152,8 +138,7 @@ class TraceSettingsFile
         return netSetElement;
     }
 
-    private String getSubTag(Element parent, String tagName)
-    {
+    private String getSubTag(Element parent, String tagName) {
         Text elem = (Text) parent.getElementsByTagName(tagName).item(0).getFirstChild();
         if (elem == null)
             return "";
@@ -161,13 +146,11 @@ class TraceSettingsFile
         return elem.getData();
     }
 
-    public void readNetSet(Element element) throws ClassNotFoundException
-    {
+    public void readNetSet(Element element) throws ClassNotFoundException {
         fViewModel.removeAllNets();
 
         NodeList netElements = element.getElementsByTagName("net");
-        for (int i = 0; i < netElements.getLength(); i++)
-        {
+        for (int i = 0; i < netElements.getLength(); i++) {
             // Get the name
             Element netElem = (Element) netElements.item(i);
             String name = getSubTag(netElem, "name");
@@ -175,34 +158,24 @@ class TraceSettingsFile
             String format = getSubTag(netElem, "format");
             ValueFormatter formatter = null;
             NodeList mappings = netElem.getElementsByTagName("mapping");
-            if (mappings.getLength() > 0)
-            {
+            if (mappings.getLength() > 0) {
                 formatter = new IdentifierValueFormatter();
-                for (int j = 0; j < mappings.getLength(); j++)
-                {
+                for (int j = 0; j < mappings.getLength(); j++) {
                     Element mappingElem = (Element) mappings.item(j);
                     String id = getSubTag(mappingElem, "id");
                     String text = getSubTag(mappingElem, "text");
                     ((IdentifierValueFormatter)formatter).addMapping(Integer.parseInt(id), text);
                 }
-            }
-            else
-            {
+            } else {
                 Class c = Class.forName(format);
-                if (c != null)
-                {
-                    try
-                    {
+                if (c != null) {
+                    try {
                         formatter = (ValueFormatter) c.newInstance();
-                    }
-                    catch (Exception exc)
-                    {
+                    } catch (Exception exc) {
                         System.out.println(exc);
                         formatter = new BinaryValueFormatter();
                     }
-                }
-                else
-                {
+                } else {
                     System.out.println("unable to find class" + format);
                     formatter = new BinaryValueFormatter();
                 }
@@ -211,18 +184,15 @@ class TraceSettingsFile
             int netId = fDataModel.findNet(name);
             if (netId < 0)
                 System.out.println("unknown net " + name);
-            else
-            {
+            else {
                 fViewModel.makeNetVisible(netId);
                 fViewModel.setValueFormatter(fViewModel.getVisibleNetCount() - 1, formatter);
             }
         }
     }
 
-    public void readConfigurationFile()
-    {
-        try
-        {
+    public void readConfigurationFile() {
+        try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = builder.parse(new File(fFilename));
 
@@ -232,8 +202,7 @@ class TraceSettingsFile
             NodeList netSets = document.getElementsByTagName("netset");
 
             // Read saved net sets
-            for (int i = 1; i < netSets.getLength(); i++)
-            {
+            for (int i = 1; i < netSets.getLength(); i++) {
                 Element netSet = (Element) netSets.item(i);
                 readNetSet(netSet);
                 fViewModel.saveNetSet(netSet.getAttribute("name"));
@@ -244,18 +213,15 @@ class TraceSettingsFile
                 readNetSet((Element) netSets.item(0));
 
             NodeList markers = document.getElementsByTagName("marker");
-            for (int j = 0; j < markers.getLength(); j++)
-            {
+            for (int j = 0; j < markers.getLength(); j++) {
                 Element markerElem = (Element) markers.item(j);
 
                 // XXX note, we ignore the ID and assume these are already in order
                 // Integer.parseInt(getSubTag(markerElem, "id"));
                 fViewModel.addMarker(getSubTag(markerElem, "description"),
-                    Long.parseLong(getSubTag(markerElem, "timestamp")));
+                                     Long.parseLong(getSubTag(markerElem, "timestamp")));
             }
-        }
-        catch (Exception exc)
-        {
+        } catch (Exception exc) {
             System.out.println("caught exception " + exc);
             exc.printStackTrace();
         }

@@ -16,24 +16,20 @@
 
 import java.util.*;
 
-class TraceDataModel
-{
-    public NetTreeModel getNetTree()
-    {
+class TraceDataModel {
+    public NetTreeModel getNetTree() {
         return fNetTree;
     }
 
     /// A bit of a kludge. Used when loading a new model.
-    void copyFrom(TraceDataModel from)
-    {
+    void copyFrom(TraceDataModel from) {
         fMaxTimestamp = from.fMaxTimestamp;
         fFullNameToNetMap = from.fFullNameToNetMap;
         fAllNets = from.fAllNets;
         fNetTree = from.fNetTree;
     }
 
-    TraceBuilder startBuilding()
-    {
+    TraceBuilder startBuilding() {
         fAllNets.clear();
         fFullNameToNetMap.clear();
         fNetTree.clear();
@@ -41,30 +37,25 @@ class TraceDataModel
         return new ConcreteTraceBuilder();
     }
 
-    TransitionVector.Iterator findTransition(int netId, long timestamp)
-    {
+    TransitionVector.Iterator findTransition(int netId, long timestamp) {
         return fAllNets.elementAt(netId).findTransition(timestamp);
     }
 
-    public long getMaxTimestamp()
-    {
+    public long getMaxTimestamp() {
         return fMaxTimestamp;
     }
 
     /// @bug Is this needed if we already have the NetTreeModel exposed?
-    public int getNetFromTreeObject(Object o)
-    {
+    public int getNetFromTreeObject(Object o) {
         return fNetTree.getNetFromTreeObject(o);
     }
 
-    public int getTotalNetCount()
-    {
+    public int getTotalNetCount() {
         return fAllNets.size();
     }
 
     /// look up by fully qualified name
-    public int findNet(String name)
-    {
+    public int findNet(String name) {
         Integer i = fFullNameToNetMap.get(name);
         if (i == null)
             return -1;
@@ -72,64 +63,52 @@ class TraceDataModel
         return i.intValue();
     }
 
-    public int getNetWidth(int index)
-    {
+    public int getNetWidth(int index) {
         return fAllNets.elementAt(index).getWidth();
     }
 
-    public String getShortNetName(int index)
-    {
+    public String getShortNetName(int index) {
         return fAllNets.elementAt(index).getShortName();
     }
 
-    public String getFullNetName(int index)
-    {
+    public String getFullNetName(int index) {
         return fAllNets.elementAt(index).getFullName();
     }
 
-    private class NetDataModel
-    {
-        NetDataModel(String shortName, int width)
-        {
+    private class NetDataModel {
+        NetDataModel(String shortName, int width) {
             fShortName = shortName;
             fTransitionVector = new TransitionVector(width);
         }
 
         // This NetDataModel shares its transition data with another one.
         /// @todo clean this up by separating into another class
-        NetDataModel(String shortName, NetDataModel cloneFrom)
-        {
+        NetDataModel(String shortName, NetDataModel cloneFrom) {
             fShortName = shortName;
             fTransitionVector = cloneFrom.fTransitionVector;
         }
 
-        void setFullName(String name)
-        {
+        void setFullName(String name) {
             fFullName = name;
         }
 
-        String getFullName()
-        {
+        String getFullName() {
             return fFullName;
         }
 
-        String getShortName()
-        {
+        String getShortName() {
             return fShortName;
         }
 
-        TransitionVector.Iterator findTransition(long timestamp)
-        {
+        TransitionVector.Iterator findTransition(long timestamp) {
             return fTransitionVector.findTransition(timestamp);
         }
 
-        long getMaxTimestamp()
-        {
+        long getMaxTimestamp() {
             return fTransitionVector.getMaxTimestamp();
         }
 
-        int getWidth()
-        {
+        int getWidth() {
             return fTransitionVector.getWidth();
         }
 
@@ -138,39 +117,32 @@ class TraceDataModel
         private String fFullName;
     }
 
-    private class ConcreteTraceBuilder implements TraceBuilder
-    {
-        public void enterModule(String name)
-        {
+    private class ConcreteTraceBuilder implements TraceBuilder {
+        public void enterModule(String name) {
             fNetTree.enterScope(name);
             fScopeStack.push(name);
         }
 
-        public void exitModule()
-        {
+        public void exitModule() {
             fNetTree.leaveScope();
             fScopeStack.pop();
         }
 
-        public void loadFinished()
-        {
+        public void loadFinished() {
             fMaxTimestamp = 0;
             for (NetDataModel model : fAllNets)
                 fMaxTimestamp = Math.max(fMaxTimestamp, model.getMaxTimestamp());
         }
 
-        public void appendTransition(int id, long timestamp, BitVector values)
-        {
+        public void appendTransition(int id, long timestamp, BitVector values) {
             NetDataModel model = fAllNets.elementAt(id);
             model.fTransitionVector.appendTransition(timestamp, values);
         }
 
-        public int newNet(String shortName, int cloneId, int width)
-        {
+        public int newNet(String shortName, int cloneId, int width) {
             // Build full path
             StringBuffer fullName = new StringBuffer();
-            for (String scope : fScopeStack)
-            {
+            for (String scope : fScopeStack) {
                 if (fullName.length() != 0)
                     fullName.append('.');
 
@@ -194,8 +166,7 @@ class TraceDataModel
             return thisNetIndex;
         }
 
-        public int getNetWidth(int netId)
-        {
+        public int getNetWidth(int netId) {
             return fAllNets.elementAt(netId).getWidth();
         }
 

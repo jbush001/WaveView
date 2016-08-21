@@ -14,10 +14,8 @@
 // limitations under the License.
 //
 
-public class HexadecimalValueFormatter implements ValueFormatter
-{
-    public String format(BitVector bits)
-    {
+public class HexadecimalValueFormatter implements ValueFormatter {
+    public String format(BitVector bits) {
         return bits.toString(16);
     }
 }

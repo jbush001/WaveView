@@ -21,10 +21,8 @@ import java.util.*;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
-class ColorPreferencePane extends PreferencePane
-{
-    public ColorPreferencePane()
-    {
+class ColorPreferencePane extends PreferencePane {
+    public ColorPreferencePane() {
         super(new FlowLayout());
         AppPreferences prefs = AppPreferences.getInstance();
 
@@ -43,10 +41,10 @@ class ColorPreferencePane extends PreferencePane
         fMarkerColorButton = new ColorButton("Marker", prefs.kMarkerColor);
         add(fMarkerColorButton);
         fListSelectionBgColorButton = new ColorButton("List Selection Background",
-            prefs.kListSelectionBgColor);
+                prefs.kListSelectionBgColor);
         add(fListSelectionBgColorButton);
         fListSelectionFgColorButton = new ColorButton("List Selection Foreground",
-            prefs.kListSelectionFgColor);
+                prefs.kListSelectionFgColor);
         add(fListSelectionFgColorButton);
         fValueColorButton = new ColorButton("Value", prefs.kValueColor);
         add(fValueColorButton);
@@ -54,12 +52,10 @@ class ColorPreferencePane extends PreferencePane
         setPreferredSize(new Dimension(275, 500));
     }
 
-    public void loadSettings()
-    {
+    public void loadSettings() {
     }
 
-    public void saveSettings()
-    {
+    public void saveSettings() {
         AppPreferences prefs = AppPreferences.getInstance();
         prefs.kTraceColor = fTraceColorButton.getColor();
         prefs.kConflictColor = fConflictColorButton.getColor();

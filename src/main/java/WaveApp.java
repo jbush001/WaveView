@@ -25,10 +25,8 @@ import java.io.*;
 /// @todo Put trace loader in separate thread, show progress dialog, pop
 ///    up error messages on exception.
 ///
-public class WaveApp extends JPanel implements ActionListener
-{
-    public WaveApp()
-    {
+public class WaveApp extends JPanel implements ActionListener {
+    public WaveApp() {
         super(new BorderLayout());
 
         JToolBar toolBar = new JToolBar();
@@ -63,13 +61,11 @@ public class WaveApp extends JPanel implements ActionListener
         setPreferredSize(new Dimension(900,600));
     }
 
-    public ImageIcon loadResourceIcon(String name)
-    {
+    public ImageIcon loadResourceIcon(String name) {
         return new ImageIcon(this.getClass().getClassLoader().getResource(name));
     }
 
-    public void actionPerformed(ActionEvent e)
-    {
+    public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if (cmd.equals("zoomin"))
             fTraceView.zoomIn();
@@ -77,10 +73,8 @@ public class WaveApp extends JPanel implements ActionListener
             fTraceView.zoomOut();
         else if (cmd.equals("zoomselection"))
             fTraceView.zoomToSelection();
-        else if (cmd.equals("addnet"))
-        {
-            if (fNetSearchPane == null)
-            {
+        else if (cmd.equals("addnet")) {
+            if (fNetSearchPane == null) {
                 /// @bug This is a hack.  It makes sure the search
                 /// panel is created after the file is loaded.
                 /// It may not work correctly after re-loading a new file.
@@ -91,45 +85,33 @@ public class WaveApp extends JPanel implements ActionListener
                 /// unless I do this.
                 fNetSearchPane.setVisible(false);
                 fNetSearchPane.setVisible(true);
-            }
-            else
-            {
+            } else {
                 // Hide or show the search panel
                 fNetSearchPane.setVisible(!fNetSearchPane.isVisible());
             }
-        }
-        else if (cmd.equals("opentrace"))
-        {
+        } else if (cmd.equals("opentrace")) {
             JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialTraceDirectory());
             chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
             chooser.setMultiSelectionEnabled(false);
             int returnValue = chooser.showOpenDialog(this);
-            if (returnValue == JFileChooser.APPROVE_OPTION)
-            {
+            if (returnValue == JFileChooser.APPROVE_OPTION) {
                 AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
                 loadTraceFile(chooser.getSelectedFile());
             }
-        }
-        else if (cmd.equals("quit"))
-        {
+        } else if (cmd.equals("quit")) {
             saveConfig();
             System.exit(0);
-        }
-        else if (cmd.equals("removeAllMarkers"))
+        } else if (cmd.equals("removeAllMarkers"))
             fTraceViewModel.removeAllMarkers();
         else if (cmd.equals("removeAllNets"))
             fTraceViewModel.removeAllNets();
-        else if (cmd.equals("insertMarker"))
-        {
+        else if (cmd.equals("insertMarker")) {
             String description = (String) JOptionPane.showInputDialog(
-                SwingUtilities.getWindowAncestor(this), "Description for this marker", "New Marker",
-                JOptionPane.PLAIN_MESSAGE, null, null, null);
+                                     SwingUtilities.getWindowAncestor(this), "Description for this marker", "New Marker",
+                                     JOptionPane.PLAIN_MESSAGE, null, null, null);
             fTraceViewModel.addMarker(description, fTraceViewModel.getCursorPosition());
-        }
-        else if (cmd.equals("showmarkerlist"))
-        {
-            if (fMarkersWindow == null)
-            {
+        } else if (cmd.equals("showmarkerlist")) {
+            if (fMarkersWindow == null) {
                 fMarkersWindow = new JFrame("Markers");
                 MarkerListView contentPane = new MarkerListView(fTraceViewModel);
                 contentPane.setOpaque(true);
@@ -140,8 +122,7 @@ public class WaveApp extends JPanel implements ActionListener
 
             fMarkersWindow.setLocationRelativeTo(this);
             fMarkersWindow.setVisible(true);
-        }
-        else if (cmd.equals("nextMarker"))
+        } else if (cmd.equals("nextMarker"))
             fTraceViewModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("prevMarker"))
             fTraceViewModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
@@ -153,29 +134,21 @@ public class WaveApp extends JPanel implements ActionListener
             findNext();
         else if (cmd.equals("findprev"))
             findPrev();
-        else if (cmd.equals("saveNetSet"))
-        {
+        else if (cmd.equals("saveNetSet")) {
             String name = (String) JOptionPane.showInputDialog(
-                SwingUtilities.getWindowAncestor(this), "Net Set Name", "Save Net Set",
-                JOptionPane.PLAIN_MESSAGE, null, null, null);
-            if (!name.equals(""))
-            {
+                              SwingUtilities.getWindowAncestor(this), "Net Set Name", "Save Net Set",
+                              JOptionPane.PLAIN_MESSAGE, null, null, null);
+            if (!name.equals("")) {
                 fTraceViewModel.saveNetSet(name);
                 buildNetMenu();
             }
-        }
-        else if (cmd.length() > 7  && cmd.substring(0, 7).equals("netSet_"))
-        {
+        } else if (cmd.length() > 7  && cmd.substring(0, 7).equals("netSet_")) {
             int index = Integer.parseInt(cmd.substring(7));
             fTraceViewModel.selectNetSet(index);
-        }
-        else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open "))
-        {
+        } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
             // Load from recents menu
             loadTraceFile(cmd.substring(5));
-        }
-        else if (cmd.equals("prefs"))
-        {
+        } else if (cmd.equals("prefs")) {
             if (fPrefsWindow == null)
                 fPrefsWindow = new PreferenceWindow();
 
@@ -184,41 +157,32 @@ public class WaveApp extends JPanel implements ActionListener
         }
     }
 
-    void loadTraceFile(String path)
-    {
+    void loadTraceFile(String path) {
         loadTraceFile(new File(path));
     }
 
-    class TraceLoadWorker extends SwingWorker<Void, Void>
-    {
-        TraceLoadWorker(File file, ProgressMonitor monitor)
-        {
+    class TraceLoadWorker extends SwingWorker<Void, Void> {
+        TraceLoadWorker(File file, ProgressMonitor monitor) {
             fFile = file;
             fProgressMonitor = monitor;
         }
 
-        public Void doInBackground()
-        {
-            try
-            {
+        public Void doInBackground() {
+            try {
                 System.out.println("Loading " + fFile.getCanonicalPath());
 
                 /// @todo Determine the loader type dynamically
                 TraceLoader loader = new VCDLoader();
                 fNewModel = new TraceDataModel();
-                TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener()
-                {
-                    public boolean updateProgress(final int percentRead)
-                    {
+                TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
+                    public boolean updateProgress(final int percentRead) {
                         // Accessing the component from a different thread, technically
                         // a no no, but probably okay.
                         if (fProgressMonitor.isCanceled())
                             return false;
 
-                        SwingUtilities.invokeLater(new Runnable()
-                        {
-                            public void run()
-                            {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            public void run() {
                                 fProgressMonitor.setProgress(percentRead);
                             }
                         });
@@ -228,9 +192,7 @@ public class WaveApp extends JPanel implements ActionListener
                 };
 
                 loader.load(fFile, fNewModel.startBuilding(), progressListener);
-            }
-            catch (Exception exc)
-            {
+            } catch (Exception exc) {
                 exc.printStackTrace();
                 fErrorMessage = exc.getMessage();
             }
@@ -239,17 +201,13 @@ public class WaveApp extends JPanel implements ActionListener
         }
 
         // Executed on main thread
-        protected void done()
-        {
+        protected void done() {
             System.out.println("finished loading trace file");
             fProgressMonitor.close();
-            if (fErrorMessage != null)
-            {
+            if (fErrorMessage != null) {
                 JOptionPane.showMessageDialog(WaveApp.this, "Error opening waveform file: "
-                    + fErrorMessage);
-            }
-            else
-            {
+                                              + fErrorMessage);
+            } else {
                 fCurrentQuery = null;
 
                 // XXX hack
@@ -264,18 +222,15 @@ public class WaveApp extends JPanel implements ActionListener
                 fTraceViewModel.clear();
                 fFrame.setTitle("Waveform Viewer [" + fFile.getName() + "]");
 
-                try
-                {
+                try {
                     fConfigFileName = createConfigFileName(fFile);
                     fTraceSettingsFile = new TraceSettingsFile(fConfigFileName,
-                        fTraceDataModel, fTraceViewModel);
+                            fTraceDataModel, fTraceViewModel);
                     if ((new File(fConfigFileName)).exists())
                         fTraceSettingsFile.readConfigurationFile();
 
                     AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
-                }
-                catch (IOException exc)
-                {
+                } catch (IOException exc) {
                     // Creating File object (which is just a path) probably shouldn't fail
                 }
 
@@ -290,8 +245,7 @@ public class WaveApp extends JPanel implements ActionListener
         private String fErrorMessage;
     }
 
-    void loadTraceFile(File file)
-    {
+    void loadTraceFile(File file) {
         if (fConfigFileName != null)
             saveConfig();
 
@@ -299,16 +253,14 @@ public class WaveApp extends JPanel implements ActionListener
         (new TraceLoadWorker(file, monitor)).execute();
     }
 
-    void showFindDialog()
-    {
+    void showFindDialog() {
         // The initial query string is formed by the selected nets and
         // their values at the cursor position.
         StringBuffer initialQuery = new StringBuffer();
         boolean first = true;
         long cursorPosition = fTraceViewModel.getCursorPosition();
 
-        for (int index : fTraceView.getSelectedNets())
-        {
+        for (int index : fTraceView.getSelectedNets()) {
             int netId = fTraceViewModel.getVisibleNet(index);
             if (first)
                 first = false;
@@ -317,7 +269,7 @@ public class WaveApp extends JPanel implements ActionListener
 
             initialQuery.append(fTraceDataModel.getFullNetName(netId));
             Transition t = fTraceDataModel.findTransition(netId,
-                cursorPosition).next();
+                           cursorPosition).next();
 
             initialQuery.append(" = 'h");
             initialQuery.append(t.toString(16));
@@ -333,58 +285,46 @@ public class WaveApp extends JPanel implements ActionListener
         frame.setVisible(true);
     }
 
-    void setQuery(String query) throws Query.ParseException
-    {
+    void setQuery(String query) throws Query.ParseException {
         fCurrentQuery = new Query(fTraceDataModel, query);
     }
 
-    void findNext()
-    {
-        if (fCurrentQuery != null)
-        {
+    void findNext() {
+        if (fCurrentQuery != null) {
             long newTimestamp = fCurrentQuery.getNextMatch(fTraceViewModel.getCursorPosition());
-            if (newTimestamp >= 0)
-            {
+            if (newTimestamp >= 0) {
                 fTraceViewModel.setSelectionStart(newTimestamp);
                 fTraceViewModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
-    void findPrev()
-    {
-        if (fCurrentQuery != null)
-        {
+    void findPrev() {
+        if (fCurrentQuery != null) {
             long newTimestamp = fCurrentQuery.getPreviousMatch(fTraceViewModel.getCursorPosition());
-            if (newTimestamp >= 0)
-            {
+            if (newTimestamp >= 0) {
                 fTraceViewModel.setSelectionStart(newTimestamp);
                 fTraceViewModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
-    void saveConfig()
-    {
+    void saveConfig() {
         if (fTraceSettingsFile != null)
             fTraceSettingsFile.writeConfigurationFile();
     }
 
-    static String createConfigFileName(File file) throws IOException
-    {
+    static String createConfigFileName(File file) throws IOException {
         String path = file.getCanonicalPath();
 
         // Find leaf file name
         int index = path.lastIndexOf('/');
         String dirPath;
         String nodeName;
-        if (index == -1)
-        {
+        if (index == -1) {
             dirPath = "";
             nodeName = path;
-        }
-        else
-        {
+        } else {
             dirPath = path.substring(0, index + 1);
             nodeName = path.substring(index + 1);
         }
@@ -394,8 +334,7 @@ public class WaveApp extends JPanel implements ActionListener
         return dirPath + nodeName;
     }
 
-    void buildNetMenu()
-    {
+    void buildNetMenu() {
         fNetMenu.removeAll();
 
         JMenuItem item = new JMenuItem("Add nets...");
@@ -413,11 +352,9 @@ public class WaveApp extends JPanel implements ActionListener
         item.addActionListener(this);
         fNetMenu.add(item);
 
-        if (fTraceViewModel.getNetSetCount() > 0)
-        {
+        if (fTraceViewModel.getNetSetCount() > 0) {
             fNetMenu.addSeparator();
-            for (int i = 0; i < fTraceViewModel.getNetSetCount(); i++)
-            {
+            for (int i = 0; i < fTraceViewModel.getNetSetCount(); i++) {
                 item = new JMenuItem(fTraceViewModel.getNetSetName(i));
                 item.setActionCommand("netSet_" + i);
                 item.addActionListener(this);
@@ -426,11 +363,9 @@ public class WaveApp extends JPanel implements ActionListener
         }
     }
 
-    void buildRecentFilesMenu()
-    {
+    void buildRecentFilesMenu() {
         fRecentFilesMenu.removeAll();
-        for (String path : AppPreferences.getInstance().getRecentFileList())
-        {
+        for (String path : AppPreferences.getInstance().getRecentFileList()) {
             JMenuItem item = new JMenuItem(path);
             item.setActionCommand("open " + path);
             item.addActionListener(this);
@@ -438,8 +373,7 @@ public class WaveApp extends JPanel implements ActionListener
         }
     }
 
-    void buildMenus()
-    {
+    void buildMenus() {
         JMenuItem item;
         JMenuBar menuBar = new JMenuBar();
         fFrame.setJMenuBar(menuBar);
@@ -486,7 +420,7 @@ public class WaveApp extends JPanel implements ActionListener
         item.setActionCommand("findprev");
         item.addActionListener(this);
         item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK
-            | KeyEvent.SHIFT_DOWN_MASK));
+                            | KeyEvent.SHIFT_DOWN_MASK));
         editMenu.add(item);
 
         // XXX go to timestamp
@@ -564,8 +498,7 @@ public class WaveApp extends JPanel implements ActionListener
     private TraceSettingsFile fTraceSettingsFile;
     private NetSearchView fNetSearchPane;
 
-    private static void createAndShowGUI(String[] args)
-    {
+    private static void createAndShowGUI(String[] args) {
         final WaveApp contentPane = new WaveApp();
         JFrame frame = new JFrame("Waveform Viewer");
         contentPane.fFrame = frame;
@@ -588,11 +521,12 @@ public class WaveApp extends JPanel implements ActionListener
             contentPane.loadTraceFile(args[0]);
     }
 
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         final String[] _args = args;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() { createAndShowGUI(_args); }
+            public void run() {
+                createAndShowGUI(_args);
+            }
         });
     }
 }

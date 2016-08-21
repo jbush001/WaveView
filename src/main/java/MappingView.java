@@ -27,10 +27,8 @@ import javax.swing.table.*;
 /// states.
 /// @bug Should check for duplicate values
 ///
-class MappingView extends JPanel
-{
-    public MappingView(IdentifierValueFormatter formatter)
-    {
+class MappingView extends JPanel {
+    public MappingView(IdentifierValueFormatter formatter) {
         super(new BorderLayout());
 
         fTable = new JTable(new MappingTableModel(formatter));
@@ -39,35 +37,29 @@ class MappingView extends JPanel
         add(scroller);
     }
 
-    class MappingTableModel extends AbstractTableModel
-    {
+    class MappingTableModel extends AbstractTableModel {
         private static final int kNumColumns = 2;
 
-        public MappingTableModel(IdentifierValueFormatter formatter)
-        {
+        public MappingTableModel(IdentifierValueFormatter formatter) {
             fFormatter = formatter;
         }
 
-        public String getColumnName(int col)
-        {
+        public String getColumnName(int col) {
             if (col == 0)
                 return "value";
             else
                 return "name";
         }
 
-        public int getRowCount()
-        {
+        public int getRowCount() {
             return fFormatter.getMappingCount() + 1;    // Bottom row always adds
         }
 
-        public int getColumnCount()
-        {
+        public int getColumnCount() {
             return 2;
         }
 
-        public Object getValueAt(int row, int col)
-        {
+        public Object getValueAt(int row, int col) {
             if (row >= fFormatter.getMappingCount())
                 return "";
 
@@ -77,13 +69,11 @@ class MappingView extends JPanel
                 return fFormatter.getNameByIndex(row);
         }
 
-        public boolean isCellEditable(int row, int col)
-        {
+        public boolean isCellEditable(int row, int col) {
             return true;
         }
 
-        public void setValueAt(Object value, int row, int col)
-        {
+        public void setValueAt(Object value, int row, int col) {
             if (row == fFormatter.getMappingCount())
                 fFormatter.addMapping(0, "");    // Create a new row
 

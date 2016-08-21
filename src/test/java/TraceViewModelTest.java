@@ -17,45 +17,38 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-public class TraceViewModelTest
-{
-    class TestModelListener implements TraceViewModel.Listener
-    {
+public class TraceViewModelTest {
+    class TestModelListener implements TraceViewModel.Listener {
         public static final int CURSOR_CHANGED = 1;
         public static final int NETS_ADDED = 2;
         public static final int NETS_REMOVED = 4;
         public static final int SCALE_CHANGED = 8;
         public static final int MARKER_CHANGED = 16;
 
-        public void cursorChanged(long oldTimestamp, long newTimestamp)
-        {
+        public void cursorChanged(long oldTimestamp, long newTimestamp) {
             fNotifications |= CURSOR_CHANGED;
             fLongArg0 = oldTimestamp;
             fLongArg1 = newTimestamp;
         }
 
-        public void netsAdded(int firstIndex, int lastIndex)
-        {
+        public void netsAdded(int firstIndex, int lastIndex) {
             fNotifications |= NETS_ADDED;
             fLongArg0 = (long) firstIndex;
             fLongArg1 = (long) lastIndex;
         }
 
-        public void netsRemoved(int firstIndex, int lastIndex)
-        {
+        public void netsRemoved(int firstIndex, int lastIndex) {
             fNotifications |= NETS_REMOVED;
             fLongArg0 = (long) firstIndex;
             fLongArg1 = (long) lastIndex;
         }
 
-        public void scaleChanged(double newScale)
-        {
+        public void scaleChanged(double newScale) {
             fNotifications |= SCALE_CHANGED;
             fDoubleArg = newScale;
         }
 
-        public void markerChanged(long timestamp)
-        {
+        public void markerChanged(long timestamp) {
             fNotifications |= MARKER_CHANGED;
             fLongArg0 = timestamp;
         }
@@ -67,8 +60,7 @@ public class TraceViewModelTest
     }
 
 
-    @Test public void testRemoveMarker()
-    {
+    @Test public void testRemoveMarker() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
@@ -157,8 +149,7 @@ public class TraceViewModelTest
         assertEquals(0, tvm.getMarkerCount());
     }
 
-    @Test public void testNextPrevMarker()
-    {
+    @Test public void testNextPrevMarker() {
         TraceViewModel tvm = new TraceViewModel();
 
         tvm.addMarker("marker2", 100);
@@ -210,8 +201,7 @@ public class TraceViewModelTest
         assertEquals(150, tvm.getSelectionStart());
     }
 
-    @Test public void testScaleChange()
-    {
+    @Test public void testScaleChange() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
@@ -222,8 +212,7 @@ public class TraceViewModelTest
         assertEquals(123.0, tvm.getHorizontalScale(), 0.0);
     }
 
-    @Test public void testCursor()
-    {
+    @Test public void testCursor() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
@@ -240,8 +229,7 @@ public class TraceViewModelTest
         assertEquals(37, listener.fLongArg1);
     }
 
-    @Test public void testMakeNetsVisible()
-    {
+    @Test public void testMakeNetsVisible() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);

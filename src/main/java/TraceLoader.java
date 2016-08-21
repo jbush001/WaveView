@@ -21,20 +21,16 @@ import java.io.File;
 // Classes override this interface to create an object that can load traces
 // from a file.
 //
-interface TraceLoader
-{
+interface TraceLoader {
     /// @todo Some kind of file detection APIs (register by extension, sniff, etc)
 
-    class LoadException extends Exception
-    {
-        LoadException(String description)
-        {
+    class LoadException extends Exception {
+        LoadException(String description) {
             super(description);
         }
     }
 
-    interface ProgressListener
-    {
+    interface ProgressListener {
         /// @param percentRead amount of file loaded 0-100
         /// @returns true if it should continue loading, false if the load
         ///  has been cancelled and it should stop.
@@ -42,6 +38,6 @@ interface TraceLoader
     }
 
     public void load(File file, TraceBuilder builder, ProgressListener listener)
-        throws LoadException, IOException;
+    throws LoadException, IOException;
 }
 
