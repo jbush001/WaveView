@@ -208,7 +208,7 @@ public class WaveApp extends JPanel implements ActionListener
                 fNewModel = new TraceDataModel();
                 TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener()
                 {
-                    public boolean updateProgress(int percentRead)
+                    public boolean updateProgress(final int percentRead)
                     {
                         // Accessing the component from a different thread, technically
                         // a no no, but probably okay.
