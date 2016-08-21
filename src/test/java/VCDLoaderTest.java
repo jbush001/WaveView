@@ -217,6 +217,15 @@ public class VCDLoaderTest
             fVCDContents.append("$enddefinitions $end\n");
         }
 
+        void appendTransition(int netId, long timestamp, int value)
+        {
+            StringBuffer tmp = new StringBuffer();
+            for (int i = 0; i < 32; i++)
+                tmp.append((value & (0x80000000 >> i)) != 0 ? '1' : '0');
+
+            appendTransition(netId, timestamp, tmp.toString());
+        }
+
         void appendTransition(int netId, long timestamp, String bitString)
         {
             if (fLastTimestamp != timestamp)
@@ -576,6 +585,60 @@ public class VCDLoaderTest
         catch (Exception exc)
         {
             fail("Threw exception " + exc);
+        }
+    }
+
+    // Put everything together with more data and multiple signals
+    @Test public void testMixed()
+    {
+        TestBuilder builder = new TestBuilder();
+        builder.setTimestampMultiplier(1);
+        builder.addString("$date\n	Mon Aug 15 22:28:13 2016\n$end\n");
+        builder.addString("$version\n	Icarus Verilog\n$end\n");
+        builder.addString("$timescale\n	1us\n$end\n");
+
+        builder.enterModule("mod1");
+        builder.setTimestampMultiplier(1000);
+        builder.defineNet("clk", -1, 1);
+        builder.defineNet("reset", -1, 1);
+        builder.enterModule("mod2");
+        builder.defineNet("addr", -1, 32);
+        builder.defineNet("data", -1, 32);
+        builder.exitModule();
+        builder.exitModule();
+        builder.endDefinitions();
+        for (int i = 0; i < 10000; i++)
+        {
+            long time = i * 5;
+
+            if (i % 2 == 0)
+                builder.appendTransition(0, time, "0");
+            else
+            {
+                if (i > 5)
+                {
+                    builder.appendTransition(0, time, "1");
+                    builder.appendTransition(2, time, i * 8);
+                    builder.appendTransition(3, time, (i * 123123123) ^ i);
+                }
+
+                if (i == 0)
+                    builder.appendTransition(1, time, "1");
+                else if (i == 5)
+                    builder.appendTransition(1, time, "0");
+            }
+        }
+
+        builder.finish();
+
+        try
+        {
+            VCDLoader loader = new VCDLoader();
+            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+        }
+        catch (Exception exc)
+        {
+            fail("caught exception " + exc);
         }
     }
 }

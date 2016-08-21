@@ -227,9 +227,8 @@ public class QueryTest
         catch (Query.ParseException exc)
         {
             assertEquals("unexpected end of string", exc.toString());
-
-            /// @todo Need to check that offsets are set for this (pretty sure
-            /// they are not)
+            assertEquals(10, exc.getStartOffset());
+            assertEquals(10, exc.getEndOffset());
         }
     }
 

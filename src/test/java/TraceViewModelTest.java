@@ -17,7 +17,6 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-/// @todo test TraceViewModel.prevMarker/nextMarker with extendSelection
 public class TraceViewModelTest
 {
     class TestModelListener implements TraceViewModel.Listener
@@ -169,12 +168,16 @@ public class TraceViewModelTest
         tvm.setCursorPosition(0);
         tvm.nextMarker(false);
         assertEquals(100, tvm.getCursorPosition());
+        assertEquals(100, tvm.getSelectionStart());
         tvm.nextMarker(false);
         assertEquals(200, tvm.getCursorPosition());
+        assertEquals(200, tvm.getSelectionStart());
         tvm.nextMarker(false);
         assertEquals(300, tvm.getCursorPosition());
+        assertEquals(300, tvm.getSelectionStart());
         tvm.nextMarker(false);
         assertEquals(400, tvm.getCursorPosition());
+        assertEquals(400, tvm.getSelectionStart());
         tvm.nextMarker(false);
         assertEquals(400, tvm.getCursorPosition());
 
@@ -183,12 +186,28 @@ public class TraceViewModelTest
         assertEquals(400, tvm.getCursorPosition());
         tvm.prevMarker(false);
         assertEquals(300, tvm.getCursorPosition());
+        assertEquals(300, tvm.getSelectionStart());
         tvm.prevMarker(false);
         assertEquals(200, tvm.getCursorPosition());
+        assertEquals(200, tvm.getSelectionStart());
         tvm.prevMarker(false);
         assertEquals(100, tvm.getCursorPosition());
+        assertEquals(100, tvm.getSelectionStart());
         tvm.prevMarker(false);
         assertEquals(100, tvm.getCursorPosition());
+
+        // Test extending the selection while navigating to marker
+        tvm.setCursorPosition(0);
+        tvm.setSelectionStart(0);
+        tvm.nextMarker(true);
+        assertEquals(100, tvm.getCursorPosition());
+        assertEquals(0, tvm.getSelectionStart());
+
+        tvm.setCursorPosition(150);
+        tvm.setSelectionStart(150);
+        tvm.prevMarker(true);
+        assertEquals(100, tvm.getCursorPosition());
+        assertEquals(150, tvm.getSelectionStart());
     }
 
     @Test public void testScaleChange()
