@@ -10,17 +10,13 @@ Install JDK from:
 
   http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 
-Install Gradle (using MacPorts https://www.macports.org/)
-
-    sudo port install gradle
-
 ## Linux (Ubuntu)
 
-	  sudo apt-get install openjdk-8-jdk gradle
+	  sudo apt-get install openjdk-8-jdk
 
 # Building
 
-    gradle build
+    ./gradlew build
 
 # Running
 
