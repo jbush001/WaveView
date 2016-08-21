@@ -24,13 +24,13 @@ import java.util.*;
 
 class VCDLoader implements TraceLoader
 {
-    public VCDLoader()
+    public void load(File file, TraceBuilder builder, ProgressListener listener)
+        throws LoadException, IOException
     {
-    }
-
-    public void load(InputStream is, TraceBuilder builder) throws LoadException, IOException
-    {
-        fTokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(is)));
+        fProgressListener = listener;
+        fProgressStream = new ProgressInputStream(new FileInputStream(file));
+        fTokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(fProgressStream)));
+        fFileLength = file.length();
         fTokenizer.resetSyntax();
         fTokenizer.wordChars(33, 126);
         fTokenizer.whitespaceChars('\r', '\r');
@@ -38,7 +38,7 @@ class VCDLoader implements TraceLoader
         fTokenizer.whitespaceChars(' ', ' ');
         fTokenizer.whitespaceChars('\t', '\t');
 
-        fInputStream = new BufferedInputStream(is);
+        fInputStream = new BufferedInputStream(new FileInputStream(file));
         fTraceBuilder = builder;
 
         while (parseDefinition())
@@ -127,7 +127,7 @@ class VCDLoader implements TraceLoader
             // XXX need to handle other units
 
             default:
-                throw new LoadException("Line " + fTokenizer.lineno() + ": unknown timescale value "
+                throw new LoadException("line " + fTokenizer.lineno() + ": unknown timescale value "
                     + getTokenString());
         }
 
@@ -204,7 +204,7 @@ class VCDLoader implements TraceLoader
             Integer net = fNetMap.get(id);
             if (net == null)
             {
-                throw new LoadException("Line " + fTokenizer.lineno() + ": Unknown net id "
+                throw new LoadException("line " + fTokenizer.lineno() + ": Unknown net id "
                     + id);
             }
 
@@ -247,7 +247,7 @@ class VCDLoader implements TraceLoader
                             break;
 
                         default:
-                            throw new LoadException("Line " + fTokenizer.lineno() + ": Invalid logic value");
+                            throw new LoadException("line " + fTokenizer.lineno() + ": Invalid logic value");
                     }
 
                     decodedValues.setBit(bitIndex--, bitValue);
@@ -280,7 +280,7 @@ class VCDLoader implements TraceLoader
         nextToken(true);
         if (!getTokenString().equals(value))
         {
-            throw new LoadException("Line " + fTokenizer.lineno() + ": parse error, expected " + value + " got "
+            throw new LoadException("line " + fTokenizer.lineno() + ": parse error, expected " + value + " got "
                 + getTokenString());
         }
     }
@@ -289,11 +289,24 @@ class VCDLoader implements TraceLoader
     /// @returns True if token was returned, false if not
     private boolean nextToken(boolean require) throws LoadException, IOException
     {
+        if (fProgressListener != null)
+        {
+            // Update periodically
+            long totalRead = fProgressStream.getTotalRead();
+            if (totalRead - fLastProgressUpdate > 0x10000)
+            {
+                if (!fProgressListener.updateProgress((int)(totalRead * 100 / fFileLength)))
+                    throw new LoadException("load cancelled");
+
+                fLastProgressUpdate = totalRead;
+            }
+        }
+
         if (fTokenizer.nextToken() == StreamTokenizer.TT_EOF)
         {
             if (require)
             {
-                throw new LoadException("Line " + fTokenizer.lineno()
+                throw new LoadException("line " + fTokenizer.lineno()
                     + ": unexpected end of file");
             }
             else
@@ -308,6 +321,59 @@ class VCDLoader implements TraceLoader
         return fTokenizer.sval;
     }
 
+    private class ProgressInputStream extends InputStream
+    {
+        ProgressInputStream(InputStream wrapped)
+        {
+            fWrapped = wrapped;
+        }
+
+        public int read() throws IOException
+        {
+            int got = fWrapped.read();
+            if (got >= 0)
+                fTotalRead++;
+
+            return got;
+        }
+
+        public int read(byte[] b) throws IOException
+        {
+            int got = fWrapped.read(b);
+            if (got >= 0)
+                fTotalRead += got;
+
+            return got;
+        }
+
+        public int read(byte[] b, int off, int len) throws IOException
+        {
+            int got = fWrapped.read(b, off, len);
+            if (got >= 0)
+                fTotalRead += got;
+
+            return got;
+        }
+
+        public long skip(long n) throws IOException
+        {
+            long skipped = fWrapped.skip(n);
+            if (skipped >= 0)
+                fTotalRead += skipped;
+
+            return skipped;
+
+        }
+
+        long getTotalRead()
+        {
+            return fTotalRead;
+        }
+
+        long fTotalRead;
+        InputStream fWrapped;
+    }
+
     private StreamTokenizer fTokenizer;
     private TraceBuilder fTraceBuilder;
     private InputStream fInputStream;
@@ -315,4 +381,8 @@ class VCDLoader implements TraceLoader
     private HashMap<String, Integer> fNetMap = new HashMap<String, Integer>();
     private long fNanoSecondsPerIncrement;    /// @todo Switch to be unit agnostic
     private int fTotalTransitions;
+    private ProgressListener fProgressListener;
+    private ProgressInputStream fProgressStream;
+    private long fLastProgressUpdate;
+    private long fFileLength;
 };

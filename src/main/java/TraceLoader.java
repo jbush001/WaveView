@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.File;
 
 //
 // Classes override this interface to create an object that can load traces
@@ -33,6 +33,15 @@ interface TraceLoader
         }
     }
 
-    public void load(InputStream is, TraceBuilder builder) throws LoadException, IOException;
+    interface ProgressListener
+    {
+        /// @param percentRead amount of file loaded 0-100
+        /// @returns true if it should continue loading, false if the load
+        ///  has been cancelled and it should stop.
+        boolean updateProgress(int percentRead);
+    }
+
+    public void load(File file, TraceBuilder builder, ProgressListener listener)
+        throws LoadException, IOException;
 }
 

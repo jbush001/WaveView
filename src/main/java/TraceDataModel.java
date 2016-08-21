@@ -23,6 +23,15 @@ class TraceDataModel
         return fNetTree;
     }
 
+    /// A bit of a kludge. Used when loading a new model.
+    void copyFrom(TraceDataModel from)
+    {
+        fMaxTimestamp = from.fMaxTimestamp;
+        fFullNameToNetMap = from.fFullNameToNetMap;
+        fAllNets = from.fAllNets;
+        fNetTree = from.fNetTree;
+    }
+
     TraceBuilder startBuilding()
     {
         fAllNets.clear();
@@ -41,7 +50,6 @@ class TraceDataModel
     {
         return fMaxTimestamp;
     }
-
 
     /// @bug Is this needed if we already have the NetTreeModel exposed?
     public int getNetFromTreeObject(Object o)

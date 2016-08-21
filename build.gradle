@@ -12,9 +12,9 @@ dependencies {
 }
 
 jar {
-	manifest {
-		attributes(
-			'Main-Class': 'WaveApp'
-		)
-	}
+    manifest {
+        attributes(
+            'Main-Class': 'WaveApp'
+        )
+    }
 }

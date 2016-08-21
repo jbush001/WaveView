@@ -27,12 +27,9 @@ import java.io.*;
 ///
 public class WaveApp extends JPanel implements ActionListener
 {
-    public WaveApp(TraceViewModel viewModel, TraceDataModel dataModel)
+    public WaveApp()
     {
         super(new BorderLayout());
-
-        fTraceViewModel = viewModel;
-        fTraceDataModel = dataModel;
 
         JToolBar toolBar = new JToolBar();
         JButton button = new JButton(loadResourceIcon("zoom-in.png"));
@@ -60,7 +57,7 @@ public class WaveApp extends JPanel implements ActionListener
         toolBar.add(button);
         add(toolBar, BorderLayout.PAGE_START);
 
-        fTraceView = new TraceView(viewModel, dataModel, this);
+        fTraceView = new TraceView(fTraceViewModel, fTraceDataModel, this);
         add(fTraceView, BorderLayout.CENTER);
 
         setPreferredSize(new Dimension(900,600));
@@ -109,16 +106,8 @@ public class WaveApp extends JPanel implements ActionListener
             int returnValue = chooser.showOpenDialog(this);
             if (returnValue == JFileChooser.APPROVE_OPTION)
             {
-                try
-                {
-                    openTraceFile(chooser.getSelectedFile());
-                    addFileToRecents(chooser.getSelectedFile().getCanonicalPath());
-                    AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
-                }
-                catch (Exception exc)
-                {
-                    JOptionPane.showMessageDialog(this, "Error opening configuration file");
-                }
+                AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
+                loadTraceFile(chooser.getSelectedFile());
             }
         }
         else if (cmd.equals("quit"))
@@ -182,15 +171,8 @@ public class WaveApp extends JPanel implements ActionListener
         }
         else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open "))
         {
-            try
-            {
-                openTraceFile(cmd.substring(5));
-            }
-            catch (Exception exc)
-            {
-                /// @todo Pop up an error dialog here
-                System.out.println("caught " + exc + " trying to open file");
-            }
+            // Load from recents menu
+            loadTraceFile(cmd.substring(5));
         }
         else if (cmd.equals("prefs"))
         {
@@ -202,33 +184,119 @@ public class WaveApp extends JPanel implements ActionListener
         }
     }
 
-    void openTraceFile(String path) throws Exception
+    void loadTraceFile(String path)
     {
-        openTraceFile(new File(path));
+        loadTraceFile(new File(path));
     }
 
-    void openTraceFile(File file) throws Exception
+    class TraceLoadWorker extends SwingWorker<Void, Void>
+    {
+        TraceLoadWorker(File file, ProgressMonitor monitor)
+        {
+            fFile = file;
+            fProgressMonitor = monitor;
+        }
+
+        public Void doInBackground()
+        {
+            try
+            {
+                System.out.println("Loading " + fFile.getCanonicalPath());
+
+                /// @todo Determine the loader type dynamically
+                TraceLoader loader = new VCDLoader();
+                fNewModel = new TraceDataModel();
+                TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener()
+                {
+                    public boolean updateProgress(int percentRead)
+                    {
+                        // Accessing the component from a different thread, technically
+                        // a no no, but probably okay.
+                        if (fProgressMonitor.isCanceled())
+                            return false;
+
+                        SwingUtilities.invokeLater(new Runnable()
+                        {
+                            public void run()
+                            {
+                                fProgressMonitor.setProgress(percentRead);
+                            }
+                        });
+
+                        return true;
+                    }
+                };
+
+                loader.load(fFile, fNewModel.startBuilding(), progressListener);
+            }
+            catch (Exception exc)
+            {
+                exc.printStackTrace();
+                fErrorMessage = exc.getMessage();
+            }
+
+            return null;
+        }
+
+        // Executed on main thread
+        protected void done()
+        {
+            System.out.println("finished loading trace file");
+            fProgressMonitor.close();
+            if (fErrorMessage != null)
+            {
+                JOptionPane.showMessageDialog(WaveApp.this, "Error opening waveform file: "
+                    + fErrorMessage);
+            }
+            else
+            {
+                fCurrentQuery = null;
+
+                // XXX hack
+                // Because this is running a separate thread, and I don't want to add locking
+                // everywhere, we load into a new copy of a data model. However, there are
+                // references to the trace data model scattered all over the place. Rather
+                // than try to update all pointers to the new model, I just copy data from
+                // the new object to the old one. Since I'm in the main window thread now,
+                // this is safe.
+                fTraceDataModel.copyFrom(fNewModel);
+
+                fTraceViewModel.clear();
+                fFrame.setTitle("Waveform Viewer [" + fFile.getName() + "]");
+
+                try
+                {
+                    fConfigFileName = createConfigFileName(fFile);
+                    fTraceSettingsFile = new TraceSettingsFile(fConfigFileName,
+                        fTraceDataModel, fTraceViewModel);
+                    if ((new File(fConfigFileName)).exists())
+                        fTraceSettingsFile.readConfigurationFile();
+
+                    AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
+                }
+                catch (IOException exc)
+                {
+                    // Creating File object (which is just a path) probably shouldn't fail
+                }
+
+                buildRecentFilesMenu();
+                buildNetMenu();
+            }
+        }
+
+        private File fFile;
+        private ProgressMonitor fProgressMonitor;
+        private TraceDataModel fNewModel;
+        private String fErrorMessage;
+    }
+
+    void loadTraceFile(File file)
     {
         if (fConfigFileName != null)
             saveConfig();
 
-        /// @todo Determine the type dynamically
-        TraceLoader loader = new VCDLoader();
-        fTraceViewModel.clear();
-
-        System.gc();
-        long startMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        long startTime = System.currentTimeMillis();
-        loader.load(new FileInputStream(file), fTraceDataModel.startBuilding());
-        long endTime = System.currentTimeMillis();
-        System.gc();
-        long endMem = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-
-        System.out.println("took " + (endTime - startTime) +  " ms to load file");
-        System.out.println("" + (endMem - startMem) +  " bytes of memory used");
-        fFrame.setTitle("Waveform Viewer [" + file.getName() + "]");
-        setConfigurationFile(createConfigFileName(file));
-        buildNetMenu();
+        ProgressMonitor monitor = new ProgressMonitor(WaveApp.this, "Loading...", "", 0, 100);
+        (new TraceLoadWorker(file, monitor)).execute();
     }
 
     void showFindDialog()
@@ -296,15 +364,6 @@ public class WaveApp extends JPanel implements ActionListener
         }
     }
 
-    void setConfigurationFile(String configFileName)
-    {
-        fTraceSettingsFile = new TraceSettingsFile(configFileName,
-            fTraceDataModel, fTraceViewModel);
-        fConfigFileName = configFileName ;
-        if ((new File(configFileName)).exists())
-            fTraceSettingsFile.readConfigurationFile();
-    }
-
     void saveConfig()
     {
         if (fTraceSettingsFile != null)
@@ -365,12 +424,6 @@ public class WaveApp extends JPanel implements ActionListener
                 fNetMenu.add(item);
             }
         }
-    }
-
-    void addFileToRecents(String path)
-    {
-        AppPreferences.getInstance().addFileToRecents(path);
-        buildRecentFilesMenu();
     }
 
     void buildRecentFilesMenu()
@@ -498,8 +551,8 @@ public class WaveApp extends JPanel implements ActionListener
     }
 
     private TraceView fTraceView;
-    private TraceViewModel fTraceViewModel;
-    private TraceDataModel fTraceDataModel;
+    private TraceViewModel fTraceViewModel = new TraceViewModel();
+    private TraceDataModel fTraceDataModel = new TraceDataModel();
     private String fConfigFileName;
     private Query fCurrentQuery;
     private JFrame fAddNetsWindow;
@@ -513,26 +566,10 @@ public class WaveApp extends JPanel implements ActionListener
 
     private static void createAndShowGUI(String[] args)
     {
-        TraceViewModel viewModel = new TraceViewModel();
-        TraceDataModel dataModel = new TraceDataModel();
-        final WaveApp contentPane = new WaveApp(viewModel, dataModel);
+        final WaveApp contentPane = new WaveApp();
         JFrame frame = new JFrame("Waveform Viewer");
         contentPane.fFrame = frame;
         contentPane.buildMenus();
-
-        if (args.length > 0)
-        {
-            try
-            {
-                contentPane.openTraceFile(args[0]);
-                contentPane.addFileToRecents((new File(args[0])).getCanonicalPath());
-            }
-            catch (Exception exc)
-            {
-                System.out.println("caught exception " + exc);
-                exc.printStackTrace();
-            }
-        }
 
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
@@ -546,6 +583,9 @@ public class WaveApp extends JPanel implements ActionListener
         frame.setContentPane(contentPane);
         frame.pack();
         frame.setVisible(true);
+
+        if (args.length > 0)
+            contentPane.loadTraceFile(args[0]);
     }
 
     public static void main(String[] args)

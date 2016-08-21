@@ -14,8 +14,9 @@
 // limitations under the License.
 //
 
-import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.rules.TemporaryFolder;
+import static org.junit.Assert.*;
 import java.nio.file.Paths;
 import java.io.*;
 import java.util.Vector;
@@ -23,6 +24,9 @@ import java.util.Vector;
 /// @todo test cloned nets
 public class VCDLoaderTest
 {
+    @Rule
+    public TemporaryFolder fTempFolder = new TemporaryFolder();
+
     // Implements TraceBuilder interface, which the VCDLoader will write into,
     // but asserts if events don't match a pre-defined sequence.
     public class ExpectTraceBuilder implements TraceBuilder
@@ -257,9 +261,9 @@ public class VCDLoaderTest
             System.out.println("output is\n" + fVCDContents.toString());
         }
 
-        InputStream getVCDInputStream()
+        File getVCDFile()
         {
-            return new ByteArrayInputStream(fVCDContents.toString().getBytes());
+            return tempFileFrom(fVCDContents.toString());
         }
 
         private String getIdForIndex(int index)
@@ -279,6 +283,20 @@ public class VCDLoaderTest
         long fLastTimestamp = -1;
     }
 
+    File tempFileFrom(String contents)
+    {
+        try
+        {
+            File f = fTempFolder.newFile("test.vcd");
+            (new FileOutputStream(f)).write(contents.getBytes());
+            return f;
+        }
+        catch (IOException exc)
+        {
+            fail("Caught I/O exception trying to create temporary file");
+            return null;
+        }
+    }
 
     // Timescale is one microsecond
     @Test public void testTimescaleUs()
@@ -300,7 +318,8 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+            loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
+                null);
         }
         catch (Exception exc)
         {
@@ -328,7 +347,8 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+            loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
+                null);
         }
         catch (Exception exc)
         {
@@ -352,7 +372,8 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+            loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
+                null);
         }
         catch (Exception exc)
         {
@@ -367,13 +388,12 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
-            assertEquals("Line 4: unknown timescale value 1qs",
+            assertEquals("line 4: unknown timescale value 1qs",
                 exc.getMessage());
         }
         catch (IOException exc)
@@ -394,13 +414,12 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
-            assertEquals("Line 6: Unknown net id $", exc.getMessage());
+            assertEquals("line 6: Unknown net id $", exc.getMessage());
         }
         catch (IOException exc)
         {
@@ -420,13 +439,12 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
-            assertEquals("Line 6: Invalid logic value",
+            assertEquals("line 6: Invalid logic value",
                 exc.getMessage());
         }
         catch (IOException exc)
@@ -443,13 +461,12 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
-            assertEquals("Line 2: parse error, expected $end got $var",
+            assertEquals("line 2: parse error, expected $end got $var",
                 exc.getMessage());
         }
         catch (IOException exc)
@@ -468,13 +485,12 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
-            assertEquals("Line 4: parse error, expected $end got $enddefinitions",
+            assertEquals("line 4: parse error, expected $end got $enddefinitions",
                 exc.getMessage());
         }
         catch (IOException exc)
@@ -493,14 +509,13 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
             exc.printStackTrace();
-            assertEquals("Line 3: parse error, expected $end got $upscope",
+            assertEquals("line 3: parse error, expected $end got $upscope",
                 exc.getMessage());
         }
         catch (IOException exc)
@@ -518,13 +533,12 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
-            assertEquals("Line 3: parse error, expected $end got $scope",
+            assertEquals("line 3: parse error, expected $end got $scope",
                 exc.getMessage());
         }
         catch (IOException exc)
@@ -540,14 +554,13 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                new DummyTraceBuilder());
+            loader.load(tempFileFrom(fileContents), new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         }
         catch (TraceLoader.LoadException exc)
         {
             exc.printStackTrace();
-            assertEquals("Line 1: unexpected end of file",
+            assertEquals("line 1: unexpected end of file",
                 exc.getMessage());
         }
         catch (IOException exc)
@@ -579,8 +592,7 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(new ByteArrayInputStream(fileContents.getBytes()),
-                builder);
+            loader.load(tempFileFrom(fileContents), builder, null);
         }
         catch (Exception exc)
         {
@@ -634,7 +646,8 @@ public class VCDLoaderTest
         try
         {
             VCDLoader loader = new VCDLoader();
-            loader.load(builder.getVCDInputStream(), builder.getTraceBuilder());
+            loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
+                null);
         }
         catch (Exception exc)
         {
