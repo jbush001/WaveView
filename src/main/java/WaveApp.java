@@ -82,23 +82,23 @@ public class WaveApp extends JPanel implements ActionListener
             fTraceView.zoomToSelection();
         else if (cmd.equals("addnet"))
         {
-            if (fSearchPane == null)
+            if (fNetSearchPane == null)
             {
                 /// @bug This is a hack.  It makes sure the search
                 /// panel is created after the file is loaded.
                 /// It may not work correctly after re-loading a new file.
-                fSearchPane = new NetSearchView(fTraceViewModel, fTraceDataModel);
-                add(fSearchPane, BorderLayout.WEST);
+                fNetSearchPane = new NetSearchView(fTraceViewModel, fTraceDataModel);
+                add(fNetSearchPane, BorderLayout.WEST);
 
                 /// @bug Bigger hack: for some reason it doesn't show up
                 /// unless I do this.
-                fSearchPane.setVisible(false);
-                fSearchPane.setVisible(true);
+                fNetSearchPane.setVisible(false);
+                fNetSearchPane.setVisible(true);
             }
             else
             {
                 // Hide or show the search panel
-                fSearchPane.setVisible(!fSearchPane.isVisible());
+                fNetSearchPane.setVisible(!fNetSearchPane.isVisible());
             }
         }
         else if (cmd.equals("opentrace"))
@@ -121,7 +121,7 @@ public class WaveApp extends JPanel implements ActionListener
                 }
             }
         }
-        else if (cmd.equals("exit"))
+        else if (cmd.equals("quit"))
         {
             saveConfig();
             System.exit(0);
@@ -149,6 +149,7 @@ public class WaveApp extends JPanel implements ActionListener
                 fMarkersWindow.pack();
             }
 
+            fMarkersWindow.setLocationRelativeTo(this);
             fMarkersWindow.setVisible(true);
         }
         else if (cmd.equals("nextMarker"))
@@ -158,7 +159,7 @@ public class WaveApp extends JPanel implements ActionListener
         else if (cmd.equals("removeMarker"))
             fTraceViewModel.removeMarkerAtTime(fTraceViewModel.getCursorPosition());
         else if (cmd.equals("findbyvalue"))
-            showQueryDialog();
+            showFindDialog();
         else if (cmd.equals("findnext"))
             findNext();
         else if (cmd.equals("findprev"))
@@ -196,6 +197,7 @@ public class WaveApp extends JPanel implements ActionListener
             if (fPrefsWindow == null)
                 fPrefsWindow = new PreferenceWindow();
 
+            fPrefsWindow.setLocationRelativeTo(this);
             fPrefsWindow.setVisible(true);
         }
     }
@@ -229,7 +231,7 @@ public class WaveApp extends JPanel implements ActionListener
         buildNetMenu();
     }
 
-    void showQueryDialog()
+    void showFindDialog()
     {
         // The initial query string is formed by the selected nets and
         // their values at the cursor position.
@@ -253,26 +255,19 @@ public class WaveApp extends JPanel implements ActionListener
             initialQuery.append(t.toString(16));
         }
 
-        // XXX make a proper find window with a textarea
-        String query = (String) JOptionPane.showInputDialog(
-            SwingUtilities.getWindowAncestor(this), "Enter search string",
-            initialQuery);
-        if (query != null)
-            doFind(query);
+        FindPanel findPanel = new FindPanel(this);
+        findPanel.setInitialQuery(initialQuery.toString());
+        JDialog frame = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Find", true);
+        frame.getContentPane().add(findPanel);
+        frame.setSize(new Dimension(450, 150));
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(this);
+        frame.setVisible(true);
     }
 
-    void doFind(String queryString)
+    void setQuery(String query) throws Query.ParseException
     {
-        try
-        {
-            fCurrentQuery = new Query(fTraceDataModel, queryString);
-            findNext();
-        }
-        catch (Query.ParseException exc)
-        {
-            JOptionPane.showMessageDialog(null, exc.toString(),"Error parsing query",
-                JOptionPane.ERROR_MESSAGE);
-        }
+        fCurrentQuery = new Query(fTraceDataModel, query);
     }
 
     void findNext()
@@ -401,6 +396,7 @@ public class WaveApp extends JPanel implements ActionListener
         item = new JMenuItem("Open Trace...");
         item.setActionCommand("opentrace");
         item.addActionListener(this);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.META_DOWN_MASK));
         fileMenu.add(item);
 
         fRecentFilesMenu = new JMenu("Open Recent");
@@ -413,9 +409,10 @@ public class WaveApp extends JPanel implements ActionListener
         item.addActionListener(this);
         fileMenu.add(item);
 
-        item = new JMenuItem("Exit");
-        item.setActionCommand("exit");
+        item = new JMenuItem("Quit");
+        item.setActionCommand("quit");
         item.addActionListener(this);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.META_DOWN_MASK));
         fileMenu.add(item);
 
         JMenu editMenu = new JMenu("Edit");
@@ -423,16 +420,20 @@ public class WaveApp extends JPanel implements ActionListener
         item = new JMenuItem("Find...");
         item.setActionCommand("findbyvalue");
         item.addActionListener(this);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK));
         editMenu.add(item);
 
         item = new JMenuItem("Find next");
         item.setActionCommand("findnext");
         item.addActionListener(this);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK));
         editMenu.add(item);
 
         item = new JMenuItem("Find prev");
         item.setActionCommand("findprev");
         item.addActionListener(this);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK
+            | KeyEvent.SHIFT_DOWN_MASK));
         editMenu.add(item);
 
         // XXX go to timestamp
@@ -441,13 +442,13 @@ public class WaveApp extends JPanel implements ActionListener
         menuBar.add(viewMenu);
         item = new JMenuItem("Zoom In");
         item.setActionCommand("zoomin");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.META_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, KeyEvent.META_DOWN_MASK));
         item.addActionListener(this);
         viewMenu.add(item);
 
         item = new JMenuItem("Zoom Out");
         item.setActionCommand("zoomout");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.META_DOWN_MASK));
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.META_DOWN_MASK));
         item.addActionListener(this);
         viewMenu.add(item);
 
@@ -508,7 +509,7 @@ public class WaveApp extends JPanel implements ActionListener
     private JFrame fFrame;
     private JMenu fRecentFilesMenu;
     private TraceSettingsFile fTraceSettingsFile;
-    private NetSearchView fSearchPane;
+    private NetSearchView fNetSearchPane;
 
     private static void createAndShowGUI(String[] args)
     {
