@@ -25,6 +25,7 @@ import javax.swing.table.*;
 /// This is a window that allows editing a table of number -> identifier
 /// mappings.  Usually used for displaying human readable names to state machine
 /// states.
+/// @bug Should check for duplicate values
 ///
 class MappingView extends JPanel
 {
