@@ -34,6 +34,8 @@ class TransitionVector
     /// @returns Iterator at transition. If there isn't a transition at this transition,
     ///   returns the transition before it. If this is before the first transition, returns
     ///   the first transition.
+    /// @todo Investigate using java.util.Arrays.binarySearch instead of a hand rolled
+    ///   implementation here.
     Iterator findTransition(long timestamp)
     {
         // Binary search

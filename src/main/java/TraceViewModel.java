@@ -265,7 +265,7 @@ public class TraceViewModel
         marker.fDescription = description;
         marker.fTimestamp = timestamp;
 
-        fMarkers.addSorted(timestamp, marker);
+        fMarkers.addSorted(marker);
         notifyMarkerChanged(timestamp);
     }
 

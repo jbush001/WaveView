@@ -16,6 +16,10 @@
 
 import java.util.*;
 
+///
+/// Vector that allows sorted inserts and binary search lookup.
+///
+
 class SortedVector<T> extends Vector<T>
 {
     public interface Keyed
@@ -37,30 +41,16 @@ class SortedVector<T> extends Vector<T>
         super(initialCapacity, capacityIncrement);
     }
 
-    /// XXX why pass key and not just call getKey on the value?
-    void addSorted(long key, T value)
+    void addSorted(T value)
     {
-        if (false)
+        long key = ((Keyed) value).getKey();
+        for (int i = 0; ; i++)
         {
-            /// @todo Optimized path, need to debug
-            if (size() == 0)
-                add(value);
-            else
+            if (i == size()
+                || ((Keyed) elementAt(i)).getKey() > key)
             {
-                int index = lookupValue(key) + 1;
-                insertElementAt(value, index);
-            }
-        }
-        else
-        {
-            for (int i = 0; ; i++)
-            {
-                if (i == size()
-                    || ((Keyed) elementAt(i)).getKey() > key)
-                {
-                    insertElementAt(value, i);
-                    break;
-                }
+                insertElementAt(value, i);
+                break;
             }
         }
     }
@@ -70,7 +60,11 @@ class SortedVector<T> extends Vector<T>
         return new SortedVectorIterator(this, lookupValue(key));
     }
 
-    // XXX better name like getIndexForKey?
+    /// @param key key value to search for
+    /// @returns index into array of element that matches key. If this
+    ///   element isn't matched exactly, return the element before this one.
+    ///   If the key is before the first element, return 0.
+    /// @todo better name like getIndexForKey?
     int lookupValue(long key)
     {
         // Binary search
