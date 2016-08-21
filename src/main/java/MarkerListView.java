@@ -28,7 +28,6 @@ import javax.swing.table.*;
 /// Displays a list of all markers and their timestamps.  The user can click on them
 /// to jump to that point in the trace.
 /// @todo Add a way to remove entries directly from this list
-/// @todo Add a way to edit the comment/description from this list
 ///
 public class MarkerListView extends JPanel implements ActionListener, TraceViewModel.Listener
 {
@@ -41,6 +40,8 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
 
         fTableModel = new MarkerTableModel(fTraceViewModel);
         fTable = new JTable(fTableModel);
+
+        fTable.getColumnModel().getColumn(0).setMaxWidth(35);
         fTable.addMouseListener(new MouseAdapter(){
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2)
@@ -130,6 +131,16 @@ class MarkerTableModel extends AbstractTableModel
         }
 
         return "";
+    }
+
+    public boolean isCellEditable(int row, int col)
+    {
+        return col == 2;    // Can edit description
+    }
+
+    public void setValueAt(Object value, int row, int col)
+    {
+        fTraceViewModel.setDescriptionForMarker(row, (String) value);
     }
 
     private String kColumnNames[] = { "ID", "Timestamp", "Comment" };

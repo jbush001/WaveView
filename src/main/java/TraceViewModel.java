@@ -309,6 +309,11 @@ public class TraceViewModel
         return fMarkers.elementAt(index).fDescription;
     }
 
+    public void setDescriptionForMarker(int index, String description)
+    {
+        fMarkers.elementAt(index).fDescription = description;
+    }
+
     public long getTimestampForMarker(int index)
     {
         return fMarkers.elementAt(index).fTimestamp;
