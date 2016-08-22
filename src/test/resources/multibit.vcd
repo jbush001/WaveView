@@ -1,0 +1,14 @@
+$timescale
+   1ns
+$end
+$scope module mod1 $end
+$var wire 16 ! addr [15:0] $end
+$var wire 3 # data [2:0] $end
+$upscope $end
+$enddefinitions $end
+#0
+b1010111000101011 !
+b011 #
+#5
+b1101010010100010 !
+b100 #

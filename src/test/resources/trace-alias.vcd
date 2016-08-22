@@ -1,0 +1,8 @@
+$scope module mod1 $end
+$var wire 1 # foo $end
+$var wire 1 ! source $end
+$var wire 1 ! alias $end
+$upscope $end
+$enddefinitions $end
+#0
+1!
