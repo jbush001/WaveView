@@ -18,7 +18,8 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 public class EnumValueFormatterTest {
-    @Test public void testFormat() {
+    @Test
+    public void testFormat() {
         EnumValueFormatter vf = new EnumValueFormatter();
         vf.addMapping(11, "primero");
         vf.addMapping(13, "segundo");

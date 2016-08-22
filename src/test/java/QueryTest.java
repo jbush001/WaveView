@@ -39,7 +39,8 @@ public class QueryTest {
         return traceDataModel;
     }
 
-    @Test public void testSimpleQuery() {
+    @Test
+    public void testSimpleQuery() {
         try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = 1");
             assertEquals(10, query.getNextMatch(4));
@@ -60,7 +61,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testLiteralBases() {
+    @Test
+    public void testLiteralBases() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -90,7 +92,8 @@ public class QueryTest {
     /// @bug This doesn't match correctly yet: Xes are ignored for
     /// matching.
     /// Verify it at least parses the query.
-    @Test public void testMatchXZ() {
+    @Test
+    public void testMatchXZ() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -153,7 +156,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testUnknownNet() {
+    @Test
+    public void testUnknownNet() {
         try {
             Query query = new Query(makeTraceDataModel(), "mod1.stall_pipeline = 2");
             fail("Did not throw exception");
@@ -164,7 +168,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testStrayIdentifier() {
+    @Test
+    public void testStrayIdentifier() {
         try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = 'h2 foo");
             fail("Did not throw exception");
@@ -175,7 +180,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testMissingCompareValue() {
+    @Test
+    public void testMissingCompareValue() {
         try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = ");
             fail("Did not throw exception");
@@ -186,7 +192,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testMissingLiteral() {
+    @Test
+    public void testMissingLiteral() {
         try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = mod2");
             fail("Did not throw exception");
@@ -197,7 +204,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testUnknownLiteralType() {
+    @Test
+    public void testUnknownLiteralType() {
         try {
             Query query = new Query(makeTraceDataModel(), "mod1.clk = 'q3z");
             fail("Did not throw exception");
@@ -209,7 +217,8 @@ public class QueryTest {
 
     }
 
-    @Test public void testAnd() {
+    @Test
+    public void testAnd() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -247,7 +256,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testOr() {
+    @Test
+    public void testOr() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -281,7 +291,8 @@ public class QueryTest {
         }
     }
 
-    @Test public void testComparisons() {
+    @Test
+    public void testComparisons() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");

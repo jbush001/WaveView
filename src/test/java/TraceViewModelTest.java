@@ -68,7 +68,8 @@ public class TraceViewModelTest {
     }
 
 
-    @Test public void testRemoveMarker() {
+    @Test
+    public void testRemoveMarker() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
@@ -157,7 +158,8 @@ public class TraceViewModelTest {
         assertEquals(0, tvm.getMarkerCount());
     }
 
-    @Test public void testNextPrevMarker() {
+    @Test
+    public void testNextPrevMarker() {
         TraceViewModel tvm = new TraceViewModel();
 
         tvm.addMarker("marker2", 100);
@@ -209,7 +211,8 @@ public class TraceViewModelTest {
         assertEquals(150, tvm.getSelectionStart());
     }
 
-    @Test public void testScaleChange() {
+    @Test
+    public void testScaleChange() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
@@ -220,7 +223,8 @@ public class TraceViewModelTest {
         assertEquals(123.0, tvm.getHorizontalScale(), 0.0);
     }
 
-    @Test public void testCursor() {
+    @Test
+    public void testCursor() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
@@ -237,7 +241,8 @@ public class TraceViewModelTest {
         assertEquals(37, listener.fLongArg1);
     }
 
-    @Test public void testMakeNetsVisible() {
+    @Test
+    public void testMakeNetsVisible() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
@@ -323,7 +328,8 @@ public class TraceViewModelTest {
         assertEquals(0, tvm.getVisibleNetCount());
     }
 
-    @Test public void testClear() {
+    @Test
+    public void testClear() {
         TraceViewModel tvm = new TraceViewModel();
 
         tvm.addMarker("marker0", 1000);
@@ -346,7 +352,8 @@ public class TraceViewModelTest {
         assertEquals(0, tvm.getMarkerCount());
     }
 
-    @Test public void testNetSet() {
+    @Test
+    public void testNetSet() {
         TraceViewModel tvm = new TraceViewModel();
 
         // Create first net set

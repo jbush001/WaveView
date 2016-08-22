@@ -81,9 +81,7 @@ class BitVector {
         return false;
     }
 
-    /// @param radix May be 16 or 2 (hex or binary)
-    /// @todo make this more generic
-    /// @bug Doesn't support decimal
+    /// @param radix May be 16, 10, or 2 (hex or binary)
     public void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
         case 2:
@@ -170,7 +168,6 @@ class BitVector {
 
     /// @returns A string representation of this BitVector with the given radix,
     ///  which may be 2, 10, or 16.
-    /// @bug Radix 10 numbers are limited to 32 bits (the others are unlimited)
     public String toString(int radix) {
         switch (radix) {
         case 2:

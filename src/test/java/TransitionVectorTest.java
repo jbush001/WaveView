@@ -24,7 +24,8 @@ public class TransitionVectorTest {
             vec.setBit(i, (value >> i) & 1);
     }
 
-    @Test public void testFindTransition() {
+    @Test
+    public void testFindTransition() {
         TransitionVector vec = new TransitionVector(8);
         vec.appendTransition(100, new BitVector("00000001", 2));
         vec.appendTransition(110, new BitVector("00000010", 2));
@@ -77,7 +78,8 @@ public class TransitionVectorTest {
         assertEquals(0, t.compare(new BitVector("00010000", 2)));
     }
 
-    @Test public void testIterator() {
+    @Test
+    public void testIterator() {
         TransitionVector vec = new TransitionVector(8);
         vec.appendTransition(100, new BitVector("00000001", 2));
         vec.appendTransition(110, new BitVector("00000010", 2));
@@ -112,7 +114,8 @@ public class TransitionVectorTest {
 
     /// The passed bitvector is larger than the transition vector width.
     /// Ensure it is truncated
-    @Test public void testTruncateVector() {
+    @Test
+    public void testTruncateVector() {
         TransitionVector vec = new TransitionVector(4);
         vec.appendTransition(100, new BitVector("00001111", 2));
         TransitionVector.Iterator ti = vec.findTransition(0);
@@ -121,7 +124,8 @@ public class TransitionVectorTest {
     }
 
     /// The passed bitvector is smaller than the transition vector width
-    @Test public void testPadVector() {
+    @Test
+    public void testPadVector() {
         TransitionVector vec = new TransitionVector(16);
         vec.appendTransition(100, new BitVector("101", 2));
         TransitionVector.Iterator ti = vec.findTransition(0);
@@ -131,7 +135,8 @@ public class TransitionVectorTest {
 
     /// Build a large transition vector, which will require reallocating
     /// the array as it grows.
-    @Test public void testLargeTransitionVector() {
+    @Test
+    public void testLargeTransitionVector() {
         TransitionVector tvec = new TransitionVector(16);
         BitVector bvec = new BitVector(16);
         for (int idx = 0; idx < 100000; idx++) {

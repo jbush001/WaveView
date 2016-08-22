@@ -31,7 +31,8 @@ public class SortedVectorTest {
         long fKeyValue;
     }
 
-    @Test public void testAddLookup1() {
+    @Test
+    public void testAddLookup1() {
         SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
 
         // Note: odd number of elements
@@ -51,7 +52,8 @@ public class SortedVectorTest {
         assertEquals(4, vec.lookupValue(120));
     }
 
-    @Test public void testAddLookup2() {
+    @Test
+    public void testAddLookup2() {
         SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
 
         // Note: even number of elements
@@ -70,7 +72,8 @@ public class SortedVectorTest {
         assertEquals(3, vec.lookupValue(120));
     }
 
-    @Test public void testIterator() {
+    @Test
+    public void testIterator() {
         SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
         vec.addSorted(new KeyedElement(140));
         vec.addSorted(new KeyedElement(100));

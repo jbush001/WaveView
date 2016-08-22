@@ -50,7 +50,8 @@ public class NetSearchListModelAdapterTest {
         int fEventSize;
     }
 
-    @Test public void testFilter()
+    @Test
+    public void testFilter()
     {
         // Build a dummy trace data model
         TraceDataModel model = new TraceDataModel();

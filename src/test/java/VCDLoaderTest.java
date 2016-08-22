@@ -264,7 +264,8 @@ public class VCDLoaderTest {
     }
 
     // Timescale is one microsecond
-    @Test public void testTimescaleUs() {
+    @Test
+    public void testTimescaleUs() {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectEnterModule("mod1");
         builder.expectNewNet("clk", -1, 1);
@@ -285,7 +286,8 @@ public class VCDLoaderTest {
     }
 
     // Timescale is one nanosecond
-    @Test public void testTimescaleNs() {
+    @Test
+    public void testTimescaleNs() {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectEnterModule("mod1");
         builder.expectNewNet("clk", -1, 1);
@@ -307,7 +309,8 @@ public class VCDLoaderTest {
 
     // Ensure it doesn't choke when it gets types it doesn't recognize
     // (for example $date, $version)
-    @Test public void testUnknownHeaderFields() {
+    @Test
+    public void testUnknownHeaderFields() {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectEnterModule("mod1");
         builder.expectNewNet("clk", -1, 1);
@@ -323,7 +326,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testMultibit() {
+    @Test
+    public void testMultibit() {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectEnterModule("mod1");
         builder.expectNewNet("addr", -1, 16);
@@ -343,7 +347,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testUnknownTimescale() {
+    @Test
+    public void testUnknownTimescale() {
         try {
             (new VCDLoader()).load(testFile("unknown-timescale.vcd"),
                 new DummyTraceBuilder(), null);
@@ -356,7 +361,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testUnknownNetId() {
+    @Test
+    public void testUnknownNetId() {
         try {
             (new VCDLoader()).load(testFile("unknown-net-id.vcd"),
                 new DummyTraceBuilder(), null);
@@ -368,7 +374,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testInvalidLogicValue() {
+    @Test
+    public void testInvalidLogicValue() {
         try {
             (new VCDLoader()).load(testFile("invalid-logic-value.vcd"),
                 new DummyTraceBuilder(), null);
@@ -381,7 +388,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testInvalidScope() {
+    @Test
+    public void testInvalidScope() {
         try {
             (new VCDLoader()).load(testFile("scope-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -394,7 +402,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testInvalidUpscope() {
+    @Test
+    public void testInvalidUpscope() {
         try {
             (new VCDLoader()).load(testFile("upscope-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -407,7 +416,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testVarParseError() {
+    @Test
+    public void testVarParseError() {
         try {
             (new VCDLoader()).load(testFile("var-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -420,7 +430,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testTimescaleParseError() {
+    @Test
+    public void testTimescaleParseError() {
         try {
             (new VCDLoader()).load(testFile("timescale-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -433,7 +444,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testTruncatedFile() {
+    @Test
+    public void testTruncatedFile() {
         try {
             (new VCDLoader()).load(testFile("truncated.vcd"),
                 new DummyTraceBuilder(), null);
@@ -445,7 +457,8 @@ public class VCDLoaderTest {
         }
     }
 
-    @Test public void testTraceAlias() {
+    @Test
+    public void testTraceAlias() {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectEnterModule("mod1");
         builder.expectNewNet("foo", -1, 1);
@@ -464,7 +477,8 @@ public class VCDLoaderTest {
     }
 
     // Put everything together with more data and multiple signals
-    @Test public void testMixed() {
+    @Test
+    public void testMixed() {
         TestBuilder builder = new TestBuilder();
         builder.setTimestampMultiplier(1);
         builder.addString("$date\n	Mon Aug 15 22:28:13 2016\n$end\n");

@@ -37,9 +37,6 @@ public class TraceViewModel {
 
     private static final int kMinMinorTickSize = 5;
 
-    TraceViewModel() {
-    }
-
     void clear() {
         int oldSize = fVisibleNets.size();
 
