@@ -67,88 +67,6 @@ public class NetSearchView extends JPanel implements ActionListener {
         }
     }
 
-    class ListModelAdapter implements ListModel, TraceViewModel.Listener, DocumentListener {
-        public ListModelAdapter(TraceViewModel model) {
-            fTraceViewModel = model;
-            model.addListener(this);
-            setPattern("");
-        }
-
-        public void setPattern(String pattern) {
-            if (pattern.equals("")) {
-                fMatches.clear();
-                for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++)
-                    fMatches.add(fTraceDataModel.getFullNetName(index));
-            } else {
-                fMatches.clear();
-                for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++) {
-                    String name = fTraceDataModel.getFullNetName(index);
-                    if (name.indexOf(pattern) != -1)
-                        fMatches.add(name);
-                }
-            }
-
-            if (fListener != null)
-                fListener.contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, fMatches.size()));
-        }
-
-        private void filter(Document doc) {
-            try {
-                setPattern(doc.getText(0, doc.getEndPosition().getOffset()).trim());
-            } catch (Exception exc) {
-                System.out.println("caught exception " + exc);
-            }
-        }
-
-        public void insertUpdate(DocumentEvent event) {
-            filter(event.getDocument());
-        }
-
-        public void removeUpdate(DocumentEvent event) {
-            filter(event.getDocument());
-        }
-
-        public void changedUpdate(DocumentEvent ev) {
-        }
-
-        public void addListDataListener(ListDataListener l) {
-            fListener = l;
-        }
-
-        public Object getElementAt(int index) {
-            return fMatches.elementAt(index);
-        }
-
-        public int getSize() {
-            return fMatches.size();
-        }
-
-        public void removeListDataListener(ListDataListener l) {
-            fListener = null;
-        }
-
-        public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        }
-
-        public void netsAdded(int firstIndex, int lastIndex) {
-            fListener.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, firstIndex, lastIndex));
-        }
-
-        public void netsRemoved(int firstIndex, int lastIndex) {
-            fListener.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, firstIndex, lastIndex));
-        }
-
-        public void markerChanged(long timestamp) {
-        }
-
-        public void scaleChanged(double newScale) {
-        }
-
-        private ListDataListener fListener;
-        private TraceViewModel fTraceViewModel;
-        private Vector<String> fMatches = new Vector<String>();
-    }
-
     public NetSearchView(TraceViewModel viewModel, TraceDataModel dataModel) {
         super(new BorderLayout());
         setPreferredSize(new Dimension(275, 500));
@@ -175,7 +93,8 @@ public class NetSearchView extends JPanel implements ActionListener {
         searchTab.setLayout(new BorderLayout());
         JTextField searchField = new JTextField();
         searchTab.add(searchField, BorderLayout.NORTH);
-        ListModelAdapter adapter = new ListModelAdapter(fTraceViewModel);
+        NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(
+            fTraceDataModel);
         JList netList = new JList(adapter);
         searchField.getDocument().addDocumentListener(adapter);
         netList.setDragEnabled(true);
