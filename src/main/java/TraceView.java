@@ -108,13 +108,13 @@ public class TraceView extends JPanel implements ActionListener {
             if (e.getActionCommand().equals("Enum")) {
                 if (indices.length > 0) {
                     ValueFormatter formatter = fTraceViewModel.getValueFormatter(indices[0]);
-                    if (!(formatter instanceof IdentifierValueFormatter)) {
-                        formatter = new IdentifierValueFormatter();
+                    if (!(formatter instanceof EnumValueFormatter)) {
+                        formatter = new EnumValueFormatter();
                         fTraceViewModel.setValueFormatter(indices[0], formatter);
                     }
 
                     JFrame frame = new JFrame("Mapping for " + fTraceDataModel.getShortNetName(fTraceViewModel.getVisibleNet(indices[0])));
-                    JPanel contentPane = new MappingView((IdentifierValueFormatter) formatter);
+                    JPanel contentPane = new MappingView((EnumValueFormatter) formatter);
                     contentPane.setOpaque(true);
                     frame.setContentPane(contentPane);
                     frame.pack();

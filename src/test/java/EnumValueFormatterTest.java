@@ -17,9 +17,9 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-public class IdentifierValueFormatterTest {
+public class EnumValueFormatterTest {
     @Test public void testFormat() {
-        IdentifierValueFormatter vf = new IdentifierValueFormatter();
+        EnumValueFormatter vf = new EnumValueFormatter();
         vf.addMapping(11, "primero");
         vf.addMapping(13, "segundo");
         vf.addMapping(17, "tercero");

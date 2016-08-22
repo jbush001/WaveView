@@ -112,8 +112,8 @@ class TraceSettingsFile {
             sigElement.appendChild(format);
 
             ValueFormatter formatter = fViewModel.getValueFormatter(i);
-            if (formatter instanceof IdentifierValueFormatter) {
-                IdentifierValueFormatter ivf = (IdentifierValueFormatter) formatter;
+            if (formatter instanceof EnumValueFormatter) {
+                EnumValueFormatter ivf = (EnumValueFormatter) formatter;
                 for (int j = 0; j < ivf.getMappingCount(); j++) {
                     Text idNode = document.createTextNode("" + ivf.getValueByIndex(j));
                     Text valueNode = document.createTextNode(ivf.getNameByIndex(j));
@@ -159,12 +159,12 @@ class TraceSettingsFile {
             ValueFormatter formatter = null;
             NodeList mappings = netElem.getElementsByTagName("mapping");
             if (mappings.getLength() > 0) {
-                formatter = new IdentifierValueFormatter();
+                formatter = new EnumValueFormatter();
                 for (int j = 0; j < mappings.getLength(); j++) {
                     Element mappingElem = (Element) mappings.item(j);
                     String id = getSubTag(mappingElem, "id");
                     String text = getSubTag(mappingElem, "text");
-                    ((IdentifierValueFormatter)formatter).addMapping(Integer.parseInt(id), text);
+                    ((EnumValueFormatter)formatter).addMapping(Integer.parseInt(id), text);
                 }
             } else {
                 Class c = Class.forName(format);

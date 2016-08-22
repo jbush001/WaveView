@@ -22,7 +22,7 @@ import java.util.*;
 ///
 
 /// @bug Inconsistent naming. Some are XXXAtIndex, some are XXXByIndex
-public class IdentifierValueFormatter implements ValueFormatter {
+public class EnumValueFormatter implements ValueFormatter {
     public class Mapping {
         Mapping(int _value, String _name) {
             value = _value;
@@ -33,7 +33,7 @@ public class IdentifierValueFormatter implements ValueFormatter {
         String name;
     };
 
-    public IdentifierValueFormatter() {
+    public EnumValueFormatter() {
     }
 
     void addMapping(int value, String name) {

@@ -28,7 +28,7 @@ import javax.swing.table.*;
 /// @bug Should check for duplicate values
 ///
 class MappingView extends JPanel {
-    public MappingView(IdentifierValueFormatter formatter) {
+    public MappingView(EnumValueFormatter formatter) {
         super(new BorderLayout());
 
         fTable = new JTable(new MappingTableModel(formatter));
@@ -40,7 +40,7 @@ class MappingView extends JPanel {
     class MappingTableModel extends AbstractTableModel {
         private static final int kNumColumns = 2;
 
-        public MappingTableModel(IdentifierValueFormatter formatter) {
+        public MappingTableModel(EnumValueFormatter formatter) {
             fFormatter = formatter;
         }
 
@@ -89,7 +89,7 @@ class MappingView extends JPanel {
                 fFormatter.setNameAtIndex(row, (String) value);
         }
 
-        private IdentifierValueFormatter fFormatter;
+        private EnumValueFormatter fFormatter;
     }
 
     private JTable fTable;
