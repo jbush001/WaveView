@@ -414,4 +414,17 @@ public class TraceViewModelTest {
         assertEquals(23, tvm.getVisibleNet(1));
         assertEquals(31, tvm.getVisibleNet(2));
     }
+
+    // When removing all nets on from an empty model, don't create
+    // a notification with a negative index. This was causing an exception
+    // that broke file loading.
+    @Test
+    public void testRemoveOnEmpty()
+    {
+        TraceViewModel tvm = new TraceViewModel();
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
+        tvm.removeAllNets();
+        assertEquals(0, listener.fNotifications);
+    }
 }

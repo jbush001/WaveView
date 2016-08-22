@@ -74,7 +74,6 @@ public class WaveApp extends JPanel implements ActionListener {
             if (fNetSearchPane == null) {
                 /// @bug This is a hack.  It makes sure the search
                 /// panel is created after the file is loaded.
-                /// It may not work correctly after re-loading a new file.
                 fNetSearchPane = new NetSearchView(fTraceViewModel, fTraceDataModel);
                 add(fNetSearchPane, BorderLayout.WEST);
 
@@ -235,6 +234,18 @@ public class WaveApp extends JPanel implements ActionListener {
 
                 buildRecentFilesMenu();
                 buildNetMenu();
+
+                // XXX hack
+                // The net search pane holds onto the old tree model, which has been
+                // replaced. Delete it so it will be re-created attached to the new one.
+                if (fNetSearchPane != null)
+                {
+                    if (fNetSearchPane.isVisible())
+                        fNetSearchPane.setVisible(false);
+
+                    remove(fNetSearchPane);
+                    fNetSearchPane = null;
+                }
             }
         }
 
