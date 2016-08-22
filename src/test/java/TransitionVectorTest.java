@@ -18,6 +18,12 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 public class TransitionVectorTest {
+    private void makeBitVectorFromInt(BitVector vec, int value)
+    {
+        for (int i = 0; i < vec.getWidth(); i++)
+            vec.setBit(i, (value >> i) & 1);
+    }
+
     @Test public void testFindTransition() {
         TransitionVector vec = new TransitionVector(8);
         vec.appendTransition(100, new BitVector("00000001", 2));
@@ -121,5 +127,24 @@ public class TransitionVectorTest {
         TransitionVector.Iterator ti = vec.findTransition(0);
         Transition t = ti.next();
         assertEquals("0000000000000101", t.toString(2));
+    }
+
+    /// Build a large transition vector, which will require reallocating
+    /// the array as it grows.
+    @Test public void testLargeTransitionVector() {
+        TransitionVector tvec = new TransitionVector(16);
+        BitVector bvec = new BitVector(16);
+        for (int idx = 0; idx < 100000; idx++) {
+            makeBitVectorFromInt(bvec, idx);
+            tvec.appendTransition(idx * 5, bvec);
+        }
+
+        TransitionVector.Iterator iter = tvec.findTransition(0);
+        for (int idx = 0; idx < 100000; idx++) {
+            makeBitVectorFromInt(bvec, idx);
+            Transition t = iter.next();
+            assertEquals(idx * 5, t.getTimestamp());
+            assertEquals(0, t.compare(bvec));
+        }
     }
 }
