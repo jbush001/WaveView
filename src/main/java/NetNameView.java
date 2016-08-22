@@ -24,7 +24,6 @@ import java.awt.datatransfer.*;
 ///
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
-
 class NetNameView extends JList implements TraceViewModel.Listener {
     private static final int kCellHeight = 26;
     private static final int kDragThreshold = 15;

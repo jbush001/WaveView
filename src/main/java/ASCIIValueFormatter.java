@@ -14,6 +14,10 @@
 // limitations under the License.
 //
 
+///
+/// Converts bitvector to a single ASCII (actually unicode) character.
+///
+
 public class ASCIIValueFormatter implements ValueFormatter {
     @Override
     public String format(BitVector bits) {

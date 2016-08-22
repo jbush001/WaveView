@@ -17,10 +17,9 @@
 import java.math.BigInteger;
 import java.lang.*;
 
-//
-// Array of arbitrary lengthed four-valued logic values
-//
-
+///
+/// Array of arbitrary lengthed four-valued logic values
+///
 class BitVector {
     public static final byte VALUE_0 = 0;
     public static final byte VALUE_1 = 1;

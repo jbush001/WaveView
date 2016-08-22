@@ -16,6 +16,11 @@
 
 import java.util.*;
 
+///
+/// Converts a bitvector to a set of strings from an enumeration. Useful for
+/// encoding state variables.
+///
+
 /// @bug Inconsistent naming. Some are XXXAtIndex, some are XXXByIndex
 public class IdentifierValueFormatter implements ValueFormatter {
     public class Mapping {

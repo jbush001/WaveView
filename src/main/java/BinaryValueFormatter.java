@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-
 public class BinaryValueFormatter implements ValueFormatter {
     @Override
     public String format(BitVector bits) {

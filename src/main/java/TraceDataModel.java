@@ -16,6 +16,11 @@
 
 import java.util.*;
 
+///
+/// Contains information about nets and transitions. View state is contained
+/// in TraceViewModel.
+///
+
 class TraceDataModel {
     public NetTreeModel getNetTree() {
         return fNetTree;

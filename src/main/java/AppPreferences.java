@@ -14,14 +14,15 @@
 // limitations under the License.
 //
 
-//
-// Global application preferences
-//
 
 import java.util.prefs.*;
 import java.util.*;
 import java.awt.*;
 import java.io.*;
+
+///
+/// Global application preferences
+///
 
 class AppPreferences {
     private static final int kMaxRecentFiles = 10;

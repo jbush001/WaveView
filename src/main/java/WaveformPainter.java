@@ -14,11 +14,22 @@
 // limitations under the License.
 //
 
-// Draws waveforms
-
 import java.awt.*;
 
+///
+/// Used to draw a waveform for a single net
+///
+
 interface WaveformPainter {
+    /// @param g Graphics context to draw onto
+    /// @param model Waveform information will be pulled from this model
+    /// @param netId Identifier of net to paint
+    /// @param y Vertical offset of top of waveform
+    /// @param visibleRect This is used to constrain what subset of the
+    ///         wave is drawn.
+    /// @param horizontalScale nanoseconds per pixel.
+    /// @param formatter Used to convert the BitVector to a readable string
+    ///        that is drawn on top of the trace waveform.
     public void paint(Graphics g, TraceDataModel model, int netId,
                       int y, Rectangle visibleRect, double horizontalScale,
                       ValueFormatter formatter);

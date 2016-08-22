@@ -20,10 +20,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-//
-// This view displays the waveforms.
-//
-public class WaveformView extends JPanel implements MouseListener, MouseMotionListener, TraceViewModel.Listener {
+///
+/// This view displays the waveforms.
+///
+
+public class WaveformView extends JPanel implements MouseListener,
+    MouseMotionListener, TraceViewModel.Listener {
+
     private static final int kWaveformHeight = 20;
     private static final int kWaveformMargin = 3;
     private static final int kWaveformSpacing = kWaveformHeight + (kWaveformMargin * 2);
