@@ -53,6 +53,14 @@ public class TraceViewModelTest {
             fLongArg0 = timestamp;
         }
 
+        void reset()
+        {
+            fNotifications = 0;
+            fLongArg0 = -1;
+            fLongArg1 = -1;
+            fDoubleArg = -1;
+        }
+
         public int fNotifications;
         public long fLongArg0;
         public long fLongArg1;
@@ -68,20 +76,20 @@ public class TraceViewModelTest {
         assertEquals(0, tvm.getMarkerAtTime(1000)); // Make sure no marker
 
         // Ensure no crash on empty set
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeMarkerAtTime(1000);
         assertEquals(0, listener.fNotifications);
 
         // Insert marker. This is both the first and last marker. Test edge
         // cases around this.
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.addMarker("marker0", 1000);
         assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
         assertEquals(1000, listener.fLongArg0);
         assertEquals(0, tvm.getMarkerAtTime(1000)); // Now there is a marker
         tvm.setHorizontalScale(10.0);   // 50 pixels each direction
 
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeMarkerAtTime(925);
         assertEquals(1, tvm.getMarkerCount()); // Marker should still be present
         tvm.removeMarkerAtTime(1075);
@@ -95,14 +103,14 @@ public class TraceViewModelTest {
         assertEquals(1000, listener.fLongArg0);
 
         // Reinsert the marker
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.addMarker("marker1", 1000);
         assertEquals(1, tvm.getMarkerCount());
         assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
         assertEquals(1000, listener.fLongArg0);
 
         // Marker is after, remove it
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeMarkerAtTime(1010);
         assertEquals(0, tvm.getMarkerCount());
         assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
@@ -124,7 +132,7 @@ public class TraceViewModelTest {
         assertEquals(400, tvm.getTimestampForMarker(3));
         assertEquals("marker5", tvm.getDescriptionForMarker(3));
 
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeMarkerAtTime(199);
         assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
         assertEquals(200, listener.fLongArg0);
@@ -133,7 +141,7 @@ public class TraceViewModelTest {
         assertEquals(300, tvm.getTimestampForMarker(1));
         assertEquals(400, tvm.getTimestampForMarker(2));
 
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeMarkerAtTime(301);
         assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
         assertEquals(300, listener.fLongArg0);
@@ -142,7 +150,7 @@ public class TraceViewModelTest {
         assertEquals(400, tvm.getTimestampForMarker(1));
 
         // Test removeAllMarkers
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeAllMarkers();
         assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
         assertEquals(-1, listener.fLongArg0);
@@ -222,7 +230,7 @@ public class TraceViewModelTest {
         assertEquals(0, listener.fLongArg0);
         assertEquals(1024, listener.fLongArg1);
 
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.setCursorPosition(37);
         assertEquals(TestModelListener.CURSOR_CHANGED, listener.fNotifications);
         assertEquals(1024, listener.fLongArg0);
@@ -245,7 +253,7 @@ public class TraceViewModelTest {
         assertEquals(7, tvm.getVisibleNet(0));
 
         // Add a second net
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.makeNetVisible(9);
         assertEquals(TestModelListener.NETS_ADDED, listener.fNotifications);
         assertEquals(1, listener.fLongArg0);
@@ -255,7 +263,7 @@ public class TraceViewModelTest {
         assertEquals(9, tvm.getVisibleNet(1));
 
         // Remove first net
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeNet(0);
         assertEquals(TestModelListener.NETS_REMOVED, listener.fNotifications);
         assertEquals(0, listener.fLongArg0);
@@ -264,7 +272,7 @@ public class TraceViewModelTest {
         assertEquals(9, tvm.getVisibleNet(0));
 
         // Remove remaining net
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeNet(0);
         assertEquals(TestModelListener.NETS_REMOVED, listener.fNotifications);
         assertEquals(0, listener.fLongArg0);
@@ -292,7 +300,7 @@ public class TraceViewModelTest {
 
         // Rearrange a set of nets
         int[] indices = { 1, 3, 4, 5};
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.moveNets(indices, 2);
         assertEquals(TestModelListener.NETS_REMOVED | TestModelListener.NETS_ADDED, listener.fNotifications);
         // XXX doesn't check parameters (multiple notifications from this)
@@ -307,11 +315,96 @@ public class TraceViewModelTest {
         assertEquals(27, tvm.getVisibleNet(6));
 
         // Remove all nets
-        listener.fNotifications = 0;
+        listener.reset();
         tvm.removeAllNets();
         assertEquals(TestModelListener.NETS_REMOVED, listener.fNotifications);
         assertEquals(0, listener.fLongArg0);
-        assertEquals(7, listener.fLongArg1);
+        assertEquals(6, listener.fLongArg1);
         assertEquals(0, tvm.getVisibleNetCount());
+    }
+
+    @Test public void testClear() {
+        TraceViewModel tvm = new TraceViewModel();
+
+        tvm.addMarker("marker0", 1000);
+        tvm.addMarker("marker1", 1200);
+        tvm.makeNetVisible(11);
+        tvm.makeNetVisible(13);
+        tvm.makeNetVisible(17);
+        assertEquals(3, tvm.getVisibleNetCount());
+        assertEquals(2, tvm.getMarkerCount());
+
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
+
+        tvm.clear();
+
+        assertEquals(TestModelListener.NETS_REMOVED, listener.fNotifications);
+        assertEquals(0, listener.fLongArg0);
+        assertEquals(3, listener.fLongArg1);
+        assertEquals(0, tvm.getVisibleNetCount());
+        assertEquals(0, tvm.getMarkerCount());
+    }
+
+    @Test public void testNetSet() {
+        TraceViewModel tvm = new TraceViewModel();
+
+        // Create first net set
+        tvm.makeNetVisible(11);
+        tvm.makeNetVisible(13);
+        tvm.makeNetVisible(17);
+        tvm.saveNetSet("set1");
+        assertEquals(1, tvm.getNetSetCount());
+        assertEquals("set1", tvm.getNetSetName(0));
+
+        // Create second net set
+        tvm.removeAllNets();
+        tvm.makeNetVisible(19);
+        tvm.makeNetVisible(23);
+        tvm.saveNetSet("set2");
+        assertEquals(2, tvm.getNetSetCount());
+
+        assertEquals("set1", tvm.getNetSetName(0));
+        assertEquals("set2", tvm.getNetSetName(1));
+
+        // Select first net set
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
+        tvm.selectNetSet(0);
+        assertEquals(TestModelListener.NETS_ADDED | TestModelListener.NETS_REMOVED,
+            listener.fNotifications);
+        assertEquals(0, listener.fLongArg0); // First index (of added nets)
+        assertEquals(2, listener.fLongArg1); // Last index (not count)
+        assertEquals(3, tvm.getVisibleNetCount());
+        assertEquals(11, tvm.getVisibleNet(0));
+        assertEquals(13, tvm.getVisibleNet(1));
+        assertEquals(17, tvm.getVisibleNet(2));
+
+        // Select second net set
+        listener.reset();
+        tvm.selectNetSet(1);
+        assertEquals(TestModelListener.NETS_ADDED | TestModelListener.NETS_REMOVED,
+            listener.fNotifications);
+        assertEquals(0, listener.fLongArg0); // First index
+        assertEquals(1, listener.fLongArg1); // last index
+        assertEquals(2, tvm.getVisibleNetCount());
+        assertEquals(19, tvm.getVisibleNet(0));
+        assertEquals(23, tvm.getVisibleNet(1));
+
+        // Update second net set
+        tvm.makeNetVisible(31);
+        tvm.saveNetSet("set2");
+        assertEquals(2, tvm.getNetSetCount());
+        assertEquals("set1", tvm.getNetSetName(0));
+        assertEquals("set2", tvm.getNetSetName(1));
+
+        // Flip back and forth to reload second net set. Make sure
+        // it has been updated
+        tvm.selectNetSet(0);
+        tvm.selectNetSet(1);
+        assertEquals(3, tvm.getVisibleNetCount());
+        assertEquals(19, tvm.getVisibleNet(0));
+        assertEquals(23, tvm.getVisibleNet(1));
+        assertEquals(31, tvm.getVisibleNet(2));
     }
 }

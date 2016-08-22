@@ -96,7 +96,7 @@ public class TraceViewModel {
         int oldSize = fVisibleNets.size();
         fVisibleNets.clear();
         for (Listener listener : fTraceListeners)
-            listener.netsRemoved(0, oldSize);
+            listener.netsRemoved(0, oldSize - 1);
     }
 
     void moveNets(int[] fromIndices, int insertionPoint) {
@@ -153,7 +153,7 @@ public class TraceViewModel {
         // There is probably a more efficient way to do this
         for (Listener listener : fTraceListeners) {
             listener.netsRemoved(0, oldSize);
-            listener.netsAdded(0, fVisibleNets.size());
+            listener.netsAdded(0, fVisibleNets.size() - 1);
         }
     }
 
