@@ -44,6 +44,7 @@ class NetNameView extends JList implements TraceViewModel.Listener {
             setOpaque(true);
         }
 
+        @Override
         public Component getListCellRendererComponent(
             JList list,
             Object value,
@@ -56,6 +57,7 @@ class NetNameView extends JList implements TraceViewModel.Listener {
             return this;
         }
 
+        @Override
         protected void paintComponent(Graphics g) {
             AppPreferences prefs = AppPreferences.getInstance();
             setBackground(prefs.kBackgroundColor);
@@ -102,6 +104,7 @@ class NetNameView extends JList implements TraceViewModel.Listener {
                          1, fValueBaseline);
         }
 
+        @Override
         public String getToolTipText(MouseEvent event) {
             return fTraceDataModel.getFullNetName(fTraceViewModel.getVisibleNet(fCurrentNet));
         }
@@ -113,36 +116,47 @@ class NetNameView extends JList implements TraceViewModel.Listener {
             model.addListener(this);
         }
 
+        @Override
         public void addListDataListener(ListDataListener l) {
+            assert fListener == null;
             fListener = l;
         }
 
+        @Override
+        public void removeListDataListener(ListDataListener l) {
+            assert fListener != null;
+            fListener = null;
+        }
+
+        @Override
         public Object getElementAt(int index) {
             return new Integer(index);
         }
 
+        @Override
         public int getSize() {
             return fTraceViewModel.getVisibleNetCount();
         }
 
-        public void removeListDataListener(ListDataListener l) {
-            fListener = null;
-        }
-
+        @Override
         public void cursorChanged(long oldTimestamp, long newTimestamp) {
         }
 
+        @Override
         public void netsAdded(int firstIndex, int lastIndex) {
             fListener.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, firstIndex, lastIndex));
         }
 
+        @Override
         public void netsRemoved(int firstIndex, int lastIndex) {
             fListener.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, firstIndex, lastIndex));
         }
 
+        @Override
         public void markerChanged(long timestamp) {
         }
 
+        @Override
         public void scaleChanged(double newScale) {
         }
 
@@ -151,25 +165,30 @@ class NetNameView extends JList implements TraceViewModel.Listener {
     }
 
     class NetTransferHandler extends TransferHandler {
+        @Override
         public int getSourceActions(JComponent component) {
             return MOVE;
         }
 
+        @Override
         public Transferable createTransferable(JComponent component) {
             fLocalIndices = ((JList) component).getSelectedIndices();
             fIsLocalDrop = true;
             return new StringSelection("");
         }
 
+        @Override
         public void exportDone(JComponent component, Transferable transfer, int action) {
             fIsLocalDrop = false;
             // XXX do nothing
         }
 
+        @Override
         public boolean canImport(TransferHandler.TransferSupport support) {
             return true;
         }
 
+        @Override
         public boolean importData(TransferHandler.TransferSupport support) {
             String data;
             try {
@@ -195,8 +214,8 @@ class NetNameView extends JList implements TraceViewModel.Listener {
             return true;
         }
 
-        boolean fIsLocalDrop = false;
-        int[] fLocalIndices;
+        private boolean fIsLocalDrop = false;
+        private int[] fLocalIndices;
     }
 
     public NetNameView(TraceViewModel viewModel, TraceDataModel dataModel) {
@@ -221,26 +240,32 @@ class NetNameView extends JList implements TraceViewModel.Listener {
         repaint();
     }
 
+    @Override
     protected void processKeyEvent(KeyEvent e) {
         /// @bug Eat key events so up/down arrows don't change selection
         /// If we allow arrows to change selection, the net name view scrolls without moving the other views.
         /// That really seems like a bug in the swing components.
     }
 
+    @Override
     public void scaleChanged(double newScale) {
     }
 
+    @Override
     public void netsAdded(int firstIndex, int lastIndex) {
         computeBounds();
     }
 
+    @Override
     public void netsRemoved(int firstIndex, int lastIndex) {
         computeBounds();
     }
 
+    @Override
     public void markerChanged(long timestamp) {
     }
 
+    @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
         repaint();
     }

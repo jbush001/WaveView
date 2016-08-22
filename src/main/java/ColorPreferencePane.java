@@ -52,9 +52,11 @@ class ColorPreferencePane extends PreferencePane {
         setPreferredSize(new Dimension(275, 500));
     }
 
+    @Override
     public void loadSettings() {
     }
 
+    @Override
     public void saveSettings() {
         AppPreferences prefs = AppPreferences.getInstance();
         prefs.kTraceColor = fTraceColorButton.getColor();

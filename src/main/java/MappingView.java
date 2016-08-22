@@ -44,6 +44,7 @@ class MappingView extends JPanel {
             fFormatter = formatter;
         }
 
+        @Override
         public String getColumnName(int col) {
             if (col == 0)
                 return "value";
@@ -51,14 +52,17 @@ class MappingView extends JPanel {
                 return "name";
         }
 
+        @Override
         public int getRowCount() {
             return fFormatter.getMappingCount() + 1;    // Bottom row always adds
         }
 
+        @Override
         public int getColumnCount() {
             return 2;
         }
 
+        @Override
         public Object getValueAt(int row, int col) {
             if (row >= fFormatter.getMappingCount())
                 return "";
@@ -69,10 +73,12 @@ class MappingView extends JPanel {
                 return fFormatter.getNameByIndex(row);
         }
 
+        @Override
         public boolean isCellEditable(int row, int col) {
             return true;
         }
 
+        @Override
         public void setValueAt(Object value, int row, int col) {
             if (row == fFormatter.getMappingCount())
                 fFormatter.addMapping(0, "");    // Create a new row
@@ -83,9 +89,9 @@ class MappingView extends JPanel {
                 fFormatter.setNameAtIndex(row, (String) value);
         }
 
-        IdentifierValueFormatter fFormatter;
+        private IdentifierValueFormatter fFormatter;
     }
 
-    JTable fTable;
+    private JTable fTable;
 }
 

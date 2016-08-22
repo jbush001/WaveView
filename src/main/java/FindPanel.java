@@ -32,14 +32,17 @@ class FindPanel extends JPanel implements ActionListener {
         fTextArea = new JTextArea(5, 30);
         fTextArea.setLineWrap(true);
         fTextArea.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
             public void changedUpdate(DocumentEvent e) {
                 invalidateText();
             }
 
+            @Override
             public void removeUpdate(DocumentEvent e) {
                 invalidateText();
             }
 
+            @Override
             public void insertUpdate(DocumentEvent e) {
                 invalidateText();
             }
@@ -102,6 +105,7 @@ class FindPanel extends JPanel implements ActionListener {
         }
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
 

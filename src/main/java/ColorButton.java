@@ -41,6 +41,7 @@ class ColorButton extends JPanel {
             fColor = newColor;
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         g.setColor(fColor);
         g.fillRect(0, 0, 32, 32);

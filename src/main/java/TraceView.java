@@ -95,6 +95,7 @@ public class TraceView extends JPanel implements ActionListener {
         fTraceViewModel.setHorizontalScale(10.0);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         int[] indices = fNetNameView.getSelectedIndices();
 

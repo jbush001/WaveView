@@ -71,10 +71,12 @@ class TransitionVector {
             fTransition.setWidth(fWidth);
         }
 
+        @Override
         public boolean hasNext() {
             return fNextIndex < fTransitionCount;
         }
 
+        @Override
         public Transition next() {
             if (!hasNext())
                 return null;
@@ -116,6 +118,7 @@ class TransitionVector {
             return fTimestamps[fNextIndex - 2];
         }
 
+        @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }

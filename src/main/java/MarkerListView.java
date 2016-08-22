@@ -51,7 +51,7 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
         add(panel);
     }
 
-    public void select(boolean extendSelection) {
+    private void select(boolean extendSelection) {
         long timestamp = fTraceViewModel.getTimestampForMarker(fTable.getSelectedRow());
 
         fTraceViewModel.setCursorPosition(timestamp);
@@ -59,21 +59,27 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
             fTraceViewModel.setSelectionStart(timestamp);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
     }
 
+    @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
     }
 
+    @Override
     public void netsAdded(int firstIndex, int lastIndex) {
     }
 
+    @Override
     public void netsRemoved(int firstIndex, int lastIndex) {
     }
 
+    @Override
     public void scaleChanged(double newScale) {
     }
 
+    @Override
     public void markerChanged(long timestamp) {
         fTableModel.fireTableDataChanged();
         // Redraw list
@@ -92,18 +98,22 @@ class MarkerTableModel extends AbstractTableModel {
         fTraceViewModel = model;
     }
 
+    @Override
     public int getColumnCount() {
         return kNumColumns;
     }
 
+    @Override
     public String getColumnName(int col) {
         return kColumnNames[col];
     }
 
+    @Override
     public int getRowCount() {
         return fTraceViewModel.getMarkerCount();
     }
 
+    @Override
     public Object getValueAt(int row, int col) {
         switch (col) {
         case 0:
@@ -117,10 +127,12 @@ class MarkerTableModel extends AbstractTableModel {
         return "";
     }
 
+    @Override
     public boolean isCellEditable(int row, int col) {
         return col == 2;    // Can edit description
     }
 
+    @Override
     public void setValueAt(Object value, int row, int col) {
         fTraceViewModel.setDescriptionForMarker(row, (String) value);
     }

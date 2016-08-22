@@ -61,10 +61,11 @@ public class WaveApp extends JPanel implements ActionListener {
         setPreferredSize(new Dimension(900,600));
     }
 
-    public ImageIcon loadResourceIcon(String name) {
+    private ImageIcon loadResourceIcon(String name) {
         return new ImageIcon(this.getClass().getClassLoader().getResource(name));
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if (cmd.equals("zoomin"))
@@ -157,7 +158,7 @@ public class WaveApp extends JPanel implements ActionListener {
         }
     }
 
-    void loadTraceFile(String path) {
+    private void loadTraceFile(String path) {
         loadTraceFile(new File(path));
     }
 
@@ -167,6 +168,7 @@ public class WaveApp extends JPanel implements ActionListener {
             fProgressMonitor = monitor;
         }
 
+        @Override
         public Void doInBackground() {
             try {
                 System.out.println("Loading " + fFile.getCanonicalPath());
@@ -201,6 +203,7 @@ public class WaveApp extends JPanel implements ActionListener {
         }
 
         // Executed on main thread
+        @Override
         protected void done() {
             System.out.println("finished loading trace file");
             fProgressMonitor.close();
@@ -245,7 +248,7 @@ public class WaveApp extends JPanel implements ActionListener {
         private String fErrorMessage;
     }
 
-    void loadTraceFile(File file) {
+    private void loadTraceFile(File file) {
         if (fConfigFileName != null)
             saveConfig();
 
@@ -253,7 +256,7 @@ public class WaveApp extends JPanel implements ActionListener {
         (new TraceLoadWorker(file, monitor)).execute();
     }
 
-    void showFindDialog() {
+    private void showFindDialog() {
         // The initial query string is formed by the selected nets and
         // their values at the cursor position.
         StringBuffer initialQuery = new StringBuffer();
@@ -309,12 +312,12 @@ public class WaveApp extends JPanel implements ActionListener {
         }
     }
 
-    void saveConfig() {
+    private void saveConfig() {
         if (fTraceSettingsFile != null)
             fTraceSettingsFile.writeConfigurationFile();
     }
 
-    static String createConfigFileName(File file) throws IOException {
+    private static String createConfigFileName(File file) throws IOException {
         String path = file.getCanonicalPath();
 
         // Find leaf file name
@@ -334,7 +337,7 @@ public class WaveApp extends JPanel implements ActionListener {
         return dirPath + nodeName;
     }
 
-    void buildNetMenu() {
+    private void buildNetMenu() {
         fNetMenu.removeAll();
 
         JMenuItem item = new JMenuItem("Add nets...");
@@ -363,7 +366,7 @@ public class WaveApp extends JPanel implements ActionListener {
         }
     }
 
-    void buildRecentFilesMenu() {
+    private void buildRecentFilesMenu() {
         fRecentFilesMenu.removeAll();
         for (String path : AppPreferences.getInstance().getRecentFileList()) {
             JMenuItem item = new JMenuItem(path);
@@ -373,7 +376,7 @@ public class WaveApp extends JPanel implements ActionListener {
         }
     }
 
-    void buildMenus() {
+    private void buildMenus() {
         JMenuItem item;
         JMenuBar menuBar = new JMenuBar();
         fFrame.setJMenuBar(menuBar);

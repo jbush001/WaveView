@@ -25,6 +25,7 @@ class MultiNetPainter implements WaveformPainter {
     private static final int kWaveformHeight = 20;
     private static final int kTransitionWidth = 3;
 
+    @Override
     public void paint(Graphics g, TraceDataModel model, int netId,
                       int topOffset, Rectangle visibleRect, double horizontalScale,
                       ValueFormatter formatter) {

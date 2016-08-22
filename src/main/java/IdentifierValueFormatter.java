@@ -55,6 +55,7 @@ public class IdentifierValueFormatter implements ValueFormatter {
         return fMappings.size();
     }
 
+    @Override
     public String format(BitVector bits) {
         int mapIndex = bits.intValue();
         for (Mapping m : fMappings) {

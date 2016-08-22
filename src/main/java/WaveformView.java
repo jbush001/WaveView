@@ -14,15 +14,15 @@
 // limitations under the License.
 //
 
-//
-// This view displays the actual waveforms.
-//
 import javax.swing.*;
 import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
+//
+// This view displays the waveforms.
+//
 public class WaveformView extends JPanel implements MouseListener, MouseMotionListener, TraceViewModel.Listener {
     private static final int kWaveformHeight = 20;
     private static final int kWaveformMargin = 3;
@@ -43,7 +43,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         setAutoscrolls(true);
     }
 
-    public void recomputeBounds() {
+    private void recomputeBounds() {
         Dimension d = getPreferredSize();
         d.width = timestampToCoordinate(fTraceDataModel.getMaxTimestamp());
         d.height = fTraceViewModel.getVisibleNetCount() * kWaveformSpacing;
@@ -51,6 +51,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         validate();
     }
 
+    @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
         int x2 = timestampToCoordinate(newTimestamp);
 
@@ -72,11 +73,13 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         }
     }
 
+    @Override
     public void netsAdded(int firstIndex, int lastIndex) {
         recomputeBounds();
         repaint();
     }
 
+    @Override
     public void netsRemoved(int firstIndex, int lastIndex) {
         recomputeBounds();
         repaint();
@@ -88,6 +91,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         }
     }
 
+    @Override
     public void markerChanged(long timestamp) {
         if (timestamp < 0)
             repaint();
@@ -97,6 +101,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         }
     }
 
+    @Override
     public void scaleChanged(double newScale) {
         // Adjust size of canvas
         Dimension d = getPreferredSize();
@@ -106,24 +111,7 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         repaint();
     }
 
-    public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation,
-                                          int direction) {
-        //Get the current position.
-        int currentPosition = 0;
-        if (orientation == SwingConstants.HORIZONTAL)
-            return 30;
-        else
-            return kWaveformSpacing;
-    }
-
-    public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation,
-                                           int direction) {
-        if (orientation == SwingConstants.HORIZONTAL)
-            return visibleRect.width - 30;
-        else
-            return visibleRect.height - kWaveformSpacing;
-    }
-
+    @Override
     protected void paintComponent(Graphics g) {
         AppPreferences prefs = AppPreferences.getInstance();
         setBackground(prefs.kBackgroundColor);
@@ -214,15 +202,19 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         }
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
         // set cursor position
         long timestamp = coordinateToTimestamp(e.getX());
@@ -242,10 +234,12 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         fTraceViewModel.setAdjustingCursor(true);
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
         fTraceViewModel.setAdjustingCursor(false);
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
         long timestamp = coordinateToTimestamp(e.getX());
         fTraceViewModel.setCursorPosition(timestamp);
@@ -256,14 +250,15 @@ public class WaveformView extends JPanel implements MouseListener, MouseMotionLi
         scrollRectToVisible(r);
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
     }
 
-    long coordinateToTimestamp(int coordinate) {
+    private long coordinateToTimestamp(int coordinate) {
         return (long)(coordinate * fTraceViewModel.getHorizontalScale());
     }
 
-    int timestampToCoordinate(long timestamp) {
+    private int timestampToCoordinate(long timestamp) {
         return (int)(timestamp / fTraceViewModel.getHorizontalScale());
     }
 

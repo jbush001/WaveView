@@ -118,27 +118,32 @@ class TraceDataModel {
     }
 
     private class ConcreteTraceBuilder implements TraceBuilder {
+        @Override
         public void enterModule(String name) {
             fNetTree.enterScope(name);
             fScopeStack.push(name);
         }
 
+        @Override
         public void exitModule() {
             fNetTree.leaveScope();
             fScopeStack.pop();
         }
 
+        @Override
         public void loadFinished() {
             fMaxTimestamp = 0;
             for (NetDataModel model : fAllNets)
                 fMaxTimestamp = Math.max(fMaxTimestamp, model.getMaxTimestamp());
         }
 
+        @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
             NetDataModel model = fAllNets.elementAt(id);
             model.fTransitionVector.appendTransition(timestamp, values);
         }
 
+        @Override
         public int newNet(String shortName, int cloneId, int width) {
             // Build full path
             StringBuffer fullName = new StringBuffer();
@@ -166,6 +171,7 @@ class TraceDataModel {
             return thisNetIndex;
         }
 
+        @Override
         public int getNetWidth(int netId) {
             return fAllNets.elementAt(netId).getWidth();
         }

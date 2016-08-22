@@ -15,6 +15,7 @@
 //
 
 public class DecimalValueFormatter implements ValueFormatter {
+    @Override
     public String format(BitVector bits) {
         return bits.toString(10);
     }

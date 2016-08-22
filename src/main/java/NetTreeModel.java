@@ -62,32 +62,40 @@ public class NetTreeModel implements TreeModel {
     }
 
     // Tree model methods
+    @Override
     public void addTreeModelListener(TreeModelListener l) {
     }
 
+    @Override
+    public void removeTreeModelListener(TreeModelListener l) {
+    }
+
+    @Override
     public Object getChild(Object parent, int index) {
         return ((NetTreeNode) parent).fChildren.elementAt(index);
     }
 
+    @Override
     public int getChildCount(Object parent) {
         return ((NetTreeNode) parent).fChildren.size();
     }
 
+    @Override
     public int getIndexOfChild(Object parent, Object child) {
         return ((NetTreeNode) parent).fChildren.indexOf(child);
     }
 
+    @Override
     public Object getRoot() {
         return fRoot;
     }
 
+    @Override
     public boolean isLeaf(Object node) {
         return ((NetTreeNode) node).fNet != -1;
     }
 
-    public void removeTreeModelListener(TreeModelListener l) {
-    }
-
+    @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
         // XXX not implemented
     }
@@ -108,9 +116,9 @@ public class NetTreeModel implements TreeModel {
             return fName;
         }
 
-        Vector<NetTreeNode> fChildren = new Vector<NetTreeNode>();
-        String fName;
-        int fNet = -1;
+        private Vector<NetTreeNode> fChildren = new Vector<NetTreeNode>();
+        private String fName;
+        private int fNet = -1;
     };
 
     private NetTreeNode fRoot;

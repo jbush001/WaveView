@@ -45,6 +45,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         scaleChanged(fTraceViewModel.getHorizontalScale());
     }
 
+    @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
         int oldX = (int)(oldTimestamp / fTraceViewModel.getHorizontalScale());
         int newX = (int)(newTimestamp / fTraceViewModel.getHorizontalScale());
@@ -57,6 +58,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
             fTimestampDisplayTimer.start();
     }
 
+    @Override
     public void markerChanged(long timestamp) {
         final int kMaxMarkerLabelWidth = 15;
         if (timestamp < 0)
@@ -68,13 +70,16 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         }
     }
 
+    @Override
     public void netsAdded(int firstIndex, int lastIndex) {
         adjustCanvasSize();
     }
 
+    @Override
     public void netsRemoved(int firstIndex, int lastIndex) {
     }
 
+    @Override
     public void scaleChanged(double newScale) {
         // Make sure minor ticks are large enough
         long minorTickInterval = fTraceViewModel.getMinorTickInterval();
@@ -102,6 +107,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         repaint();
     }
 
+    @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
@@ -171,6 +177,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         }
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         fShowTimestamp = false;
         repaint();

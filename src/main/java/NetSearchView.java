@@ -29,11 +29,12 @@ import javax.swing.text.*;
 ///
 public class NetSearchView extends JPanel implements ActionListener {
     class NetTreeTransferHandler extends TransferHandler {
+        @Override
         public int getSourceActions(JComponent component) {
             return MOVE;
         }
 
-        public void buildNetListRecursive(Object node, StringBuffer indexList) {
+        private void buildNetListRecursive(Object node, StringBuffer indexList) {
             if (fTree.getModel().isLeaf(node)) {
                 indexList.append(fTraceDataModel.getFullNetName(fTraceDataModel.getNetFromTreeObject(node)));
                 indexList.append('\n');
@@ -44,6 +45,7 @@ public class NetSearchView extends JPanel implements ActionListener {
                 buildNetListRecursive(fTree.getModel().getChild(node, i), indexList);
         }
 
+        @Override
         public Transferable createTransferable(JComponent component) {
             StringBuffer indexList = new StringBuffer();
             for (TreePath selectedPath : fTree.getSelectionPaths()) {
@@ -54,14 +56,17 @@ public class NetSearchView extends JPanel implements ActionListener {
             return new StringSelection(indexList.toString());
         }
 
+        @Override
         public void exportDone(JComponent component, Transferable transfer, int action) {
             // XXX do nothing
         }
 
+        @Override
         public boolean canImport(TransferHandler.TransferSupport support) {
             return false;
         }
 
+        @Override
         public boolean importData(TransferHandler.TransferSupport support) {
             return false;
         }
@@ -103,6 +108,7 @@ public class NetSearchView extends JPanel implements ActionListener {
         listScroller.add(new JTextArea());
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
     }
 

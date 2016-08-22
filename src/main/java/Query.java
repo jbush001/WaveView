@@ -353,6 +353,7 @@ public class Query {
             fRightChild = right;
         }
 
+        @Override
         public boolean evaluate(long timestamp, QueryHint outHint) {
             boolean leftResult = fLeftChild.evaluate(timestamp, fLeftHint);
             boolean rightResult = fRightChild.evaluate(timestamp, fRightHint);
@@ -414,16 +415,19 @@ public class Query {
             super(left, right);
         }
 
+        @Override
         protected boolean compareResults(boolean value1, boolean value2) {
             return value1 || value2;
         }
 
         // If both are false, either one changing may cause the expression to be true.
         // Therefore, pick the soonest one
+        @Override
         protected long nextForwardEvent(long nextEvent1, long nextEvent2) {
             return Math.min(nextEvent1, nextEvent2);
         }
 
+        @Override
         protected long nextBackwardEvent(long nextEvent1, long nextEvent2) {
             return Math.max(nextEvent1, nextEvent2);
         }
@@ -434,16 +438,19 @@ public class Query {
             super(left, right);
         }
 
+        @Override
         protected boolean compareResults(boolean value1, boolean value2) {
             return value1 && value2;
         }
 
         // If both are false, both must change for the expression to be true.
         // Therefore, pick the later one.
+        @Override
         protected long nextForwardEvent(long nextEvent1, long nextEvent2) {
             return Math.max(nextEvent1, nextEvent2);
         }
 
+        @Override
         protected long nextBackwardEvent(long nextEvent1, long nextEvent2) {
             return Math.min(nextEvent1, nextEvent2);
         }
@@ -455,6 +462,7 @@ public class Query {
             fExpected = expected;
         }
 
+        @Override
         public boolean evaluate(long timestamp, QueryHint outHint) {
             TransitionVector.Iterator i = fTraceDataModel.findTransition(fNetId, timestamp);
             Transition t = i.next();
@@ -474,6 +482,7 @@ public class Query {
             super(netId, match);
         }
 
+        @Override
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) == 0;
         }
@@ -484,6 +493,7 @@ public class Query {
             super(netId, match);
         }
 
+        @Override
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) != 0;
         }
@@ -494,6 +504,7 @@ public class Query {
             super(netId, match);
         }
 
+        @Override
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) > 0;
         }
@@ -504,6 +515,7 @@ public class Query {
             super(netId, match);
         }
 
+        @Override
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) < 0;
         }

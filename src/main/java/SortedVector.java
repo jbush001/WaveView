@@ -84,20 +84,24 @@ class SortedVector<T> extends Vector<T> {
             fIndex = index;
         }
 
+        @Override
         public boolean hasNext() {
             return fIndex < fVector.size();
         }
 
+        @Override
         public T next() {
             T val = fVector.elementAt(fIndex);
             fIndex++;
             return val;
         }
 
+        @Override
         public void remove() {
+            throw new UnsupportedOperationException();
         }
 
-        SortedVector<T> fVector;
-        int fIndex;
+        private SortedVector<T> fVector;
+        private int fIndex;
     }
 }

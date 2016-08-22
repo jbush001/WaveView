@@ -24,6 +24,7 @@ import java.util.*;
 class SingleNetPainter implements WaveformPainter {
     private static final int kWaveformHeight = 20;
 
+    @Override
     public void paint(Graphics g, TraceDataModel model, int netId,
                       int topOffset, Rectangle visibleRect, double horizontalScale,
                       ValueFormatter formatter) {
@@ -70,7 +71,7 @@ class SingleNetPainter implements WaveformPainter {
         }
     }
 
-    public void drawSpan(Graphics g, int value, int left, int right, int top) {
+    private void drawSpan(Graphics g, int value, int left, int right, int top) {
         if (left >= right)
             return;
 

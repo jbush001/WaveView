@@ -23,6 +23,7 @@ import java.io.*;
 import java.util.*;
 
 class VCDLoader implements TraceLoader {
+    @Override
     public void load(File file, TraceBuilder builder, ProgressListener listener)
     throws LoadException, IOException {
         fProgressListener = listener;
@@ -283,6 +284,7 @@ class VCDLoader implements TraceLoader {
             fWrapped = wrapped;
         }
 
+        @Override
         public int read() throws IOException {
             int got = fWrapped.read();
             if (got >= 0)
@@ -291,6 +293,7 @@ class VCDLoader implements TraceLoader {
             return got;
         }
 
+        @Override
         public int read(byte[] b) throws IOException {
             int got = fWrapped.read(b);
             if (got >= 0)
@@ -299,6 +302,7 @@ class VCDLoader implements TraceLoader {
             return got;
         }
 
+        @Override
         public int read(byte[] b, int off, int len) throws IOException {
             int got = fWrapped.read(b, off, len);
             if (got >= 0)
@@ -307,21 +311,21 @@ class VCDLoader implements TraceLoader {
             return got;
         }
 
+        @Override
         public long skip(long n) throws IOException {
             long skipped = fWrapped.skip(n);
             if (skipped >= 0)
                 fTotalRead += skipped;
 
             return skipped;
-
         }
 
         long getTotalRead() {
             return fTotalRead;
         }
 
-        long fTotalRead;
-        InputStream fWrapped;
+        private long fTotalRead;
+        private InputStream fWrapped;
     }
 
     private StreamTokenizer fTokenizer;

@@ -315,6 +315,7 @@ public class TraceViewModel {
     }
 
     class Marker implements SortedVector.Keyed {
+        @Override
         public long getKey() {
             return fTimestamp;
         }
@@ -330,8 +331,8 @@ public class TraceViewModel {
             fVisibleNets = visibleNets;
         }
 
-        String fName;
-        Vector<NetViewModel> fVisibleNets;
+        private String fName;
+        private Vector<NetViewModel> fVisibleNets;
     }
 
     private class NetViewModel {
@@ -343,8 +344,8 @@ public class TraceViewModel {
                 formatter = _formatter;
         }
 
-        int index;
-        ValueFormatter formatter;
+        private int index;
+        private ValueFormatter formatter;
     }
 
     private Vector<Listener> fTraceListeners = new Vector<Listener>();
