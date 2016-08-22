@@ -31,15 +31,12 @@ class NetNameView extends JList implements TraceViewModel.Listener {
     class NetNameRenderer extends JPanel implements ListCellRenderer {
         private int fCurrentNet;
         private boolean fCurrentNetIsSelected;
-        private TraceViewModel fTraceViewModel;    // XXX get this from the enclosing class
         private int fLabelBaseline = -1;
         private int fValueBaseline;
         private Font fLabelFont = new Font("SansSerif", Font.BOLD, 10);
         private Font fValueFont = new Font("SansSerif", Font.PLAIN, 8);
 
-        NetNameRenderer(TraceViewModel viewModel, TraceDataModel dataModel) {
-            fTraceViewModel = viewModel;
-            fTraceDataModel = dataModel;
+        NetNameRenderer() {
             setOpaque(true);
         }
 
@@ -110,9 +107,8 @@ class NetNameView extends JList implements TraceViewModel.Listener {
     }
 
     class ListModelAdapter implements ListModel, TraceViewModel.Listener {
-        public ListModelAdapter(TraceViewModel model) {
-            fTraceViewModel = model;
-            model.addListener(this);
+        public ListModelAdapter() {
+            fTraceViewModel.addListener(this);
         }
 
         @Override
@@ -160,7 +156,6 @@ class NetNameView extends JList implements TraceViewModel.Listener {
         }
 
         private ListDataListener fListener;
-        private TraceViewModel fTraceViewModel;
     }
 
     class NetTransferHandler extends TransferHandler {
@@ -221,8 +216,8 @@ class NetNameView extends JList implements TraceViewModel.Listener {
         fTraceViewModel = viewModel;
         fTraceDataModel = dataModel;
         viewModel.addListener(this);
-        setModel(new ListModelAdapter(viewModel));
-        setCellRenderer(new NetNameRenderer(fTraceViewModel, fTraceDataModel));
+        setModel(new ListModelAdapter());
+        setCellRenderer(new NetNameRenderer());
         computeBounds();
         setFixedCellHeight(kCellHeight);
         setDragEnabled(true);
