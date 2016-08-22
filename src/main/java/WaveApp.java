@@ -21,6 +21,7 @@ import java.util.*;
 import javax.swing.text.*;
 import java.io.*;
 
+/// @todo Add menu item to jump to specific timestamp
 public class WaveApp extends JPanel implements ActionListener {
     public WaveApp() {
         super(new BorderLayout());

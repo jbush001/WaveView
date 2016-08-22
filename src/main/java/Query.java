@@ -18,9 +18,10 @@ import java.lang.Math;
 import java.util.*;
 
 ///
-/// The Query class allows searching for specific logic values, including multiple values.
-/// It builds an expression tree to represent the search criteria.  There are specific
-/// optimizations that allow skipping events that cannot meet the criteria.
+/// The Query class allows searching for logic conditions using complex boolean expressions
+/// For example: (ena = 1 & (addr = 'h1000 or addr = 'h2000))
+/// It builds an expression tree to represent the search criteria. It is optimized
+/// for fast searching, skipping events that cannot meet the criteria.
 ///
 /// @todo Support >=, <=, ~, etc
 /// @todo Support proper logical operators &&, ||
@@ -60,7 +61,7 @@ public class Query {
     }
 
     ///
-    /// Scan forward to find the next timestamp that matches this query's expression
+    /// Scan backward to find the previous timestamp that matches this query's expression
     /// If the startTimestamp is already a match, it will not be returned. This will
     ///  instead scan to the previous transition
     /// @bug This will snap to the beginning of the region that matches, not the end.
@@ -92,6 +93,7 @@ public class Query {
                 fEndOffset = fTokenStart;
         }
 
+        @Override
         public String toString() {
             return fErrorMessage;
         }
