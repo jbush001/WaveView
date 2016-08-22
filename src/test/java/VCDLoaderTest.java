@@ -47,6 +47,7 @@ public class VCDLoaderTest {
             BitVector fValues;
         }
 
+        @Override
         public void enterModule(String name) {
             System.out.println("enterModule " + name);
 
@@ -54,6 +55,7 @@ public class VCDLoaderTest {
             assertEquals(event.fType, EXPECT_ENTER);
         }
 
+        @Override
         public void exitModule() {
             System.out.println("exitModule");
 
@@ -61,6 +63,7 @@ public class VCDLoaderTest {
             assertEquals(event.fType, EXPECT_EXIT);
         }
 
+        @Override
         public int newNet(String shortName, int cloneId, int width) {
             System.out.println("newNet " + shortName + " " + cloneId + " " + width);
 
@@ -70,14 +73,10 @@ public class VCDLoaderTest {
             assertEquals(event.fId, cloneId);
             assertEquals(event.fWidth, width);
 
-            fNetWidths.add(new Integer(width));
-            return fNetWidths.size() - 1;
+            return fNextNetId++;
         }
 
-        public int getNetWidth(int netId) {
-            return fNetWidths.elementAt(netId);
-        }
-
+        @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
             System.out.println("appendTransition " + id + " " + timestamp + " " + values.toString(2));
 
@@ -124,27 +123,31 @@ public class VCDLoaderTest {
             fEventList.add(new Event(EXPECT_FINISHED));
         }
 
-        private Vector<Integer> fNetWidths = new Vector<Integer>();
         private Vector<Event> fEventList = new Vector<Event>();
-        private int fCurrentEvent = 0;
+        private int fCurrentEvent;
+        private int fNextNetId;
     }
 
     public class DummyTraceBuilder implements TraceBuilder {
+        @Override
         public void enterModule(String name) {}
+
+        @Override
         public void exitModule() {}
+
+        @Override
         public int newNet(String shortName, int cloneId, int width) {
-            fNetWidths.add(new Integer(width));
-            return fNetWidths.size() - 1;
+            return fNextNetId++;
         }
 
-        public int getNetWidth(int netId) {
-            return fNetWidths.elementAt(netId);
-        }
-
+        @Override
         public void appendTransition(int id, long timestamp, BitVector values) {}
+
+        @Override
         public void loadFinished() {}
 
         private Vector<Integer> fNetWidths = new Vector<Integer>();
+        private int fNextNetId;
     }
 
     // Simulataneously builds VCD file contents and populates the

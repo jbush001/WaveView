@@ -176,11 +176,6 @@ class TraceDataModel {
             return thisNetIndex;
         }
 
-        @Override
-        public int getNetWidth(int netId) {
-            return fAllNets.elementAt(netId).getWidth();
-        }
-
         private Stack<String> fScopeStack = new Stack<String>();
     }
 

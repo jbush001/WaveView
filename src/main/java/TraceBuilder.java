@@ -33,12 +33,9 @@ interface TraceBuilder {
     ///   the should share the same transition data. The clone ID will contain the
     ///   ID that was returned from newNet when the original signal was added
     /// @param width Number of bits in this signal.
-    /// @returns a unique integer identifier for the newly created net
+    /// @returns a unique integer identifier for the newly created net. This will be
+    ///   passed to appendTransition.
     int newNet(String shortName, int cloneId, int width);
-
-    /// Return the width of a net that was previously added by newNet
-    /// @bug This is a hack.  Clean up.
-    int getNetWidth(int netId);
 
     /// Add a new transition
     /// @param netId Identifier of the net for which the transition takes place. This

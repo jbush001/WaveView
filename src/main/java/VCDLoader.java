@@ -52,6 +52,17 @@ class VCDLoader implements TraceLoader {
         System.out.println("" + fNetMap.size() + " total nets");
     }
 
+    private class Net
+    {
+        Net(int builderID, int width) {
+            fBuilderID = builderID;
+            fWidth = width;
+        }
+
+        int fBuilderID;  /// ID given to this net by the builder
+        int fWidth;
+    }
+
     private void parseScope() throws LoadException, IOException {
         nextToken(true);    // Scope type (ignore)
         nextToken(true);
@@ -81,7 +92,7 @@ class VCDLoader implements TraceLoader {
 
         match("$end");
 
-        Integer net = fNetMap.get(id);
+        Net net = fNetMap.get(id);
         if (net == null) {
             // We've never seen this net before
             // Strip off the width declaration
@@ -89,10 +100,11 @@ class VCDLoader implements TraceLoader {
             if (openBracket != -1)
                 netName = netName.substring(0, openBracket);
 
-            fNetMap.put(id, fTraceBuilder.newNet(netName, -1, width));
+            net = new Net(fTraceBuilder.newNet(netName, -1, width), width);
+            fNetMap.put(id, net);
         } else {
             // Shares data with existing net.  Add as clone.
-            fTraceBuilder.newNet(netName, net.intValue(), width);
+            fTraceBuilder.newNet(netName, net.fBuilderID, width);
         }
     }
 
@@ -179,24 +191,23 @@ class VCDLoader implements TraceLoader {
                 id = getTokenString().substring(1);
             }
 
-            Integer net = fNetMap.get(id);
+            Net net = fNetMap.get(id);
             if (net == null) {
-                throw new LoadException("line " + fTokenizer.lineno() + ": Unknown net id "
-                                        + id);
+                throw new LoadException("line " + fTokenizer.lineno()
+                    + ": Unknown net id " + id);
             }
 
-            int netWidth = fTraceBuilder.getNetWidth(net.intValue());
-            BitVector decodedValues = new BitVector(netWidth);
-            if (value.equals("z") && netWidth > 1) {
-                for (int i = 0; i < netWidth; i++)
+            BitVector decodedValues = new BitVector(net.fWidth);
+            if (value.equals("z") && net.fWidth > 1) {
+                for (int i = 0; i < net.fWidth; i++)
                     decodedValues.setBit(i, BitVector.VALUE_Z);
-            } else if (value.equals("x") && netWidth > 1) {
-                for (int i = 0; i < netWidth; i++)
+            } else if (value.equals("x") && net.fWidth > 1) {
+                for (int i = 0; i < net.fWidth; i++)
                     decodedValues.setBit(i, BitVector.VALUE_X);
             } else {
                 // Decode and pad if necessary.
                 // XXX should this be done inside BitVector
-                int bitIndex = netWidth - 1;
+                int bitIndex = net.fWidth - 1;
                 for (int i = 0; i < value.length(); i++) {
                     int bitValue;
                     switch (value.charAt(i)) {
@@ -224,7 +235,7 @@ class VCDLoader implements TraceLoader {
                 }
             }
 
-            fTraceBuilder.appendTransition(net.intValue(), fCurrentTime, decodedValues);
+            fTraceBuilder.appendTransition(net.fBuilderID, fCurrentTime, decodedValues);
         }
 
         return true;
@@ -332,7 +343,7 @@ class VCDLoader implements TraceLoader {
     private TraceBuilder fTraceBuilder;
     private InputStream fInputStream;
     private long fCurrentTime;
-    private HashMap<String, Integer> fNetMap = new HashMap<String, Integer>();
+    private HashMap<String, Net> fNetMap = new HashMap<String, Net>();
     private long fNanoSecondsPerIncrement;    /// @todo Switch to be unit agnostic
     private int fTotalTransitions;
     private ProgressListener fProgressListener;

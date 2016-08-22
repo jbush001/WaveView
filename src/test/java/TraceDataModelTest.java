@@ -32,10 +32,6 @@ public class TraceDataModelTest {
         builder.exitModule();
         builder.exitModule();
 
-        assertEquals(1, builder.getNetWidth(net1));
-        assertEquals(3, builder.getNetWidth(net2));
-        assertEquals(2, builder.getNetWidth(net3));
-
         builder.appendTransition(net1, 10, new BitVector("1", 2));
         builder.appendTransition(net1, 20, new BitVector("0", 2));
         builder.appendTransition(net2, 10, new BitVector("100", 2));
@@ -73,9 +69,6 @@ public class TraceDataModelTest {
         assertEquals(net1, model.findNet("mod1.net1"));
         assertEquals(net2, model.findNet("mod1.net2"));
         assertEquals(net3, model.findNet("mod1.mod2.net3"));
-        assertEquals(1, model.getNetWidth(net1));
-        assertEquals(3, model.getNetWidth(net2));
-        assertEquals(2, model.getNetWidth(net3));
         assertEquals("net1", model.getShortNetName(net1));
         assertEquals("net2", model.getShortNetName(net2));
         assertEquals("net3", model.getShortNetName(net3));
