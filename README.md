@@ -3,6 +3,8 @@
 WaveView is a Java based waveform viewer.  It reads VCD (value change dump)
 files.
 
+![screenshot](https://raw.githubusercontent.com/wiki/jbush001/WaveView/screenshot.png)
+
 # Setup
 ## MacOS
 
