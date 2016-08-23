@@ -71,7 +71,7 @@ class BitVector {
         return true;
     }
 
-    /// @returns True if this contains any Z or X values in any positions
+    /// @returns true if this contains any Z or X values in any positions
     public boolean isX() {
         for (int i = 0; i < fValues.length; i++) {
             if (fValues[i] == VALUE_Z || fValues[i] == VALUE_X)
@@ -81,7 +81,7 @@ class BitVector {
         return false;
     }
 
-    /// @param radix May be 16, 10, or 2 (hex or binary)
+    /// @param radix May be 2, 10, or 16
     public void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
         case 2:
@@ -103,7 +103,7 @@ class BitVector {
 
     /// @returns 1 if this is greater than the other bit vector, -1 if it is
     /// less than, 0 if equal
-    /// @bug This is probably not completely correct for X and Z values...
+    /// @bug Ignores X and Z values, should have a rule for those.
     public int compare(BitVector other) {
         int myWidth = getWidth();
         int otherWidth = other.getWidth();
@@ -166,8 +166,8 @@ class BitVector {
         return value;
     }
 
-    /// @returns A string representation of this BitVector with the given radix,
-    ///  which may be 2, 10, or 16.
+    /// @param radix may be 2, 10, or 16
+    /// @returns A string representation of this BitVector with the given radix
     public String toString(int radix) {
         switch (radix) {
         case 2:

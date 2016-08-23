@@ -89,7 +89,6 @@ class TraceSettingsFile {
             serializer.serialize(document);
         } catch (Exception exc) {
             System.out.println("caught exception " + exc + " while saving state");
-            exc.printStackTrace();
         }
     }
 
@@ -223,7 +222,6 @@ class TraceSettingsFile {
             }
         } catch (Exception exc) {
             System.out.println("caught exception " + exc);
-            exc.printStackTrace();
         }
     }
 

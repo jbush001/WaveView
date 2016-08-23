@@ -14,7 +14,6 @@
 // limitations under the License.
 //
 
-// Container for the timescale view, net names, and the actual waveforms themselves.
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,6 +24,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.io.File;
 
+///
+/// Container for the timescale view, net names, and waveforms.
+///
 public class TraceView extends JPanel implements ActionListener {
     public TraceView(TraceViewModel viewModel, TraceDataModel dataModel, WaveApp waveApp) {
         super(new BorderLayout());

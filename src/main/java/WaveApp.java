@@ -191,7 +191,6 @@ public class WaveApp extends JPanel implements ActionListener {
 
                 loader.load(fFile, fNewModel.startBuilding(), progressListener);
             } catch (Exception exc) {
-                exc.printStackTrace();
                 fErrorMessage = exc.getMessage();
             }
 
