@@ -221,11 +221,11 @@ public class WaveApp extends JPanel implements ActionListener {
                 fFrame.setTitle("Waveform Viewer [" + fFile.getName() + "]");
 
                 try {
-                    fConfigFileName = createConfigFileName(fFile);
-                    fTraceSettingsFile = new TraceSettingsFile(fConfigFileName,
+                    fConfigFile = createConfigFileName(fFile);
+                    fTraceSettingsFile = new TraceSettingsFile(fConfigFile,
                             fTraceDataModel, fTraceViewModel);
-                    if ((new File(fConfigFileName)).exists())
-                        fTraceSettingsFile.readConfigurationFile();
+                    if (fConfigFile.exists())
+                        fTraceSettingsFile.read();
 
                     AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
                 } catch (IOException exc) {
@@ -256,7 +256,7 @@ public class WaveApp extends JPanel implements ActionListener {
     }
 
     private void loadTraceFile(File file) {
-        if (fConfigFileName != null)
+        if (fConfigFile != null)
             saveConfig();
 
         ProgressMonitor monitor = new ProgressMonitor(WaveApp.this, "Loading...", "", 0, 100);
@@ -321,10 +321,10 @@ public class WaveApp extends JPanel implements ActionListener {
 
     private void saveConfig() {
         if (fTraceSettingsFile != null)
-            fTraceSettingsFile.writeConfigurationFile();
+            fTraceSettingsFile.write();
     }
 
-    private static String createConfigFileName(File file) throws IOException {
+    private static File createConfigFileName(File file) throws IOException {
         String path = file.getCanonicalPath();
 
         // Find leaf file name
@@ -341,7 +341,7 @@ public class WaveApp extends JPanel implements ActionListener {
 
         nodeName = "." + nodeName + ".traceconfig";
 
-        return dirPath + nodeName;
+        return new File(dirPath + nodeName);
     }
 
     private void buildNetMenu() {
@@ -497,7 +497,7 @@ public class WaveApp extends JPanel implements ActionListener {
     private TraceView fTraceView;
     private TraceViewModel fTraceViewModel = new TraceViewModel();
     private TraceDataModel fTraceDataModel = new TraceDataModel();
-    private String fConfigFileName;
+    private File fConfigFile;
     private Query fCurrentQuery;
     private JFrame fAddNetsWindow;
     private JFrame fMarkersWindow;

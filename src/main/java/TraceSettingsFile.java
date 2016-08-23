@@ -17,25 +17,25 @@
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import javax.xml.transform.*;
-import com.sun.org.apache.xml.internal.serialize.*;
 import java.util.*;
 import java.io.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.*;
 
 ///
 /// Load/Save view settings specific to a loaded trace
-/// @bug Fix warning "OutputFormat is internal proprietary API and
-/// may be removed in a future release"
 ///
 
 class TraceSettingsFile {
-    public TraceSettingsFile(String filename, TraceDataModel dataModel,
+    public TraceSettingsFile(File file, TraceDataModel dataModel,
                              TraceViewModel viewModel) {  /// @bug make order of view and data model consistent between methods
-        fFilename = filename;
+        fFile = file;
         fDataModel = dataModel;
         fViewModel = viewModel;
     }
 
-    public void writeConfigurationFile() {
+    public void write() {
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = builder.newDocument();
@@ -83,10 +83,10 @@ class TraceSettingsFile {
                 description.appendChild(document.createTextNode(fViewModel.getDescriptionForMarker(i)));
             }
 
-            OutputFormat format = new OutputFormat(document);
-            format.setIndenting(true);
-            XMLSerializer serializer = new XMLSerializer(new FileOutputStream(new File(fFilename)), format);
-            serializer.serialize(document);
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            DOMSource source = new DOMSource(document);
+            StreamResult result = new StreamResult(fFile);
+            transformer.transform(source, result);
         } catch (Exception exc) {
             System.out.println("caught exception " + exc + " while saving state");
         }
@@ -190,10 +190,10 @@ class TraceSettingsFile {
         }
     }
 
-    public void readConfigurationFile() {
+    public void read() {
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = builder.parse(new File(fFilename));
+            Document document = builder.parse(fFile);
 
             fViewModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
@@ -225,7 +225,7 @@ class TraceSettingsFile {
         }
     }
 
-    private String fFilename;
+    private File fFile;
     private TraceDataModel fDataModel;
     private TraceViewModel fViewModel;
 }
