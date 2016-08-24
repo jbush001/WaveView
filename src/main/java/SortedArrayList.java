@@ -20,35 +20,31 @@ import java.util.*;
 /// Vector that allows sorted inserts and binary search lookup.
 ///
 
-class SortedVector<T> extends Vector<T> {
+class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
     public interface Keyed {
         public long getKey();
     }
 
-    public SortedVector() {
+    public SortedArrayList() {
     }
 
-    public SortedVector(int initialCapacity) {
+    public SortedArrayList(int initialCapacity) {
         super(initialCapacity);
-    }
-
-    public SortedVector(int initialCapacity, int capacityIncrement) {
-        super(initialCapacity, capacityIncrement);
     }
 
     void addSorted(T value) {
         long key = ((Keyed) value).getKey();
         for (int i = 0; ; i++) {
             if (i == size()
-                    || ((Keyed) elementAt(i)).getKey() > key) {
-                insertElementAt(value, i);
+                    || ((Keyed) get(i)).getKey() > key) {
+                add(i, value);
                 break;
             }
         }
     }
 
     Iterator<T> find(long key) {
-        return new SortedVectorIterator(this, lookupValue(key));
+        return new SortedArrayListIterator(this, lookupValue(key));
     }
 
     /// @param key key value to search for
@@ -63,7 +59,7 @@ class SortedVector<T> extends Vector<T> {
 
         while (low < high) {
             int mid = (low + high) / 2;
-            long elemKey = ((Keyed) elementAt(mid)).getKey();
+            long elemKey = ((Keyed) get(mid)).getKey();
             if (key == elemKey)
                 return mid;
             else if (key < elemKey)
@@ -78,8 +74,8 @@ class SortedVector<T> extends Vector<T> {
         return 0;    // Before the first entry
     }
 
-    private class SortedVectorIterator<T> implements Iterator<T> {
-        public SortedVectorIterator(SortedVector<T> vector, int index) {
+    private class SortedArrayListIterator implements Iterator<T> {
+        public SortedArrayListIterator(SortedArrayList<T> vector, int index) {
             fVector = vector;
             fIndex = index;
         }
@@ -91,7 +87,7 @@ class SortedVector<T> extends Vector<T> {
 
         @Override
         public T next() {
-            T val = fVector.elementAt(fIndex);
+            T val = fVector.get(fIndex);
             fIndex++;
             return val;
         }
@@ -101,7 +97,7 @@ class SortedVector<T> extends Vector<T> {
             throw new UnsupportedOperationException();
         }
 
-        private SortedVector<T> fVector;
+        private SortedArrayList<T> fVector;
         private int fIndex;
     }
 }

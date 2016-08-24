@@ -43,7 +43,7 @@ class TraceDataModel {
     }
 
     TransitionVector.Iterator findTransition(int netId, long timestamp) {
-        return fAllNets.elementAt(netId).findTransition(timestamp);
+        return fAllNets.get(netId).findTransition(timestamp);
     }
 
     public long getMaxTimestamp() {
@@ -69,15 +69,15 @@ class TraceDataModel {
     }
 
     public int getNetWidth(int index) {
-        return fAllNets.elementAt(index).getWidth();
+        return fAllNets.get(index).getWidth();
     }
 
     public String getShortNetName(int index) {
-        return fAllNets.elementAt(index).getShortName();
+        return fAllNets.get(index).getShortName();
     }
 
     public String getFullNetName(int index) {
-        return fAllNets.elementAt(index).getFullName();
+        return fAllNets.get(index).getFullName();
     }
 
     private class NetDataModel {
@@ -144,7 +144,7 @@ class TraceDataModel {
 
         @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
-            NetDataModel model = fAllNets.elementAt(id);
+            NetDataModel model = fAllNets.get(id);
             model.fTransitionVector.appendTransition(timestamp, values);
         }
 
@@ -164,12 +164,12 @@ class TraceDataModel {
 
             NetDataModel net;
             if (cloneId != -1)
-                net = new NetDataModel(shortName, fAllNets.elementAt(cloneId));
+                net = new NetDataModel(shortName, fAllNets.get(cloneId));
             else
                 net = new NetDataModel(shortName, width);
 
             net.setFullName(fullName.toString());
-            fAllNets.addElement(net);
+            fAllNets.add(net);
             int thisNetIndex = fAllNets.size() - 1;
             fNetTree.addNet(shortName, thisNetIndex);
             fFullNameToNetMap.put(fullName.toString(), thisNetIndex);
@@ -181,6 +181,6 @@ class TraceDataModel {
 
     private long fMaxTimestamp;
     private HashMap<String, Integer> fFullNameToNetMap = new HashMap<String, Integer>();
-    private Vector<NetDataModel> fAllNets = new Vector<NetDataModel>();
+    private ArrayList<NetDataModel> fAllNets = new ArrayList<NetDataModel>();
     private NetTreeModel fNetTree = new NetTreeModel();
 }

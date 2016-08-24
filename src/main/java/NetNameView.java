@@ -24,11 +24,11 @@ import java.awt.datatransfer.*;
 ///
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
-class NetNameView extends JList implements TraceViewModel.Listener {
+class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
     private static final int kCellHeight = 26;
     private static final int kDragThreshold = 15;
 
-    class NetNameRenderer extends JPanel implements ListCellRenderer {
+    class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
         private int fCurrentNet;
         private boolean fCurrentNetIsSelected;
         private int fLabelBaseline = -1;
@@ -42,12 +42,12 @@ class NetNameView extends JList implements TraceViewModel.Listener {
 
         @Override
         public Component getListCellRendererComponent(
-            JList list,
-            Object value,
+            JList<? extends Integer> list,
+            Integer value,
             int index,
             boolean isSelected,
             boolean cellHasFocus) {
-            fCurrentNet = ((Integer) value).intValue();
+            fCurrentNet = value.intValue();
             fCurrentNetIsSelected = isSelected;
 
             return this;
@@ -106,7 +106,7 @@ class NetNameView extends JList implements TraceViewModel.Listener {
         }
     }
 
-    class ListModelAdapter implements ListModel, TraceViewModel.Listener {
+    class ListModelAdapter implements ListModel<Integer>, TraceViewModel.Listener {
         public ListModelAdapter() {
             fTraceViewModel.addListener(this);
         }
@@ -124,8 +124,8 @@ class NetNameView extends JList implements TraceViewModel.Listener {
         }
 
         @Override
-        public Object getElementAt(int index) {
-            return new Integer(index);
+        public Integer getElementAt(int index) {
+            return new Integer(index);  // @todo preallocate?
         }
 
         @Override
@@ -139,12 +139,14 @@ class NetNameView extends JList implements TraceViewModel.Listener {
 
         @Override
         public void netsAdded(int firstIndex, int lastIndex) {
-            fListener.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, firstIndex, lastIndex));
+            fListener.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED,
+                firstIndex, lastIndex));
         }
 
         @Override
         public void netsRemoved(int firstIndex, int lastIndex) {
-            fListener.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, firstIndex, lastIndex));
+            fListener.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED,
+                firstIndex, lastIndex));
         }
 
         @Override

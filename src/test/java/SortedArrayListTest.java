@@ -18,8 +18,8 @@ import static org.junit.Assert.*;
 import org.junit.*;
 import java.util.*;
 
-public class SortedVectorTest {
-    class KeyedElement implements SortedVector.Keyed {
+public class SortedArrayListTest {
+    class KeyedElement implements SortedArrayList.Keyed {
         public KeyedElement(long keyval) {
             fKeyValue = keyval;
         }
@@ -33,7 +33,7 @@ public class SortedVectorTest {
 
     @Test
     public void testAddLookup1() {
-        SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
+        SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
 
         // Note: odd number of elements
         vec.addSorted(new KeyedElement(100));
@@ -54,7 +54,7 @@ public class SortedVectorTest {
 
     @Test
     public void testAddLookup2() {
-        SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
+        SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
 
         // Note: even number of elements
         vec.addSorted(new KeyedElement(100));
@@ -74,7 +74,7 @@ public class SortedVectorTest {
 
     @Test
     public void testIterator() {
-        SortedVector<KeyedElement> vec = new SortedVector<KeyedElement>();
+        SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
         vec.addSorted(new KeyedElement(140));
         vec.addSorted(new KeyedElement(100));
         vec.addSorted(new KeyedElement(120));

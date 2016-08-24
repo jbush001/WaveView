@@ -41,19 +41,19 @@ public class EnumValueFormatter implements ValueFormatter {
     }
 
     void setNameAtIndex(int index, String name) {
-        fMappings.elementAt(index).name = name;
+        fMappings.get(index).name = name;
     }
 
     void setValueAtIndex(int index, int value) {
-        fMappings.elementAt(index).value = value;
+        fMappings.get(index).value = value;
     }
 
     int getValueByIndex(int index) {
-        return fMappings.elementAt(index).value;
+        return fMappings.get(index).value;
     }
 
     String getNameByIndex(int index) {
-        return fMappings.elementAt(index).name;
+        return fMappings.get(index).name;
     }
 
     int getMappingCount() {
@@ -72,5 +72,5 @@ public class EnumValueFormatter implements ValueFormatter {
         return "??? (" + Integer.toString(mapIndex) + ")";
     }
 
-    private Vector<Mapping> fMappings = new Vector<Mapping>();
+    private ArrayList<Mapping> fMappings = new ArrayList<Mapping>();
 }

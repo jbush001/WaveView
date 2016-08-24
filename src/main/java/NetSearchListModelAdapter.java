@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import java.util.Vector;
+import java.util.ArrayList;
 import javax.swing.ListModel;
 import javax.swing.text.Document;
 import javax.swing.event.DocumentListener;
@@ -28,7 +28,7 @@ import javax.swing.event.ListDataEvent;
 /// itself as a listener on the text field where the user types a pattern.
 ///
 
-class NetSearchListModelAdapter implements ListModel, DocumentListener {
+class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     public NetSearchListModelAdapter(TraceDataModel model) {
         fTraceDataModel = model;
         setPattern("");
@@ -93,8 +93,8 @@ class NetSearchListModelAdapter implements ListModel, DocumentListener {
     }
 
     @Override
-    public Object getElementAt(int index) {
-        return fMatches.elementAt(index);
+    public String getElementAt(int index) {
+        return fMatches.get(index);
     }
 
     @Override
@@ -103,6 +103,6 @@ class NetSearchListModelAdapter implements ListModel, DocumentListener {
     }
 
     private ListDataListener fListener;
-    private Vector<String> fMatches = new Vector<String>();
+    private ArrayList<String> fMatches = new ArrayList<String>();
     private TraceDataModel fTraceDataModel;
 }

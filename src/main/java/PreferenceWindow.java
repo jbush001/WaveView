@@ -62,14 +62,14 @@ class PreferenceWindow extends JFrame {
     }
 
     protected void cancel() {
-        hide();
+        setVisible(false);
     }
 
     protected void ok() {
         for (int i = 0; i < fTabbedPane.getTabCount(); i++)
             ((PreferencePane) fTabbedPane.getComponentAt(i)).saveSettings();
 
-        hide();
+        setVisible(false);
     }
 
     JTabbedPane fTabbedPane;

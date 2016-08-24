@@ -62,9 +62,9 @@ class AppPreferences {
 
         // Remove oldest file from list if necessary
         if (fRecentFiles.size() >= kMaxRecentFiles)
-            fRecentFiles.removeElementAt(0);
+            fRecentFiles.remove(0);
 
-        fRecentFiles.addElement(path);
+        fRecentFiles.add(path);
 
         // Write out to preferences file
         StringBuffer recentList = new StringBuffer();
@@ -78,7 +78,7 @@ class AppPreferences {
         fPrefs.put("recentFiles", recentList.toString());
     }
 
-    public Vector<String> getRecentFileList() {
+    public ArrayList<String> getRecentFileList() {
         return fRecentFiles;
     }
 
@@ -104,7 +104,7 @@ class AppPreferences {
         String[] paths = recentList.split(";");
         for (String path : paths) {
             if (path.length() > 0)
-                fRecentFiles.addElement(path);
+                fRecentFiles.add(path);
         }
 
         kTraceColor = readColor("traceColor", Color.black);
@@ -135,5 +135,5 @@ class AppPreferences {
 
     private Preferences fPrefs = Preferences.userNodeForPackage(WaveApp.class);
     private static AppPreferences fInstance;
-    private Vector<String> fRecentFiles = new Vector<String>();
+    private ArrayList<String> fRecentFiles = new ArrayList<String>();
 }

@@ -101,7 +101,7 @@ public class TraceViewModel {
     void moveNets(int[] fromIndices, int insertionPoint) {
         NetViewModel[] nets = new NetViewModel[fromIndices.length];
         for (int i = fromIndices.length - 1; i >= 0; i--) {
-            nets[i] = fVisibleNets.elementAt(fromIndices[i]);
+            nets[i] = fVisibleNets.get(fromIndices[i]);
             removeNet(fromIndices[i]);
             if (fromIndices[i] < insertionPoint)
                 insertionPoint--;
@@ -125,15 +125,15 @@ public class TraceViewModel {
     /// @param index Index of net in order displayed in net list
     /// @returns netID (as referenced in TraceDataModel)
     public int getVisibleNet(int index) {
-        return fVisibleNets.elementAt(index).index;
+        return fVisibleNets.get(index).index;
     }
 
     public void setValueFormatter(int listIndex, ValueFormatter formatter) {
-        fVisibleNets.elementAt(listIndex).formatter = formatter;
+        fVisibleNets.get(listIndex).formatter = formatter;
     }
 
     public ValueFormatter getValueFormatter(int listIndex) {
-        return fVisibleNets.elementAt(listIndex).formatter;
+        return fVisibleNets.get(listIndex).formatter;
     }
 
     public int getNetSetCount() {
@@ -141,13 +141,13 @@ public class TraceViewModel {
     }
 
     public String getNetSetName(int index) {
-        return fNetSets.elementAt(index).fName;
+        return fNetSets.get(index).fName;
     }
 
     public void selectNetSet(int index) {
         int oldSize = fVisibleNets.size();
 
-        fVisibleNets = (Vector<NetViewModel>) fNetSets.elementAt(index).fVisibleNets.clone();
+        fVisibleNets = new ArrayList<NetViewModel>(fNetSets.get(index).fVisibleNets);
 
         // There is probably a more efficient way to do this
         for (Listener listener : fTraceListeners) {
@@ -158,7 +158,7 @@ public class TraceViewModel {
 
     /// Saves the current view configuration as a named net set
     public void saveNetSet(String name) {
-        NetSet newNetSet = new NetSet(name, (Vector<NetViewModel>) fVisibleNets.clone());
+        NetSet newNetSet = new NetSet(name, fVisibleNets);
 
         // Determine if we should save over an existing net set...
         boolean found = false;
@@ -245,7 +245,7 @@ public class TraceViewModel {
         final int kMarkerRemoveSize = (int)(5.0 * getHorizontalScale());
 
         int index = fMarkers.lookupValue(timestamp);
-        long targetTimestamp = fMarkers.elementAt(index).fTimestamp;
+        long targetTimestamp = fMarkers.get(index).fTimestamp;
 
         // The lookup function sometimes rounds to the lower marker, so
         // check both the current marker and the next one.
@@ -253,7 +253,7 @@ public class TraceViewModel {
             fMarkers.remove(index);
             notifyMarkerChanged(targetTimestamp);
         } else if (index < fMarkers.size() - 1) {
-            targetTimestamp = fMarkers.elementAt(index + 1).fTimestamp;
+            targetTimestamp = fMarkers.get(index + 1).fTimestamp;
             if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize) {
                 fMarkers.remove(index + 1);
                 notifyMarkerChanged(targetTimestamp);
@@ -262,19 +262,19 @@ public class TraceViewModel {
     }
 
     public String getDescriptionForMarker(int index) {
-        return fMarkers.elementAt(index).fDescription;
+        return fMarkers.get(index).fDescription;
     }
 
     public void setDescriptionForMarker(int index, String description) {
-        fMarkers.elementAt(index).fDescription = description;
+        fMarkers.get(index).fDescription = description;
     }
 
     public long getTimestampForMarker(int index) {
-        return fMarkers.elementAt(index).fTimestamp;
+        return fMarkers.get(index).fTimestamp;
     }
 
     public int getIdForMarker(int index) {
-        return fMarkers.elementAt(index).fId;
+        return fMarkers.get(index).fId;
     }
 
     public int getMarkerCount() {
@@ -313,7 +313,7 @@ public class TraceViewModel {
         }
     }
 
-    class Marker implements SortedVector.Keyed {
+    class Marker implements SortedArrayList.Keyed {
         @Override
         public long getKey() {
             return fTimestamp;
@@ -325,13 +325,13 @@ public class TraceViewModel {
     }
 
     class NetSet {
-        NetSet(String name, Vector<NetViewModel> visibleNets) {
+        NetSet(String name, ArrayList<NetViewModel> visibleNets) {
             fName = name;
-            fVisibleNets = visibleNets;
+            fVisibleNets = new ArrayList<NetViewModel>(visibleNets);
         }
 
         private String fName;
-        private Vector<NetViewModel> fVisibleNets;
+        private ArrayList<NetViewModel> fVisibleNets;
     }
 
     private class NetViewModel {
@@ -347,14 +347,14 @@ public class TraceViewModel {
         private ValueFormatter formatter;
     }
 
-    private Vector<Listener> fTraceListeners = new Vector<Listener>();
-    private Vector<NetViewModel> fVisibleNets = new Vector<NetViewModel>();
-    private Vector<NetSet> fNetSets = new Vector<NetSet>();
+    private ArrayList<Listener> fTraceListeners = new ArrayList<Listener>();
+    private ArrayList<NetViewModel> fVisibleNets = new ArrayList<NetViewModel>();
+    private ArrayList<NetSet> fNetSets = new ArrayList<NetSet>();
     private long fCursorPosition;
     private long fSelectionStart;
     private double fHorizontalScale = 10.0; // Nanoseconds per pixel
     private boolean fAdjustingCursor;
-    private SortedVector<Marker> fMarkers = new SortedVector<Marker>();
+    private SortedArrayList<Marker> fMarkers = new SortedArrayList<Marker>();
     private int fNextMarkerId = 1;
     private long fMinorTickInterval;
 };

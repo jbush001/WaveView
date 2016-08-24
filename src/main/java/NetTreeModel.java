@@ -72,7 +72,7 @@ public class NetTreeModel implements TreeModel {
 
     @Override
     public Object getChild(Object parent, int index) {
-        return ((NetTreeNode) parent).fChildren.elementAt(index);
+        return ((NetTreeNode) parent).fChildren.get(index);
     }
 
     @Override
@@ -116,7 +116,7 @@ public class NetTreeModel implements TreeModel {
             return fName;
         }
 
-        private Vector<NetTreeNode> fChildren = new Vector<NetTreeNode>();
+        private ArrayList<NetTreeNode> fChildren = new ArrayList<NetTreeNode>();
         private String fName;
         private int fNet = -1;
     };

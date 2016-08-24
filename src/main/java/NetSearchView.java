@@ -100,7 +100,7 @@ public class NetSearchView extends JPanel implements ActionListener {
         searchTab.add(searchField, BorderLayout.NORTH);
         NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(
             fTraceDataModel);
-        JList netList = new JList(adapter);
+        JList<String> netList = new JList<String>(adapter);
         searchField.getDocument().addDocumentListener(adapter);
         netList.setDragEnabled(true);
         JScrollPane listScroller = new JScrollPane(netList);
