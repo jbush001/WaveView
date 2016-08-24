@@ -221,15 +221,15 @@ public class WaveApp extends JPanel implements ActionListener {
                 fFrame.setTitle("Waveform Viewer [" + fFile.getName() + "]");
 
                 try {
+                    AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
+
                     fConfigFile = createConfigFileName(fFile);
                     fTraceSettingsFile = new TraceSettingsFile(fConfigFile,
                             fTraceDataModel, fTraceViewModel);
                     if (fConfigFile.exists())
                         fTraceSettingsFile.read();
-
-                    AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
-                } catch (IOException exc) {
-                    // Creating File object (which is just a path) probably shouldn't fail
+                } catch (Exception exc) {
+                    exc.printStackTrace();
                 }
 
                 buildRecentFilesMenu();
@@ -256,9 +256,7 @@ public class WaveApp extends JPanel implements ActionListener {
     }
 
     private void loadTraceFile(File file) {
-        if (fConfigFile != null)
-            saveConfig();
-
+        saveConfig();
         ProgressMonitor monitor = new ProgressMonitor(WaveApp.this, "Loading...", "", 0, 100);
         (new TraceLoadWorker(file, monitor)).execute();
     }
@@ -320,8 +318,12 @@ public class WaveApp extends JPanel implements ActionListener {
     }
 
     private void saveConfig() {
-        if (fTraceSettingsFile != null)
-            fTraceSettingsFile.write();
+        try {
+            if (fTraceSettingsFile != null)
+                fTraceSettingsFile.write();
+        } catch (Exception exc) {
+            exc.printStackTrace();
+        }
     }
 
     private static File createConfigFileName(File file) throws IOException {

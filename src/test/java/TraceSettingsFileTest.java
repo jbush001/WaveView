@@ -25,7 +25,7 @@ public class TraceSettingsFileTest {
     public TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
-    public void testLoad() throws IOException {
+    public void testLoad() throws Exception {
         TraceDataModel dataModel = new TraceDataModel();
         TraceViewModel sourceViewModel = new TraceViewModel();
 
@@ -61,6 +61,15 @@ public class TraceSettingsFileTest {
         sourceViewModel.makeNetVisible(4);
         sourceViewModel.makeNetVisible(5);
 
+        sourceViewModel.setValueFormatter(0, new BinaryValueFormatter());
+        sourceViewModel.setValueFormatter(1, new DecimalValueFormatter());
+        sourceViewModel.setValueFormatter(2, new HexadecimalValueFormatter());
+        EnumValueFormatter enumFormatter = new EnumValueFormatter();
+        enumFormatter.addMapping(0, "STATE_INIT");
+        enumFormatter.addMapping(1, "STATE_LOAD");
+        enumFormatter.addMapping(2, "STATE_STORE");
+        sourceViewModel.setValueFormatter(3, enumFormatter);
+
         sourceViewModel.addMarker("marker1", 1234);
         sourceViewModel.addMarker("marker2", 5678);
         assertEquals(1, sourceViewModel.getIdForMarker(0));
@@ -78,6 +87,16 @@ public class TraceSettingsFileTest {
         assertEquals(2, destViewModel.getVisibleNet(1));
         assertEquals(4, destViewModel.getVisibleNet(2));
         assertEquals(5, destViewModel.getVisibleNet(3));
+
+        assertTrue(destViewModel.getValueFormatter(0) instanceof BinaryValueFormatter);
+        assertTrue(destViewModel.getValueFormatter(1) instanceof DecimalValueFormatter);
+        assertTrue(destViewModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
+        enumFormatter = (EnumValueFormatter) destViewModel.getValueFormatter(3);
+        assertTrue(enumFormatter instanceof EnumValueFormatter);
+        assertEquals(3, enumFormatter.getMappingCount());
+        assertEquals("STATE_INIT", enumFormatter.getNameByIndex(0));
+        assertEquals("STATE_LOAD", enumFormatter.getNameByIndex(1));
+        assertEquals("STATE_STORE", enumFormatter.getNameByIndex(2));
 
         assertEquals(2, destViewModel.getNetSetCount());
         assertEquals("set1", destViewModel.getNetSetName(0));

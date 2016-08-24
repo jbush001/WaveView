@@ -35,61 +35,57 @@ class TraceSettingsFile {
         fViewModel = viewModel;
     }
 
-    public void write() {
-        try {
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = builder.newDocument();
+    public void write() throws Exception {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = builder.newDocument();
 
-            Element configuration = document.createElement("configuration");
-            document.appendChild(configuration);
+        Element configuration = document.createElement("configuration");
+        document.appendChild(configuration);
 
-            Element scale = document.createElement("scale");
-            configuration.appendChild(scale);
-            scale.appendChild(document.createTextNode(Double.toString(fViewModel.getHorizontalScale())));
+        Element scale = document.createElement("scale");
+        configuration.appendChild(scale);
+        scale.appendChild(document.createTextNode(Double.toString(fViewModel.getHorizontalScale())));
 
-            Element netSetsElement = document.createElement("netsets");
-            configuration.appendChild(netSetsElement);
+        Element netSetsElement = document.createElement("netsets");
+        configuration.appendChild(netSetsElement);
 
-            // Set 0 is the currently visible set of nets
-            Element netSetElement = makeVisibleNetList(document);
-            netSetElement.setAttribute("name", "_default");
+        // Set 0 is the currently visible set of nets
+        Element netSetElement = makeVisibleNetList(document);
+        netSetElement.setAttribute("name", "_default");
+        netSetsElement.appendChild(netSetElement);
+
+        // Write out all of our saved net sets
+        for (int i = 0; i < fViewModel.getNetSetCount(); i++) {
+            fViewModel.selectNetSet(i);
+            netSetElement = makeVisibleNetList(document);
+            netSetElement.setAttribute("name", fViewModel.getNetSetName(i));
             netSetsElement.appendChild(netSetElement);
-
-            // Write out all of our saved net sets
-            for (int i = 0; i < fViewModel.getNetSetCount(); i++) {
-                fViewModel.selectNetSet(i);
-                netSetElement = makeVisibleNetList(document);
-                netSetElement.setAttribute("name", fViewModel.getNetSetName(i));
-                netSetsElement.appendChild(netSetElement);
-            }
-
-            Element markers = document.createElement("markers");
-            configuration.appendChild(markers);
-
-            for (int i = 0; i < fViewModel.getMarkerCount(); i++) {
-                Element markerElement = document.createElement("marker");
-                markers.appendChild(markerElement);
-
-                Element id = document.createElement("id");
-                markerElement.appendChild(id);
-                id.appendChild(document.createTextNode(Integer.toString(i)));
-
-                Element timestamp = document.createElement("timestamp");
-                markerElement.appendChild(timestamp);
-                timestamp.appendChild(document.createTextNode(Long.toString(fViewModel.getTimestampForMarker(i))));
-
-                Element description = document.createElement("description");
-                markerElement.appendChild(description);
-                description.appendChild(document.createTextNode(fViewModel.getDescriptionForMarker(i)));
-            }
-
-            Transformer transformer = TransformerFactory.newInstance().newTransformer();
-            DOMSource source = new DOMSource(document);
-            StreamResult result = new StreamResult(fFile);
-            transformer.transform(source, result);
-        } catch (Exception exc) {
-            System.out.println("caught exception " + exc + " while saving state");
         }
+
+        Element markers = document.createElement("markers");
+        configuration.appendChild(markers);
+
+        for (int i = 0; i < fViewModel.getMarkerCount(); i++) {
+            Element markerElement = document.createElement("marker");
+            markers.appendChild(markerElement);
+
+            Element id = document.createElement("id");
+            markerElement.appendChild(id);
+            id.appendChild(document.createTextNode(Integer.toString(i)));
+
+            Element timestamp = document.createElement("timestamp");
+            markerElement.appendChild(timestamp);
+            timestamp.appendChild(document.createTextNode(Long.toString(fViewModel.getTimestampForMarker(i))));
+
+            Element description = document.createElement("description");
+            markerElement.appendChild(description);
+            description.appendChild(document.createTextNode(fViewModel.getDescriptionForMarker(i)));
+        }
+
+        Transformer transformer = TransformerFactory.newInstance().newTransformer();
+        DOMSource source = new DOMSource(document);
+        StreamResult result = new StreamResult(fFile);
+        transformer.transform(source, result);
     }
 
     public Element makeVisibleNetList(Document document) {
@@ -154,7 +150,6 @@ class TraceSettingsFile {
             Element netElem = (Element) netElements.item(i);
             String name = getSubTag(netElem, "name");
 
-            String format = getSubTag(netElem, "format");
             ValueFormatter formatter = null;
             NodeList mappings = netElem.getElementsByTagName("mapping");
             if (mappings.getLength() > 0) {
@@ -166,6 +161,7 @@ class TraceSettingsFile {
                     ((EnumValueFormatter)formatter).addMapping(Integer.parseInt(id), text);
                 }
             } else {
+                String format = getSubTag(netElem, "format");
                 Class c = Class.forName(format);
                 if (c != null) {
                     try {
@@ -190,38 +186,34 @@ class TraceSettingsFile {
         }
     }
 
-    public void read() {
-        try {
-            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = builder.parse(fFile);
+    public void read() throws Exception {
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = builder.parse(fFile);
 
-            fViewModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
+        fViewModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
-            // read NetSet
-            NodeList netSets = document.getElementsByTagName("netset");
+        // read NetSet
+        NodeList netSets = document.getElementsByTagName("netset");
 
-            // Read saved net sets
-            for (int i = 1; i < netSets.getLength(); i++) {
-                Element netSet = (Element) netSets.item(i);
-                readNetSet(netSet);
-                fViewModel.saveNetSet(netSet.getAttribute("name"));
-            }
+        // Read saved net sets
+        for (int i = 1; i < netSets.getLength(); i++) {
+            Element netSet = (Element) netSets.item(i);
+            readNetSet(netSet);
+            fViewModel.saveNetSet(netSet.getAttribute("name"));
+        }
 
-            // Default net set
-            if (netSets.getLength() > 0)
-                readNetSet((Element) netSets.item(0));
+        // Default net set
+        if (netSets.getLength() > 0)
+            readNetSet((Element) netSets.item(0));
 
-            NodeList markers = document.getElementsByTagName("marker");
-            for (int j = 0; j < markers.getLength(); j++) {
-                Element markerElem = (Element) markers.item(j);
+        NodeList markers = document.getElementsByTagName("marker");
+        for (int j = 0; j < markers.getLength(); j++) {
+            Element markerElem = (Element) markers.item(j);
 
-                // XXX note, we ignore the ID and assume these are already in order
-                // Integer.parseInt(getSubTag(markerElem, "id"));
-                fViewModel.addMarker(getSubTag(markerElem, "description"),
-                                     Long.parseLong(getSubTag(markerElem, "timestamp")));
-            }
-        } catch (Exception exc) {
-            System.out.println("caught exception " + exc);
+            // XXX note, we ignore the ID and assume these are already in order
+            // Integer.parseInt(getSubTag(markerElem, "id"));
+            fViewModel.addMarker(getSubTag(markerElem, "description"),
+                                 Long.parseLong(getSubTag(markerElem, "timestamp")));
         }
     }
 
