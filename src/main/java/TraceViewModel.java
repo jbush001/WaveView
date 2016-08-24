@@ -56,6 +56,8 @@ public class TraceViewModel {
         fHorizontalScale = scale;
         fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
                                                 scale * kMinMinorTickSize)));
+        if (fMinorTickInterval <= 0)
+            fMinorTickInterval = 1;
 
         for (Listener listener : fTraceListeners)
             listener.scaleChanged(scale);

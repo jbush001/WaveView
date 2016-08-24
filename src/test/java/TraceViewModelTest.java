@@ -419,12 +419,18 @@ public class TraceViewModelTest {
     // a notification with a negative index. This was causing an exception
     // that broke file loading.
     @Test
-    public void testRemoveOnEmpty()
-    {
+    public void testRemoveOnEmpty() {
         TraceViewModel tvm = new TraceViewModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
         tvm.removeAllNets();
         assertEquals(0, listener.fNotifications);
+    }
+
+    @Test
+    public void testZeroMinorTick() {
+        TraceViewModel tvm = new TraceViewModel();
+        tvm.setHorizontalScale(0.01);
+        assertEquals(1, tvm.getMinorTickInterval());
     }
 }
