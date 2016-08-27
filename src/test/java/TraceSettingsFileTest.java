@@ -27,7 +27,7 @@ public class TraceSettingsFileTest {
     @Test
     public void testLoad() throws Exception {
         TraceDataModel dataModel = new TraceDataModel();
-        TraceDisplayModel sourceViewModel = new TraceDisplayModel();
+        TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
 
         TraceBuilder builder = dataModel.startBuilding();
         builder.enterModule("mod1");
@@ -45,79 +45,128 @@ public class TraceSettingsFileTest {
         builder.newNet("net8", -1, 1);
         builder.exitModule();
 
-        // Populate sourceViewModel
-        sourceViewModel.makeNetVisible(1);
-        sourceViewModel.makeNetVisible(2);
-        sourceViewModel.saveNetSet("set1");
+        // Populate sourceDisplayModel
+        sourceDisplayModel.makeNetVisible(1);
+        sourceDisplayModel.makeNetVisible(2);
+        sourceDisplayModel.saveNetSet("set1");
 
-        sourceViewModel.removeAllNets();
-        sourceViewModel.makeNetVisible(6);
-        sourceViewModel.makeNetVisible(7);
-        sourceViewModel.saveNetSet("set2");
+        sourceDisplayModel.removeAllNets();
+        sourceDisplayModel.makeNetVisible(6);
+        sourceDisplayModel.makeNetVisible(7);
+        sourceDisplayModel.saveNetSet("set2");
 
-        sourceViewModel.removeAllNets();
-        sourceViewModel.makeNetVisible(0);
-        sourceViewModel.makeNetVisible(2);
-        sourceViewModel.makeNetVisible(4);
-        sourceViewModel.makeNetVisible(5);
+        sourceDisplayModel.removeAllNets();
+        sourceDisplayModel.makeNetVisible(0);
+        sourceDisplayModel.makeNetVisible(2);
+        sourceDisplayModel.makeNetVisible(4);
+        sourceDisplayModel.makeNetVisible(5);
 
-        sourceViewModel.setValueFormatter(0, new BinaryValueFormatter());
-        sourceViewModel.setValueFormatter(1, new DecimalValueFormatter());
-        sourceViewModel.setValueFormatter(2, new HexadecimalValueFormatter());
+        sourceDisplayModel.setValueFormatter(0, new BinaryValueFormatter());
+        sourceDisplayModel.setValueFormatter(1, new DecimalValueFormatter());
+        sourceDisplayModel.setValueFormatter(2, new HexadecimalValueFormatter());
         EnumValueFormatter enumFormatter = new EnumValueFormatter();
         enumFormatter.addMapping(0, "STATE_INIT");
         enumFormatter.addMapping(1, "STATE_LOAD");
         enumFormatter.addMapping(2, "STATE_STORE");
-        sourceViewModel.setValueFormatter(3, enumFormatter);
+        sourceDisplayModel.setValueFormatter(3, enumFormatter);
 
-        sourceViewModel.addMarker("marker1", 1234);
-        sourceViewModel.addMarker("marker2", 5678);
-        assertEquals(1, sourceViewModel.getIdForMarker(0));
-        assertEquals(2, sourceViewModel.getIdForMarker(1));
+        sourceDisplayModel.addMarker("marker1", 1234);
+        sourceDisplayModel.addMarker("marker2", 5678);
+        assertEquals(1, sourceDisplayModel.getIdForMarker(0));
+        assertEquals(2, sourceDisplayModel.getIdForMarker(1));
+
+        sourceDisplayModel.setHorizontalScale(123.0);
 
         // Save and reload contents
-        TraceDisplayModel destViewModel = new TraceDisplayModel();
-        File file = fTempFolder.newFile("test.vcd");
-        (new TraceSettingsFile(file, dataModel, sourceViewModel)).write();
-        (new TraceSettingsFile(file, dataModel, destViewModel)).read();
+        TraceDisplayModel destDisplayModel = new TraceDisplayModel();
+        File file = fTempFolder.newFile("test1.settings");
+        (new TraceSettingsFile(file, dataModel, sourceDisplayModel)).write();
+        (new TraceSettingsFile(file, dataModel, destDisplayModel)).read();
 
-        // Check destViewModel
-        assertEquals(4, destViewModel.getVisibleNetCount());
-        assertEquals(0, destViewModel.getVisibleNet(0));
-        assertEquals(2, destViewModel.getVisibleNet(1));
-        assertEquals(4, destViewModel.getVisibleNet(2));
-        assertEquals(5, destViewModel.getVisibleNet(3));
+        // Check destDisplayModel
+        assertEquals(4, destDisplayModel.getVisibleNetCount());
+        assertEquals(0, destDisplayModel.getVisibleNet(0));
+        assertEquals(2, destDisplayModel.getVisibleNet(1));
+        assertEquals(4, destDisplayModel.getVisibleNet(2));
+        assertEquals(5, destDisplayModel.getVisibleNet(3));
 
-        assertTrue(destViewModel.getValueFormatter(0) instanceof BinaryValueFormatter);
-        assertTrue(destViewModel.getValueFormatter(1) instanceof DecimalValueFormatter);
-        assertTrue(destViewModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
-        enumFormatter = (EnumValueFormatter) destViewModel.getValueFormatter(3);
+        assertTrue(destDisplayModel.getValueFormatter(0) instanceof BinaryValueFormatter);
+        assertTrue(destDisplayModel.getValueFormatter(1) instanceof DecimalValueFormatter);
+        assertTrue(destDisplayModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
+        enumFormatter = (EnumValueFormatter) destDisplayModel.getValueFormatter(3);
         assertTrue(enumFormatter instanceof EnumValueFormatter);
         assertEquals(3, enumFormatter.getMappingCount());
         assertEquals("STATE_INIT", enumFormatter.getName(0));
         assertEquals("STATE_LOAD", enumFormatter.getName(1));
         assertEquals("STATE_STORE", enumFormatter.getName(2));
 
-        assertEquals(2, destViewModel.getNetSetCount());
-        assertEquals("set1", destViewModel.getNetSetName(0));
-        assertEquals("set2", destViewModel.getNetSetName(1));
+        assertEquals(2, destDisplayModel.getNetSetCount());
+        assertEquals("set1", destDisplayModel.getNetSetName(0));
+        assertEquals("set2", destDisplayModel.getNetSetName(1));
 
-        destViewModel.selectNetSet(0);
-        assertEquals(2, destViewModel.getVisibleNetCount());
-        assertEquals(1, destViewModel.getVisibleNet(0));
-        assertEquals(2, destViewModel.getVisibleNet(1));
+        destDisplayModel.selectNetSet(0);
+        assertEquals(2, destDisplayModel.getVisibleNetCount());
+        assertEquals(1, destDisplayModel.getVisibleNet(0));
+        assertEquals(2, destDisplayModel.getVisibleNet(1));
 
-        destViewModel.selectNetSet(1);
-        assertEquals(2, destViewModel.getVisibleNetCount());
-        assertEquals(6, destViewModel.getVisibleNet(0));
-        assertEquals(7, destViewModel.getVisibleNet(1));
+        destDisplayModel.selectNetSet(1);
+        assertEquals(2, destDisplayModel.getVisibleNetCount());
+        assertEquals(6, destDisplayModel.getVisibleNet(0));
+        assertEquals(7, destDisplayModel.getVisibleNet(1));
 
-        assertEquals(2, destViewModel.getMarkerCount());
-        assertEquals("marker1", destViewModel.getDescriptionForMarker(0));
-        assertEquals("marker2", destViewModel.getDescriptionForMarker(1));
-        assertEquals(1234, destViewModel.getTimestampForMarker(0));
-        assertEquals(5678, destViewModel.getTimestampForMarker(1));
-        assertEquals(1, destViewModel.getIdForMarker(0));
-        assertEquals(2, destViewModel.getIdForMarker(1));
+        assertEquals(2, destDisplayModel.getMarkerCount());
+        assertEquals("marker1", destDisplayModel.getDescriptionForMarker(0));
+        assertEquals("marker2", destDisplayModel.getDescriptionForMarker(1));
+        assertEquals(1234, destDisplayModel.getTimestampForMarker(0));
+        assertEquals(5678, destDisplayModel.getTimestampForMarker(1));
+        assertEquals(1, destDisplayModel.getIdForMarker(0));
+        assertEquals(2, destDisplayModel.getIdForMarker(1));
+
+        assertEquals(123.0, sourceDisplayModel.getHorizontalScale(), 0.001);
+    }
+
+    // When the data model changes, ensure the loader falls back
+    // gracefully. Specifically if a visible net is no longer in
+    // the data model after it is reloaded
+    // @todo Does not test when markers are put in past the end time.
+    //  (not currently implemented in loader)
+    @Test
+    public void testDataModelChanged() throws Exception {
+        TraceDataModel sourceDataModel = new TraceDataModel();
+        TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
+        TraceBuilder builder1 = sourceDataModel.startBuilding();
+        builder1.enterModule("mod1");
+        builder1.newNet("net1", -1, 1);
+        builder1.newNet("net2", -1, 1);
+        builder1.newNet("net3", -1, 1);
+        builder1.exitModule();
+        sourceDisplayModel.makeNetVisible(0);
+        sourceDisplayModel.makeNetVisible(1);
+        sourceDisplayModel.makeNetVisible(2);
+
+        TraceDataModel destDataModel = new TraceDataModel();
+        TraceDisplayModel destDisplayModel = new TraceDisplayModel();
+
+        TraceBuilder builder2 = destDataModel.startBuilding();
+        builder2.enterModule("mod1");
+        builder2.newNet("net1", -1, 1);
+        builder2.newNet("net4", -1, 1);
+        builder2.newNet("net3", -1, 1);
+        builder2.exitModule();
+
+        File file = fTempFolder.newFile("test2.settings");
+        (new TraceSettingsFile(file, sourceDataModel, sourceDisplayModel)).write();
+        (new TraceSettingsFile(file, destDataModel, destDisplayModel)).read();
+
+        assertEquals(2, destDisplayModel.getVisibleNetCount());
+        assertEquals(0, destDisplayModel.getVisibleNet(0));
+        assertEquals(2, destDisplayModel.getVisibleNet(1));
+    }
+
+    @Test
+    public void testConfigFileName() throws Exception {
+        assertEquals("/home/foo/bar/.trace.vcd.traceconfig",
+            TraceSettingsFile.configFileName(new File(
+            "/home/foo/bar/trace.vcd")).toString());
     }
 }

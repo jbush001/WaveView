@@ -223,10 +223,10 @@ public class WaveApp extends JPanel implements ActionListener {
                 try {
                     AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
 
-                    fConfigFile = createConfigFileName(fFile);
-                    fTraceSettingsFile = new TraceSettingsFile(fConfigFile,
+                    File configFile = TraceSettingsFile.configFileName(fFile);
+                    fTraceSettingsFile = new TraceSettingsFile(configFile,
                             fTraceDataModel, fTraceDisplayModel);
-                    if (fConfigFile.exists())
+                    if (configFile.exists())
                         fTraceSettingsFile.read();
                 } catch (Exception exc) {
                     exc.printStackTrace();
@@ -324,26 +324,6 @@ public class WaveApp extends JPanel implements ActionListener {
         } catch (Exception exc) {
             exc.printStackTrace();
         }
-    }
-
-    private static File createConfigFileName(File file) throws IOException {
-        String path = file.getCanonicalPath();
-
-        // Find leaf file name
-        int index = path.lastIndexOf('/');
-        String dirPath;
-        String nodeName;
-        if (index == -1) {
-            dirPath = "";
-            nodeName = path;
-        } else {
-            dirPath = path.substring(0, index + 1);
-            nodeName = path.substring(index + 1);
-        }
-
-        nodeName = "." + nodeName + ".traceconfig";
-
-        return new File(dirPath + nodeName);
     }
 
     private void buildNetMenu() {
@@ -499,7 +479,6 @@ public class WaveApp extends JPanel implements ActionListener {
     private TracePanel fTracePanel;
     private TraceDisplayModel fTraceDisplayModel = new TraceDisplayModel();
     private TraceDataModel fTraceDataModel = new TraceDataModel();
-    private File fConfigFile;
     private Query fCurrentQuery;
     private JFrame fAddNetsWindow;
     private JFrame fMarkersWindow;

@@ -24,12 +24,38 @@ import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
 
 ///
-/// Load/Save view settings specific to a loaded trace
+/// Load/Save TraceDisplayModel state for a trace.
+/// @bug If markers are past the end offset, this should probably drop them.
 ///
 
 class TraceSettingsFile {
+
+    /// @param file Name of a trace file
+    /// @returns configuration file for this (a .dotfile in the same
+    ///  directory)
+    public static File configFileName(File file) throws IOException {
+        String path = file.getCanonicalPath();
+
+        // Find leaf file name
+        int index = path.lastIndexOf('/');
+        String dirPath;
+        String nodeName;
+        if (index == -1) {
+            dirPath = "";
+            nodeName = path;
+        } else {
+            dirPath = path.substring(0, index + 1);
+            nodeName = path.substring(index + 1);
+        }
+
+        nodeName = "." + nodeName + ".traceconfig";
+
+        return new File(dirPath + nodeName);
+    }
+
+
     public TraceSettingsFile(File file, TraceDataModel dataModel,
-                             TraceDisplayModel displayModel) {  /// @bug make order of view and data model consistent between methods
+                             TraceDisplayModel displayModel) {
         fFile = file;
         fDataModel = dataModel;
         fDisplayModel = displayModel;
@@ -210,7 +236,8 @@ class TraceSettingsFile {
         for (int j = 0; j < markers.getLength(); j++) {
             Element markerElem = (Element) markers.item(j);
 
-            // XXX note, we ignore the ID and assume these are already in order
+            /// @bug we ignore the ID and assume these are in order
+            /// This will renumber markers if there are gaps. Is that okay?
             // Integer.parseInt(getSubTag(markerElem, "id"));
             fDisplayModel.addMarker(getSubTag(markerElem, "description"),
                                  Long.parseLong(getSubTag(markerElem, "timestamp")));
