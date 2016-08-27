@@ -112,29 +112,24 @@ class VCDLoader implements TraceLoader {
         nextToken(true);
 
         String s = getTokenString();
-        switch (s.charAt(s.length() - 2)) {  // we want the prefix for the time unit: ####xs
-        case 'n':    // Nano-seconds
+        int unitStart = 0;
+        while (unitStart < s.length() && Character.isDigit(s.charAt(unitStart)))
+            unitStart++;
+
+        String unit = s.substring(unitStart);
+
+        if (unit.equals("ns"))
             fNanoSecondsPerIncrement = 1;
-            s = s.substring(0, s.length() - 2);
-            break;
-        case 'u':    // Microseconds
-            s = s.substring(0, s.length() - 2);
+        else if (unit.equals("us"))
             fNanoSecondsPerIncrement = 1000;
-            break;
-
-        case 's':   // Seconds
+        else if (unit.equals("s"))
             fNanoSecondsPerIncrement = 1000000000;
-            s = s.substring(0, s.length() - 1);
-            break;
-
-        // XXX need to handle other units
-
-        default:
+        else {
             throw new LoadException("line " + fTokenizer.lineno() + ": unknown timescale value "
                                     + getTokenString());
         }
 
-        fNanoSecondsPerIncrement *= Long.parseLong(s);
+        fNanoSecondsPerIncrement *= Long.parseLong(s.substring(0, unitStart));
         match("$end");
     }
 
@@ -241,18 +236,6 @@ class VCDLoader implements TraceLoader {
         return true;
     }
 
-    private boolean isNum(int c) {
-        return c >= '0' && c <= '9';
-    }
-
-    private boolean isSpace(int c) {
-        return c == ' ' || c == '\t' || c == '\n' || c == '\r';
-    }
-
-    private boolean isAlphaNum(int c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
-    }
-
     private void match(String value) throws LoadException, IOException {
         nextToken(true);
         if (!getTokenString().equals(value)) {
@@ -304,32 +287,7 @@ class VCDLoader implements TraceLoader {
             return got;
         }
 
-        @Override
-        public int read(byte[] b) throws IOException {
-            int got = fWrapped.read(b);
-            if (got >= 0)
-                fTotalRead += got;
-
-            return got;
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-            int got = fWrapped.read(b, off, len);
-            if (got >= 0)
-                fTotalRead += got;
-
-            return got;
-        }
-
-        @Override
-        public long skip(long n) throws IOException {
-            long skipped = fWrapped.skip(n);
-            if (skipped >= 0)
-                fTotalRead += skipped;
-
-            return skipped;
-        }
+        // @note skip and byte array versions of read are not used by the Tokenizer
 
         long getTotalRead() {
             return fTotalRead;

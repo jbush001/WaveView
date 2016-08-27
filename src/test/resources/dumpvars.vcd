@@ -8,17 +8,13 @@ $var wire 1 C enable $end
 $upscope $end
 $enddefinitions $end
 #0
+$dumpvars
 b1010111000101011 A
 b011 B
 zC
+$end
 #5
 b1101010010100010 A
 b100 B
 xC
-#10
-b01zxxz10zxzx1010 A
-1C
-#15
-bz A
-bx B
 
