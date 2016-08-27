@@ -17,7 +17,6 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-/// @todo does not test signal aliases...
 public class TraceDataModelTest {
     @Test
     public void testTraceDataModel() {

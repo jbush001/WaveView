@@ -18,8 +18,7 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 public class TransitionVectorTest {
-    private void makeBitVectorFromInt(BitVector vec, int value)
-    {
+    private void makeBitVectorFromInt(BitVector vec, int value) {
         for (int i = 0; i < vec.getWidth(); i++)
             vec.setBit(i, (value >> i) & 1);
     }

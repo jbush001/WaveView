@@ -120,6 +120,4 @@ public class TraceSettingsFileTest {
         assertEquals(1, destViewModel.getIdForMarker(0));
         assertEquals(2, destViewModel.getIdForMarker(1));
     }
-
-
 }
