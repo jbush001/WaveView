@@ -24,3 +24,10 @@ Install JDK from:
 
     java -jar build/libs/WaveView.jar <trace file>
 
+## Test Coverage Report
+
+    ./gradlew jacocoTestReport
+
+Output is in build/reports/jacoco/test/html/index.html
+
+
