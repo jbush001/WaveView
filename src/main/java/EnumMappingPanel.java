@@ -27,8 +27,8 @@ import javax.swing.table.*;
 /// states.
 /// @bug Should check for duplicate values
 ///
-class MappingView extends JPanel {
-    public MappingView(EnumValueFormatter formatter) {
+class EnumMappingPanel extends JPanel {
+    public EnumMappingPanel(EnumValueFormatter formatter) {
         super(new BorderLayout());
 
         fTable = new JTable(new MappingTableModel(formatter));

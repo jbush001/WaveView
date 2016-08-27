@@ -52,8 +52,8 @@ public class WaveApp extends JPanel implements ActionListener {
         toolBar.add(button);
         add(toolBar, BorderLayout.PAGE_START);
 
-        fTraceView = new TraceView(fTraceViewModel, fTraceDataModel, this);
-        add(fTraceView, BorderLayout.CENTER);
+        fTracePanel = new TracePanel(fTraceDisplayModel, fTraceDataModel, this);
+        add(fTracePanel, BorderLayout.CENTER);
 
         setPreferredSize(new Dimension(900,600));
     }
@@ -66,16 +66,16 @@ public class WaveApp extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if (cmd.equals("zoomin"))
-            fTraceView.zoomIn();
+            fTracePanel.zoomIn();
         else if (cmd.equals("zoomout"))
-            fTraceView.zoomOut();
+            fTracePanel.zoomOut();
         else if (cmd.equals("zoomselection"))
-            fTraceView.zoomToSelection();
+            fTracePanel.zoomToSelection();
         else if (cmd.equals("addnet")) {
             if (fNetSearchPane == null) {
                 /// @bug This is a hack.  It makes sure the search
                 /// panel is created after the file is loaded.
-                fNetSearchPane = new NetSearchView(fTraceViewModel, fTraceDataModel);
+                fNetSearchPane = new NetSearchPanel(fTraceDisplayModel, fTraceDataModel);
                 add(fNetSearchPane, BorderLayout.WEST);
 
                 /// @bug Bigger hack: for some reason it doesn't show up
@@ -99,18 +99,18 @@ public class WaveApp extends JPanel implements ActionListener {
             saveConfig();
             System.exit(0);
         } else if (cmd.equals("removeAllMarkers"))
-            fTraceViewModel.removeAllMarkers();
+            fTraceDisplayModel.removeAllMarkers();
         else if (cmd.equals("removeAllNets"))
-            fTraceViewModel.removeAllNets();
+            fTraceDisplayModel.removeAllNets();
         else if (cmd.equals("insertMarker")) {
             String description = (String) JOptionPane.showInputDialog(
                                      SwingUtilities.getWindowAncestor(this), "Description for this marker", "New Marker",
                                      JOptionPane.PLAIN_MESSAGE, null, null, null);
-            fTraceViewModel.addMarker(description, fTraceViewModel.getCursorPosition());
+            fTraceDisplayModel.addMarker(description, fTraceDisplayModel.getCursorPosition());
         } else if (cmd.equals("showmarkerlist")) {
             if (fMarkersWindow == null) {
                 fMarkersWindow = new JFrame("Markers");
-                MarkerListView contentPane = new MarkerListView(fTraceViewModel);
+                MarkerListPanel contentPane = new MarkerListPanel(fTraceDisplayModel);
                 contentPane.setOpaque(true);
                 fMarkersWindow.setPreferredSize(new Dimension(400, 300));
                 fMarkersWindow.setContentPane(contentPane);
@@ -120,11 +120,11 @@ public class WaveApp extends JPanel implements ActionListener {
             fMarkersWindow.setLocationRelativeTo(this);
             fMarkersWindow.setVisible(true);
         } else if (cmd.equals("nextMarker"))
-            fTraceViewModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+            fTraceDisplayModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("prevMarker"))
-            fTraceViewModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+            fTraceDisplayModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("removeMarker"))
-            fTraceViewModel.removeMarkerAtTime(fTraceViewModel.getCursorPosition());
+            fTraceDisplayModel.removeMarkerAtTime(fTraceDisplayModel.getCursorPosition());
         else if (cmd.equals("findbyvalue"))
             showFindDialog();
         else if (cmd.equals("findnext"))
@@ -136,12 +136,12 @@ public class WaveApp extends JPanel implements ActionListener {
                               SwingUtilities.getWindowAncestor(this), "Net Set Name", "Save Net Set",
                               JOptionPane.PLAIN_MESSAGE, null, null, null);
             if (!name.equals("")) {
-                fTraceViewModel.saveNetSet(name);
+                fTraceDisplayModel.saveNetSet(name);
                 buildNetMenu();
             }
         } else if (cmd.length() > 7  && cmd.substring(0, 7).equals("netSet_")) {
             int index = Integer.parseInt(cmd.substring(7));
-            fTraceViewModel.selectNetSet(index);
+            fTraceDisplayModel.selectNetSet(index);
         } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
             // Load from recents menu
             loadTraceFile(cmd.substring(5));
@@ -217,7 +217,7 @@ public class WaveApp extends JPanel implements ActionListener {
                 // this is safe.
                 fTraceDataModel.copyFrom(fNewModel);
 
-                fTraceViewModel.clear();
+                fTraceDisplayModel.clear();
                 fFrame.setTitle("Waveform Viewer [" + fFile.getName() + "]");
 
                 try {
@@ -225,7 +225,7 @@ public class WaveApp extends JPanel implements ActionListener {
 
                     fConfigFile = createConfigFileName(fFile);
                     fTraceSettingsFile = new TraceSettingsFile(fConfigFile,
-                            fTraceDataModel, fTraceViewModel);
+                            fTraceDataModel, fTraceDisplayModel);
                     if (fConfigFile.exists())
                         fTraceSettingsFile.read();
                 } catch (Exception exc) {
@@ -266,10 +266,10 @@ public class WaveApp extends JPanel implements ActionListener {
         // their values at the cursor position.
         StringBuffer initialQuery = new StringBuffer();
         boolean first = true;
-        long cursorPosition = fTraceViewModel.getCursorPosition();
+        long cursorPosition = fTraceDisplayModel.getCursorPosition();
 
-        for (int index : fTraceView.getSelectedNets()) {
-            int netId = fTraceViewModel.getVisibleNet(index);
+        for (int index : fTracePanel.getSelectedNets()) {
+            int netId = fTraceDisplayModel.getVisibleNet(index);
             if (first)
                 first = false;
             else
@@ -299,20 +299,20 @@ public class WaveApp extends JPanel implements ActionListener {
 
     void findNext() {
         if (fCurrentQuery != null) {
-            long newTimestamp = fCurrentQuery.getNextMatch(fTraceViewModel.getCursorPosition());
+            long newTimestamp = fCurrentQuery.getNextMatch(fTraceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                fTraceViewModel.setSelectionStart(newTimestamp);
-                fTraceViewModel.setCursorPosition(newTimestamp);
+                fTraceDisplayModel.setSelectionStart(newTimestamp);
+                fTraceDisplayModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
     void findPrev() {
         if (fCurrentQuery != null) {
-            long newTimestamp = fCurrentQuery.getPreviousMatch(fTraceViewModel.getCursorPosition());
+            long newTimestamp = fCurrentQuery.getPreviousMatch(fTraceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                fTraceViewModel.setSelectionStart(newTimestamp);
-                fTraceViewModel.setCursorPosition(newTimestamp);
+                fTraceDisplayModel.setSelectionStart(newTimestamp);
+                fTraceDisplayModel.setCursorPosition(newTimestamp);
             }
         }
     }
@@ -364,10 +364,10 @@ public class WaveApp extends JPanel implements ActionListener {
         item.addActionListener(this);
         fNetMenu.add(item);
 
-        if (fTraceViewModel.getNetSetCount() > 0) {
+        if (fTraceDisplayModel.getNetSetCount() > 0) {
             fNetMenu.addSeparator();
-            for (int i = 0; i < fTraceViewModel.getNetSetCount(); i++) {
-                item = new JMenuItem(fTraceViewModel.getNetSetName(i));
+            for (int i = 0; i < fTraceDisplayModel.getNetSetCount(); i++) {
+                item = new JMenuItem(fTraceDisplayModel.getNetSetName(i));
                 item.setActionCommand("netSet_" + i);
                 item.addActionListener(this);
                 fNetMenu.add(item);
@@ -496,8 +496,8 @@ public class WaveApp extends JPanel implements ActionListener {
         markerMenu.add(item);
     }
 
-    private TraceView fTraceView;
-    private TraceViewModel fTraceViewModel = new TraceViewModel();
+    private TracePanel fTracePanel;
+    private TraceDisplayModel fTraceDisplayModel = new TraceDisplayModel();
     private TraceDataModel fTraceDataModel = new TraceDataModel();
     private File fConfigFile;
     private Query fCurrentQuery;
@@ -508,7 +508,7 @@ public class WaveApp extends JPanel implements ActionListener {
     private JFrame fFrame;
     private JMenu fRecentFilesMenu;
     private TraceSettingsFile fTraceSettingsFile;
-    private NetSearchView fNetSearchPane;
+    private NetSearchPanel fNetSearchPane;
 
     private static void createAndShowGUI(String[] args) {
         final WaveApp contentPane = new WaveApp();

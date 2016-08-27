@@ -17,8 +17,8 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 
-public class TraceViewModelTest {
-    class TestModelListener implements TraceViewModel.Listener {
+public class TraceDisplayModelTest {
+    class TestModelListener implements TraceDisplayModel.Listener {
         public static final int CURSOR_CHANGED = 1;
         public static final int NETS_ADDED = 2;
         public static final int NETS_REMOVED = 4;
@@ -82,7 +82,7 @@ public class TraceViewModelTest {
 
     @Test
     public void testRemoveMarker() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
 
@@ -172,7 +172,7 @@ public class TraceViewModelTest {
 
     @Test
     public void testNextPrevMarker() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
 
         tvm.addMarker("marker2", 100);
         tvm.addMarker("marker3", 200);
@@ -225,7 +225,7 @@ public class TraceViewModelTest {
 
     @Test
     public void testScaleChange() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
 
@@ -237,7 +237,7 @@ public class TraceViewModelTest {
 
     @Test
     public void testCursor() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
 
@@ -255,7 +255,7 @@ public class TraceViewModelTest {
 
     @Test
     public void testMakeNetsVisible() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
 
@@ -342,7 +342,7 @@ public class TraceViewModelTest {
 
     @Test
     public void testClear() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
 
         tvm.addMarker("marker0", 1000);
         tvm.addMarker("marker1", 1200);
@@ -366,7 +366,7 @@ public class TraceViewModelTest {
 
     @Test
     public void testNetSet() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
 
         // Create first net set
         tvm.makeNetVisible(11);
@@ -432,7 +432,7 @@ public class TraceViewModelTest {
     // that broke file loading.
     @Test
     public void testRemoveOnEmpty() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
         tvm.removeAllNets();
@@ -441,14 +441,14 @@ public class TraceViewModelTest {
 
     @Test
     public void testZeroMinorTick() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         tvm.setHorizontalScale(0.01);
         assertEquals(1, tvm.getMinorTickInterval());
     }
 
     @Test
     public void testSetGetValueFormatter() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         TestModelListener listener = new TestModelListener();
         tvm.addListener(listener);
         tvm.makeNetVisible(1);
@@ -461,11 +461,11 @@ public class TraceViewModelTest {
         assertTrue(tvm.getValueFormatter(1) == dvf);
     }
 
-    // Ensure the minor tick interval is initialized when TraceViewModel
+    // Ensure the minor tick interval is initialized when TraceDisplayModel
     // is created.
     @Test
     public void testMinorTickInit() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         assertNotEquals(0, tvm.getMinorTickInterval(), 0);
     }
 
@@ -473,7 +473,7 @@ public class TraceViewModelTest {
     // that all notification types will notify all listeners.
     @Test
     public void testMultipleListeners() {
-        TraceViewModel tvm = new TraceViewModel();
+        TraceDisplayModel tvm = new TraceDisplayModel();
         TestModelListener listener1 = new TestModelListener();
         tvm.addListener(listener1);
         TestModelListener listener2 = new TestModelListener();

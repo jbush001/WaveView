@@ -27,7 +27,7 @@ public class TraceSettingsFileTest {
     @Test
     public void testLoad() throws Exception {
         TraceDataModel dataModel = new TraceDataModel();
-        TraceViewModel sourceViewModel = new TraceViewModel();
+        TraceDisplayModel sourceViewModel = new TraceDisplayModel();
 
         TraceBuilder builder = dataModel.startBuilding();
         builder.enterModule("mod1");
@@ -76,7 +76,7 @@ public class TraceSettingsFileTest {
         assertEquals(2, sourceViewModel.getIdForMarker(1));
 
         // Save and reload contents
-        TraceViewModel destViewModel = new TraceViewModel();
+        TraceDisplayModel destViewModel = new TraceDisplayModel();
         File file = fTempFolder.newFile("test.vcd");
         (new TraceSettingsFile(file, dataModel, sourceViewModel)).write();
         (new TraceSettingsFile(file, dataModel, destViewModel)).read();

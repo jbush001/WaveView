@@ -24,7 +24,7 @@ import java.awt.datatransfer.*;
 ///
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
-class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
+class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
     ActionListener {
     private static final int kDragThreshold = 15;
 
@@ -86,7 +86,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
             g.setColor(fCurrentNetIsSelected ? prefs.listSelectionFgColor
                        : prefs.traceColor);
 
-            int netId = fTraceViewModel.getVisibleNet(fCurrentNet);
+            int netId = fTraceDisplayModel.getVisibleNet(fCurrentNet);
             String name = fTraceDataModel.getShortNetName(netId);
             g.drawString(name, 1, fLabelBaseline);
 
@@ -95,20 +95,20 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
             g.setFont(fValueFont);
 
             Transition t = fTraceDataModel.findTransition(netId,
-                           fTraceViewModel.getCursorPosition()).next();
-            g.drawString(fTraceViewModel.getValueFormatter(fCurrentNet).format(t),
+                           fTraceDisplayModel.getCursorPosition()).next();
+            g.drawString(fTraceDisplayModel.getValueFormatter(fCurrentNet).format(t),
                          1, fValueBaseline);
         }
 
         @Override
         public String getToolTipText(MouseEvent event) {
-            return fTraceDataModel.getFullNetName(fTraceViewModel.getVisibleNet(fCurrentNet));
+            return fTraceDataModel.getFullNetName(fTraceDisplayModel.getVisibleNet(fCurrentNet));
         }
     }
 
-    class ListModelAdapter implements ListModel<Integer>, TraceViewModel.Listener {
+    class ListModelAdapter implements ListModel<Integer>, TraceDisplayModel.Listener {
         public ListModelAdapter() {
-            fTraceViewModel.addListener(this);
+            fTraceDisplayModel.addListener(this);
         }
 
         @Override
@@ -130,7 +130,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
 
         @Override
         public int getSize() {
-            return fTraceViewModel.getVisibleNetCount();
+            return fTraceDisplayModel.getVisibleNetCount();
         }
 
         @Override
@@ -201,12 +201,12 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
             JList.DropLocation location = (JList.DropLocation) support.getDropLocation();
             int insertionPoint = location.getIndex();
             if (fIsLocalDrop) {
-                fTraceViewModel.moveNets(fLocalIndices, insertionPoint);
+                fTraceDisplayModel.moveNets(fLocalIndices, insertionPoint);
             } else {
                 // Drag from another window (for example, net tree)
                 String[] values = data.split("\n");
                 for (String value : values)
-                    fTraceViewModel.makeNetVisible(insertionPoint++, fTraceDataModel.findNet(value));
+                    fTraceDisplayModel.makeNetVisible(insertionPoint++, fTraceDataModel.findNet(value));
             }
 
             // @todo Deal with selection changes.  Should probably just clear the selection.
@@ -218,10 +218,10 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
         private int[] fLocalIndices;
     }
 
-    public NetNameView(TraceViewModel viewModel, TraceDataModel dataModel) {
-        fTraceViewModel = viewModel;
+    public NetNameList(TraceDisplayModel displayModel, TraceDataModel dataModel) {
+        fTraceDisplayModel = displayModel;
         fTraceDataModel = dataModel;
-        viewModel.addListener(this);
+        displayModel.addListener(this);
         setModel(new ListModelAdapter());
         setCellRenderer(new NetNameRenderer());
         computeBounds();
@@ -266,7 +266,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
     private void computeBounds() {
         Dimension d = getPreferredSize();
         d.width = 200;
-        d.height = fTraceViewModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
+        d.height = fTraceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
         setPreferredSize(d);
         validate();
         repaint();
@@ -313,20 +313,20 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
 
         if (e.getActionCommand().equals("Remove Net")) {
             for (int i = indices.length - 1; i >= 0; i--)
-                fTraceViewModel.removeNet(indices[i]);
+                fTraceDisplayModel.removeNet(indices[i]);
 
             clearSelection();
         } else {
             if (e.getActionCommand().equals("Enum")) {
                 if (indices.length > 0) {
-                    ValueFormatter formatter = fTraceViewModel.getValueFormatter(indices[0]);
+                    ValueFormatter formatter = fTraceDisplayModel.getValueFormatter(indices[0]);
                     if (!(formatter instanceof EnumValueFormatter)) {
                         formatter = new EnumValueFormatter();
-                        fTraceViewModel.setValueFormatter(indices[0], formatter);
+                        fTraceDisplayModel.setValueFormatter(indices[0], formatter);
                     }
 
-                    JFrame frame = new JFrame("Mapping for " + fTraceDataModel.getShortNetName(fTraceViewModel.getVisibleNet(indices[0])));
-                    JPanel contentPane = new MappingView((EnumValueFormatter) formatter);
+                    JFrame frame = new JFrame("Mapping for " + fTraceDataModel.getShortNetName(fTraceDisplayModel.getVisibleNet(indices[0])));
+                    JPanel contentPane = new EnumMappingPanel((EnumValueFormatter) formatter);
                     contentPane.setOpaque(true);
                     frame.setContentPane(contentPane);
                     frame.pack();
@@ -347,7 +347,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
 //                         ValueFormatter formatter = (ValueFormatter) c.newInstance();
 //                         for (int i = 0; i < indices.length; i++)
 //                         {
-//                             NetModel net = fTraceViewModel.getVisibleNet(indices[i]);
+//                             NetModel net = fTraceDisplayModel.getVisibleNet(indices[i]);
 //                             net.setCustomValueFormatterPath(jarFileName);
 //                             net.setValueFormatter(formatter);
 //                         }
@@ -368,13 +368,13 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
 
                 if (formatter != null) {
                     for (int i = 0; i < indices.length; i++)
-                        fTraceViewModel.setValueFormatter(indices[i], formatter);
+                        fTraceDisplayModel.setValueFormatter(indices[i], formatter);
                 }
             }
         }
     }
 
-    private TraceViewModel fTraceViewModel;
+    private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
     private JPopupMenu fPopupMenu;
 }

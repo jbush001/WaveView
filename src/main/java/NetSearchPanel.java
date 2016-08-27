@@ -27,7 +27,7 @@ import javax.swing.text.*;
 /// Displays searchable lists of all nets in a design. Can be dragged onto
 /// the visible net view to see them.
 ///
-public class NetSearchView extends JPanel implements ActionListener {
+public class NetSearchPanel extends JPanel implements ActionListener {
     class NetTreeTransferHandler extends TransferHandler {
         @Override
         public int getSourceActions(JComponent component) {
@@ -72,11 +72,11 @@ public class NetSearchView extends JPanel implements ActionListener {
         }
     }
 
-    public NetSearchView(TraceViewModel viewModel, TraceDataModel dataModel) {
+    public NetSearchPanel(TraceDisplayModel displayModel, TraceDataModel dataModel) {
         super(new BorderLayout());
         setPreferredSize(new Dimension(275, 500));
 
-        fTraceViewModel = viewModel;
+        fTraceDisplayModel = displayModel;
         fTraceDataModel = dataModel;
 
         JTabbedPane tabView = new JTabbedPane();
@@ -113,6 +113,6 @@ public class NetSearchView extends JPanel implements ActionListener {
     }
 
     private JTree fTree;
-    private TraceViewModel fTraceViewModel;
+    private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
 }

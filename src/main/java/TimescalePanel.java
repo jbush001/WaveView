@@ -22,32 +22,32 @@ import java.awt.event.*;
 ///
 /// Draws the ruler with times at the top of the trace view.
 ///
-public class TimescaleView extends JPanel implements TraceViewModel.Listener, ActionListener {
+public class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, ActionListener {
     private static final int TIMESTAMP_DISAPPEAR_INTERVAL = 500;
 
-    public TimescaleView(TraceViewModel viewModel, TraceDataModel dataModel) {
-        fTraceViewModel = viewModel;
+    public TimescalePanel(TraceDisplayModel displayModel, TraceDataModel dataModel) {
+        fTraceDisplayModel = displayModel;
         fTraceDataModel = dataModel;
-        fTraceViewModel.addListener(this);
+        fTraceDisplayModel.addListener(this);
         setBackground(AppPreferences.getInstance().backgroundColor);
         setPreferredSize(new Dimension(200, DrawMetrics.TIMESCALE_HEIGHT));
         setFont(new Font("SansSerif", Font.PLAIN, 9));
-        scaleChanged(fTraceViewModel.getHorizontalScale());
+        scaleChanged(fTraceDisplayModel.getHorizontalScale());
         fTimestampDisplayTimer.setRepeats(false);
     }
 
     private void adjustCanvasSize() {
-        scaleChanged(fTraceViewModel.getHorizontalScale());
+        scaleChanged(fTraceDisplayModel.getHorizontalScale());
     }
 
     @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        int oldX = (int)(oldTimestamp / fTraceViewModel.getHorizontalScale());
-        int newX = (int)(newTimestamp / fTraceViewModel.getHorizontalScale());
+        int oldX = (int)(oldTimestamp / fTraceDisplayModel.getHorizontalScale());
+        int newX = (int)(newTimestamp / fTraceDisplayModel.getHorizontalScale());
         int leftEdge = Math.min(oldX, newX) - DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         int rightEdge = Math.max(oldX, newX) + DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         repaint(leftEdge, 0, rightEdge - leftEdge, getHeight());
-        if (fTraceViewModel.getAdjustingCursor())
+        if (fTraceDisplayModel.getAdjustingCursor())
             fShowTimestamp = true;
         else
             fTimestampDisplayTimer.start();
@@ -58,7 +58,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         if (timestamp < 0)
             repaint();
         else {
-            int x = (int)(timestamp / fTraceViewModel.getHorizontalScale());
+            int x = (int)(timestamp / fTraceDisplayModel.getHorizontalScale());
             repaint(x - (DrawMetrics.MAX_MARKER_LABEL_WIDTH / 2), 0,
                 DrawMetrics.MAX_MARKER_LABEL_WIDTH,
                 DrawMetrics.TIMESCALE_HEIGHT);
@@ -80,7 +80,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
     @Override
     public void scaleChanged(double newScale) {
         // Make sure minor ticks are large enough
-        long minorTickInterval = fTraceViewModel.getMinorTickInterval();
+        long minorTickInterval = fTraceDisplayModel.getMinorTickInterval();
         if (minorTickInterval < 100) {
             fUnitMagnitude = 1;
             fUnit = "ns";
@@ -99,7 +99,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         // Not sure the best approach for that.
 
         Dimension d = getPreferredSize();
-        d.width = (int)(fTraceDataModel.getMaxTimestamp() / fTraceViewModel.getHorizontalScale());
+        d.width = (int)(fTraceDataModel.getMaxTimestamp() / fTraceDisplayModel.getHorizontalScale());
         setPreferredSize(d);
         revalidate();
         repaint();
@@ -113,18 +113,18 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
 
         Rectangle visibleRect = getVisibleRect();
         FontMetrics metrics = g.getFontMetrics();
-        long minorTickInterval = fTraceViewModel.getMinorTickInterval();
+        long minorTickInterval = fTraceDisplayModel.getMinorTickInterval();
 
         // The -100 in start time keeps labels that are to the left of the window from not being drawn
         // (which causes artifacts when scrolling).  It needs to be bigger than the largest label.
-        long startTime = (long)((visibleRect.x - 100) * fTraceViewModel.getHorizontalScale());
-        long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceViewModel.getHorizontalScale());
+        long startTime = (long)((visibleRect.x - 100) * fTraceDisplayModel.getHorizontalScale());
+        long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceDisplayModel.getHorizontalScale());
         if (startTime < 0)
             startTime = 0;
 
         startTime = (startTime / minorTickInterval) * minorTickInterval;    // Round to an event tick boundary
         for (long ts = startTime; ts < endTime; ts += minorTickInterval) {
-            int x = (int)(ts / fTraceViewModel.getHorizontalScale());
+            int x = (int)(ts / fTraceDisplayModel.getHorizontalScale());
             if ((ts / minorTickInterval) % DrawMetrics.MINOR_TICKS_PER_MAJOR == 0) {
                 g.drawLine(x, 5, x, DrawMetrics.TIMESCALE_HEIGHT);
                 g.drawString(Long.toString(ts / fUnitMagnitude) + " " + fUnit, x + 3, DrawMetrics.MINOR_TICK_TOP
@@ -134,15 +134,15 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         }
 
         // Draw Markers
-        int markerIndex = fTraceViewModel.getMarkerAtTime(startTime);
-        while (markerIndex < fTraceViewModel.getMarkerCount()) {
-            long timestamp = fTraceViewModel.getTimestampForMarker(markerIndex);
+        int markerIndex = fTraceDisplayModel.getMarkerAtTime(startTime);
+        while (markerIndex < fTraceDisplayModel.getMarkerCount()) {
+            long timestamp = fTraceDisplayModel.getTimestampForMarker(markerIndex);
             if (timestamp > endTime)
                 break;
 
-            String labelString = "" + fTraceViewModel.getIdForMarker(markerIndex);
+            String labelString = "" + fTraceDisplayModel.getIdForMarker(markerIndex);
             int labelWidth = g.getFontMetrics().stringWidth(labelString);
-            int x = (int) (timestamp / fTraceViewModel.getHorizontalScale());
+            int x = (int) (timestamp / fTraceDisplayModel.getHorizontalScale());
             g.setColor(AppPreferences.getInstance().backgroundColor);
             g.fillRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP),
                 DrawMetrics.TIMESCALE_HEIGHT - 12,
@@ -157,11 +157,11 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         }
 
         if (fShowTimestamp) {
-            String timeString = "" + (double) fTraceViewModel.getCursorPosition()
+            String timeString = "" + (double) fTraceDisplayModel.getCursorPosition()
                                 / fUnitMagnitude + " " + fUnit;
             int timeWidth = g.getFontMetrics().stringWidth(timeString);
-            int cursorX = (int) (fTraceViewModel.getCursorPosition()
-                                 / fTraceViewModel.getHorizontalScale());
+            int cursorX = (int) (fTraceDisplayModel.getCursorPosition()
+                                 / fTraceDisplayModel.getHorizontalScale());
             int labelLeft = cursorX + timeWidth > visibleRect.x + visibleRect.width
                             ? cursorX - timeWidth : cursorX;
 
@@ -186,7 +186,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
     private boolean fShowTimestamp;
     private int fUnitMagnitude = 1;
     private String fUnit = "s";
-    private TraceViewModel fTraceViewModel;
+    private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
     private int fOldCursor;
     private javax.swing.Timer fTimestampDisplayTimer = new javax.swing.Timer(TIMESTAMP_DISAPPEAR_INTERVAL, this);

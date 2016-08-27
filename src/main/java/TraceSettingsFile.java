@@ -29,10 +29,10 @@ import javax.xml.transform.stream.*;
 
 class TraceSettingsFile {
     public TraceSettingsFile(File file, TraceDataModel dataModel,
-                             TraceViewModel viewModel) {  /// @bug make order of view and data model consistent between methods
+                             TraceDisplayModel displayModel) {  /// @bug make order of view and data model consistent between methods
         fFile = file;
         fDataModel = dataModel;
-        fViewModel = viewModel;
+        fDisplayModel = displayModel;
     }
 
     public void write() throws Exception {
@@ -44,7 +44,7 @@ class TraceSettingsFile {
 
         Element scale = document.createElement("scale");
         configuration.appendChild(scale);
-        scale.appendChild(document.createTextNode(Double.toString(fViewModel.getHorizontalScale())));
+        scale.appendChild(document.createTextNode(Double.toString(fDisplayModel.getHorizontalScale())));
 
         Element netSetsElement = document.createElement("netsets");
         configuration.appendChild(netSetsElement);
@@ -55,17 +55,17 @@ class TraceSettingsFile {
         netSetsElement.appendChild(netSetElement);
 
         // Write out all of our saved net sets
-        for (int i = 0; i < fViewModel.getNetSetCount(); i++) {
-            fViewModel.selectNetSet(i);
+        for (int i = 0; i < fDisplayModel.getNetSetCount(); i++) {
+            fDisplayModel.selectNetSet(i);
             netSetElement = makeVisibleNetList(document);
-            netSetElement.setAttribute("name", fViewModel.getNetSetName(i));
+            netSetElement.setAttribute("name", fDisplayModel.getNetSetName(i));
             netSetsElement.appendChild(netSetElement);
         }
 
         Element markers = document.createElement("markers");
         configuration.appendChild(markers);
 
-        for (int i = 0; i < fViewModel.getMarkerCount(); i++) {
+        for (int i = 0; i < fDisplayModel.getMarkerCount(); i++) {
             Element markerElement = document.createElement("marker");
             markers.appendChild(markerElement);
 
@@ -75,11 +75,11 @@ class TraceSettingsFile {
 
             Element timestamp = document.createElement("timestamp");
             markerElement.appendChild(timestamp);
-            timestamp.appendChild(document.createTextNode(Long.toString(fViewModel.getTimestampForMarker(i))));
+            timestamp.appendChild(document.createTextNode(Long.toString(fDisplayModel.getTimestampForMarker(i))));
 
             Element description = document.createElement("description");
             markerElement.appendChild(description);
-            description.appendChild(document.createTextNode(fViewModel.getDescriptionForMarker(i)));
+            description.appendChild(document.createTextNode(fDisplayModel.getDescriptionForMarker(i)));
         }
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -91,8 +91,8 @@ class TraceSettingsFile {
     public Element makeVisibleNetList(Document document) {
         Element netSetElement = document.createElement("netset");
 
-        for (int i = 0; i < fViewModel.getVisibleNetCount(); i++) {
-            int netId = fViewModel.getVisibleNet(i);
+        for (int i = 0; i < fDisplayModel.getVisibleNetCount(); i++) {
+            int netId = fDisplayModel.getVisibleNet(i);
 
             Element sigElement = document.createElement("net");
             netSetElement.appendChild(sigElement);
@@ -106,7 +106,7 @@ class TraceSettingsFile {
             Element format = document.createElement("format");
             sigElement.appendChild(format);
 
-            ValueFormatter formatter = fViewModel.getValueFormatter(i);
+            ValueFormatter formatter = fDisplayModel.getValueFormatter(i);
             if (formatter instanceof EnumValueFormatter) {
                 EnumValueFormatter ivf = (EnumValueFormatter) formatter;
                 for (int j = 0; j < ivf.getMappingCount(); j++) {
@@ -142,7 +142,7 @@ class TraceSettingsFile {
     }
 
     public void readNetSet(Element element) throws ClassNotFoundException {
-        fViewModel.removeAllNets();
+        fDisplayModel.removeAllNets();
 
         NodeList netElements = element.getElementsByTagName("net");
         for (int i = 0; i < netElements.getLength(); i++) {
@@ -180,8 +180,8 @@ class TraceSettingsFile {
             if (netId < 0)
                 System.out.println("unknown net " + name);
             else {
-                fViewModel.makeNetVisible(netId);
-                fViewModel.setValueFormatter(fViewModel.getVisibleNetCount() - 1, formatter);
+                fDisplayModel.makeNetVisible(netId);
+                fDisplayModel.setValueFormatter(fDisplayModel.getVisibleNetCount() - 1, formatter);
             }
         }
     }
@@ -190,7 +190,7 @@ class TraceSettingsFile {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(fFile);
 
-        fViewModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
+        fDisplayModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
         // read NetSet
         NodeList netSets = document.getElementsByTagName("netset");
@@ -199,7 +199,7 @@ class TraceSettingsFile {
         for (int i = 1; i < netSets.getLength(); i++) {
             Element netSet = (Element) netSets.item(i);
             readNetSet(netSet);
-            fViewModel.saveNetSet(netSet.getAttribute("name"));
+            fDisplayModel.saveNetSet(netSet.getAttribute("name"));
         }
 
         // Default net set
@@ -212,12 +212,12 @@ class TraceSettingsFile {
 
             // XXX note, we ignore the ID and assume these are already in order
             // Integer.parseInt(getSubTag(markerElem, "id"));
-            fViewModel.addMarker(getSubTag(markerElem, "description"),
+            fDisplayModel.addMarker(getSubTag(markerElem, "description"),
                                  Long.parseLong(getSubTag(markerElem, "timestamp")));
         }
     }
 
     private File fFile;
     private TraceDataModel fDataModel;
-    private TraceViewModel fViewModel;
+    private TraceDisplayModel fDisplayModel;
 }

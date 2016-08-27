@@ -29,14 +29,14 @@ import javax.swing.table.*;
 /// to jump to that point in the trace.
 /// @todo Add a way to remove entries directly from this list
 ///
-public class MarkerListView extends JPanel implements ActionListener, TraceViewModel.Listener {
-    public MarkerListView(TraceViewModel traceModel) {
+public class MarkerListPanel extends JPanel implements ActionListener, TraceDisplayModel.Listener {
+    public MarkerListPanel(TraceDisplayModel traceModel) {
         setLayout(new GridLayout(1, 1));
 
-        fTraceViewModel = traceModel;
-        fTraceViewModel.addListener(this);
+        fTraceDisplayModel = traceModel;
+        fTraceDisplayModel.addListener(this);
 
-        fTableModel = new MarkerTableModel(fTraceViewModel);
+        fTableModel = new MarkerTableModel(fTraceDisplayModel);
         fTable = new JTable(fTableModel);
 
         fTable.getColumnModel().getColumn(0).setMaxWidth(35);
@@ -52,11 +52,11 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
     }
 
     private void select(boolean extendSelection) {
-        long timestamp = fTraceViewModel.getTimestampForMarker(fTable.getSelectedRow());
+        long timestamp = fTraceDisplayModel.getTimestampForMarker(fTable.getSelectedRow());
 
-        fTraceViewModel.setCursorPosition(timestamp);
+        fTraceDisplayModel.setCursorPosition(timestamp);
         if (!extendSelection)
-            fTraceViewModel.setSelectionStart(timestamp);
+            fTraceDisplayModel.setSelectionStart(timestamp);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
         repaint();
     }
 
-    private TraceViewModel fTraceViewModel;
+    private TraceDisplayModel fTraceDisplayModel;
     private MarkerTableModel fTableModel;
     private JTable fTable;
 }
@@ -98,8 +98,8 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
 class MarkerTableModel extends AbstractTableModel {
     private static final int NUM_COLUMNS = 3;
 
-    public MarkerTableModel(TraceViewModel model) {
-        fTraceViewModel = model;
+    public MarkerTableModel(TraceDisplayModel model) {
+        fTraceDisplayModel = model;
     }
 
     @Override
@@ -114,18 +114,18 @@ class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return fTraceViewModel.getMarkerCount();
+        return fTraceDisplayModel.getMarkerCount();
     }
 
     @Override
     public Object getValueAt(int row, int col) {
         switch (col) {
         case 0:
-            return "" + fTraceViewModel.getIdForMarker(row);
+            return "" + fTraceDisplayModel.getIdForMarker(row);
         case 1:
-            return "" + fTraceViewModel.getTimestampForMarker(row) + " ns";
+            return "" + fTraceDisplayModel.getTimestampForMarker(row) + " ns";
         case 2:
-            return "" + fTraceViewModel.getDescriptionForMarker(row);
+            return "" + fTraceDisplayModel.getDescriptionForMarker(row);
         }
 
         return "";
@@ -138,10 +138,10 @@ class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        fTraceViewModel.setDescriptionForMarker(row, (String) value);
+        fTraceDisplayModel.setDescriptionForMarker(row, (String) value);
     }
 
     private String kColumnNames[] = { "ID", "Timestamp", "Comment" };
-    private TraceViewModel fTraceViewModel;
+    private TraceDisplayModel fTraceDisplayModel;
 }
 

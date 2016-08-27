@@ -18,7 +18,7 @@ import java.util.*;
 
 ///
 /// Contains information about nets and transitions. View state is contained
-/// in TraceViewModel.
+/// in TraceDisplayModel.
 ///
 
 class TraceDataModel {

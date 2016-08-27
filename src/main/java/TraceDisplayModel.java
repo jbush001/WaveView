@@ -22,11 +22,11 @@ import java.io.*;
 import java.net.*;
 
 ///
-/// TraceViewModel contains view state for a waveform capture
+/// TraceDisplayModel contains visible state for a waveform capture
 /// (e.g. Cursor position, scale, visible nets, etc.)
 ///
 
-public class TraceViewModel {
+public class TraceDisplayModel {
     interface Listener {
         public void cursorChanged(long oldTimestamp, long newTimestamp);
         public void netsAdded(int firstIndex, int lastIndex);
@@ -36,7 +36,7 @@ public class TraceViewModel {
         public void formatChanged(int index);
     };
 
-    public TraceViewModel() {
+    public TraceDisplayModel() {
         setHorizontalScale(10.0);
     }
 

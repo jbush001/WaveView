@@ -24,11 +24,11 @@ import java.util.*;
 /// This view displays the waveforms.
 ///
 
-public class WaveformView extends JPanel implements MouseListener,
-    MouseMotionListener, TraceViewModel.Listener {
+public class WaveformPanel extends JPanel implements MouseListener,
+    MouseMotionListener, TraceDisplayModel.Listener {
 
-    public WaveformView(TraceViewModel traceViewModel, TraceDataModel traceDataModel) {
-        fTraceViewModel = traceViewModel;
+    public WaveformPanel(TraceDisplayModel traceViewModel, TraceDataModel traceDataModel) {
+        fTraceDisplayModel = traceViewModel;
         fTraceDataModel = traceDataModel;
         traceViewModel.addListener(this);
 
@@ -43,7 +43,7 @@ public class WaveformView extends JPanel implements MouseListener,
     private void computeBounds() {
         Dimension d = getPreferredSize();
         d.width = timestampToCoordinate(fTraceDataModel.getMaxTimestamp());
-        d.height = fTraceViewModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
+        d.height = fTraceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
         setPreferredSize(d);
         validate();
     }
@@ -83,7 +83,7 @@ public class WaveformView extends JPanel implements MouseListener,
         Dimension preferredSize = getPreferredSize();
         if (visibleRect.y + visibleRect.height > preferredSize.height) {
             // XXX hack
-            // Need to match behavior of NetNameView, inherited from JList.
+            // Need to match behavior of NetNameList, inherited from JList.
             // If the list is scrolled to the bottom and items are removed,
             // scroll up so there's no space at the bottom. If we don't do
             // this, the name view and waveform view will become vertically
@@ -104,7 +104,7 @@ public class WaveformView extends JPanel implements MouseListener,
         if (timestamp < 0)
             repaint();
         else {
-            int x = (int)(timestamp / fTraceViewModel.getHorizontalScale());
+            int x = (int)(timestamp / fTraceDisplayModel.getHorizontalScale());
             repaint(x - 1, 0, 2, getVisibleRect().height);
         }
     }
@@ -134,10 +134,10 @@ public class WaveformView extends JPanel implements MouseListener,
         Rectangle visibleRect = getVisibleRect();
 
         // Draw selection
-        if (fTraceViewModel.getCursorPosition() != fTraceViewModel.getSelectionStart()) {
+        if (fTraceDisplayModel.getCursorPosition() != fTraceDisplayModel.getSelectionStart()) {
             g.setColor(prefs.selectionColor);
-            int selectionStart =  timestampToCoordinate(fTraceViewModel.getSelectionStart());
-            int selectionEnd =  timestampToCoordinate(fTraceViewModel.getCursorPosition());
+            int selectionStart =  timestampToCoordinate(fTraceDisplayModel.getSelectionStart());
+            int selectionEnd =  timestampToCoordinate(fTraceDisplayModel.getCursorPosition());
             int leftEdge = Math.min(selectionStart, selectionEnd);
             int rightEdge = Math.max(selectionStart, selectionEnd);
             g.fillRect(leftEdge, 0, rightEdge - leftEdge, getHeight());
@@ -153,17 +153,17 @@ public class WaveformView extends JPanel implements MouseListener,
             waveformIndex--;
 
         while (waveformIndex * DrawMetrics.WAVEFORM_V_SPACING < visibleRect.y + visibleRect.height
-                && waveformIndex < fTraceViewModel.getVisibleNetCount()) {
-            ValueFormatter formatter = fTraceViewModel.getValueFormatter(waveformIndex);
-            int netId = fTraceViewModel.getVisibleNet(waveformIndex);
+                && waveformIndex < fTraceDisplayModel.getVisibleNetCount()) {
+            ValueFormatter formatter = fTraceDisplayModel.getValueFormatter(waveformIndex);
+            int netId = fTraceDisplayModel.getVisibleNet(waveformIndex);
             if (fTraceDataModel.getNetWidth(netId) > 1) {
                 fMultiNetPainter.paint(g, fTraceDataModel, netId,
                     waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP,
-                    visibleRect, fTraceViewModel.getHorizontalScale(), formatter);
+                    visibleRect, fTraceDisplayModel.getHorizontalScale(), formatter);
             } else {
                 fSingleNetPainter.paint(g, fTraceDataModel, netId,
                     waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP,
-                    visibleRect, fTraceViewModel.getHorizontalScale(), formatter);
+                    visibleRect, fTraceDisplayModel.getHorizontalScale(), formatter);
             }
 
             waveformIndex++;
@@ -172,7 +172,7 @@ public class WaveformView extends JPanel implements MouseListener,
         // Draw the cursor (a vertical line that runs from the top to the
         // bottom of the trace).
         g.setColor(prefs.cursorColor);
-        int cursorX = timestampToCoordinate(fTraceViewModel.getCursorPosition());
+        int cursorX = timestampToCoordinate(fTraceDisplayModel.getCursorPosition());
         g.drawLine(cursorX, visibleRect.y, cursorX, visibleRect.y + visibleRect.height);
     }
 
@@ -182,17 +182,17 @@ public class WaveformView extends JPanel implements MouseListener,
         g2d.setStroke(kDashedStroke);
         g2d.setColor(AppPreferences.getInstance().markerColor);
 
-        long startTime = (long)(visibleRect.x * fTraceViewModel.getHorizontalScale());
-        long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceViewModel.getHorizontalScale());
+        long startTime = (long)(visibleRect.x * fTraceDisplayModel.getHorizontalScale());
+        long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceDisplayModel.getHorizontalScale());
 
         // Draw Markers
-        int markerIndex = fTraceViewModel.getMarkerAtTime(startTime);
-        while (markerIndex < fTraceViewModel.getMarkerCount()) {
-            long timestamp = fTraceViewModel.getTimestampForMarker(markerIndex);
+        int markerIndex = fTraceDisplayModel.getMarkerAtTime(startTime);
+        while (markerIndex < fTraceDisplayModel.getMarkerCount()) {
+            long timestamp = fTraceDisplayModel.getTimestampForMarker(markerIndex);
             if (timestamp > endTime)
                 break;
 
-            int x = (int) (timestamp / fTraceViewModel.getHorizontalScale());
+            int x = (int) (timestamp / fTraceDisplayModel.getHorizontalScale());
             g2d.drawLine(x, 0, x, visibleRect.y + visibleRect.height);
             markerIndex++;
         }
@@ -201,10 +201,10 @@ public class WaveformView extends JPanel implements MouseListener,
     }
 
     private void drawTimingLines(Graphics g, Rectangle visibleRect) {
-        double scale = fTraceViewModel.getHorizontalScale();
+        double scale = fTraceDisplayModel.getHorizontalScale();
         long startTime = (long)(visibleRect.x * scale);
         long endTime = (long) ((visibleRect.x + visibleRect.width) * scale);
-        int minorTickInterval = (int) fTraceViewModel.getMinorTickInterval();
+        int minorTickInterval = (int) fTraceDisplayModel.getMinorTickInterval();
         int majorTickInterval = minorTickInterval * DrawMetrics.MINOR_TICKS_PER_MAJOR;
         startTime = ((startTime + majorTickInterval - 1) / majorTickInterval) * majorTickInterval;
 
@@ -231,31 +231,31 @@ public class WaveformView extends JPanel implements MouseListener,
     public void mousePressed(MouseEvent e) {
         // set cursor position
         long timestamp = coordinateToTimestamp(e.getX());
-        if (fTraceViewModel.getCursorPosition() != fTraceViewModel.getSelectionStart())
+        if (fTraceDisplayModel.getCursorPosition() != fTraceDisplayModel.getSelectionStart())
             repaint(); // we already had a selection, clear it
 
         if (!e.isShiftDown())
-            fTraceViewModel.setSelectionStart(timestamp);
+            fTraceDisplayModel.setSelectionStart(timestamp);
 
-        fTraceViewModel.setCursorPosition(timestamp);
+        fTraceDisplayModel.setCursorPosition(timestamp);
 
         fOldCursor = e.getX();
 
         /// @bug Be sure to do this after setting the position, otherwise the view will jump back to the
         /// old cursor position first and invoke the auto-scroll-to logic.  This is pretty clunky, and
         /// should probably be rethought.
-        fTraceViewModel.setAdjustingCursor(true);
+        fTraceDisplayModel.setAdjustingCursor(true);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        fTraceViewModel.setAdjustingCursor(false);
+        fTraceDisplayModel.setAdjustingCursor(false);
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         long timestamp = coordinateToTimestamp(e.getX());
-        fTraceViewModel.setCursorPosition(timestamp);
+        fTraceDisplayModel.setCursorPosition(timestamp);
         fOldCursor = e.getX();
 
         // Drag scrolling
@@ -268,11 +268,11 @@ public class WaveformView extends JPanel implements MouseListener,
     }
 
     private long coordinateToTimestamp(int coordinate) {
-        return (long)(coordinate * fTraceViewModel.getHorizontalScale());
+        return (long)(coordinate * fTraceDisplayModel.getHorizontalScale());
     }
 
     private int timestampToCoordinate(long timestamp) {
-        return (int)(timestamp / fTraceViewModel.getHorizontalScale());
+        return (int)(timestamp / fTraceDisplayModel.getHorizontalScale());
     }
 
     private float kDashDescription[] = { 10.0f };
@@ -280,7 +280,7 @@ public class WaveformView extends JPanel implements MouseListener,
     private Stroke kSolidStroke = new BasicStroke(1);
     private SingleNetPainter fSingleNetPainter = new SingleNetPainter();
     private MultiNetPainter fMultiNetPainter = new MultiNetPainter();
-    private TraceViewModel fTraceViewModel;
+    private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
     private int fOldCursor;
 }
