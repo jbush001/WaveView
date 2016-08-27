@@ -22,10 +22,14 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 
 ///
-/// This is a window that allows editing a table of number -> identifier
+/// This is a window that allows editing a table of number -> enum identifier
 /// mappings.  Usually used for displaying human readable names to state machine
 /// states.
 /// @bug Should check for duplicate values
+/// @bug Need to put values in order
+/// @bug When enum is updated, the waveform will still display old values
+///   until it is redrawn. There's no notifier to tell TraceDisplayModel
+///   listeners that enum mappings have changed.
 ///
 class EnumMappingPanel extends JPanel {
     public EnumMappingPanel(EnumValueFormatter formatter) {
@@ -66,9 +70,9 @@ class EnumMappingPanel extends JPanel {
                 return "";
 
             if (col == 0)
-                return fFormatter.getValueByIndex(row);
+                return fFormatter.getValue(row);
             else
-                return fFormatter.getNameByIndex(row);
+                return fFormatter.getName(row);
         }
 
         @Override
@@ -82,9 +86,9 @@ class EnumMappingPanel extends JPanel {
                 fFormatter.addMapping(0, "");    // Create a new row
 
             if (col == 0)
-                fFormatter.setValueAtIndex(row, Integer.parseInt((String) value));
+                fFormatter.setValue(row, Integer.parseInt((String) value));
             else
-                fFormatter.setNameAtIndex(row, (String) value);
+                fFormatter.setName(row, (String) value);
         }
 
         private EnumValueFormatter fFormatter;

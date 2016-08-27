@@ -26,17 +26,17 @@ public class EnumValueFormatterTest {
         vf.addMapping(17, "tercero");
         assertEquals(3, vf.getMappingCount());
 
-        assertEquals(11, vf.getValueByIndex(0));
-        assertEquals("primero", vf.getNameByIndex(0));
-        assertEquals(13, vf.getValueByIndex(1));
-        assertEquals("segundo", vf.getNameByIndex(1));
-        assertEquals(17, vf.getValueByIndex(2));
-        assertEquals("tercero", vf.getNameByIndex(2));
+        assertEquals(11, vf.getValue(0));
+        assertEquals("primero", vf.getName(0));
+        assertEquals(13, vf.getValue(1));
+        assertEquals("segundo", vf.getName(1));
+        assertEquals(17, vf.getValue(2));
+        assertEquals("tercero", vf.getName(2));
 
-        vf.setValueAtIndex(1, 12);
-        vf.setNameAtIndex(1, "secondo");
-        assertEquals(12, vf.getValueByIndex(1));
-        assertEquals("secondo", vf.getNameByIndex(1));
+        vf.setValue(1, 12);
+        vf.setName(1, "secondo");
+        assertEquals(12, vf.getValue(1));
+        assertEquals("secondo", vf.getName(1));
 
         assertEquals("primero", vf.format(new BitVector("1011", 2)));
         assertEquals("secondo", vf.format(new BitVector("1100", 2)));

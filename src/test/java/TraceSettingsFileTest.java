@@ -94,9 +94,9 @@ public class TraceSettingsFileTest {
         enumFormatter = (EnumValueFormatter) destViewModel.getValueFormatter(3);
         assertTrue(enumFormatter instanceof EnumValueFormatter);
         assertEquals(3, enumFormatter.getMappingCount());
-        assertEquals("STATE_INIT", enumFormatter.getNameByIndex(0));
-        assertEquals("STATE_LOAD", enumFormatter.getNameByIndex(1));
-        assertEquals("STATE_STORE", enumFormatter.getNameByIndex(2));
+        assertEquals("STATE_INIT", enumFormatter.getName(0));
+        assertEquals("STATE_LOAD", enumFormatter.getName(1));
+        assertEquals("STATE_STORE", enumFormatter.getName(2));
 
         assertEquals(2, destViewModel.getNetSetCount());
         assertEquals("set1", destViewModel.getNetSetName(0));

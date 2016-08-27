@@ -110,8 +110,8 @@ class TraceSettingsFile {
             if (formatter instanceof EnumValueFormatter) {
                 EnumValueFormatter ivf = (EnumValueFormatter) formatter;
                 for (int j = 0; j < ivf.getMappingCount(); j++) {
-                    Text idNode = document.createTextNode("" + ivf.getValueByIndex(j));
-                    Text valueNode = document.createTextNode(ivf.getNameByIndex(j));
+                    Text idNode = document.createTextNode("" + ivf.getValue(j));
+                    Text valueNode = document.createTextNode(ivf.getName(j));
 
                     Element mappingElement = document.createElement("mapping");
                     format.appendChild(mappingElement);

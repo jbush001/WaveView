@@ -21,7 +21,6 @@ import java.util.*;
 /// encoding state variables.
 ///
 
-/// @bug Inconsistent naming. Some are XXXAtIndex, some are XXXByIndex
 public class EnumValueFormatter implements ValueFormatter {
     public class Mapping {
         Mapping(int _value, String _name) {
@@ -40,19 +39,19 @@ public class EnumValueFormatter implements ValueFormatter {
         fMappings.add(new Mapping(value, name));
     }
 
-    void setNameAtIndex(int index, String name) {
+    void setName(int index, String name) {
         fMappings.get(index).name = name;
     }
 
-    void setValueAtIndex(int index, int value) {
+    void setValue(int index, int value) {
         fMappings.get(index).value = value;
     }
 
-    int getValueByIndex(int index) {
+    int getValue(int index) {
         return fMappings.get(index).value;
     }
 
-    String getNameByIndex(int index) {
+    String getName(int index) {
         return fMappings.get(index).name;
     }
 
