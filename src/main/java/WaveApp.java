@@ -95,6 +95,8 @@ public class WaveApp extends JPanel implements ActionListener {
                 AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
                 loadTraceFile(chooser.getSelectedFile());
             }
+        } else if (cmd.equals("reloadtrace")) {
+            loadTraceFile(fCurrentTraceFile);
         } else if (cmd.equals("quit")) {
             saveConfig();
             System.exit(0);
@@ -246,6 +248,8 @@ public class WaveApp extends JPanel implements ActionListener {
                     remove(fNetSearchPane);
                     fNetSearchPane = null;
                 }
+
+                fCurrentTraceFile = fFile;
             }
         }
 
@@ -380,8 +384,12 @@ public class WaveApp extends JPanel implements ActionListener {
 
         fRecentFilesMenu = new JMenu("Open Recent");
         fileMenu.add(fRecentFilesMenu);
-
         buildRecentFilesMenu();
+
+        item = new JMenuItem("Reload Trace");
+        item.setActionCommand("reloadtrace");
+        item.addActionListener(this);
+        fileMenu.add(item);
 
         item = new JMenuItem("Preferences...");
         item.setActionCommand("prefs");
@@ -487,6 +495,7 @@ public class WaveApp extends JPanel implements ActionListener {
     private JFrame fFrame;
     private JMenu fRecentFilesMenu;
     private TraceSettingsFile fTraceSettingsFile;
+    private File fCurrentTraceFile;
     private NetSearchPanel fNetSearchPane;
 
     private static void createAndShowGUI(String[] args) {
