@@ -460,4 +460,26 @@ public class TraceViewModelTest {
         assertEquals(1, listener.fLongArg0);
         assertTrue(tvm.getValueFormatter(1) == dvf);
     }
+
+    // Ensure the minor tick interval is initialized when TraceViewModel
+    // is created.
+    @Test
+    public void testMinorTickInit() {
+        TraceViewModel tvm = new TraceViewModel();
+        assertNotEquals(0, tvm.getMinorTickInterval(), 0);
+    }
+
+    // Ensure this records multiple listeners properly. We don't test
+    // that all notification types will notify all listeners.
+    @Test
+    public void testMultipleListeners() {
+        TraceViewModel tvm = new TraceViewModel();
+        TestModelListener listener1 = new TestModelListener();
+        tvm.addListener(listener1);
+        TestModelListener listener2 = new TestModelListener();
+        tvm.addListener(listener2);
+        tvm.setHorizontalScale(1);
+        assertEquals(TestModelListener.SCALE_CHANGED, listener1.fNotifications);
+        assertEquals(TestModelListener.SCALE_CHANGED, listener2.fNotifications);
+    }
 }
