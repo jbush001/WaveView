@@ -56,7 +56,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
         @Override
         protected void paintComponent(Graphics g) {
             AppPreferences prefs = AppPreferences.getInstance();
-            setBackground(prefs.kBackgroundColor);
+            setBackground(prefs.backgroundColor);
 
             super.paintComponent(g);
 
@@ -77,21 +77,21 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
             }
 
             if (fCurrentNetIsSelected)
-                g.setColor(prefs.kListSelectionBgColor);
+                g.setColor(prefs.listSelectionBgColor);
             else
-                g.setColor(prefs.kBackgroundColor);
+                g.setColor(prefs.backgroundColor);
 
             g.fillRect(0, 0, getWidth(), DrawMetrics.WAVEFORM_V_SPACING);
             g.setFont(fLabelFont);
-            g.setColor(fCurrentNetIsSelected ? prefs.kListSelectionFgColor
-                       : prefs.kTraceColor);
+            g.setColor(fCurrentNetIsSelected ? prefs.listSelectionFgColor
+                       : prefs.traceColor);
 
             int netId = fTraceViewModel.getVisibleNet(fCurrentNet);
             String name = fTraceDataModel.getShortNetName(netId);
             g.drawString(name, 1, fLabelBaseline);
 
-            g.setColor(fCurrentNetIsSelected ? prefs.kListSelectionFgColor
-                       : prefs.kValueColor);
+            g.setColor(fCurrentNetIsSelected ? prefs.listSelectionFgColor
+                       : prefs.valueColor);
             g.setFont(fValueFont);
 
             Transition t = fTraceDataModel.findTransition(netId,

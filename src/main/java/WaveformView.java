@@ -32,7 +32,7 @@ public class WaveformView extends JPanel implements MouseListener,
         fTraceDataModel = traceDataModel;
         traceViewModel.addListener(this);
 
-        setBackground(AppPreferences.getInstance().kBackgroundColor);
+        setBackground(AppPreferences.getInstance().backgroundColor);
         setFont(new Font("SansSerif", Font.PLAIN, 9));
         computeBounds();
         addMouseListener(this);
@@ -127,7 +127,7 @@ public class WaveformView extends JPanel implements MouseListener,
     @Override
     protected void paintComponent(Graphics g) {
         AppPreferences prefs = AppPreferences.getInstance();
-        setBackground(prefs.kBackgroundColor);
+        setBackground(prefs.backgroundColor);
 
         super.paintComponent(g);
 
@@ -135,7 +135,7 @@ public class WaveformView extends JPanel implements MouseListener,
 
         // Draw selection
         if (fTraceViewModel.getCursorPosition() != fTraceViewModel.getSelectionStart()) {
-            g.setColor(prefs.kSelectionColor);
+            g.setColor(prefs.selectionColor);
             int selectionStart =  timestampToCoordinate(fTraceViewModel.getSelectionStart());
             int selectionEnd =  timestampToCoordinate(fTraceViewModel.getCursorPosition());
             int leftEdge = Math.min(selectionStart, selectionEnd);
@@ -171,7 +171,7 @@ public class WaveformView extends JPanel implements MouseListener,
 
         // Draw the cursor (a vertical line that runs from the top to the
         // bottom of the trace).
-        g.setColor(prefs.kCursorColor);
+        g.setColor(prefs.cursorColor);
         int cursorX = timestampToCoordinate(fTraceViewModel.getCursorPosition());
         g.drawLine(cursorX, visibleRect.y, cursorX, visibleRect.y + visibleRect.height);
     }
@@ -180,7 +180,7 @@ public class WaveformView extends JPanel implements MouseListener,
         Graphics2D g2d = (Graphics2D) g;
 
         g2d.setStroke(kDashedStroke);
-        g2d.setColor(AppPreferences.getInstance().kMarkerColor);
+        g2d.setColor(AppPreferences.getInstance().markerColor);
 
         long startTime = (long)(visibleRect.x * fTraceViewModel.getHorizontalScale());
         long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceViewModel.getHorizontalScale());
@@ -208,7 +208,7 @@ public class WaveformView extends JPanel implements MouseListener,
         int majorTickInterval = minorTickInterval * DrawMetrics.MINOR_TICKS_PER_MAJOR;
         startTime = ((startTime + majorTickInterval - 1) / majorTickInterval) * majorTickInterval;
 
-        g.setColor(AppPreferences.getInstance().kTimingMarkerColor);
+        g.setColor(AppPreferences.getInstance().timingMarkerColor);
         for (long ts = startTime; ts < endTime; ts += majorTickInterval) {
             int x = (int) (ts / scale);
             g.drawLine(x, visibleRect.y, x, visibleRect.y + visibleRect.height);

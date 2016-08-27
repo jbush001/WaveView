@@ -26,27 +26,27 @@ class ColorPreferencePane extends PreferencePane {
         super(new FlowLayout());
         AppPreferences prefs = AppPreferences.getInstance();
 
-        fTraceColorButton = new ColorButton("Trace", prefs.kTraceColor);
+        fTraceColorButton = new ColorButton("Trace", prefs.traceColor);
         add(fTraceColorButton);
-        fConflictColorButton = new ColorButton("Conflict", prefs.kConflictColor);
+        fConflictColorButton = new ColorButton("Conflict", prefs.conflictColor);
         add(fConflictColorButton);
-        fSelectionColorButton = new ColorButton("Selection", prefs.kSelectionColor);
+        fSelectionColorButton = new ColorButton("Selection", prefs.selectionColor);
         add(fSelectionColorButton);
-        fCursorColorButton = new ColorButton("Cursor", prefs.kCursorColor);
+        fCursorColorButton = new ColorButton("Cursor", prefs.cursorColor);
         add(fCursorColorButton);
-        fBackgroundColorButton = new ColorButton("Background", prefs.kBackgroundColor);
+        fBackgroundColorButton = new ColorButton("Background", prefs.backgroundColor);
         add(fBackgroundColorButton);
-        fTimingMarkerColorButton = new ColorButton("Timing Mark", prefs.kTimingMarkerColor);
+        fTimingMarkerColorButton = new ColorButton("Timing Mark", prefs.timingMarkerColor);
         add(fTimingMarkerColorButton);
-        fMarkerColorButton = new ColorButton("Marker", prefs.kMarkerColor);
+        fMarkerColorButton = new ColorButton("Marker", prefs.markerColor);
         add(fMarkerColorButton);
         fListSelectionBgColorButton = new ColorButton("List Selection Background",
-                prefs.kListSelectionBgColor);
+                prefs.listSelectionBgColor);
         add(fListSelectionBgColorButton);
         fListSelectionFgColorButton = new ColorButton("List Selection Foreground",
-                prefs.kListSelectionFgColor);
+                prefs.listSelectionFgColor);
         add(fListSelectionFgColorButton);
-        fValueColorButton = new ColorButton("Value", prefs.kValueColor);
+        fValueColorButton = new ColorButton("Value", prefs.valueColor);
         add(fValueColorButton);
 
         setPreferredSize(new Dimension(275, 500));
@@ -59,16 +59,16 @@ class ColorPreferencePane extends PreferencePane {
     @Override
     public void saveSettings() {
         AppPreferences prefs = AppPreferences.getInstance();
-        prefs.kTraceColor = fTraceColorButton.getColor();
-        prefs.kConflictColor = fConflictColorButton.getColor();
-        prefs.kSelectionColor = fSelectionColorButton.getColor();
-        prefs.kCursorColor = fCursorColorButton.getColor();
-        prefs.kBackgroundColor = fBackgroundColorButton.getColor();
-        prefs.kTimingMarkerColor = fTimingMarkerColorButton.getColor();
-        prefs.kMarkerColor = fMarkerColorButton.getColor();
-        prefs.kListSelectionBgColor = fListSelectionBgColorButton.getColor();
-        prefs.kListSelectionFgColor = fListSelectionFgColorButton.getColor();
-        prefs.kValueColor = fValueColorButton.getColor();
+        prefs.traceColor = fTraceColorButton.getColor();
+        prefs.conflictColor = fConflictColorButton.getColor();
+        prefs.selectionColor = fSelectionColorButton.getColor();
+        prefs.cursorColor = fCursorColorButton.getColor();
+        prefs.backgroundColor = fBackgroundColorButton.getColor();
+        prefs.timingMarkerColor = fTimingMarkerColorButton.getColor();
+        prefs.markerColor = fMarkerColorButton.getColor();
+        prefs.listSelectionBgColor = fListSelectionBgColorButton.getColor();
+        prefs.listSelectionFgColor = fListSelectionFgColorButton.getColor();
+        prefs.valueColor = fValueColorButton.getColor();
         prefs.writeColors();
     }
 

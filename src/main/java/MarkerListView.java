@@ -96,7 +96,7 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
 }
 
 class MarkerTableModel extends AbstractTableModel {
-    private static final int kNumColumns = 3;
+    private static final int NUM_COLUMNS = 3;
 
     public MarkerTableModel(TraceViewModel model) {
         fTraceViewModel = model;
@@ -104,7 +104,7 @@ class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return kNumColumns;
+        return NUM_COLUMNS;
     }
 
     @Override

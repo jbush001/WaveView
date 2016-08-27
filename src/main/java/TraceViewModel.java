@@ -36,8 +36,6 @@ public class TraceViewModel {
         public void formatChanged(int index);
     };
 
-    private static final int kMinMinorTickSize = 5;
-
     public TraceViewModel() {
         setHorizontalScale(10.0);
     }
@@ -60,7 +58,7 @@ public class TraceViewModel {
     public void setHorizontalScale(double scale) {
         fHorizontalScale = scale;
         fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
-                                                scale * kMinMinorTickSize)));
+            scale * DrawMetrics.MIN_MINOR_TICK_SIZE)));
         if (fMinorTickInterval <= 0)
             fMinorTickInterval = 1;
 

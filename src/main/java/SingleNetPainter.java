@@ -22,13 +22,11 @@ import java.util.*;
 /// bit in it.
 ///
 class SingleNetPainter implements WaveformPainter {
-    private static final int kWaveformHeight = 20;
-
     @Override
     public void paint(Graphics g, TraceDataModel model, int netId,
                       int topOffset, Rectangle visibleRect, double horizontalScale,
                       ValueFormatter formatter) {
-        g.setColor(AppPreferences.getInstance().kTraceColor);
+        g.setColor(AppPreferences.getInstance().traceColor);
 
         int lastValue = 0;
         int lastX = visibleRect.x + visibleRect.width;
@@ -46,17 +44,20 @@ class SingleNetPainter implements WaveformPainter {
             // Draw transition line at beginning of interval
             if (lastValue != value) {
                 if (lastValue == BitVector.VALUE_Z && value != BitVector.VALUE_X) {
-                    if (value == BitVector.VALUE_0)
-                        g.drawLine(x, topOffset + kWaveformHeight / 2, x, topOffset + kWaveformHeight);
-                    else
-                        g.drawLine(x, topOffset + kWaveformHeight / 2, x, topOffset);
+                    if (value == BitVector.VALUE_0) {
+                        g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x,
+                            topOffset + DrawMetrics.WAVEFORM_HEIGHT);
+                    } else
+                        g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x, topOffset);
                 } else if (value == BitVector.VALUE_Z && lastValue != BitVector.VALUE_X) {
-                    if (lastValue == BitVector.VALUE_0)
-                        g.drawLine(x, topOffset + kWaveformHeight, x, topOffset + kWaveformHeight / 2);
+                    if (lastValue == BitVector.VALUE_0) {
+                        g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT, x,
+                            topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
+                    }
                     else
-                        g.drawLine(x, topOffset, x, topOffset + kWaveformHeight / 2);
+                        g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
                 } else
-                    g.drawLine(x, topOffset, x, topOffset + kWaveformHeight);
+                    g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT);
             }
 
             if (x > visibleRect.x + visibleRect.width)
@@ -81,19 +82,22 @@ class SingleNetPainter implements WaveformPainter {
             break;
 
         case BitVector.VALUE_0:
-            g.drawLine(left, top + kWaveformHeight, right, top + kWaveformHeight);
+            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right,
+                top + DrawMetrics.WAVEFORM_HEIGHT);
             break;
 
         case BitVector.VALUE_Z:
-            g.drawLine(left, top + kWaveformHeight / 2, right, top + kWaveformHeight / 2);
+            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top
+                + DrawMetrics.WAVEFORM_HEIGHT / 2);
             break;
 
         case BitVector.VALUE_X:
-            g.setColor(AppPreferences.getInstance().kConflictColor);
-            g.fillRect(left, top + 1, right - left, kWaveformHeight - 1);
-            g.setColor(AppPreferences.getInstance().kTraceColor);
+            g.setColor(AppPreferences.getInstance().conflictColor);
+            g.fillRect(left, top + 1, right - left, DrawMetrics.WAVEFORM_HEIGHT - 1);
+            g.setColor(AppPreferences.getInstance().traceColor);
             g.drawLine(left, top, right, top);
-            g.drawLine(left, top + kWaveformHeight, right, top + kWaveformHeight);
+            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top
+                + DrawMetrics.WAVEFORM_HEIGHT);
             break;
         }
     }

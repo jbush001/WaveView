@@ -29,7 +29,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
         fTraceViewModel = viewModel;
         fTraceDataModel = dataModel;
         fTraceViewModel.addListener(this);
-        setBackground(AppPreferences.getInstance().kBackgroundColor);
+        setBackground(AppPreferences.getInstance().backgroundColor);
         setPreferredSize(new Dimension(200, DrawMetrics.TIMESCALE_HEIGHT));
         setFont(new Font("SansSerif", Font.PLAIN, 9));
         scaleChanged(fTraceViewModel.getHorizontalScale());
@@ -109,7 +109,7 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.setColor(AppPreferences.getInstance().kTraceColor);
+        g.setColor(AppPreferences.getInstance().traceColor);
 
         Rectangle visibleRect = getVisibleRect();
         FontMetrics metrics = g.getFontMetrics();
@@ -143,15 +143,15 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
             String labelString = "" + fTraceViewModel.getIdForMarker(markerIndex);
             int labelWidth = g.getFontMetrics().stringWidth(labelString);
             int x = (int) (timestamp / fTraceViewModel.getHorizontalScale());
-            g.setColor(AppPreferences.getInstance().kBackgroundColor);
+            g.setColor(AppPreferences.getInstance().backgroundColor);
             g.fillRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP),
                 DrawMetrics.TIMESCALE_HEIGHT - 12,
                 labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
-            g.setColor(AppPreferences.getInstance().kTraceColor);
+            g.setColor(AppPreferences.getInstance().traceColor);
             g.drawRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP),
                 DrawMetrics.TIMESCALE_HEIGHT - 12,
                 labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
-            g.setColor(AppPreferences.getInstance().kTraceColor);
+            g.setColor(AppPreferences.getInstance().traceColor);
             g.drawString(labelString, x - labelWidth / 2, DrawMetrics.TIMESCALE_HEIGHT - 3);
             markerIndex++;
         }
@@ -165,13 +165,13 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
             int labelLeft = cursorX + timeWidth > visibleRect.x + visibleRect.width
                             ? cursorX - timeWidth : cursorX;
 
-            g.setColor(AppPreferences.getInstance().kBackgroundColor);
+            g.setColor(AppPreferences.getInstance().backgroundColor);
             g.fillRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP, DrawMetrics.TIMESCALE_HEIGHT - 15,
                        timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
-            g.setColor(AppPreferences.getInstance().kTraceColor);
+            g.setColor(AppPreferences.getInstance().traceColor);
             g.drawRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP, DrawMetrics.TIMESCALE_HEIGHT - 15,
                        timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
-            g.setColor(AppPreferences.getInstance().kTraceColor);
+            g.setColor(AppPreferences.getInstance().traceColor);
             g.drawString(timeString, labelLeft + DrawMetrics.TIMESTAMP_H_GAP,
                          DrawMetrics.TIMESCALE_HEIGHT - DrawMetrics.TIMESTAMP_H_GAP);
         }

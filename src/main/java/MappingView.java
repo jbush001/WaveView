@@ -38,8 +38,6 @@ class MappingView extends JPanel {
     }
 
     class MappingTableModel extends AbstractTableModel {
-        private static final int kNumColumns = 2;
-
         public MappingTableModel(EnumValueFormatter formatter) {
             fFormatter = formatter;
         }

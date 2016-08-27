@@ -25,7 +25,7 @@ import java.io.*;
 ///
 
 class AppPreferences {
-    private static final int kMaxRecentFiles = 10;
+    private static final int MAX_RECENT_FILES = 10;
 
     public static AppPreferences getInstance() {
         if (fInstance == null)
@@ -34,16 +34,16 @@ class AppPreferences {
         return fInstance;
     }
 
-    public Color kTraceColor;
-    public Color kConflictColor;
-    public Color kSelectionColor;
-    public Color kCursorColor;
-    public Color kBackgroundColor;
-    public Color kTimingMarkerColor;
-    public Color kMarkerColor;
-    public Color kListSelectionBgColor;
-    public Color kListSelectionFgColor;
-    public Color kValueColor;
+    public Color traceColor;
+    public Color conflictColor;
+    public Color selectionColor;
+    public Color cursorColor;
+    public Color backgroundColor;
+    public Color timingMarkerColor;
+    public Color markerColor;
+    public Color listSelectionBgColor;
+    public Color listSelectionFgColor;
+    public Color valueColor;
 
     public void setInitialTraceDirectory(File file) {
         fPrefs.put("initialTraceDirectory", file.toString());
@@ -61,7 +61,7 @@ class AppPreferences {
         }
 
         // Remove oldest file from list if necessary
-        if (fRecentFiles.size() >= kMaxRecentFiles)
+        if (fRecentFiles.size() >= MAX_RECENT_FILES)
             fRecentFiles.remove(0);
 
         fRecentFiles.add(path);
@@ -83,16 +83,16 @@ class AppPreferences {
     }
 
     public void writeColors() {
-        writeColor("traceColor", kTraceColor);
-        writeColor("conflictColor", kConflictColor);
-        writeColor("selectionColor", kSelectionColor);
-        writeColor("cursorColor", kCursorColor);
-        writeColor("backgroundColor", kBackgroundColor);
-        writeColor("timingMarkerColor", kTimingMarkerColor);
-        writeColor("markerColor", kMarkerColor);
-        writeColor("listSelectionBgColor", kListSelectionBgColor);
-        writeColor("listSelectionFgColor", kListSelectionFgColor);
-        writeColor("valueColor", kValueColor);
+        writeColor("traceColor", traceColor);
+        writeColor("conflictColor", conflictColor);
+        writeColor("selectionColor", selectionColor);
+        writeColor("cursorColor", cursorColor);
+        writeColor("backgroundColor", backgroundColor);
+        writeColor("timingMarkerColor", timingMarkerColor);
+        writeColor("markerColor", markerColor);
+        writeColor("listSelectionBgColor", listSelectionBgColor);
+        writeColor("listSelectionFgColor", listSelectionFgColor);
+        writeColor("valueColor", valueColor);
     }
 
     private AppPreferences() {
@@ -107,16 +107,16 @@ class AppPreferences {
                 fRecentFiles.add(path);
         }
 
-        kTraceColor = readColor("traceColor", Color.black);
-        kConflictColor = readColor("conflictColor", new Color(255, 200, 200));
-        kSelectionColor = readColor("selectionColor", new Color(230, 230, 230));
-        kCursorColor = readColor("cursorColor", Color.red);
-        kBackgroundColor = readColor("backgroundColor", Color.white);
-        kTimingMarkerColor = readColor("timingMarkerColor", new Color(230, 230, 230));
-        kMarkerColor = readColor("markerColor", Color.green);
-        kListSelectionBgColor = readColor("listSelectionBgColor", Color.blue);
-        kListSelectionFgColor = readColor("listSelectionFgColor", Color.white);
-        kValueColor = readColor("valueColor", Color.blue);
+        traceColor = readColor("traceColor", Color.black);
+        conflictColor = readColor("conflictColor", new Color(255, 200, 200));
+        selectionColor = readColor("selectionColor", new Color(230, 230, 230));
+        cursorColor = readColor("cursorColor", Color.red);
+        backgroundColor = readColor("backgroundColor", Color.white);
+        timingMarkerColor = readColor("timingMarkerColor", new Color(230, 230, 230));
+        markerColor = readColor("markerColor", Color.green);
+        listSelectionBgColor = readColor("listSelectionBgColor", Color.blue);
+        listSelectionFgColor = readColor("listSelectionFgColor", Color.white);
+        valueColor = readColor("valueColor", Color.blue);
     }
 
     private Color readColor(String name, Color def) {
