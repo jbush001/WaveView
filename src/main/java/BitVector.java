@@ -46,6 +46,9 @@ class BitVector {
     /// @param index bit number, where 0 is least significant
     /// @parma value of bit at position, one of VALUE_0, VALUE_1, VALUE_X, VALUE_Z
     public void setBit(int index, int value) {
+        if (value > VALUE_Z || value < 0)
+            throw new NumberFormatException("invalid bit value");
+
         fValues[index] = (byte) value;
     }
 

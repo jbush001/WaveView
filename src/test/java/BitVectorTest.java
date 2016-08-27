@@ -62,11 +62,47 @@ public class BitVectorTest {
         assertFalse(bv.isZ());
         assertTrue(bv.isX());
         assertEquals("xxxxxxxxxxx", bv.toString(2));
+
+        bv = new BitVector("XXXXX", 2);
+        assertEquals(5, bv.getWidth());
+        assertFalse(bv.isZ());
+        assertTrue(bv.isX());
+        assertEquals("xxxxx", bv.toString(2));
+
+        bv = new BitVector("xxx", 16);
+        assertEquals(12, bv.getWidth());
+        assertFalse(bv.isZ());
+        assertTrue(bv.isX());
+        assertEquals("xxxxxxxxxxxx", bv.toString(2));
+
+        bv = new BitVector("XXX", 16);
+        assertEquals(12, bv.getWidth());
+        assertFalse(bv.isZ());
+        assertTrue(bv.isX());
+        assertEquals("xxxxxxxxxxxx", bv.toString(2));
     }
 
     @Test
     public void testParseZ() {
         BitVector bv = new BitVector("zzzzzzzz", 2);
+        assertEquals(8, bv.getWidth());
+        assertTrue(bv.isZ());
+        assertTrue(bv.isX());
+        assertEquals("zzzzzzzz", bv.toString(2));
+
+        bv = new BitVector("ZZZZZZZZ", 2);
+        assertEquals(8, bv.getWidth());
+        assertTrue(bv.isZ());
+        assertTrue(bv.isX());
+        assertEquals("zzzzzzzz", bv.toString(2));
+
+        bv = new BitVector("zz", 16);
+        assertEquals(8, bv.getWidth());
+        assertTrue(bv.isZ());
+        assertTrue(bv.isX());
+        assertEquals("zzzzzzzz", bv.toString(2));
+
+        bv = new BitVector("ZZ", 16);
         assertEquals(8, bv.getWidth());
         assertTrue(bv.isZ());
         assertTrue(bv.isX());
@@ -193,19 +229,34 @@ public class BitVectorTest {
     @Test
     public void parseStringAllocate() {
         // Ensure we grow a bitvector properly when assigning a larger value
-        BitVector bv1 = new BitVector(2);
-        bv1.parseString("10000", 2);
-        bv1.parseString("1000", 10);
-        bv1.parseString("100000", 16);
+        BitVector bv = new BitVector(1);
+        bv.parseString("10000001001", 2);
+
+        bv = new BitVector(1);
+        bv.parseString("100000", 10);
+
+        bv = new BitVector(1);
+        bv.parseString("100000", 16);
 
         // Values are unallocated in empty bitvectors
-        BitVector bv2 = new BitVector();
-        bv2.parseString("10", 2);
+        bv = new BitVector();
+        bv.parseString("10", 2);
 
-        BitVector bv3 = new BitVector();
-        bv3.parseString("17", 10);
+        bv = new BitVector();
+        bv.parseString("17", 10);
 
-        BitVector bv4 = new BitVector();
-        bv3.parseString("17", 16);
+        bv = new BitVector();
+        bv.parseString("17", 16);
+    }
+
+    @Test
+    public void badSetBitValue() {
+        BitVector bv = new BitVector(8);
+        try {
+            bv.setBit(0, 5);
+            fail("did not throw exception");
+        } catch (NumberFormatException exc) {
+            assertEquals("invalid bit value", exc.getMessage());
+        }
     }
 }
