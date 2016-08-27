@@ -52,6 +52,8 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
     ///   element isn't matched exactly, return the element before this one.
     ///   If the key is before the first element, return 0.
     /// @todo better name like getIndexForKey?
+    /// @todo Investigate using java.util.Arrays.binarySearch instead of
+    /// a hand rolled implementation here.
     int lookupValue(long key) {
         // Binary search
         int low = 0;

@@ -164,6 +164,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         private ListDataListener fListener;
     }
 
+    /// Handles lists of signals dropped onto this view
     class NetTransferHandler extends TransferHandler {
         @Override
         public int getSourceActions(JComponent component) {

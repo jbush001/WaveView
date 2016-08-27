@@ -97,7 +97,7 @@ public class NetTreeModel implements TreeModel {
 
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
-        // XXX not implemented
+        throw new UnsupportedOperationException();
     }
 
     private class NetTreeNode {

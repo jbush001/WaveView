@@ -28,6 +28,9 @@ import javax.swing.text.*;
 /// the visible net view to see them.
 ///
 public class NetSearchPanel extends JPanel implements ActionListener {
+
+    /// Allow user to drag signals out of this view and drop
+    /// in currently displayed nets
     class NetTreeTransferHandler extends TransferHandler {
         @Override
         public int getSourceActions(JComponent component) {
