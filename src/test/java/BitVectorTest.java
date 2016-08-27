@@ -75,32 +75,44 @@ public class BitVectorTest {
 
     @Test
     public void testNumberFormatException() {
+        // Digits other than 0/1 in binary
         try {
             BitVector bv = new BitVector("12345", 2);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
+        // Invalid hex digit 'H'
         try {
             BitVector bv = new BitVector("ABCDEFGH", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
+        // Hex digits in decimal format
         try {
             BitVector bv = new BitVector("1234a", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
+        // z not legal in decimal format
         try {
             BitVector bv = new BitVector("z", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
+        // x not legal in decimal format
         try {
             BitVector bv = new BitVector("x", 10);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+        }
+
+        // Bad radix
+        try {
+            BitVector bv = new BitVector("1", 12);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
@@ -156,5 +168,44 @@ public class BitVectorTest {
         assertEquals(1, bv3.compare(bv2));
         assertEquals(0, bv3.compare(bv3));
         assertEquals(-1, bv3.compare(bv4));
+    }
+
+    @Test
+    public void testToString() {
+        BitVector bv1 = new BitVector("1010001001", 2); // Length is not multiple of 4
+        BitVector bv2 = new BitVector("1z01xxxx11110000", 2);
+
+        assertEquals("1010001001", bv1.toString());
+        assertEquals("1z01xxxx11110000", bv2.toString());
+        assertEquals("1010001001", bv1.toString(2));
+        assertEquals("1z01xxxx11110000", bv2.toString(2));
+        assertEquals("289", bv1.toString(16));
+        assertEquals("ZXF0", bv2.toString(16));
+        assertEquals("649", bv1.toString(10));
+
+        try {
+            bv1.toString(12);
+        } catch (NumberFormatException exc) {
+            assertEquals("bad radix", exc.getMessage());
+        }
+    }
+
+    @Test
+    public void parseStringAllocate() {
+        // Ensure we grow a bitvector properly when assigning a larger value
+        BitVector bv1 = new BitVector(2);
+        bv1.parseString("10000", 2);
+        bv1.parseString("1000", 10);
+        bv1.parseString("100000", 16);
+
+        // Values are unallocated in empty bitvectors
+        BitVector bv2 = new BitVector();
+        bv2.parseString("10", 2);
+
+        BitVector bv3 = new BitVector();
+        bv3.parseString("17", 10);
+
+        BitVector bv4 = new BitVector();
+        bv3.parseString("17", 16);
     }
 }

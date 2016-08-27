@@ -180,7 +180,7 @@ class BitVector {
             return toHexString();
 
         default:
-            return "bad radix"; /// @todo Exception?
+            throw new NumberFormatException("bad radix");
         }
     }
 
