@@ -120,6 +120,11 @@ public class WaveformView extends JPanel implements MouseListener,
     }
 
     @Override
+    public void formatChanged(int index) {
+        repaint();
+    }
+
+    @Override
     protected void paintComponent(Graphics g) {
         AppPreferences prefs = AppPreferences.getInstance();
         setBackground(prefs.kBackgroundColor);

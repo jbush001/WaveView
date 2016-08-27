@@ -24,33 +24,45 @@ public class TraceViewModelTest {
         public static final int NETS_REMOVED = 4;
         public static final int SCALE_CHANGED = 8;
         public static final int MARKER_CHANGED = 16;
+        public static final int FORMAT_CHANGED = 32;
 
+        @Override
         public void cursorChanged(long oldTimestamp, long newTimestamp) {
             fNotifications |= CURSOR_CHANGED;
             fLongArg0 = oldTimestamp;
             fLongArg1 = newTimestamp;
         }
 
+        @Override
         public void netsAdded(int firstIndex, int lastIndex) {
             fNotifications |= NETS_ADDED;
             fLongArg0 = (long) firstIndex;
             fLongArg1 = (long) lastIndex;
         }
 
+        @Override
         public void netsRemoved(int firstIndex, int lastIndex) {
             fNotifications |= NETS_REMOVED;
             fLongArg0 = (long) firstIndex;
             fLongArg1 = (long) lastIndex;
         }
 
+        @Override
         public void scaleChanged(double newScale) {
             fNotifications |= SCALE_CHANGED;
             fDoubleArg = newScale;
         }
 
+        @Override
         public void markerChanged(long timestamp) {
             fNotifications |= MARKER_CHANGED;
             fLongArg0 = timestamp;
+        }
+
+        @Override
+        public void formatChanged(int index) {
+            fNotifications |= FORMAT_CHANGED;
+            fLongArg0 = index;
         }
 
         void reset()
@@ -432,5 +444,20 @@ public class TraceViewModelTest {
         TraceViewModel tvm = new TraceViewModel();
         tvm.setHorizontalScale(0.01);
         assertEquals(1, tvm.getMinorTickInterval());
+    }
+
+    @Test
+    public void testSetGetValueFormatter() {
+        TraceViewModel tvm = new TraceViewModel();
+        TestModelListener listener = new TestModelListener();
+        tvm.addListener(listener);
+        tvm.makeNetVisible(1);
+        tvm.makeNetVisible(2);
+        DecimalValueFormatter dvf = new DecimalValueFormatter();
+        listener.reset();
+        tvm.setValueFormatter(1, dvf);
+        assertEquals(TestModelListener.FORMAT_CHANGED, listener.fNotifications);
+        assertEquals(1, listener.fLongArg0);
+        assertTrue(tvm.getValueFormatter(1) == dvf);
     }
 }

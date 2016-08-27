@@ -24,7 +24,8 @@ import java.awt.datatransfer.*;
 ///
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
-class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
+class NetNameView extends JList<Integer> implements TraceViewModel.Listener,
+    ActionListener {
     private static final int kDragThreshold = 15;
 
     class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
@@ -156,6 +157,10 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
         public void scaleChanged(double newScale) {
         }
 
+        @Override
+        public void formatChanged(int index) {
+        }
+
         private ListDataListener fListener;
     }
 
@@ -224,6 +229,38 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
         setDragEnabled(true);
         setDropMode(DropMode.ON_OR_INSERT);
         setTransferHandler(new NetTransferHandler());
+
+        fPopupMenu = new JPopupMenu();
+        JMenuItem item = new JMenuItem("Remove Net");
+        item.addActionListener(this);
+        fPopupMenu.add(item);
+        item = new JMenu("Format");
+        JMenuItem subItem = new JMenuItem("Hex");
+        item.add(subItem);
+        subItem.addActionListener(this);
+        subItem = new JMenuItem("Binary");
+        subItem.addActionListener(this);
+        item.add(subItem);
+        subItem = new JMenuItem("Decimal");
+        subItem.addActionListener(this);
+        item.add(subItem);
+        subItem = new JMenuItem("ASCII");
+        subItem.addActionListener(this);
+        item.add(subItem);
+        subItem = new JMenuItem("Enum");
+        subItem.addActionListener(this);
+        item.add(subItem);
+        subItem = new JMenuItem("Custom Formatter...");
+        subItem.addActionListener(this);
+        item.add(subItem);
+        fPopupMenu.add(item);
+
+        addMouseListener(new MouseAdapter() {
+            public void mousePressed(MouseEvent event) {
+                if (event.isPopupTrigger())
+                    fPopupMenu.show(event.getComponent(), event.getX(), event.getY());
+            }
+        });
     }
 
     private void computeBounds() {
@@ -265,6 +302,79 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
         repaint();
     }
 
+    @Override
+    public void formatChanged(int index) {
+        repaint();
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        int[] indices = getSelectedIndices();
+
+        if (e.getActionCommand().equals("Remove Net")) {
+            for (int i = indices.length - 1; i >= 0; i--)
+                fTraceViewModel.removeNet(indices[i]);
+
+            clearSelection();
+        } else {
+            if (e.getActionCommand().equals("Enum")) {
+                if (indices.length > 0) {
+                    ValueFormatter formatter = fTraceViewModel.getValueFormatter(indices[0]);
+                    if (!(formatter instanceof EnumValueFormatter)) {
+                        formatter = new EnumValueFormatter();
+                        fTraceViewModel.setValueFormatter(indices[0], formatter);
+                    }
+
+                    JFrame frame = new JFrame("Mapping for " + fTraceDataModel.getShortNetName(fTraceViewModel.getVisibleNet(indices[0])));
+                    JPanel contentPane = new MappingView((EnumValueFormatter) formatter);
+                    contentPane.setOpaque(true);
+                    frame.setContentPane(contentPane);
+                    frame.pack();
+                    frame.setVisible(true);
+                }
+            } else if (e.getActionCommand().equals("Custom Formatter...")) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setMultiSelectionEnabled(false);
+                int returnValue = chooser.showOpenDialog(this);
+
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    try {
+//                         String jarFileName = chooser.getSelectedFile().getCanonicalPath();
+//                         URL[] urls = { (new File(jarFileName)).toURL() };
+//                         URLClassLoader loader = new URLClassLoader(urls);
+//                         Class c = loader.loadClass("CustomFormatter");
+//                         ValueFormatter formatter = (ValueFormatter) c.newInstance();
+//                         for (int i = 0; i < indices.length; i++)
+//                         {
+//                             NetModel net = fTraceViewModel.getVisibleNet(indices[i]);
+//                             net.setCustomValueFormatterPath(jarFileName);
+//                             net.setValueFormatter(formatter);
+//                         }
+                    } catch (Exception exc) {
+                        JOptionPane.showMessageDialog(this, "Error opening configuration file");
+                    }
+                }
+            } else {
+                ValueFormatter formatter = null;
+                if (e.getActionCommand().equals("Hex"))
+                    formatter = new HexadecimalValueFormatter();
+                else if (e.getActionCommand().equals("Binary"))
+                    formatter = new BinaryValueFormatter();
+                else if (e.getActionCommand().equals("Decimal"))
+                    formatter = new DecimalValueFormatter();
+                else if (e.getActionCommand().equals("ASCII"))
+                    formatter = new ASCIIValueFormatter();
+
+                if (formatter != null) {
+                    for (int i = 0; i < indices.length; i++)
+                        fTraceViewModel.setValueFormatter(indices[i], formatter);
+                }
+            }
+        }
+    }
+
     private TraceViewModel fTraceViewModel;
     private TraceDataModel fTraceDataModel;
+    private JPopupMenu fPopupMenu;
 }

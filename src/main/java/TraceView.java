@@ -27,7 +27,7 @@ import java.io.File;
 ///
 /// Container for the timescale view, net names, and waveforms.
 ///
-public class TraceView extends JPanel implements ActionListener {
+public class TraceView extends JPanel {
     public TraceView(TraceViewModel viewModel, TraceDataModel dataModel,
     WaveApp waveApp) {
         super(new BorderLayout());
@@ -80,112 +80,6 @@ public class TraceView extends JPanel implements ActionListener {
                 fWaveformView.repaint();
             }
         });
-
-        // Add net context menu
-        // @todo should this be moved to NetNameView?
-        fPopupMenu = new JPopupMenu();
-        JMenuItem item = new JMenuItem("Remove Net");
-        item.addActionListener(this);
-        fPopupMenu.add(item);
-        item = new JMenu("Format");
-        JMenuItem subItem = new JMenuItem("Hex");
-        item.add(subItem);
-        subItem.addActionListener(this);
-        subItem = new JMenuItem("Binary");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        subItem = new JMenuItem("Decimal");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        subItem = new JMenuItem("ASCII");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        subItem = new JMenuItem("Enum");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        subItem = new JMenuItem("Custom Formatter...");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        fPopupMenu.add(item);
-
-        fNetNameView.addMouseListener(new MouseAdapter() {
-            public void mousePressed(MouseEvent event) {
-                if (event.isPopupTrigger())
-                    fPopupMenu.show(event.getComponent(), event.getX(), event.getY());
-            }
-        });
-
-        fTraceViewModel.setHorizontalScale(10.0);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        int[] indices = fNetNameView.getSelectedIndices();
-
-        if (e.getActionCommand().equals("Remove Net")) {
-            for (int i = indices.length - 1; i >= 0; i--)
-                fTraceViewModel.removeNet(indices[i]);
-
-            fNetNameView.clearSelection();
-        } else {
-            if (e.getActionCommand().equals("Enum")) {
-                if (indices.length > 0) {
-                    ValueFormatter formatter = fTraceViewModel.getValueFormatter(indices[0]);
-                    if (!(formatter instanceof EnumValueFormatter)) {
-                        formatter = new EnumValueFormatter();
-                        fTraceViewModel.setValueFormatter(indices[0], formatter);
-                    }
-
-                    JFrame frame = new JFrame("Mapping for " + fTraceDataModel.getShortNetName(fTraceViewModel.getVisibleNet(indices[0])));
-                    JPanel contentPane = new MappingView((EnumValueFormatter) formatter);
-                    contentPane.setOpaque(true);
-                    frame.setContentPane(contentPane);
-                    frame.pack();
-                    frame.setVisible(true);
-                }
-            } else if (e.getActionCommand().equals("Custom Formatter...")) {
-                JFileChooser chooser = new JFileChooser();
-                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                chooser.setMultiSelectionEnabled(false);
-                int returnValue = chooser.showOpenDialog(this);
-
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    try {
-//                         String jarFileName = chooser.getSelectedFile().getCanonicalPath();
-//                         URL[] urls = { (new File(jarFileName)).toURL() };
-//                         URLClassLoader loader = new URLClassLoader(urls);
-//                         Class c = loader.loadClass("CustomFormatter");
-//                         ValueFormatter formatter = (ValueFormatter) c.newInstance();
-//                         for (int i = 0; i < indices.length; i++)
-//                         {
-//                             NetModel net = fTraceViewModel.getVisibleNet(indices[i]);
-//                             net.setCustomValueFormatterPath(jarFileName);
-//                             net.setValueFormatter(formatter);
-//                         }
-                    } catch (Exception exc) {
-                        JOptionPane.showMessageDialog(this, "Error opening configuration file");
-                    }
-                }
-            } else {
-                ValueFormatter formatter = null;
-                if (e.getActionCommand().equals("Hex"))
-                    formatter = new HexadecimalValueFormatter();
-                else if (e.getActionCommand().equals("Binary"))
-                    formatter = new BinaryValueFormatter();
-                else if (e.getActionCommand().equals("Decimal"))
-                    formatter = new DecimalValueFormatter();
-                else if (e.getActionCommand().equals("ASCII"))
-                    formatter = new ASCIIValueFormatter();
-
-                if (formatter != null) {
-                    for (int i = 0; i < indices.length; i++)
-                        fTraceViewModel.setValueFormatter(indices[i], formatter);
-                }
-            }
-        }
-
-        fWaveformView.repaint();
-        fNetNameView.repaint();
     }
 
     public void zoomIn() {
@@ -244,7 +138,6 @@ public class TraceView extends JPanel implements ActionListener {
     private NetNameView fNetNameView;
     private JScrollPane fScrollPane;
     private TimescaleView fTimescaleView;
-    private JPopupMenu fPopupMenu;
     private TraceViewModel fTraceViewModel;
     private TraceDataModel fTraceDataModel;
     private WaveApp fWaveApp;

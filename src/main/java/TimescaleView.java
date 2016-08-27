@@ -75,6 +75,9 @@ public class TimescaleView extends JPanel implements TraceViewModel.Listener, Ac
     }
 
     @Override
+    public void formatChanged(int index) {}
+
+    @Override
     public void scaleChanged(double newScale) {
         // Make sure minor ticks are large enough
         long minorTickInterval = fTraceViewModel.getMinorTickInterval();

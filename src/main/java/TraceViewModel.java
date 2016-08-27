@@ -33,9 +33,14 @@ public class TraceViewModel {
         public void netsRemoved(int firstIndex, int lastIndex);
         public void scaleChanged(double newScale);
         public void markerChanged(long timestamp);
+        public void formatChanged(int index);
     };
 
     private static final int kMinMinorTickSize = 5;
+
+    public TraceViewModel() {
+        setHorizontalScale(10.0);
+    }
 
     void clear() {
         int oldSize = fVisibleNets.size();
@@ -132,6 +137,8 @@ public class TraceViewModel {
 
     public void setValueFormatter(int listIndex, ValueFormatter formatter) {
         fVisibleNets.get(listIndex).formatter = formatter;
+        for (Listener listener : fTraceListeners)
+            listener.formatChanged(listIndex);
     }
 
     public ValueFormatter getValueFormatter(int listIndex) {
@@ -354,7 +361,7 @@ public class TraceViewModel {
     private ArrayList<NetSet> fNetSets = new ArrayList<NetSet>();
     private long fCursorPosition;
     private long fSelectionStart;
-    private double fHorizontalScale = 10.0; // Nanoseconds per pixel
+    private double fHorizontalScale; // Nanoseconds per pixel
     private boolean fAdjustingCursor;
     private SortedArrayList<Marker> fMarkers = new SortedArrayList<Marker>();
     private int fNextMarkerId = 1;

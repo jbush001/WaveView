@@ -80,6 +80,10 @@ public class MarkerListView extends JPanel implements ActionListener, TraceViewM
     }
 
     @Override
+    public void formatChanged(int index) {
+    }
+
+    @Override
     public void markerChanged(long timestamp) {
         fTableModel.fireTableDataChanged();
         // Redraw list
