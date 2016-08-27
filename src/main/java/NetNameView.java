@@ -25,7 +25,6 @@ import java.awt.datatransfer.*;
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
 class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
-    private static final int kCellHeight = 26;
     private static final int kDragThreshold = 15;
 
     class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
@@ -71,7 +70,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
                 fValueBaseline = fLabelBaseline + labelMetrics.getDescent() + labelMetrics.getLeading()
                                  + valueMetrics.getAscent();
                 int totalHeight = fValueBaseline + valueMetrics.getDescent();
-                int border = (kCellHeight - totalHeight) / 2;
+                int border = (DrawMetrics.WAVEFORM_V_SPACING - totalHeight) / 2;
                 fLabelBaseline += border;
                 fValueBaseline += border;
             }
@@ -81,7 +80,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
             else
                 g.setColor(prefs.kBackgroundColor);
 
-            g.fillRect(0, 0, getWidth(), kCellHeight);
+            g.fillRect(0, 0, getWidth(), DrawMetrics.WAVEFORM_V_SPACING);
             g.setFont(fLabelFont);
             g.setColor(fCurrentNetIsSelected ? prefs.kListSelectionFgColor
                        : prefs.kTraceColor);
@@ -221,7 +220,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
         setModel(new ListModelAdapter());
         setCellRenderer(new NetNameRenderer());
         computeBounds();
-        setFixedCellHeight(kCellHeight);
+        setFixedCellHeight(DrawMetrics.WAVEFORM_V_SPACING);
         setDragEnabled(true);
         setDropMode(DropMode.ON_OR_INSERT);
         setTransferHandler(new NetTransferHandler());
@@ -230,7 +229,7 @@ class NetNameView extends JList<Integer> implements TraceViewModel.Listener {
     private void computeBounds() {
         Dimension d = getPreferredSize();
         d.width = 200;
-        d.height = fTraceViewModel.getVisibleNetCount() * kCellHeight;
+        d.height = fTraceViewModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
         setPreferredSize(d);
         validate();
         repaint();

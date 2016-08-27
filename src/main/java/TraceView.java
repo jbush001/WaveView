@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-
 import javax.swing.*;
+import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -28,7 +28,8 @@ import java.io.File;
 /// Container for the timescale view, net names, and waveforms.
 ///
 public class TraceView extends JPanel implements ActionListener {
-    public TraceView(TraceViewModel viewModel, TraceDataModel dataModel, WaveApp waveApp) {
+    public TraceView(TraceViewModel viewModel, TraceDataModel dataModel,
+    WaveApp waveApp) {
         super(new BorderLayout());
 
         fWaveApp = waveApp;
@@ -37,28 +38,48 @@ public class TraceView extends JPanel implements ActionListener {
         fWaveformView = new WaveformView(viewModel, dataModel);
         fTimescaleView = new TimescaleView(viewModel, dataModel);
         fScrollPane = new JScrollPane(fWaveformView);
-        add(fScrollPane, BorderLayout.CENTER);
-
-        fNetNameView = new NetNameView(viewModel, dataModel);
-
-        fScrollPane.setRowHeaderView(fNetNameView);
         fScrollPane.setColumnHeaderView(fTimescaleView);
         fScrollPane.setViewportBorder(BorderFactory.createLineBorder(Color.black));
 
-        if (false) {
-            JPanel corner = new JPanel();
-            corner.setBorder(BorderFactory.createLineBorder(Color.black));
-            corner.setBackground(Color.white);
-            fScrollPane.setCorner(JScrollPane.UPPER_LEFT_CORNER, corner);
-        }
+        // Always keep the horizontal scroll bar. In 99% of cases, we need it,
+        // and it simplifies the net name layout if we don't need to worry about
+        // the wave view changing size.
+        fScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+            fNetNameView = new NetNameView(viewModel, dataModel);
+
+        JViewport netNameViewport = new JViewport();
+        netNameViewport.setView(fNetNameView);
+        JPanel netNameBorder = new JPanel(new BorderLayout());
+        netNameBorder.setBorder(BorderFactory.createLineBorder(Color.black));
+        netNameBorder.add(netNameViewport, BorderLayout.CENTER);
+
+        // Need to make sure the net name view is the same size as the waveform view
+        // so scrolling will work correctly (otherwise they will be out of sync).
+        JPanel netNameContainer = new JPanel(new BorderLayout());
+        netNameContainer.add(Box.createVerticalStrut(fTimescaleView.getPreferredSize().height),
+            BorderLayout.NORTH);
+        netNameContainer.add(netNameBorder, BorderLayout.CENTER);
+        netNameContainer.add(Box.createVerticalStrut(fScrollPane.getHorizontalScrollBar()
+            .getPreferredSize().height), BorderLayout.SOUTH);
+
+        // To allow resizing the net name view,  put it in the left half of a split pane
+        // rather than setting it as the scroll pane's row header. Add a listener for
+        // the vertical scrollbar that also controls the net name view.
+        fSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, netNameContainer, fScrollPane);
+        add(fSplitPane, BorderLayout.CENTER);
+        fScrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            public void adjustmentValueChanged(AdjustmentEvent ae) {
+                netNameViewport.setViewPosition(new Point(0, ae.getValue()));
+            }
+        });
 
         fScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
             public void adjustmentValueChanged(AdjustmentEvent ae) {
-                // We have to repaint when scrolling because values on partially visible
+                // Need to repaint when scrolling because values on partially visible
                 // nets will be centered.
                 fWaveformView.repaint();
             }
-        } );
+        });
 
         // Add net context menu
         // @todo should this be moved to NetNameView?
@@ -218,6 +239,7 @@ public class TraceView extends JPanel implements ActionListener {
         return fNetNameView.getSelectedIndices();
     }
 
+    private JSplitPane fSplitPane;
     private WaveformView fWaveformView;
     private NetNameView fNetNameView;
     private JScrollPane fScrollPane;
