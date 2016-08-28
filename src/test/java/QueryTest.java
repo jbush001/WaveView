@@ -40,30 +40,26 @@ public class QueryTest {
     }
 
     @Test
-    public void testSimpleQuery() {
-        try {
-            // clk is high 10-14, 20-
-            Query query = new Query(makeTraceDataModel(), "mod1.clk = 1");
-            assertEquals(10, query.getNextMatch(4));
-            assertEquals(10, query.getNextMatch(9));
-            assertEquals(20, query.getNextMatch(10));
-            assertEquals(20, query.getNextMatch(15));
-            assertEquals(-1, query.getNextMatch(20));
-            assertEquals(-1, query.getNextMatch(30));
+    public void testSimpleQuery() throws Exception {
+        // clk is high 10-14, 20-
+        Query query = new Query(makeTraceDataModel(), "mod1.clk = 1");
+        assertEquals(10, query.getNextMatch(4));
+        assertEquals(10, query.getNextMatch(9));
+        assertEquals(20, query.getNextMatch(10));
+        assertEquals(20, query.getNextMatch(15));
+        assertEquals(-1, query.getNextMatch(20));
+        assertEquals(-1, query.getNextMatch(30));
 
-            assertEquals(14, query.getPreviousMatch(21));
-            assertEquals(14, query.getPreviousMatch(20));
-            assertEquals(14, query.getPreviousMatch(15));
-            assertEquals(-1, query.getPreviousMatch(10));
-            assertEquals(-1, query.getPreviousMatch(5));
-            assertEquals(-1, query.getPreviousMatch(4));
-        } catch (Query.ParseException exc) {
-            fail("caught query parse exception " + exc);
-        }
+        assertEquals(14, query.getPreviousMatch(21));
+        assertEquals(14, query.getPreviousMatch(20));
+        assertEquals(14, query.getPreviousMatch(15));
+        assertEquals(-1, query.getPreviousMatch(10));
+        assertEquals(-1, query.getPreviousMatch(5));
+        assertEquals(-1, query.getPreviousMatch(4));
     }
 
     @Test
-    public void testLiteralBases() {
+    public void testLiteralBases() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -73,28 +69,24 @@ public class QueryTest {
         builder.appendTransition(id1, 23, new BitVector("10", 10));
         builder.loadFinished();
 
-        try {
-            Query query = new Query(traceDataModel, "mod1.value = 10");
-            assertEquals(23, query.getNextMatch(0));
+        Query query = new Query(traceDataModel, "mod1.value = 10");
+        assertEquals(23, query.getNextMatch(0));
 
-            query = new Query(traceDataModel, "mod1.value = 'd10");
-            assertEquals(23, query.getNextMatch(0));
+        query = new Query(traceDataModel, "mod1.value = 'd10");
+        assertEquals(23, query.getNextMatch(0));
 
-            query = new Query(traceDataModel, "mod1.value = 'ha");
-            assertEquals(23, query.getNextMatch(0));
+        query = new Query(traceDataModel, "mod1.value = 'ha");
+        assertEquals(23, query.getNextMatch(0));
 
-            query = new Query(traceDataModel, "mod1.value = 'b1010");
-            assertEquals(23, query.getNextMatch(0));
-        } catch (Query.ParseException exc) {
-            fail("Threw query parse exception " + exc);
-        }
+        query = new Query(traceDataModel, "mod1.value = 'b1010");
+        assertEquals(23, query.getNextMatch(0));
     }
 
     /// @bug This doesn't match correctly yet: Xes are ignored for
     /// matching.
     /// Verify it at least parses the query.
     @Test
-    public void testMatchXZ() {
+    public void testMatchXZ() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -106,54 +98,42 @@ public class QueryTest {
 
         // Try upper and lower case versions of X and Z for hex and decimal
         // bases
-        try {
-            Query query = new Query(traceDataModel, "mod1.value = 'bxxxx");
-            query = new Query(traceDataModel, "mod1.value = 'bXXXX");
-            query = new Query(traceDataModel, "mod1.value = 'hx");
-            query = new Query(traceDataModel, "mod1.value = 'hX");
-            query = new Query(traceDataModel, "mod1.value = 'bzzzz");
-            query = new Query(traceDataModel, "mod1.value = 'bZZZZ");
-            query = new Query(traceDataModel, "mod1.value = 'hz");
-            query = new Query(traceDataModel, "mod1.value = 'hZ");
-        } catch (Exception exc) {
-            fail("Threw query parse exception " + exc);
-        }
+        Query query = new Query(traceDataModel, "mod1.value = 'bxxxx");
+        query = new Query(traceDataModel, "mod1.value = 'bXXXX");
+        query = new Query(traceDataModel, "mod1.value = 'hx");
+        query = new Query(traceDataModel, "mod1.value = 'hX");
+        query = new Query(traceDataModel, "mod1.value = 'bzzzz");
+        query = new Query(traceDataModel, "mod1.value = 'bZZZZ");
+        query = new Query(traceDataModel, "mod1.value = 'hz");
+        query = new Query(traceDataModel, "mod1.value = 'hZ");
 
         // X and Z with decimal values should fail
         try {
-            Query query = new Query(traceDataModel, "mod1.value = 'dx");
+            query = new Query(traceDataModel, "mod1.value = 'dx");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
-        } catch (Query.ParseException exc) {
-            fail("threw query parse exception " + exc);
         }
 
         try {
-            Query query = new Query(traceDataModel, "mod1.value = 'dX");
+            query = new Query(traceDataModel, "mod1.value = 'dX");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
-        } catch (Query.ParseException exc) {
-            fail("threw query parse exception " + exc);
         }
 
         try {
-            Query query = new Query(traceDataModel, "mod1.value = 'dz");
+            query = new Query(traceDataModel, "mod1.value = 'dz");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
-        } catch (Query.ParseException exc) {
-            fail("threw query parse exception " + exc);
         }
 
         try {
-            Query query = new Query(traceDataModel, "mod1.value = 'dZ");
+            query = new Query(traceDataModel, "mod1.value = 'dZ");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
-        } catch (Query.ParseException exc) {
-            fail("threw query parse exception " + exc);
         }
     }
 
@@ -256,7 +236,7 @@ public class QueryTest {
     /// This implicitly verifies query hinting by starting at different
     /// transition points
     @Test
-    public void testAnd() {
+    public void testAnd() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -286,12 +266,7 @@ public class QueryTest {
 
         builder.loadFinished();
 
-        Query query = null;
-        try {
-            query = new Query(traceDataModel, "mod1.a = 1 & mod1.b = 1");
-        } catch (Query.ParseException exc) {
-            fail("threw query parse exception " + exc);
-        }
+        Query query = new Query(traceDataModel, "mod1.a = 1 & mod1.b = 1");
 
         // Expression is true:
         // 15-19, 25-29, 45-
@@ -326,7 +301,7 @@ public class QueryTest {
     /// This implicitly verifies query hinting by starting at different
     /// transition points
     @Test
-    public void testOr() {
+    public void testOr() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -356,12 +331,7 @@ public class QueryTest {
 
         builder.loadFinished();
 
-        Query query = null;
-        try {
-            query = new Query(traceDataModel, "mod1.a = 1 | mod1.b = 1");
-        } catch (Query.ParseException exc) {
-            fail("threw query parse exception " + exc);
-        }
+        Query query = new Query(traceDataModel, "mod1.a = 1 | mod1.b = 1");
 
         // Expression is true:
         // 5-9, 15-29, 35-39, 45-
@@ -394,7 +364,7 @@ public class QueryTest {
     }
 
     @Test
-    public void testComparisons() {
+    public void testComparisons() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
@@ -412,14 +382,64 @@ public class QueryTest {
         builder.appendTransition(id1, 9, new BitVector("9", 16));
         builder.loadFinished();
 
-        try {
-            Query query = new Query(traceDataModel, "mod1.value > 'h5");
-            assertEquals(6, query.getNextMatch(0));
+        Query query = new Query(traceDataModel, "mod1.value > 'h5");
+        assertEquals(6, query.getNextMatch(0));
 
-            query = new Query(traceDataModel, "mod1.value < 'h5");
-            assertEquals(4, query.getPreviousMatch(10));
-        } catch (Query.ParseException exc) {
-            fail("threw query parse exception " + exc);
-        }
+        query = new Query(traceDataModel, "mod1.value < 'h5");
+        assertEquals(4, query.getPreviousMatch(10));
+    }
+
+    @Test
+    public void testParens() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("a", -1, 1);
+        int id2 = builder.newNet("b", -1, 1);
+        int id3 = builder.newNet("c", -1, 1);
+        builder.exitModule();
+
+        // a
+        builder.appendTransition(id1, 0, new BitVector("0", 2));
+        builder.appendTransition(id1, 1, new BitVector("0", 2));
+        builder.appendTransition(id1, 2, new BitVector("1", 2));
+        builder.appendTransition(id1, 3, new BitVector("0", 2));
+        builder.appendTransition(id1, 4, new BitVector("1", 2));
+        builder.appendTransition(id1, 5, new BitVector("1", 2));
+        builder.appendTransition(id1, 6, new BitVector("1", 2));
+
+        // b
+        builder.appendTransition(id2, 0, new BitVector("0", 2));
+        builder.appendTransition(id2, 1, new BitVector("0", 2));
+        builder.appendTransition(id2, 2, new BitVector("1", 2));
+        builder.appendTransition(id2, 3, new BitVector("1", 2));
+        builder.appendTransition(id2, 4, new BitVector("0", 2));
+        builder.appendTransition(id2, 5, new BitVector("0", 2));
+        builder.appendTransition(id2, 6, new BitVector("1", 2));
+
+        // c
+        builder.appendTransition(id3, 0, new BitVector("0", 2));
+        builder.appendTransition(id3, 1, new BitVector("1", 2));
+        builder.appendTransition(id3, 2, new BitVector("0", 2));
+        builder.appendTransition(id3, 3, new BitVector("0", 2));
+        builder.appendTransition(id3, 4, new BitVector("0", 2));
+        builder.appendTransition(id3, 5, new BitVector("1", 2));
+        builder.appendTransition(id3, 6, new BitVector("1", 2));
+        builder.loadFinished();
+
+        //   abc
+        //   000  0
+        //   001  1
+        //   110  2
+        //   010  3
+        //   100  4
+        //   101  5
+        //   111  6
+
+        Query query = new Query(traceDataModel, "(mod1.a = 1 | mod1.b = 1) & mod1.c = 1");
+        assertEquals(5, query.getNextMatch(0));
+
+        query = new Query(traceDataModel, "mod1.a = 1 & (mod1.b = 1 | mod1.c = 1)");
+        assertEquals(2, query.getNextMatch(0));
     }
 }

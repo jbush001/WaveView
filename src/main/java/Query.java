@@ -33,6 +33,7 @@ public class Query {
         fQueryString = queryString;
         fStringOffset = 0;
         fExpression = parseExpression();
+        match(TOK_END);
     }
 
     ///
@@ -287,9 +288,7 @@ public class Query {
     }
 
     ExpressionNode parseExpression() throws ParseException {
-        ExpressionNode node = parseOr();
-        match(TOK_END);
-        return node;
+        return parseOr();
     }
 
     ExpressionNode parseOr() throws ParseException {
@@ -546,17 +545,6 @@ public class Query {
         @Override
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) == 0;
-        }
-    }
-
-    private class NotEqualExpressionNode extends ComparisonExpressionNode {
-        public NotEqualExpressionNode(int netId, BitVector match) {
-            super(netId, match);
-        }
-
-        @Override
-        protected boolean doCompare(BitVector value1, BitVector value2) {
-            return value1.compare(value2) != 0;
         }
     }
 
