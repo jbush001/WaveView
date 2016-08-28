@@ -296,11 +296,9 @@ public class TraceDisplayModel {
             timestamp = getTimestampForMarker(id);
         }
 
-        if (timestamp < getCursorPosition()) {
-            setCursorPosition(timestamp);
-            if (!extendSelection)
-                setSelectionStart(timestamp);
-        }
+        setCursorPosition(timestamp);
+        if (!extendSelection)
+            setSelectionStart(timestamp);
     }
 
     public void nextMarker(boolean extendSelection) {
@@ -309,14 +307,12 @@ public class TraceDisplayModel {
             long timestamp = getTimestampForMarker(id);
             if (timestamp <= getCursorPosition()) {
                 id++;
-                timestamp = getTimestampForMarker(id );
+                timestamp = getTimestampForMarker(id);
             }
 
-            if (timestamp > getCursorPosition()) {
-                setCursorPosition(timestamp);
-                if (!extendSelection)
-                    setSelectionStart(timestamp);
-            }
+            setCursorPosition(timestamp);
+            if (!extendSelection)
+                setSelectionStart(timestamp);
         }
     }
 
