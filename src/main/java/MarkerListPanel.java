@@ -40,6 +40,11 @@ public class MarkerListPanel extends JPanel implements ActionListener, TraceDisp
         fTable = new JTable(fTableModel);
 
         fTable.getColumnModel().getColumn(0).setMaxWidth(35);
+
+        // Double clicking an item in the list will cause the trace
+        // view to jump to that location. Holding shift will select
+        // the area between the old cursor and new location (consistent
+        // with normal click selection in the view)
         fTable.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2)
@@ -95,53 +100,5 @@ public class MarkerListPanel extends JPanel implements ActionListener, TraceDisp
     private JTable fTable;
 }
 
-class MarkerTableModel extends AbstractTableModel {
-    private static final int NUM_COLUMNS = 3;
 
-    public MarkerTableModel(TraceDisplayModel model) {
-        fTraceDisplayModel = model;
-    }
-
-    @Override
-    public int getColumnCount() {
-        return NUM_COLUMNS;
-    }
-
-    @Override
-    public String getColumnName(int col) {
-        return kColumnNames[col];
-    }
-
-    @Override
-    public int getRowCount() {
-        return fTraceDisplayModel.getMarkerCount();
-    }
-
-    @Override
-    public Object getValueAt(int row, int col) {
-        switch (col) {
-        case 0:
-            return "" + fTraceDisplayModel.getIdForMarker(row);
-        case 1:
-            return "" + fTraceDisplayModel.getTimestampForMarker(row) + " ns";
-        case 2:
-            return "" + fTraceDisplayModel.getDescriptionForMarker(row);
-        }
-
-        return "";
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int col) {
-        return col == 2;    // Can edit description
-    }
-
-    @Override
-    public void setValueAt(Object value, int row, int col) {
-        fTraceDisplayModel.setDescriptionForMarker(row, (String) value);
-    }
-
-    private String kColumnNames[] = { "ID", "Timestamp", "Comment" };
-    private TraceDisplayModel fTraceDisplayModel;
-}
 
