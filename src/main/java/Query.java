@@ -263,9 +263,6 @@ public class Query {
                     case LITERAL_TYPE_DECIMAL:
                         fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
                         break;
-
-                    default:
-                        assert false;   // Should not get here
                     }
 
                     fPushBackChar = c;
@@ -444,11 +441,11 @@ public class Query {
                 else
                     return Math.max(nextLeftTimestamp, nextRightTimestamp);
             }
-            else if (leftResult && !rightResult) {
+            else if (leftResult) {
                 // Currently true. It can only become false when left result
                 // becomes false.
                 return nextLeftTimestamp;
-            } else if (rightResult && !leftResult)  {
+            } else if (rightResult)  {
                 // Currently true. It can only become false when right result
                 // becomes false.
                 return nextRightTimestamp;
@@ -486,11 +483,11 @@ public class Query {
                 else
                     return Math.min(nextLeftTimestamp, nextRightTimestamp);
             }
-            else if (leftResult && !rightResult) {
+            else if (leftResult) {
                 // Currently false. It can only become true when right result
                 // becomes true.
                 return nextRightTimestamp;
-            } else if (rightResult && !leftResult)  {
+            } else if (rightResult)  {
                 // Currently false. It can only become true when left result
                 // becomes true.
                 return nextLeftTimestamp;

@@ -39,6 +39,33 @@ public class QueryTest {
         return traceDataModel;
     }
 
+    /// Test various forms of whitespace (and lack thereof)
+    @Test
+    public void testWhitespace() throws Exception {
+        Query query = new Query(makeTraceDataModel(), "\r  \n \t  mod1.clk          =  1\n");
+        assertEquals(10, query.getNextMatch(4));
+
+        query = new Query(makeTraceDataModel(), "mod1.clk=1");
+        assertEquals(10, query.getNextMatch(4));
+    }
+
+    /// Test identifier characters
+    @Test
+    public void testIdentifier() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", -1, 1);
+        builder.exitModule();
+        builder.appendTransition(id1, 5, new BitVector("0", 2));
+        builder.appendTransition(id1, 10, new BitVector("1", 2));
+        builder.loadFinished();
+
+        Query query = new Query(traceDataModel, "mod1.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 = 1\n");
+        assertEquals(10, query.getNextMatch(4));
+    }
+
+
     @Test
     public void testSimpleQuery() throws Exception {
         // clk is high 10-14, 20-
@@ -76,6 +103,9 @@ public class QueryTest {
         assertEquals(23, query.getNextMatch(0));
 
         query = new Query(traceDataModel, "mod1.value = 'ha");
+        assertEquals(23, query.getNextMatch(0));
+
+        query = new Query(traceDataModel, "mod1.value = 'hA");
         assertEquals(23, query.getNextMatch(0));
 
         query = new Query(traceDataModel, "mod1.value = 'b1010");
@@ -441,5 +471,62 @@ public class QueryTest {
 
         query = new Query(traceDataModel, "mod1.a = 1 & (mod1.b = 1 | mod1.c = 1)");
         assertEquals(2, query.getNextMatch(0));
+    }
+
+    /// Test running off the end of the trace without finding a match. In
+    /// this case, we start in a match and hit the end while searching for
+    /// the end of the match
+    @Test
+    public void testGetNextMatchEnd1() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("a", -1, 1);
+        builder.exitModule();
+        builder.appendTransition(id1, 0, new BitVector("1", 2));
+        Query query = new Query(traceDataModel, "mod1.a = 1");
+        assertEquals(-1, query.getNextMatch(0));
+    }
+
+    // Similar to above, except finds the end of the first match then
+    // doesn't find a second match
+    @Test
+    public void testGetNextMatchEnd2() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("a", -1, 1);
+        builder.exitModule();
+        builder.appendTransition(id1, 0, new BitVector("1", 2));
+        builder.appendTransition(id1, 10, new BitVector("0", 2));
+        Query query = new Query(traceDataModel, "mod1.a = 1");
+        assertEquals(-1, query.getNextMatch(0));
+    }
+
+    // Same as testGetNextMatchEnd1, except searching backward
+    @Test
+    public void testGetPrevMatchEnd1() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("a", -1, 1);
+        builder.exitModule();
+        builder.appendTransition(id1, 0, new BitVector("1", 2));
+        Query query = new Query(traceDataModel, "mod1.a = 1");
+        assertEquals(-1, query.getPreviousMatch(50));
+    }
+
+    // Same as testGetNextMatchEnd2, except searching backward
+    @Test
+    public void testGetPrevMatchEnd2() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("mod1");
+        int id1 = builder.newNet("a", -1, 1);
+        builder.exitModule();
+        builder.appendTransition(id1, 0, new BitVector("1", 2));
+        builder.appendTransition(id1, 40, new BitVector("1", 2));
+        Query query = new Query(traceDataModel, "mod1.a = 1");
+        assertEquals(-1, query.getPreviousMatch(50));
     }
 }
