@@ -79,7 +79,7 @@ class TransitionVector {
         @Override
         public Transition next() {
             if (!hasNext())
-                return null;
+                throw new NoSuchElementException();
 
             int bitOffset = (fNextIndex * fWidth * 2);
             int wordOffset = bitOffset >> 5;

@@ -17,6 +17,7 @@
 import static org.junit.Assert.*;
 import org.junit.*;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class TransitionVectorTest {
     private void makeBitVectorFromInt(BitVector vec, int value) {
@@ -104,6 +105,18 @@ public class TransitionVectorTest {
         assertFalse(ti.hasNext());
         assertEquals(111, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00001000", 2)));
+
+        try {
+            ti.next();
+            fail("next didn't throw exception");
+        } catch (NoSuchElementException exc) {
+        }
+
+        try {
+            ti.remove();
+            fail("remove didn't throw exception");
+        } catch (UnsupportedOperationException exc) {
+        }
     }
 
     /// The passed bitvector is larger than the transition vector width.
@@ -145,5 +158,13 @@ public class TransitionVectorTest {
             assertEquals(idx * 5, t.getTimestamp());
             assertEquals(0, t.compare(bvec));
         }
+    }
+
+    @Test
+    public void testGetMaxTimestamp() {
+        TransitionVector tvec = new TransitionVector(1);
+        assertEquals(0, tvec.getMaxTimestamp());
+        tvec.appendTransition(100, new BitVector("1", 2));
+        assertEquals(100, tvec.getMaxTimestamp());
     }
 }
