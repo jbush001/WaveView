@@ -22,10 +22,10 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 
 ///
-/// This is a window that allows editing a table of number -> enum identifier
-/// mappings.  Usually used for displaying human readable names to state machine
+/// This window allows editing number -> enum identifier mappings.
+/// Usually used for displaying human readable names to state machine
 /// states.
-/// @bug Should check for duplicate values
+/// @bug Should check for duplicate values and display an error
 /// @bug Need to put values in order
 /// @bug When enum is updated, the waveform will still display old values
 ///   until it is redrawn. There's no notifier to tell TraceDisplayModel
@@ -35,63 +35,10 @@ class EnumMappingPanel extends JPanel {
     public EnumMappingPanel(EnumValueFormatter formatter) {
         super(new BorderLayout());
 
-        fTable = new JTable(new MappingTableModel(formatter));
+        fTable = new JTable(new EnumMappingTableModel(formatter));
         JScrollPane scroller = new JScrollPane(fTable);
         fTable.setFillsViewportHeight(true);
         add(scroller);
-    }
-
-    class MappingTableModel extends AbstractTableModel {
-        public MappingTableModel(EnumValueFormatter formatter) {
-            fFormatter = formatter;
-        }
-
-        @Override
-        public String getColumnName(int col) {
-            if (col == 0)
-                return "value";
-            else
-                return "name";
-        }
-
-        @Override
-        public int getRowCount() {
-            return fFormatter.getMappingCount() + 1;    // Bottom row always adds
-        }
-
-        @Override
-        public int getColumnCount() {
-            return 2;
-        }
-
-        @Override
-        public Object getValueAt(int row, int col) {
-            if (row >= fFormatter.getMappingCount())
-                return "";
-
-            if (col == 0)
-                return fFormatter.getValue(row);
-            else
-                return fFormatter.getName(row);
-        }
-
-        @Override
-        public boolean isCellEditable(int row, int col) {
-            return true;
-        }
-
-        @Override
-        public void setValueAt(Object value, int row, int col) {
-            if (row == fFormatter.getMappingCount())
-                fFormatter.addMapping(0, "");    // Create a new row
-
-            if (col == 0)
-                fFormatter.setValue(row, Integer.parseInt((String) value));
-            else
-                fFormatter.setName(row, (String) value);
-        }
-
-        private EnumValueFormatter fFormatter;
     }
 
     private JTable fTable;
