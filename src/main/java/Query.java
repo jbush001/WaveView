@@ -36,6 +36,12 @@ public class Query {
         match(TOK_END);
     }
 
+    /// Mainly useful for unit testing
+    /// @returns true if this query matches at the given timestamp
+    public boolean matches(long timestamp) {
+        return fExpression.evaluate(timestamp, fQueryHint);
+    }
+
     ///
     /// Scan forward to find the next timestamp that matches this query's expression
     /// If the startTimestamp is already a match, it will not be returned. This will
@@ -129,6 +135,10 @@ public class Query {
         private String fErrorMessage;
         private int fStartOffset;
         private int fEndOffset;
+    }
+
+    public String toString() {
+        return fExpression.toString();
     }
 
     private static final int TOK_IDENTIFIER = 1000;
@@ -291,27 +301,31 @@ public class Query {
     ExpressionNode parseOr() throws ParseException {
         ExpressionNode left = parseAnd();
 
-        int lookahead = parseToken();
-        if (lookahead != '|') {
-            pushBackToken(lookahead);
-            return left;
-        }
+        while (true) {
+            int lookahead = parseToken();
+            if (lookahead != '|') {
+                pushBackToken(lookahead);
+                return left;
+            }
 
-        ExpressionNode right = parseExpression();
-        return new OrExpressionNode(left, right);
+            ExpressionNode right = parseAnd();
+            left = new OrExpressionNode(left, right);
+        }
     }
 
     ExpressionNode parseAnd() throws ParseException {
         ExpressionNode left = parseCondition();
 
-        int lookahead = parseToken();
-        if (lookahead != '&') {
-            pushBackToken(lookahead);
-            return left;
-        }
+        while (true) {
+            int lookahead = parseToken();
+            if (lookahead != '&') {
+                pushBackToken(lookahead);
+                return left;
+            }
 
-        ExpressionNode right = parseExpression();
-        return new AndExpressionNode(left, right);
+            ExpressionNode right = parseCondition();
+            left = new AndExpressionNode(left, right);
+        }
     }
 
     ExpressionNode parseCondition() throws ParseException {
@@ -341,7 +355,9 @@ public class Query {
             match(TOK_LITERAL);
             return new EqualExpressionNode(netId, fBitVector);
         default:
-            throw new ParseException("unknown conditional operator");
+            // If there's not an operator, treat as != 0
+            pushBackToken(lookahead);
+            return new NotEqualExpressionNode(netId, ZERO_VEC);
         }
     }
 
@@ -403,8 +419,8 @@ public class Query {
         abstract protected long nextHint(boolean leftResult, boolean rightResult,
             long nextLeftTimestamp, long nextRightTimestamp, boolean searchBackward);
 
-        private ExpressionNode fLeftChild;
-        private ExpressionNode fRightChild;
+        protected ExpressionNode fLeftChild;
+        protected ExpressionNode fRightChild;
 
         // These are preallocated for efficiency and aren't used outside
         // the evaluate() call.
@@ -451,6 +467,11 @@ public class Query {
                     return Math.min(nextLeftTimestamp, nextRightTimestamp);
             }
         }
+
+        @Override
+        public String toString() {
+            return "(or " + fLeftChild + " " + fRightChild + ")";
+        }
     }
 
     private class AndExpressionNode extends BooleanExpressionNode {
@@ -493,6 +514,11 @@ public class Query {
                     return Math.max(nextLeftTimestamp, nextRightTimestamp);
             }
         }
+
+        @Override
+        public String toString() {
+            return "(and " + fLeftChild + " " + fRightChild + ")";
+        }
     }
 
     private abstract class ComparisonExpressionNode extends ExpressionNode {
@@ -523,8 +549,8 @@ public class Query {
 
         abstract protected boolean doCompare(BitVector value1, BitVector value2);
 
-        private int fNetId;
-        private BitVector fExpected;
+        protected int fNetId;
+        protected BitVector fExpected;
     }
 
     private class EqualExpressionNode extends ComparisonExpressionNode {
@@ -535,6 +561,27 @@ public class Query {
         @Override
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) == 0;
+        }
+
+        @Override
+        public String toString() {
+            return "(equal net" + fNetId + " " + fExpected + ")";
+        }
+    }
+
+    private class NotEqualExpressionNode extends ComparisonExpressionNode {
+        public NotEqualExpressionNode(int netId, BitVector match) {
+            super(netId, match);
+        }
+
+        @Override
+        protected boolean doCompare(BitVector value1, BitVector value2) {
+            return value1.compare(value2) != 0;
+        }
+
+        @Override
+        public String toString() {
+            return "(notequal net" + fNetId + " " + fExpected + ")";
         }
     }
 
@@ -547,6 +594,11 @@ public class Query {
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) > 0;
         }
+
+        @Override
+        public String toString() {
+            return "(greater net" + fNetId + " " + fExpected + ")";
+        }
     }
 
     private class LessThanExpressionNode extends ComparisonExpressionNode {
@@ -558,9 +610,16 @@ public class Query {
         protected boolean doCompare(BitVector value1, BitVector value2) {
             return value1.compare(value2) < 0;
         }
+
+        @Override
+        public String toString() {
+            return "(lessthan net" + fNetId + " " + fExpected + ")";
+        }
     }
 
     private TraceDataModel fTraceDataModel;
     private QueryHint fQueryHint = new QueryHint();
     private ExpressionNode fExpression;
+    private static BitVector ZERO_VEC = new BitVector("0", 2);
 }
+

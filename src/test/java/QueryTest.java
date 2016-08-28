@@ -18,22 +18,42 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 public class QueryTest {
-    TraceDataModel makeTraceDataModel() {
+    /// Utility function to create a sample trace with a clock signal
+    TraceDataModel makeSingleBitModel() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
         int id1 = builder.newNet("clk", -1, 1);
-        int id2 = builder.newNet("dat", -1, 8);
-        int id3 = builder.newNet("addr", -1, 8);
         builder.exitModule();
         builder.appendTransition(id1, 5, new BitVector("0", 2));
         builder.appendTransition(id1, 10, new BitVector("1", 2));
         builder.appendTransition(id1, 15, new BitVector("0", 2));
         builder.appendTransition(id1, 20, new BitVector("1", 2));
-        builder.appendTransition(id2, 10, new BitVector("11111111", 2));
-        builder.appendTransition(id2, 15, new BitVector("01010101", 2));
-        builder.appendTransition(id3, 12, new BitVector("00000000", 2));
-        builder.appendTransition(id3, 16, new BitVector("11110000", 2));
+        builder.loadFinished();
+
+        return traceDataModel;
+    }
+
+    TraceDataModel makeFourBitModel() {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.enterModule("m");
+        builder.newNet("a", -1, 1);
+        builder.newNet("b", -1, 1);
+        builder.newNet("c", -1, 1);
+        builder.newNet("d", -1, 1);
+        builder.exitModule();
+
+        BitVector bv = new BitVector(1);
+        for (int t = 0; t < 16; t++)
+        {
+            for (int bit = 0; bit < 4; bit++){
+                bv.setBit(0, (t >> (3 - bit)) & 1);
+                builder.appendTransition(bit, t, bv);
+                System.out.println("builder.appendTransition(" + bit + ", " + t + ", " + bv + ")");
+            }
+        }
+
         builder.loadFinished();
 
         return traceDataModel;
@@ -42,10 +62,10 @@ public class QueryTest {
     /// Test various forms of whitespace (and lack thereof)
     @Test
     public void testWhitespace() throws Exception {
-        Query query = new Query(makeTraceDataModel(), "\r  \n \t  mod1.clk          =  1\n");
+        Query query = new Query(makeSingleBitModel(), "\r  \n \t  mod1.clk          =  1\n");
         assertEquals(10, query.getNextMatch(4));
 
-        query = new Query(makeTraceDataModel(), "mod1.clk=1");
+        query = new Query(makeSingleBitModel(), "mod1.clk=1");
         assertEquals(10, query.getNextMatch(4));
     }
 
@@ -65,11 +85,10 @@ public class QueryTest {
         assertEquals(10, query.getNextMatch(4));
     }
 
-
     @Test
     public void testSimpleQuery() throws Exception {
         // clk is high 10-14, 20-
-        Query query = new Query(makeTraceDataModel(), "mod1.clk = 1");
+        Query query = new Query(makeSingleBitModel(), "mod1.clk");
         assertEquals(10, query.getNextMatch(4));
         assertEquals(10, query.getNextMatch(9));
         assertEquals(20, query.getNextMatch(10));
@@ -170,7 +189,7 @@ public class QueryTest {
     @Test
     public void testUnknownNet() {
         try {
-            Query query = new Query(makeTraceDataModel(), "mod1.stall_pipeline = 2");
+            Query query = new Query(makeSingleBitModel(), "mod1.stall_pipeline = 2");
             fail("Did not throw exception");
         } catch (Query.ParseException exc) {
             assertEquals("unknown net \"mod1.stall_pipeline\"", exc.toString());
@@ -182,7 +201,7 @@ public class QueryTest {
     @Test
     public void testStrayIdentifier() {
         try {
-            Query query = new Query(makeTraceDataModel(), "mod1.clk = 'h2 foo");
+            Query query = new Query(makeSingleBitModel(), "mod1.clk = 'h2 foo");
             fail("Did not throw exception");
         } catch (Query.ParseException exc) {
             assertEquals("unexpected value", exc.toString());
@@ -194,7 +213,7 @@ public class QueryTest {
     @Test
     public void testMissingCompareValue() {
         try {
-            Query query = new Query(makeTraceDataModel(), "mod1.clk = ");
+            Query query = new Query(makeSingleBitModel(), "mod1.clk = ");
             fail("Did not throw exception");
         } catch (Query.ParseException exc) {
             assertEquals("unexpected end of string", exc.toString());
@@ -206,7 +225,7 @@ public class QueryTest {
     @Test
     public void testMissingLiteral() {
         try {
-            Query query = new Query(makeTraceDataModel(), "mod1.clk = mod2");
+            Query query = new Query(makeSingleBitModel(), "mod1.clk = mod2");
             fail("Did not throw exception");
         } catch (Query.ParseException exc) {
             assertEquals("unexpected value", exc.toString());
@@ -218,7 +237,7 @@ public class QueryTest {
     @Test
     public void testUnknownLiteralType() {
         try {
-            Query query = new Query(makeTraceDataModel(), "mod1.clk = 'q3z");
+            Query query = new Query(makeSingleBitModel(), "mod1.clk = 'q3z");
             fail("Did not throw exception");
         } catch (Query.ParseException exc) {
             assertEquals("unknown type q", exc.toString());
@@ -230,7 +249,7 @@ public class QueryTest {
     @Test
     public void testMissingParen() {
         try {
-            Query query = new Query(makeTraceDataModel(), "(mod1.clk = 'h3 foo");
+            Query query = new Query(makeSingleBitModel(), "(mod1.clk = 'h3 foo");
             fail("Did not throw exception");
         } catch (Query.ParseException exc) {
             assertEquals("unexpected value", exc.toString());
@@ -242,7 +261,7 @@ public class QueryTest {
     @Test
     public void testMissingIdentifier() {
         try {
-            Query query = new Query(makeTraceDataModel(), "> 'h12");
+            Query query = new Query(makeSingleBitModel(), "> 'h12");
             fail("Did not throw exception");
         } catch (Query.ParseException exc) {
             assertEquals("unexpected value", exc.toString());
@@ -251,18 +270,7 @@ public class QueryTest {
         }
     }
 
-    @Test
-    public void testBadOperator() {
-        try {
-            Query query = new Query(makeTraceDataModel(), "mod1.clk ? 'h12");
-            fail("Did not throw exception");
-        } catch (Query.ParseException exc) {
-            assertEquals("unknown conditional operator", exc.toString());
-            assertEquals(9, exc.getStartOffset());
-            assertEquals(9, exc.getEndOffset());
-        }
-    }
-
+    /// Basic test for 'and' functionailty
     /// This implicitly verifies query hinting by starting at different
     /// transition points
     @Test
@@ -296,7 +304,7 @@ public class QueryTest {
 
         builder.loadFinished();
 
-        Query query = new Query(traceDataModel, "mod1.a = 1 & mod1.b = 1");
+        Query query = new Query(traceDataModel, "mod1.a & mod1.b");
 
         // Expression is true:
         // 15-19, 25-29, 45-
@@ -328,6 +336,7 @@ public class QueryTest {
         assertEquals(29, query.getPreviousMatch(50)); // false & true = false
     }
 
+    /// Basic test for 'or' functionailty
     /// This implicitly verifies query hinting by starting at different
     /// transition points
     @Test
@@ -361,7 +370,7 @@ public class QueryTest {
 
         builder.loadFinished();
 
-        Query query = new Query(traceDataModel, "mod1.a = 1 | mod1.b = 1");
+        Query query = new Query(traceDataModel, "mod1.a | mod1.b");
 
         // Expression is true:
         // 5-9, 15-29, 35-39, 45-
@@ -417,60 +426,214 @@ public class QueryTest {
 
         query = new Query(traceDataModel, "mod1.value < 'h5");
         assertEquals(4, query.getPreviousMatch(10));
+
+        query = new Query(traceDataModel, "mod1.value = 'h5");
+        assertEquals(5, query.getPreviousMatch(10));
     }
 
     @Test
-    public void testParens() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
-        builder.enterModule("mod1");
-        int id1 = builder.newNet("a", -1, 1);
-        int id2 = builder.newNet("b", -1, 1);
-        int id3 = builder.newNet("c", -1, 1);
-        builder.exitModule();
+    public void testPrecedence() throws Exception {
+        TraceDataModel traceDataModel = makeFourBitModel();
+        Query query;
 
-        // a
-        builder.appendTransition(id1, 0, new BitVector("0", 2));
-        builder.appendTransition(id1, 1, new BitVector("0", 2));
-        builder.appendTransition(id1, 2, new BitVector("1", 2));
-        builder.appendTransition(id1, 3, new BitVector("0", 2));
-        builder.appendTransition(id1, 4, new BitVector("1", 2));
-        builder.appendTransition(id1, 5, new BitVector("1", 2));
-        builder.appendTransition(id1, 6, new BitVector("1", 2));
+        query = new Query(traceDataModel, "m.a & m.b & m.c & m.d");
+        assertFalse(query.matches(0));
+        assertFalse(query.matches(1));
+        assertFalse(query.matches(2));
+        assertFalse(query.matches(3));
+        assertFalse(query.matches(4));
+        assertFalse(query.matches(5));
+        assertFalse(query.matches(6));
+        assertFalse(query.matches(7));
+        assertFalse(query.matches(8));
+        assertFalse(query.matches(9));
+        assertFalse(query.matches(10));
+        assertFalse(query.matches(11));
+        assertFalse(query.matches(12));
+        assertFalse(query.matches(13));
+        assertFalse(query.matches(14));
+        assertTrue(query.matches(15));
 
-        // b
-        builder.appendTransition(id2, 0, new BitVector("0", 2));
-        builder.appendTransition(id2, 1, new BitVector("0", 2));
-        builder.appendTransition(id2, 2, new BitVector("1", 2));
-        builder.appendTransition(id2, 3, new BitVector("1", 2));
-        builder.appendTransition(id2, 4, new BitVector("0", 2));
-        builder.appendTransition(id2, 5, new BitVector("0", 2));
-        builder.appendTransition(id2, 6, new BitVector("1", 2));
+        query = new Query(traceDataModel, "m.a & m.b & m.c | m.d");
+        assertFalse(query.matches(0));
+        assertTrue(query.matches(1));
+        assertFalse(query.matches(2));
+        assertTrue(query.matches(3));
+        assertFalse(query.matches(4));
+        assertTrue(query.matches(5));
+        assertFalse(query.matches(6));
+        assertTrue(query.matches(7));
+        assertFalse(query.matches(8));
+        assertTrue(query.matches(9));
+        assertFalse(query.matches(10));
+        assertTrue(query.matches(11));
+        assertFalse(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
 
-        // c
-        builder.appendTransition(id3, 0, new BitVector("0", 2));
-        builder.appendTransition(id3, 1, new BitVector("1", 2));
-        builder.appendTransition(id3, 2, new BitVector("0", 2));
-        builder.appendTransition(id3, 3, new BitVector("0", 2));
-        builder.appendTransition(id3, 4, new BitVector("0", 2));
-        builder.appendTransition(id3, 5, new BitVector("1", 2));
-        builder.appendTransition(id3, 6, new BitVector("1", 2));
-        builder.loadFinished();
+        query = new Query(traceDataModel, "m.a & m.b | m.c & m.d");
+        assertFalse(query.matches(0));
+        assertFalse(query.matches(1));
+        assertFalse(query.matches(2));
+        assertTrue(query.matches(3));
+        assertFalse(query.matches(4));
+        assertFalse(query.matches(5));
+        assertFalse(query.matches(6));
+        assertTrue(query.matches(7));
+        assertFalse(query.matches(8));
+        assertFalse(query.matches(9));
+        assertFalse(query.matches(10));
+        assertTrue(query.matches(11));
+        assertTrue(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
 
-        //   abc
-        //   000  0
-        //   001  1
-        //   110  2
-        //   010  3
-        //   100  4
-        //   101  5
-        //   111  6
+        query = new Query(traceDataModel, "m.a & m.b | m.c | m.d");
+        assertFalse(query.matches(0));
+        assertTrue(query.matches(1));
+        assertTrue(query.matches(2));
+        assertTrue(query.matches(3));
+        assertFalse(query.matches(4));
+        assertTrue(query.matches(5));
+        assertTrue(query.matches(6));
+        assertTrue(query.matches(7));
+        assertFalse(query.matches(8));
+        assertTrue(query.matches(9));
+        assertTrue(query.matches(10));
+        assertTrue(query.matches(11));
+        assertTrue(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
 
-        Query query = new Query(traceDataModel, "(mod1.a = 1 | mod1.b = 1) & mod1.c = 1");
-        assertEquals(5, query.getNextMatch(0));
+        query = new Query(traceDataModel, "m.a | m.b & m.c & m.d");
+        assertFalse(query.matches(0));
+        assertFalse(query.matches(1));
+        assertFalse(query.matches(2));
+        assertFalse(query.matches(3));
+        assertFalse(query.matches(4));
+        assertFalse(query.matches(5));
+        assertFalse(query.matches(6));
+        assertTrue(query.matches(7));
+        assertTrue(query.matches(8));
+        assertTrue(query.matches(9));
+        assertTrue(query.matches(10));
+        assertTrue(query.matches(11));
+        assertTrue(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "mod1.a = 1 & (mod1.b = 1 | mod1.c = 1)");
-        assertEquals(2, query.getNextMatch(0));
+        query = new Query(traceDataModel, "m.a | m.b & m.c | m.d");
+        assertFalse(query.matches(0));
+        assertTrue(query.matches(1));
+        assertFalse(query.matches(2));
+        assertTrue(query.matches(3));
+        assertFalse(query.matches(4));
+        assertTrue(query.matches(5));
+        assertTrue(query.matches(6));
+        assertTrue(query.matches(7));
+        assertTrue(query.matches(8));
+        assertTrue(query.matches(9));
+        assertTrue(query.matches(10));
+        assertTrue(query.matches(11));
+        assertTrue(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
+
+        query = new Query(traceDataModel, "m.a | m.b | m.c & m.d");
+        assertFalse(query.matches(0));
+        assertFalse(query.matches(1));
+        assertFalse(query.matches(2));
+        assertTrue(query.matches(3));
+        assertTrue(query.matches(4));
+        assertTrue(query.matches(5));
+        assertTrue(query.matches(6));
+        assertTrue(query.matches(7));
+        assertTrue(query.matches(8));
+        assertTrue(query.matches(9));
+        assertTrue(query.matches(10));
+        assertTrue(query.matches(11));
+        assertTrue(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
+
+        query = new Query(traceDataModel, "m.a | m.b | m.c | m.d");
+        assertFalse(query.matches(0));
+        assertTrue(query.matches(1));
+        assertTrue(query.matches(2));
+        assertTrue(query.matches(3));
+        assertTrue(query.matches(4));
+        assertTrue(query.matches(5));
+        assertTrue(query.matches(6));
+        assertTrue(query.matches(7));
+        assertTrue(query.matches(8));
+        assertTrue(query.matches(9));
+        assertTrue(query.matches(10));
+        assertTrue(query.matches(11));
+        assertTrue(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
+
+        // Parentheses
+        query = new Query(traceDataModel, "m.a & (m.b | m.c) & m.d");
+        assertFalse(query.matches(0));
+        assertFalse(query.matches(1));
+        assertFalse(query.matches(2));
+        assertFalse(query.matches(3));
+        assertFalse(query.matches(4));
+        assertFalse(query.matches(5));
+        assertFalse(query.matches(6));
+        assertFalse(query.matches(7));
+        assertFalse(query.matches(8));
+        assertFalse(query.matches(9));
+        assertFalse(query.matches(10));
+        assertTrue(query.matches(11));
+        assertFalse(query.matches(12));
+        assertTrue(query.matches(13));
+        assertFalse(query.matches(14));
+        assertTrue(query.matches(15));
+
+        query = new Query(traceDataModel, "m.a & m.b & (m.c | m.d)");
+        assertFalse(query.matches(0));
+        assertFalse(query.matches(1));
+        assertFalse(query.matches(2));
+        assertFalse(query.matches(3));
+        assertFalse(query.matches(4));
+        assertFalse(query.matches(5));
+        assertFalse(query.matches(6));
+        assertFalse(query.matches(7));
+        assertFalse(query.matches(8));
+        assertFalse(query.matches(9));
+        assertFalse(query.matches(10));
+        assertFalse(query.matches(11));
+        assertFalse(query.matches(12));
+        assertTrue(query.matches(13));
+        assertTrue(query.matches(14));
+        assertTrue(query.matches(15));
+
+        query = new Query(traceDataModel, "(m.a | m.b) & m.c & m.d");
+        assertFalse(query.matches(0));
+        assertFalse(query.matches(1));
+        assertFalse(query.matches(2));
+        assertFalse(query.matches(3));
+        assertFalse(query.matches(4));
+        assertFalse(query.matches(5));
+        assertFalse(query.matches(6));
+        assertTrue(query.matches(7));
+        assertFalse(query.matches(8));
+        assertFalse(query.matches(9));
+        assertFalse(query.matches(10));
+        assertTrue(query.matches(11));
+        assertFalse(query.matches(12));
+        assertFalse(query.matches(13));
+        assertFalse(query.matches(14));
+        assertTrue(query.matches(15));
     }
 
     /// Test running off the end of the trace without finding a match. In
@@ -484,7 +647,7 @@ public class QueryTest {
         int id1 = builder.newNet("a", -1, 1);
         builder.exitModule();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
-        Query query = new Query(traceDataModel, "mod1.a = 1");
+        Query query = new Query(traceDataModel, "mod1.a");
         assertEquals(-1, query.getNextMatch(0));
     }
 
@@ -499,7 +662,7 @@ public class QueryTest {
         builder.exitModule();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         builder.appendTransition(id1, 10, new BitVector("0", 2));
-        Query query = new Query(traceDataModel, "mod1.a = 1");
+        Query query = new Query(traceDataModel, "mod1.a");
         assertEquals(-1, query.getNextMatch(0));
     }
 
@@ -512,7 +675,7 @@ public class QueryTest {
         int id1 = builder.newNet("a", -1, 1);
         builder.exitModule();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
-        Query query = new Query(traceDataModel, "mod1.a = 1");
+        Query query = new Query(traceDataModel, "mod1.a");
         assertEquals(-1, query.getPreviousMatch(50));
     }
 
@@ -526,7 +689,16 @@ public class QueryTest {
         builder.exitModule();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         builder.appendTransition(id1, 40, new BitVector("1", 2));
-        Query query = new Query(traceDataModel, "mod1.a = 1");
+        Query query = new Query(traceDataModel, "mod1.a");
         assertEquals(-1, query.getPreviousMatch(50));
     }
+
+    @Test
+    public void testQueryToString() throws Exception {
+        TraceDataModel traceDataModel = makeFourBitModel();
+        Query query = new Query(traceDataModel, "m.a = 0 & m.b | m.c & m.d");
+        assertEquals("(or (and (equal net0 00000000) (notequal net1 0)) (and (notequal net2 0) (notequal net3 0)))",
+            query.toString());
+    }
 }
+
