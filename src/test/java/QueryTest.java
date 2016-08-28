@@ -75,13 +75,13 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterModule("mod1");
-        int id1 = builder.newNet("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", -1, 1);
+        int id1 = builder.newNet("_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", -1, 1);
         builder.exitModule();
         builder.appendTransition(id1, 5, new BitVector("0", 2));
         builder.appendTransition(id1, 10, new BitVector("1", 2));
         builder.loadFinished();
 
-        Query query = new Query(traceDataModel, "mod1.abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 = 1\n");
+        Query query = new Query(traceDataModel, "mod1._abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 = 1\n");
         assertEquals(10, query.getNextMatch(4));
     }
 
@@ -693,12 +693,33 @@ public class QueryTest {
         assertEquals(-1, query.getPreviousMatch(50));
     }
 
+    /// Converting a query to a string is a debug feature.
     @Test
     public void testQueryToString() throws Exception {
         TraceDataModel traceDataModel = makeFourBitModel();
-        Query query = new Query(traceDataModel, "m.a = 0 & m.b | m.c & m.d");
-        assertEquals("(or (and (equal net0 00000000) (notequal net1 0)) (and (notequal net2 0) (notequal net3 0)))",
-            query.toString());
+
+        // Use all comparison operators
+        assertEquals("(or (and (equal net0 00000000) (lessthan net1 00000001)) (and (greater net2 00000010) (notequal net3 0)))",
+            (new Query(traceDataModel, "m.a = 0 & m.b < 1 | m.c > 2 & m.d")).toString());
+
+        // Precedence tests. These mirror the test above, but ensure the expression tree was
+        // set up correctly.
+        assertEquals("(and (and (and (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
+            (new Query(traceDataModel, "m.a & m.b & m.c & m.d")).toString());
+        assertEquals("(or (and (and (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
+            (new Query(traceDataModel, "m.a & m.b & m.c | m.d")).toString());
+        assertEquals("(or (and (notequal net0 0) (notequal net1 0)) (and (notequal net2 0) (notequal net3 0)))",
+            (new Query(traceDataModel, "m.a & m.b | m.c & m.d")).toString());
+        assertEquals("(or (or (and (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
+            (new Query(traceDataModel, "m.a & m.b | m.c | m.d")).toString());
+        assertEquals("(or (notequal net0 0) (and (and (notequal net1 0) (notequal net2 0)) (notequal net3 0)))",
+            (new Query(traceDataModel, "m.a | m.b & m.c & m.d")).toString());
+        assertEquals("(or (or (notequal net0 0) (and (notequal net1 0) (notequal net2 0))) (notequal net3 0))",
+            (new Query(traceDataModel, "m.a | m.b & m.c | m.d")).toString());
+        assertEquals("(or (or (notequal net0 0) (notequal net1 0)) (and (notequal net2 0) (notequal net3 0)))",
+            (new Query(traceDataModel, "m.a | m.b | m.c & m.d")).toString());
+        assertEquals("(or (or (or (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
+            (new Query(traceDataModel, "m.a | m.b | m.c | m.d")).toString());
     }
 }
 
