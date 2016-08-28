@@ -62,8 +62,6 @@ class TransitionVector {
         return fWidth;
     }
 
-    /// This augments the normal iterator with methods to obtain
-    /// the timestamp of the next and previous events.
     private class TransitionVectorIterator implements Iterator<Transition> {
         TransitionVectorIterator(int index) {
             assert index >= 0;
@@ -76,6 +74,9 @@ class TransitionVector {
             return fNextIndex < fTransitionCount;
         }
 
+        /// @note the Transition returned from next will be clobbered
+        /// if next() is called again (since it's preallocated and
+        /// reused)
         @Override
         public Transition next() {
             if (!hasNext())
@@ -153,6 +154,9 @@ class TransitionVector {
 
         int wordOffset = bitIndex / 16;
         int bitOffset = (bitIndex * 2) % 32;
+
+        // If the passed value is wider than the vector width, only copy the
+        // low order bits of it.
         for (int i = Math.min(values.getWidth(), fWidth) - 1; i >= 0; i--) {
             fValues[wordOffset] |= values.getBit(i) << bitOffset;
             bitOffset += 2;

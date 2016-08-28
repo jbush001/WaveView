@@ -34,6 +34,8 @@ class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
         setPattern("");
     }
 
+    /// @note this isn't a wildcard pattern, it's just a substring match.
+    ///   Investigate java.util.regex.Pattern for more complex matches
     /// @param pattern Only items that contain this pattern in some part of
     ///    them will be displayed.
     public void setPattern(String pattern) {

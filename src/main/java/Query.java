@@ -315,7 +315,6 @@ public class Query {
     }
 
     ExpressionNode parseCondition() throws ParseException {
-        // if this is an '(', call parseExpression
         int lookahead = parseToken();
         if (lookahead == '(') {
             ExpressionNode node = parseExpression();
@@ -330,7 +329,6 @@ public class Query {
         if (netId < 0)
             throw new ParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
 
-        // check conditional.
         lookahead = parseToken();
         switch (lookahead) {
         case '>':
@@ -355,7 +353,7 @@ public class Query {
     private abstract class ExpressionNode {
         /// Determine if this subexpression is true at the timestamp provided.
         /// @param timestamp Timestamp and which to evaluate.  If timestamp
-        ///  is right on a transition, the value *after* the transition will be used
+        ///  is on a transition, the value after the transition will be used
         /// @param outHint Contains the next timestamp where the value of the
         ///   expression may change. It is guaranteed that no transition will occur
         ///   sooner than this value.
@@ -388,9 +386,6 @@ public class Query {
             if (outHint.forwardTimestamp == Long.MAX_VALUE)
                 outHint.forwardTimestamp = -1;
 
-            // This is a bit of a hack.
-            // For the backward hint, I reuse nextHint, but negate the values so the
-            // the comparisons will be reversed.
             long prevLeft = fLeftHint.backwardTimestamp >= 0
                 ? fLeftHint.backwardTimestamp : -Long.MAX_VALUE;
             long prevRight = fRightHint.backwardTimestamp >= 0
@@ -405,8 +400,6 @@ public class Query {
         }
 
         abstract protected boolean compareResults(boolean value1, boolean value2);
-
-        /// If both conditions are false, pick which event we should evaluate next.
         abstract protected long nextHint(boolean leftResult, boolean rightResult,
             long nextLeftTimestamp, long nextRightTimestamp, boolean searchBackward);
 

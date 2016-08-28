@@ -284,7 +284,7 @@ class BitVector {
         return result.toString();
     }
 
-    /// @bug will crash with empty values
+    /// @bug will crash if the bit vector hasn't been assigned.
     private String toDecimalString() {
         // We add one leading byte that is always zero so this will
         // be treated as unsigned.
@@ -311,7 +311,7 @@ class BitVector {
                 break;
             case VALUE_X:
                 return 'X';
-            case VALUE_Z:    // XXX bug: should only be Z if all bits are Z
+            case VALUE_Z:    // @bug should only be Z if all bits are Z
                 return 'Z';
             }
         }

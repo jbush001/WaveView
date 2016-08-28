@@ -26,7 +26,6 @@ import java.awt.datatransfer.*;
 ///
 class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
     ActionListener {
-    private static final int kDragThreshold = 15;
 
     class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
         private int fCurrentNet;

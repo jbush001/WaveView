@@ -156,7 +156,7 @@ public class TraceDisplayModel {
 
         fVisibleNets = new ArrayList<NetViewModel>(fNetSets.get(index).fVisibleNets);
 
-        // There is probably a more efficient way to do this
+        // @todo There is probably a more efficient way to do this
         for (Listener listener : fTraceListeners) {
             listener.netsRemoved(0, oldSize);
             listener.netsAdded(0, fVisibleNets.size() - 1);

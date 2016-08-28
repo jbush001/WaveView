@@ -38,6 +38,6 @@ interface TraceLoader {
     }
 
     public void load(File file, TraceBuilder builder, ProgressListener listener)
-    throws LoadException, IOException;
+        throws LoadException, IOException;
 }
 

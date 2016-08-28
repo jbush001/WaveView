@@ -48,7 +48,7 @@ public class TimescalePanel extends JPanel implements TraceDisplayModel.Listener
         int rightEdge = Math.max(oldX, newX) + DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         repaint(leftEdge, 0, rightEdge - leftEdge, getHeight());
 
-        // When the cursor moves, we draw the current time in the timescale
+        // When the cursor moves, draw the current time in the timescale
         // for a little while, then hide it when the timer expires.
         if (fTraceDisplayModel.getAdjustingCursor())
             fShowTimestamp = true;
