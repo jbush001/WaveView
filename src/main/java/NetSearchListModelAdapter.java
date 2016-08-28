@@ -77,8 +77,7 @@ class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     }
 
     @Override
-    public void changedUpdate(DocumentEvent ev) {
-    }
+    public void changedUpdate(DocumentEvent ev) {}
 
     @Override
     public void addListDataListener(ListDataListener l) {

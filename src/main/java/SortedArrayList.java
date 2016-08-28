@@ -25,8 +25,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
         public long getKey();
     }
 
-    public SortedArrayList() {
-    }
+    public SortedArrayList() {}
 
     public SortedArrayList(int initialCapacity) {
         super(initialCapacity);

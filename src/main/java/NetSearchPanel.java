@@ -112,8 +112,7 @@ public class NetSearchPanel extends JPanel implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-    }
+    public void actionPerformed(ActionEvent e) {}
 
     private JTree fTree;
     private TraceDisplayModel fTraceDisplayModel;

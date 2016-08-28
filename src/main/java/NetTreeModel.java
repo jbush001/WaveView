@@ -25,8 +25,7 @@ import javax.swing.tree.*;
 /// are modules.
 ///
 public class NetTreeModel implements TreeModel {
-    public NetTreeModel() {
-    }
+    public NetTreeModel() {}
 
     public void clear() {
         fRoot = null;
@@ -63,12 +62,10 @@ public class NetTreeModel implements TreeModel {
 
     // Tree model methods
     @Override
-    public void addTreeModelListener(TreeModelListener l) {
-    }
+    public void addTreeModelListener(TreeModelListener l) {}
 
     @Override
-    public void removeTreeModelListener(TreeModelListener l) {
-    }
+    public void removeTreeModelListener(TreeModelListener l) {}
 
     @Override
     public Object getChild(Object parent, int index) {

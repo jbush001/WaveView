@@ -216,16 +216,13 @@ public class WaveformPanel extends JPanel implements MouseListener,
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-    }
+    public void mouseEntered(MouseEvent e) {}
 
     @Override
-    public void mouseExited(MouseEvent e) {
-    }
+    public void mouseExited(MouseEvent e) {}
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -264,8 +261,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
     }
 
     @Override
-    public void mouseMoved(MouseEvent e) {
-    }
+    public void mouseMoved(MouseEvent e) {}
 
     private long xCoordinateToTimestamp(int coordinate) {
         return (long)(coordinate * fTraceDisplayModel.getHorizontalScale());

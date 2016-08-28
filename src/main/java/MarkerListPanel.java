@@ -29,7 +29,9 @@ import javax.swing.table.*;
 /// to jump to that point in the trace.
 /// @todo Add a way to remove entries directly from this list
 ///
-public class MarkerListPanel extends JPanel implements ActionListener, TraceDisplayModel.Listener {
+public class MarkerListPanel extends JPanel implements ActionListener,
+    TraceDisplayModel.Listener {
+
     public MarkerListPanel(TraceDisplayModel traceModel) {
         setLayout(new GridLayout(1, 1));
 
@@ -57,41 +59,34 @@ public class MarkerListPanel extends JPanel implements ActionListener, TraceDisp
     }
 
     private void select(boolean extendSelection) {
-        long timestamp = fTraceDisplayModel.getTimestampForMarker(fTable.getSelectedRow());
-
+        long timestamp = fTraceDisplayModel.getTimestampForMarker(
+            fTable.getSelectedRow());
         fTraceDisplayModel.setCursorPosition(timestamp);
         if (!extendSelection)
             fTraceDisplayModel.setSelectionStart(timestamp);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-    }
+    public void actionPerformed(ActionEvent e) {}
 
     @Override
-    public void cursorChanged(long oldTimestamp, long newTimestamp) {
-    }
+    public void cursorChanged(long oldTimestamp, long newTimestamp) {}
 
     @Override
-    public void netsAdded(int firstIndex, int lastIndex) {
-    }
+    public void netsAdded(int firstIndex, int lastIndex) {}
 
     @Override
-    public void netsRemoved(int firstIndex, int lastIndex) {
-    }
+    public void netsRemoved(int firstIndex, int lastIndex) {}
 
     @Override
-    public void scaleChanged(double newScale) {
-    }
+    public void scaleChanged(double newScale) {}
 
     @Override
-    public void formatChanged(int index) {
-    }
+    public void formatChanged(int index) {}
 
     @Override
     public void markerChanged(long timestamp) {
         fTableModel.fireTableDataChanged();
-        // Redraw list
         repaint();
     }
 

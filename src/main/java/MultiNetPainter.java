@@ -22,7 +22,6 @@ import java.util.*;
 /// bit in it.
 ///
 class MultiNetPainter implements WaveformPainter {
-
     @Override
     public void paint(Graphics g, TraceDataModel model, int netId,
                       int topOffset, Rectangle visibleRect, double horizontalScale,

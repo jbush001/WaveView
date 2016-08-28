@@ -133,8 +133,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         }
 
         @Override
-        public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        }
+        public void cursorChanged(long oldTimestamp, long newTimestamp) {}
 
         @Override
         public void netsAdded(int firstIndex, int lastIndex) {
@@ -149,16 +148,13 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         }
 
         @Override
-        public void markerChanged(long timestamp) {
-        }
+        public void markerChanged(long timestamp) {}
 
         @Override
-        public void scaleChanged(double newScale) {
-        }
+        public void scaleChanged(double newScale) {}
 
         @Override
-        public void formatChanged(int index) {
-        }
+        public void formatChanged(int index) {}
 
         private ListDataListener fListener;
     }
@@ -280,8 +276,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
     }
 
     @Override
-    public void scaleChanged(double newScale) {
-    }
+    public void scaleChanged(double newScale) {}
 
     @Override
     public void netsAdded(int firstIndex, int lastIndex) {
@@ -294,8 +289,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
     }
 
     @Override
-    public void markerChanged(long timestamp) {
-    }
+    public void markerChanged(long timestamp) {}
 
     @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {

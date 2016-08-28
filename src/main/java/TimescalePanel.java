@@ -74,8 +74,7 @@ public class TimescalePanel extends JPanel implements TraceDisplayModel.Listener
     }
 
     @Override
-    public void netsRemoved(int firstIndex, int lastIndex) {
-    }
+    public void netsRemoved(int firstIndex, int lastIndex) {}
 
     @Override
     public void formatChanged(int index) {}

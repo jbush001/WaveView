@@ -52,8 +52,7 @@ class VCDLoader implements TraceLoader {
         System.out.println("" + fNetMap.size() + " total nets");
     }
 
-    private class Net
-    {
+    private class Net {
         Net(int builderID, int width) {
             fBuilderID = builderID;
             fWidth = width;
