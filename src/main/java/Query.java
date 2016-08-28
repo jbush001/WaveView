@@ -31,7 +31,7 @@ public class Query {
     public Query(TraceDataModel traceModel, String queryString) throws ParseException {
         fTraceDataModel = traceModel;
         fQueryString = queryString;
-        fStringOffset = 0;
+        fLexerOffset = 0;
         fExpression = parseExpression();
         match(TOK_END);
     }
@@ -155,7 +155,7 @@ public class Query {
     private static final int LITERAL_TYPE_BINARY = 2;
 
     String fQueryString;
-    int fStringOffset;
+    int fLexerOffset;
     StringBuffer fCurrentTokenValue = new StringBuffer();
     int fCurrentTokenType;
     int fPushBackChar = -1;
@@ -167,29 +167,29 @@ public class Query {
         fPushBackToken = tok;
     }
 
-    boolean isAlpha(int value) {
+    static boolean isAlpha(int value) {
         return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
     }
 
-    boolean isNum(int value) {
+    static boolean isNum(int value) {
         return value >= '0' && value <= '9';
     }
 
-    boolean isHexDigit(int value) {
+    static boolean isHexDigit(int value) {
         return (value >= '0' && value <= '9')
                || (value >= 'a' && value <='f')
                || (value >= 'A' && value <= 'F');
     }
 
-    boolean isAlphaNum(int value) {
+    static boolean isAlphaNum(int value) {
         return isAlpha(value) || isNum(value);
     }
 
-    boolean isSpace(int value) {
+    static boolean isSpace(int value) {
         return value == ' ' || value == '\t' || value == '\n' || value == '\r';
     }
 
-    int parseToken() throws ParseException {
+    int nextToken() throws ParseException {
         if (fPushBackToken != -1) {
             int token = fPushBackToken;
             fPushBackToken = -1;
@@ -206,15 +206,15 @@ public class Query {
                 c = fPushBackChar;
                 fPushBackChar = -1;
             } else {
-                if (fStringOffset == fQueryString.length())
+                if (fLexerOffset == fQueryString.length())
                     c = -1;
                 else
-                    c = fQueryString.charAt(fStringOffset++);
+                    c = fQueryString.charAt(fLexerOffset++);
             }
 
             switch (state) {
             case STATE_INIT:
-                fTokenStart = fStringOffset - 1;
+                fTokenStart = fLexerOffset - 1;
                 if (c == -1)
                     return TOK_END;
                 else if (c == '\'')
@@ -285,7 +285,7 @@ public class Query {
     }
 
     void match(int tokenType) throws ParseException {
-        int got = parseToken();
+        int got = nextToken();
         if (got != tokenType) {
             if (got == TOK_END)
                 throw new ParseException("unexpected end of string");
@@ -302,7 +302,7 @@ public class Query {
         ExpressionNode left = parseAnd();
 
         while (true) {
-            int lookahead = parseToken();
+            int lookahead = nextToken();
             if (lookahead != '|') {
                 pushBackToken(lookahead);
                 return left;
@@ -317,7 +317,7 @@ public class Query {
         ExpressionNode left = parseCondition();
 
         while (true) {
-            int lookahead = parseToken();
+            int lookahead = nextToken();
             if (lookahead != '&') {
                 pushBackToken(lookahead);
                 return left;
@@ -329,7 +329,7 @@ public class Query {
     }
 
     ExpressionNode parseCondition() throws ParseException {
-        int lookahead = parseToken();
+        int lookahead = nextToken();
         if (lookahead == '(') {
             ExpressionNode node = parseExpression();
             match(')');
@@ -343,7 +343,7 @@ public class Query {
         if (netId < 0)
             throw new ParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
 
-        lookahead = parseToken();
+        lookahead = nextToken();
         switch (lookahead) {
         case '>':
             match(TOK_LITERAL);
@@ -620,6 +620,6 @@ public class Query {
     private TraceDataModel fTraceDataModel;
     private QueryHint fQueryHint = new QueryHint();
     private ExpressionNode fExpression;
-    private static BitVector ZERO_VEC = new BitVector("0", 2);
+    private static final BitVector ZERO_VEC = new BitVector("0", 2);
 }
 
