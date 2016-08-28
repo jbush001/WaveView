@@ -235,20 +235,20 @@ class BitVector {
             if (c >= '0' && c <= '9') {
                 int digitVal = c - '0';
                 for (int offset = 0; offset < 4; offset++) {
-                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? VALUE_1
-                                                            : VALUE_0;
+                    fValues[(index + 1) * 4 - offset - 1] =
+                        (digitVal & (8 >> offset)) != 0 ? VALUE_1 : VALUE_0;
                 }
             } else if (c >= 'a' && c <= 'f') {
                 int digitVal = c - 'a' + 10;
                 for (int offset = 0; offset < 4; offset++) {
-                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? VALUE_1
-                                                            : VALUE_0;
+                    fValues[(index + 1) * 4 - offset - 1] =
+                        (digitVal & (8 >> offset)) != 0 ? VALUE_1 : VALUE_0;
                 }
             } else if (c >= 'A' && c <= 'F') {
                 int digitVal = c - 'A' + 10;
                 for (int offset = 0; offset < 4; offset++) {
-                    fValues[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) != 0 ? VALUE_1
-                                                            : VALUE_0;
+                    fValues[(index + 1) * 4 - offset - 1] =
+                        (digitVal & (8 >> offset)) != 0 ? VALUE_1 : VALUE_0;
                 }
             } else if (c == 'X' || c == 'x') {
                 for (int offset = 0; offset < 4; offset++)
@@ -256,8 +256,10 @@ class BitVector {
             } else if (c == 'Z' || c == 'z') {
                 for (int offset = 0; offset < 4; offset++)
                     fValues[(index + 1) * 4 - offset - 1] = VALUE_Z;
-            } else
-                throw new NumberFormatException("number format exception parsing " + string);
+            } else {
+                throw new NumberFormatException("number format exception parsing "
+                    + string);
+            }
         }
     }
 

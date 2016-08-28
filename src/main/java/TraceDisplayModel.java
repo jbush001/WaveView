@@ -58,7 +58,7 @@ public class TraceDisplayModel {
     public void setHorizontalScale(double scale) {
         fHorizontalScale = scale;
         fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
-            scale * DrawMetrics.MIN_MINOR_TICK_SIZE)));
+            scale * DrawMetrics.MIN_MINOR_TICK_H_SPACE)));
         if (fMinorTickInterval <= 0)
             fMinorTickInterval = 1;
 

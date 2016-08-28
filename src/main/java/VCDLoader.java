@@ -25,7 +25,7 @@ import java.util.*;
 class VCDLoader implements TraceLoader {
     @Override
     public void load(File file, TraceBuilder builder, ProgressListener listener)
-    throws LoadException, IOException {
+        throws LoadException, IOException {
         fProgressListener = listener;
         fProgressStream = new ProgressInputStream(new FileInputStream(file));
         fTokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(fProgressStream)));

@@ -17,7 +17,7 @@
 import java.util.*;
 
 ///
-/// Vector that allows sorted inserts and binary search lookup.
+/// ArrayList that allows sorted inserts and binary search lookup.
 ///
 
 class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {

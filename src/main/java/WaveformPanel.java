@@ -42,7 +42,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
 
     private void computeBounds() {
         Dimension d = getPreferredSize();
-        d.width = timestampToCoordinate(fTraceDataModel.getMaxTimestamp());
+        d.width = timestampToXCoordinate(fTraceDataModel.getMaxTimestamp());
         d.height = fTraceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
         setPreferredSize(d);
         validate();
@@ -50,7 +50,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
 
     @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        int x2 = timestampToCoordinate(newTimestamp);
+        int x2 = timestampToXCoordinate(newTimestamp);
 
         Rectangle visibleRect = getVisibleRect();
 
@@ -63,7 +63,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
             visibleRect.width = 100;
             scrollRectToVisible(visibleRect);
         } else {
-            int x1 = timestampToCoordinate(oldTimestamp);
+            int x1 = timestampToXCoordinate(oldTimestamp);
             int left = Math.min(x1, x2);
             int right = Math.max(x1, x2);
             repaint(left - 1, 0, right - left + 2, getHeight());
@@ -113,7 +113,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
     public void scaleChanged(double newScale) {
         // Adjust size of canvas
         Dimension d = getPreferredSize();
-        d.width = timestampToCoordinate(fTraceDataModel.getMaxTimestamp());
+        d.width = timestampToXCoordinate(fTraceDataModel.getMaxTimestamp());
         setPreferredSize(d);
         revalidate();
         repaint();
@@ -136,8 +136,8 @@ public class WaveformPanel extends JPanel implements MouseListener,
         // Draw selection
         if (fTraceDisplayModel.getCursorPosition() != fTraceDisplayModel.getSelectionStart()) {
             g.setColor(prefs.selectionColor);
-            int selectionStart =  timestampToCoordinate(fTraceDisplayModel.getSelectionStart());
-            int selectionEnd =  timestampToCoordinate(fTraceDisplayModel.getCursorPosition());
+            int selectionStart =  timestampToXCoordinate(fTraceDisplayModel.getSelectionStart());
+            int selectionEnd =  timestampToXCoordinate(fTraceDisplayModel.getCursorPosition());
             int leftEdge = Math.min(selectionStart, selectionEnd);
             int rightEdge = Math.max(selectionStart, selectionEnd);
             g.fillRect(leftEdge, 0, rightEdge - leftEdge, getHeight());
@@ -172,7 +172,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
         // Draw the cursor (a vertical line that runs from the top to the
         // bottom of the trace).
         g.setColor(prefs.cursorColor);
-        int cursorX = timestampToCoordinate(fTraceDisplayModel.getCursorPosition());
+        int cursorX = timestampToXCoordinate(fTraceDisplayModel.getCursorPosition());
         g.drawLine(cursorX, visibleRect.y, cursorX, visibleRect.y + visibleRect.height);
     }
 
@@ -230,7 +230,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
     @Override
     public void mousePressed(MouseEvent e) {
         // set cursor position
-        long timestamp = coordinateToTimestamp(e.getX());
+        long timestamp = xCoordinateToTimestamp(e.getX());
         if (fTraceDisplayModel.getCursorPosition() != fTraceDisplayModel.getSelectionStart())
             repaint(); // we already had a selection, clear it
 
@@ -254,7 +254,7 @@ public class WaveformPanel extends JPanel implements MouseListener,
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        long timestamp = coordinateToTimestamp(e.getX());
+        long timestamp = xCoordinateToTimestamp(e.getX());
         fTraceDisplayModel.setCursorPosition(timestamp);
         fOldCursor = e.getX();
 
@@ -267,11 +267,11 @@ public class WaveformPanel extends JPanel implements MouseListener,
     public void mouseMoved(MouseEvent e) {
     }
 
-    private long coordinateToTimestamp(int coordinate) {
+    private long xCoordinateToTimestamp(int coordinate) {
         return (long)(coordinate * fTraceDisplayModel.getHorizontalScale());
     }
 
-    private int timestampToCoordinate(long timestamp) {
+    private int timestampToXCoordinate(long timestamp) {
         return (int)(timestamp / fTraceDisplayModel.getHorizontalScale());
     }
 
