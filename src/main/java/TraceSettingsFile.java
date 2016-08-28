@@ -34,25 +34,8 @@ class TraceSettingsFile {
     /// @returns configuration file for this (a .dotfile in the same
     ///  directory)
     public static File configFileName(File file) throws IOException {
-        String path = file.getCanonicalPath();
-
-        // Find leaf file name
-        int index = path.lastIndexOf('/');
-        String dirPath;
-        String nodeName;
-        if (index == -1) {
-            dirPath = "";
-            nodeName = path;
-        } else {
-            dirPath = path.substring(0, index + 1);
-            nodeName = path.substring(index + 1);
-        }
-
-        nodeName = "." + nodeName + ".traceconfig";
-
-        return new File(dirPath + nodeName);
+        return new File(file.getParent() + "/." + file.getName() + ".traceconfig");
     }
-
 
     public TraceSettingsFile(File file, TraceDataModel dataModel,
                              TraceDisplayModel displayModel) {
