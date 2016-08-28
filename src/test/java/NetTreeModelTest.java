@@ -75,4 +75,21 @@ public class NetTreeModelTest {
         assertEquals(1, model.getIndexOfChild(kid2, grandkid1));
         assertEquals(27, model.getNetFromTreeObject(grandkid1));
     }
+
+    // If you call $dumpvars more than once in iverilog, it will
+    // exit the root node and re-push it. Ensure this is handled properly.
+    @Test
+    public void doubleRootTest() {
+        NetTreeModel model = new NetTreeModel();
+        model.enterScope("scope1");
+        model.leaveScope();
+        model.enterScope("scope1");
+        model.addNet("child1", 17);
+        model.leaveScope();
+
+        Object root = model.getRoot();
+        assertEquals(1, model.getChildCount(root));
+        Object kid0 = model.getChild(root, 0);
+        assertEquals("child1", kid0.toString());
+    }
 }
