@@ -42,7 +42,7 @@ class TraceDataModel {
         return new ConcreteTraceBuilder();
     }
 
-    TransitionVector.Iterator findTransition(int netId, long timestamp) {
+    Iterator<Transition> findTransition(int netId, long timestamp) {
         return fAllNets.get(netId).findTransition(timestamp);
     }
 
@@ -105,7 +105,7 @@ class TraceDataModel {
             return fShortName;
         }
 
-        TransitionVector.Iterator findTransition(long timestamp) {
+        Iterator<Transition> findTransition(long timestamp) {
             return fTransitionVector.findTransition(timestamp);
         }
 

@@ -16,6 +16,7 @@
 
 import static org.junit.Assert.*;
 import org.junit.*;
+import java.util.Iterator;
 
 public class TransitionVectorTest {
     private void makeBitVectorFromInt(BitVector vec, int value) {
@@ -87,25 +88,19 @@ public class TransitionVectorTest {
         // Note: previously there was a bug where calling current() would
         // iterate to the next value. We call current here multiple times
         // to confirm that works correctly now.
-        TransitionVector.Iterator ti = vec.findTransition(99);
+        Iterator<Transition> ti = vec.findTransition(99);
         assertTrue(ti.hasNext());
         Transition t = ti.next();
-        assertEquals(110, ti.getNextTimestamp());
-        assertEquals(-1, ti.getPrevTimestamp());
         assertTrue(ti.hasNext());
         assertEquals(100, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
 
         t = ti.next();
-        assertEquals(111, ti.getNextTimestamp());
-        assertEquals(100, ti.getPrevTimestamp());
         assertTrue(ti.hasNext());
         assertEquals(110, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000010", 2)));
 
         t = ti.next();
-        assertEquals(-1, ti.getNextTimestamp());
-        assertEquals(110, ti.getPrevTimestamp());
         assertFalse(ti.hasNext());
         assertEquals(111, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00001000", 2)));
@@ -117,7 +112,7 @@ public class TransitionVectorTest {
     public void testTruncateVector() {
         TransitionVector vec = new TransitionVector(4);
         vec.appendTransition(100, new BitVector("00001111", 2));
-        TransitionVector.Iterator ti = vec.findTransition(0);
+        Iterator<Transition> ti = vec.findTransition(0);
         Transition t = ti.next();
         assertEquals("1111", t.toString(2));
     }
@@ -127,7 +122,7 @@ public class TransitionVectorTest {
     public void testPadVector() {
         TransitionVector vec = new TransitionVector(16);
         vec.appendTransition(100, new BitVector("101", 2));
-        TransitionVector.Iterator ti = vec.findTransition(0);
+        Iterator<Transition> ti = vec.findTransition(0);
         Transition t = ti.next();
         assertEquals("0000000000000101", t.toString(2));
     }
@@ -143,7 +138,7 @@ public class TransitionVectorTest {
             tvec.appendTransition(idx * 5, bvec);
         }
 
-        TransitionVector.Iterator iter = tvec.findTransition(0);
+        Iterator<Transition> iter = tvec.findTransition(0);
         for (int idx = 0; idx < 100000; idx++) {
             makeBitVectorFromInt(bvec, idx);
             Transition t = iter.next();

@@ -41,45 +41,64 @@ public class Query {
     ///  instead scan to the next transition
     /// @bug If startTimestamp is before the first event, and the first event matches,
     ///      this will not return it.
-    /// @bug When searching with OR, may snap to the middle of a region that matches
-    ///      (need to verify)
     /// @returns
     ///   -1 If there are no matches in the forward direction
     ///      timestamp of the next forward match otherwise
     ///
     public long getNextMatch(long startTimestamp) {
-        long timestamp = startTimestamp;
-        while (true) {
-            if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
-                return timestamp;
+        long currentTime = startTimestamp;
+        boolean currentValue = fExpression.evaluate(currentTime, fQueryHint);
 
-            if (fQueryHint.forwardTimestamp < 0)
-                return -1;
+        // If the start timestamp is already at a region that is true, scan first
+        // to find a place where the expression is false. We'll then scan again
+        // to where it is true.
+        while (currentValue) {
+            if (fQueryHint.forwardTimestamp == -1)
+                return -1;  // End of trace
 
-            timestamp = fQueryHint.forwardTimestamp;
+            currentTime = fQueryHint.forwardTimestamp;
+            currentValue = fExpression.evaluate(currentTime, fQueryHint);
         }
+
+        while (!currentValue) {
+            if (fQueryHint.forwardTimestamp == -1)
+                return -1;  // End of trace
+
+            currentTime = fQueryHint.forwardTimestamp;
+            currentValue = fExpression.evaluate(currentTime, fQueryHint);
+        }
+
+        return currentTime;
     }
 
     ///
-    /// Scan backward to find the previous timestamp that matches this query's expression
-    /// If the startTimestamp is already a match, it will not be returned. This will
-    ///  instead scan to the previous transition
-    /// @bug This will snap to the beginning of the region that matches, not the end.
+    /// Scan backward to find the end of the region that
+    /// matches this query's expression If the startTimestamp is already
+    /// in a match, it will jump to end of the previous region that matches.
     /// @returns
     ///   -1 If there are no matches in the backward direction
     ///      timestamp of the next backward match otherwise
     ///
     public long getPreviousMatch(long startTimestamp) {
-        long timestamp = startTimestamp;
-        while (true) {
-            if (fExpression.evaluate(timestamp, fQueryHint) && timestamp != startTimestamp)
-                return timestamp;
+        long currentTime = startTimestamp;
+        boolean currentValue = fExpression.evaluate(currentTime, fQueryHint);
+        while (currentValue) {
+            if (fQueryHint.backwardTimestamp == -1)
+                return -1;  // End of trace
 
-            if (fQueryHint.backwardTimestamp < 0)
-                return -1;
-
-            timestamp = fQueryHint.backwardTimestamp;
+            currentTime = fQueryHint.backwardTimestamp;
+            currentValue = fExpression.evaluate(currentTime, fQueryHint);
         }
+
+        while (!currentValue) {
+            if (fQueryHint.backwardTimestamp == -1)
+                return -1;  // End of trace
+
+            currentTime = fQueryHint.backwardTimestamp;
+            currentValue = fExpression.evaluate(currentTime, fQueryHint);
+        }
+
+        return currentTime;
     }
 
     class ParseException extends Exception {
@@ -156,7 +175,7 @@ public class Query {
     }
 
     boolean isSpace(int value) {
-        return value == ' ' || value == '\r' || value == '\n' || value == '\t';
+        return value == ' ' || value == '\t' || value == '\n' || value == '\r';
     }
 
     int parseToken() throws ParseException {
@@ -187,8 +206,6 @@ public class Query {
                 fTokenStart = fStringOffset - 1;
                 if (c == -1)
                     return TOK_END;
-                else if ("(<>)=|&".indexOf(c) != -1)
-                    return c;
                 else if (c == '\'')
                     state = STATE_SCAN_LITERAL_TYPE;
                 else if (isAlpha(c)) {
@@ -199,6 +216,8 @@ public class Query {
                     fCurrentTokenType = LITERAL_TYPE_DECIMAL;
                     state = STATE_SCAN_LITERAL;
                 }
+                else if (!isSpace(c))
+                    return c;
 
                 break;
 
@@ -309,7 +328,7 @@ public class Query {
         }
 
         if (lookahead != TOK_IDENTIFIER)
-            throw new ParseException("unexpected token, expected identifier");
+            throw new ParseException("unexpected value");
 
         int netId = fTraceDataModel.findNet(fCurrentTokenValue.toString());
         if (netId < 0)
@@ -328,7 +347,7 @@ public class Query {
             match(TOK_LITERAL);
             return new EqualExpressionNode(netId, fBitVector);
         default:
-            throw new ParseException("Unknown conditional operator");
+            throw new ParseException("unknown conditional operator");
         }
     }
 
@@ -339,10 +358,11 @@ public class Query {
 
     private abstract class ExpressionNode {
         /// Determine if this subexpression is true at the timestamp provided.
-        /// @param timestamp Timestamp and which to evaluate.  If timestamp is right on a transition,
-        ///  the value *after* the transition will be used
-        /// @param outHint Sets the next timestamp that is worth investigating. Skips transitions
-        ///  for nets that aren't
+        /// @param timestamp Timestamp and which to evaluate.  If timestamp
+        ///  is right on a transition, the value *after* the transition will be used
+        /// @param outHint Contains the next timestamp where the value of the
+        ///   expression may change. It is guaranteed that no transition will occur
+        ///   sooner than this value.
         /// @return
         ///   - true if the value at the timestamp makes this expression true
         ///   - false if the value at the timestamp makes this expression true
@@ -360,54 +380,45 @@ public class Query {
             boolean leftResult = fLeftChild.evaluate(timestamp, fLeftHint);
             boolean rightResult = fRightChild.evaluate(timestamp, fRightHint);
 
-            // Forward timestamp
-            if (fLeftHint.forwardTimestamp >= 0 && fRightHint.forwardTimestamp >= 0) {
-                // Here we skip events that cannot possibly make the expression evaluate to true.
-                if (leftResult && rightResult)
-                    outHint.forwardTimestamp = Math.min(fRightHint.forwardTimestamp, fLeftHint.forwardTimestamp);
-                else if (leftResult)
-                    outHint.forwardTimestamp = fRightHint.forwardTimestamp;
-                else if (rightResult)
-                    outHint.forwardTimestamp = fLeftHint.forwardTimestamp;
-                else
-                    outHint.forwardTimestamp = nextForwardEvent(fRightHint.forwardTimestamp, fLeftHint.forwardTimestamp);
-            } else if (fLeftHint.forwardTimestamp >= 0)
-                outHint.forwardTimestamp = fLeftHint.forwardTimestamp;
-            else if (fRightHint.forwardTimestamp >= 0)
-                outHint.forwardTimestamp = fRightHint.forwardTimestamp;
-            else
+            // Compute the hints, which are the soonest time this expression
+            // *could* change value. We will call the subclassed methods to determine
+            // the actual hint type.
+            long nextLeft = fLeftHint.forwardTimestamp >= 0
+                ? fLeftHint.forwardTimestamp : Long.MAX_VALUE;
+            long nextRight = fRightHint.forwardTimestamp >= 0
+                ? fRightHint.forwardTimestamp : Long.MAX_VALUE;
+            outHint.forwardTimestamp = nextHint(leftResult, rightResult, nextLeft, nextRight,
+                false);
+            if (outHint.forwardTimestamp == Long.MAX_VALUE)
                 outHint.forwardTimestamp = -1;
 
-            // Backward timestamp
-            if (fLeftHint.backwardTimestamp >= 0 && fRightHint.backwardTimestamp >= 0) {
-                if (leftResult && rightResult)
-                    outHint.backwardTimestamp = Math.max(fRightHint.backwardTimestamp, fLeftHint.backwardTimestamp);
-                else if (leftResult)
-                    outHint.backwardTimestamp = fRightHint.backwardTimestamp;
-                else if (rightResult)
-                    outHint.backwardTimestamp = fLeftHint.backwardTimestamp;
-                else
-                    outHint.backwardTimestamp = nextBackwardEvent(fRightHint.backwardTimestamp, fLeftHint.backwardTimestamp);
-            } else if (fLeftHint.backwardTimestamp >= 0)
-                outHint.backwardTimestamp = fLeftHint.backwardTimestamp;
-            else if (fRightHint.backwardTimestamp >= 0)
-                outHint.backwardTimestamp = fRightHint.backwardTimestamp;
-            else
+            // This is a bit of a hack.
+            // For the backward hint, I reuse nextHint, but negate the values so the
+            // the comparisons will be reversed.
+            long prevLeft = fLeftHint.backwardTimestamp >= 0
+                ? fLeftHint.backwardTimestamp : -Long.MAX_VALUE;
+            long prevRight = fRightHint.backwardTimestamp >= 0
+                ? fRightHint.backwardTimestamp : -Long.MAX_VALUE;
+            outHint.backwardTimestamp = nextHint(leftResult, rightResult, prevLeft, prevRight,
+                true);
+            if (outHint.backwardTimestamp == -Long.MAX_VALUE)
                 outHint.backwardTimestamp = -1;
 
+            // Return the result at this time
             return compareResults(leftResult, rightResult);
         }
 
         abstract protected boolean compareResults(boolean value1, boolean value2);
 
         /// If both conditions are false, pick which event we should evaluate next.
-        abstract protected long nextForwardEvent(long timestamp1, long timestamp2);
-        abstract protected long nextBackwardEvent(long timestamp1, long timestamp2);
+        abstract protected long nextHint(boolean leftResult, boolean rightResult,
+            long nextLeftTimestamp, long nextRightTimestamp, boolean searchBackward);
 
         private ExpressionNode fLeftChild;
         private ExpressionNode fRightChild;
 
-        // These are preallocated for efficiency and aren't used outside the evaluate() call.
+        // These are preallocated for efficiency and aren't used outside
+        // the evaluate() call.
         private QueryHint fLeftHint = new QueryHint();
         private QueryHint fRightHint = new QueryHint();
     }
@@ -422,16 +433,34 @@ public class Query {
             return value1 || value2;
         }
 
-        // If both are false, either one changing may cause the expression to be true.
-        // Therefore, pick the soonest one
         @Override
-        protected long nextForwardEvent(long nextEvent1, long nextEvent2) {
-            return Math.min(nextEvent1, nextEvent2);
-        }
+        protected long nextHint(boolean leftResult, boolean rightResult,
+            long nextLeftTimestamp, long nextRightTimestamp, boolean searchBackward) {
 
-        @Override
-        protected long nextBackwardEvent(long nextEvent1, long nextEvent2) {
-            return Math.max(nextEvent1, nextEvent2);
+            if (leftResult && rightResult) {
+                // Both expressions are true. The only way for this to become
+                // false is if when both change to false.
+                if (searchBackward)
+                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
+                else
+                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
+            }
+            else if (leftResult && !rightResult) {
+                // Currently true. It can only become false when left result
+                // becomes false.
+                return nextLeftTimestamp;
+            } else if (rightResult && !leftResult)  {
+                // Currently true. It can only become false when right result
+                // becomes false.
+                return nextRightTimestamp;
+            } else {
+                // Both expressions are false. May become true if either subexpression
+                // changes.
+                if (searchBackward)
+                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
+                else
+                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
+            }
         }
     }
 
@@ -445,16 +474,35 @@ public class Query {
             return value1 && value2;
         }
 
-        // If both are false, both must change for the expression to be true.
-        // Therefore, pick the later one.
         @Override
-        protected long nextForwardEvent(long nextEvent1, long nextEvent2) {
-            return Math.max(nextEvent1, nextEvent2);
-        }
+        protected long nextHint(boolean leftResult, boolean rightResult,
+            long nextLeftTimestamp, long nextRightTimestamp,
+            boolean searchBackward) {
 
-        @Override
-        protected long nextBackwardEvent(long nextEvent1, long nextEvent2) {
-            return Math.min(nextEvent1, nextEvent2);
+            if (leftResult && rightResult) {
+                // Both expressions are true. Either expression changing
+                // could make it false.
+                if (searchBackward)
+                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
+                else
+                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
+            }
+            else if (leftResult && !rightResult) {
+                // Currently false. It can only become true when right result
+                // becomes true.
+                return nextRightTimestamp;
+            } else if (rightResult && !leftResult)  {
+                // Currently false. It can only become true when left result
+                // becomes true.
+                return nextLeftTimestamp;
+            } else {
+                // Both expressions are false. Both must change before this
+                // may become true.
+                if (searchBackward)
+                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
+                else
+                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
+            }
         }
     }
 
@@ -466,11 +514,22 @@ public class Query {
 
         @Override
         public boolean evaluate(long timestamp, QueryHint outHint) {
-            TransitionVector.Iterator i = fTraceDataModel.findTransition(fNetId, timestamp);
+            Iterator<Transition> i = fTraceDataModel.findTransition(fNetId, timestamp);
             Transition t = i.next();
-            outHint.forwardTimestamp = i.getNextTimestamp();
-            outHint.backwardTimestamp = i.getPrevTimestamp();
-            return doCompare(t, fExpected);
+            boolean result = doCompare(t, fExpected);
+            if (timestamp >= t.getTimestamp())
+                outHint.backwardTimestamp = t.getTimestamp() - 1;
+            else
+                outHint.backwardTimestamp = -1;
+
+            if (i.hasNext()) {
+                t = i.next();
+                outHint.forwardTimestamp = t.getTimestamp();
+            }
+            else
+                outHint.forwardTimestamp = -1;
+
+            return result;
         }
 
         abstract protected boolean doCompare(BitVector value1, BitVector value2);

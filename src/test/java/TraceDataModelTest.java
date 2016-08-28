@@ -16,6 +16,7 @@
 
 import static org.junit.Assert.*;
 import org.junit.*;
+import java.util.Iterator;
 
 public class TraceDataModelTest {
     @Test
@@ -75,7 +76,7 @@ public class TraceDataModelTest {
         assertEquals("mod1.net2", model.getFullNetName(net2));
         assertEquals("mod1.mod2.net3", model.getFullNetName(net3));
 
-        TransitionVector.Iterator ati  = model.findTransition(net2, 12);
+        Iterator<Transition> ati  = model.findTransition(net2, 12);
         Transition t = ati.next();
         assertEquals(10, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("100", 2)));
@@ -102,7 +103,7 @@ public class TraceDataModelTest {
         assertEquals(net1, model.getNetFromTreeObject(kid0));
         assertEquals(net2, model.getNetFromTreeObject(kid1));
 
-        TransitionVector.Iterator ati  = model.findTransition(net1, 0);
+        Iterator<Transition> ati  = model.findTransition(net1, 0);
         assertEquals(17, ati.next().getTimestamp());
 
         // Same transition should be in this one (they share a TransitionVector)

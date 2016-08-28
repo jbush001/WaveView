@@ -42,6 +42,7 @@ public class QueryTest {
     @Test
     public void testSimpleQuery() {
         try {
+            // clk is high 10-14, 20-
             Query query = new Query(makeTraceDataModel(), "mod1.clk = 1");
             assertEquals(10, query.getNextMatch(4));
             assertEquals(10, query.getNextMatch(9));
@@ -50,9 +51,9 @@ public class QueryTest {
             assertEquals(-1, query.getNextMatch(20));
             assertEquals(-1, query.getNextMatch(30));
 
-            assertEquals(10, query.getPreviousMatch(21));
-            assertEquals(10, query.getPreviousMatch(20));
-            assertEquals(10, query.getPreviousMatch(15));
+            assertEquals(14, query.getPreviousMatch(21));
+            assertEquals(14, query.getPreviousMatch(20));
+            assertEquals(14, query.getPreviousMatch(15));
             assertEquals(-1, query.getPreviousMatch(10));
             assertEquals(-1, query.getPreviousMatch(5));
             assertEquals(-1, query.getPreviousMatch(4));
@@ -85,7 +86,7 @@ public class QueryTest {
             query = new Query(traceDataModel, "mod1.value = 'b1010");
             assertEquals(23, query.getNextMatch(0));
         } catch (Query.ParseException exc) {
-            fail("Threw query parse exception");
+            fail("Threw query parse exception " + exc);
         }
     }
 
@@ -115,7 +116,7 @@ public class QueryTest {
             query = new Query(traceDataModel, "mod1.value = 'hz");
             query = new Query(traceDataModel, "mod1.value = 'hZ");
         } catch (Exception exc) {
-            fail("Threw query parse exception");
+            fail("Threw query parse exception " + exc);
         }
 
         // X and Z with decimal values should fail
@@ -125,7 +126,7 @@ public class QueryTest {
         } catch (NumberFormatException exc) {
             // Should throw this
         } catch (Query.ParseException exc) {
-            fail("threw query parse exception");
+            fail("threw query parse exception " + exc);
         }
 
         try {
@@ -134,7 +135,7 @@ public class QueryTest {
         } catch (NumberFormatException exc) {
             // Should throw this
         } catch (Query.ParseException exc) {
-            fail("threw query parse exception");
+            fail("threw query parse exception " + exc);
         }
 
         try {
@@ -143,7 +144,7 @@ public class QueryTest {
         } catch (NumberFormatException exc) {
             // Should throw this
         } catch (Query.ParseException exc) {
-            fail("threw query parse exception");
+            fail("threw query parse exception " + exc);
         }
 
         try {
@@ -152,7 +153,7 @@ public class QueryTest {
         } catch (NumberFormatException exc) {
             // Should throw this
         } catch (Query.ParseException exc) {
-            fail("threw query parse exception");
+            fail("threw query parse exception " + exc);
         }
     }
 
@@ -214,9 +215,46 @@ public class QueryTest {
             assertEquals(11, exc.getStartOffset());
             assertEquals(11, exc.getEndOffset());
         }
-
     }
 
+    @Test
+    public void testMissingParen() {
+        try {
+            Query query = new Query(makeTraceDataModel(), "(mod1.clk = 'h3 foo");
+            fail("Did not throw exception");
+        } catch (Query.ParseException exc) {
+            assertEquals("unexpected value", exc.toString());
+            assertEquals(16, exc.getStartOffset());
+            assertEquals(18, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void testMissingIdentifier() {
+        try {
+            Query query = new Query(makeTraceDataModel(), "> 'h12");
+            fail("Did not throw exception");
+        } catch (Query.ParseException exc) {
+            assertEquals("unexpected value", exc.toString());
+            assertEquals(0, exc.getStartOffset());
+            assertEquals(0, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void testBadOperator() {
+        try {
+            Query query = new Query(makeTraceDataModel(), "mod1.clk ? 'h12");
+            fail("Did not throw exception");
+        } catch (Query.ParseException exc) {
+            assertEquals("unknown conditional operator", exc.toString());
+            assertEquals(9, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
+        }
+    }
+
+    /// This implicitly verifies query hinting by starting at different
+    /// transition points
     @Test
     public void testAnd() {
         TraceDataModel traceDataModel = new TraceDataModel();
@@ -226,36 +264,67 @@ public class QueryTest {
         int id2 = builder.newNet("b", -1, 1);
         builder.exitModule();
 
-        builder.appendTransition(id1, 1, new BitVector("0", 2));
-        builder.appendTransition(id2, 1, new BitVector("0", 2));
+        // Fast toggle (a).
+        // True 5-9, 15-19, 25-29, 35-40, 45-
+        builder.appendTransition(id1, 0, new BitVector("0", 2));
         builder.appendTransition(id1, 5, new BitVector("1", 2));
-        builder.appendTransition(id2, 5, new BitVector("0", 2));
-        builder.appendTransition(id1, 10, new BitVector("1", 2));
-        builder.appendTransition(id2, 10, new BitVector("1", 2));
-        builder.appendTransition(id1, 15, new BitVector("0", 2));
-        builder.appendTransition(id2, 15, new BitVector("1", 2));
-        builder.appendTransition(id1, 20, new BitVector("1", 2));
-        builder.appendTransition(id2, 20, new BitVector("0", 2));
+        builder.appendTransition(id1, 10, new BitVector("0", 2));
+        builder.appendTransition(id1, 15, new BitVector("1", 2));
+        builder.appendTransition(id1, 20, new BitVector("0", 2));
         builder.appendTransition(id1, 25, new BitVector("1", 2));
-        builder.appendTransition(id2, 25, new BitVector("1", 2));
         builder.appendTransition(id1, 30, new BitVector("0", 2));
+        builder.appendTransition(id1, 35, new BitVector("1", 2));
+        builder.appendTransition(id1, 40, new BitVector("0", 2));
+        builder.appendTransition(id1, 45, new BitVector("1", 2));
+
+        // Slow toggle (b)
+        // True 15-29, 45-
+        builder.appendTransition(id2, 0, new BitVector("0", 2));
+        builder.appendTransition(id2, 15, new BitVector("1", 2));
         builder.appendTransition(id2, 30, new BitVector("0", 2));
+        builder.appendTransition(id2, 45, new BitVector("1", 2));
+
         builder.loadFinished();
 
+        Query query = null;
         try {
-            Query query = new Query(traceDataModel, "mod1.a = 1 & mod1.b = 1");
-            assertEquals(10, query.getNextMatch(0));
-            assertEquals(25, query.getNextMatch(10));
-
-            // XXX this doesn't seem right: should seek back to the end of the
-            // region where it changes (30 and 15)
-            assertEquals(25, query.getPreviousMatch(40));
-            assertEquals(10, query.getPreviousMatch(25));
+            query = new Query(traceDataModel, "mod1.a = 1 & mod1.b = 1");
         } catch (Query.ParseException exc) {
-            fail("Threw query parse exception");
+            fail("threw query parse exception " + exc);
         }
+
+        // Expression is true:
+        // 15-19, 25-29, 45-
+
+        // Test forward
+        assertEquals(15, query.getNextMatch(0));  // false & false = false
+        assertEquals(15, query.getNextMatch(5));  // true & false = false
+        assertEquals(15, query.getNextMatch(10)); // false & false = false
+        assertEquals(25, query.getNextMatch(15)); // true & true = true
+        assertEquals(25, query.getNextMatch(20)); // false & true = false
+        assertEquals(45, query.getNextMatch(25)); // true & true = true
+        assertEquals(45, query.getNextMatch(30)); // false & false = false
+        assertEquals(45, query.getNextMatch(35)); // true & false = false
+        assertEquals(45, query.getNextMatch(40)); // false & false = false
+        assertEquals(-1, query.getNextMatch(45)); // true & true  = true
+        assertEquals(-1, query.getNextMatch(50)); // false & true = false
+
+        // Test backward
+        assertEquals(-1, query.getPreviousMatch(0));  // false & false = false
+        assertEquals(-1, query.getPreviousMatch(5));  // true & false = false
+        assertEquals(-1, query.getPreviousMatch(10)); // false & false = false
+        assertEquals(-1, query.getPreviousMatch(15)); // true & true = true
+        assertEquals(19, query.getPreviousMatch(20)); // false & true = false
+        assertEquals(19, query.getPreviousMatch(25)); // true & true = true
+        assertEquals(29, query.getPreviousMatch(30)); // false & false = false
+        assertEquals(29, query.getPreviousMatch(35)); // true & false = false
+        assertEquals(29, query.getPreviousMatch(40)); // false & false = false
+        assertEquals(29, query.getPreviousMatch(45)); // true & true  = true
+        assertEquals(29, query.getPreviousMatch(50)); // false & true = false
     }
 
+    /// This implicitly verifies query hinting by starting at different
+    /// transition points
     @Test
     public void testOr() {
         TraceDataModel traceDataModel = new TraceDataModel();
@@ -265,30 +334,63 @@ public class QueryTest {
         int id2 = builder.newNet("b", -1, 1);
         builder.exitModule();
 
-        builder.appendTransition(id1, 1, new BitVector("0", 2));
-        builder.appendTransition(id2, 1, new BitVector("0", 2));
+        // Fast toggle (a).
+        // True 5-9, 15-19, 25-29, 35-40, 45-
+        builder.appendTransition(id1, 0, new BitVector("0", 2));
         builder.appendTransition(id1, 5, new BitVector("1", 2));
-        builder.appendTransition(id2, 5, new BitVector("0", 2));
         builder.appendTransition(id1, 10, new BitVector("0", 2));
-        builder.appendTransition(id2, 10, new BitVector("0", 2));
-        builder.appendTransition(id1, 15, new BitVector("0", 2));
-        builder.appendTransition(id2, 15, new BitVector("1", 2));
+        builder.appendTransition(id1, 15, new BitVector("1", 2));
         builder.appendTransition(id1, 20, new BitVector("0", 2));
-        builder.appendTransition(id2, 20, new BitVector("0", 2));
         builder.appendTransition(id1, 25, new BitVector("1", 2));
-        builder.appendTransition(id2, 25, new BitVector("1", 2));
+        builder.appendTransition(id1, 30, new BitVector("0", 2));
+        builder.appendTransition(id1, 35, new BitVector("1", 2));
+        builder.appendTransition(id1, 40, new BitVector("0", 2));
+        builder.appendTransition(id1, 45, new BitVector("1", 2));
+
+        // Slow toggle (b)
+        // True 15-29, 45-
+        builder.appendTransition(id2, 0, new BitVector("0", 2));
+        builder.appendTransition(id2, 15, new BitVector("1", 2));
+        builder.appendTransition(id2, 30, new BitVector("0", 2));
+        builder.appendTransition(id2, 45, new BitVector("1", 2));
+
         builder.loadFinished();
 
+        Query query = null;
         try {
-            Query query = new Query(traceDataModel, "mod1.a = 1 | mod1.b = 1");
-            assertEquals(5, query.getNextMatch(0));
-            assertEquals(15, query.getNextMatch(5));
-            assertEquals(25, query.getNextMatch(15));
-
-            /// @bug get next match will do weird things with or...
+            query = new Query(traceDataModel, "mod1.a = 1 | mod1.b = 1");
         } catch (Query.ParseException exc) {
-            fail("Threw query parse exception");
+            fail("threw query parse exception " + exc);
         }
+
+        // Expression is true:
+        // 5-9, 15-29, 35-39, 45-
+
+        // Test forward
+        assertEquals(5, query.getNextMatch(0));  // false | false = false
+        assertEquals(15, query.getNextMatch(5));  // true | false = true
+        assertEquals(15, query.getNextMatch(10)); // false | false = false
+        assertEquals(35, query.getNextMatch(15)); // true | true = true
+        assertEquals(35, query.getNextMatch(20)); // false | true = true
+        assertEquals(35, query.getNextMatch(25)); // true | true = true
+        assertEquals(35, query.getNextMatch(30)); // false | false = false
+        assertEquals(45, query.getNextMatch(35)); // true | false = true
+        assertEquals(45, query.getNextMatch(40)); // false | false = false
+        assertEquals(-1, query.getNextMatch(45)); // true | true  = true
+        assertEquals(-1, query.getNextMatch(50)); // false | true = true
+
+        // Test backward
+        assertEquals(-1, query.getPreviousMatch(0));  // false | false = false
+        assertEquals(-1, query.getPreviousMatch(5));  // true | false = true
+        assertEquals(9, query.getPreviousMatch(10));  // false | false = false
+        assertEquals(9, query.getPreviousMatch(15));  // true | true = true
+        assertEquals(9, query.getPreviousMatch(20)); // false | true = true
+        assertEquals(9, query.getPreviousMatch(25)); // true | true = true
+        assertEquals(29, query.getPreviousMatch(30)); // false | false = false
+        assertEquals(29, query.getPreviousMatch(35)); // true | false = true
+        assertEquals(39, query.getPreviousMatch(40)); // false | false = false
+        assertEquals(39, query.getPreviousMatch(45)); // true | true  = true
+        assertEquals(39, query.getPreviousMatch(50)); // false | true = true
     }
 
     @Test
@@ -317,7 +419,7 @@ public class QueryTest {
             query = new Query(traceDataModel, "mod1.value < 'h5");
             assertEquals(4, query.getPreviousMatch(10));
         } catch (Query.ParseException exc) {
-            fail("Threw query parse exception");
+            fail("threw query parse exception " + exc);
         }
     }
 }

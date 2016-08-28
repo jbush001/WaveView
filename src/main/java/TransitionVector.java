@@ -34,7 +34,7 @@ class TransitionVector {
     ///   the first transition.
     /// @todo Investigate using java.util.Arrays.binarySearch instead of a hand rolled
     ///   implementation here.
-    Iterator findTransition(long timestamp) {
+    Iterator<Transition> findTransition(long timestamp) {
         // Binary search
         int low = 0;
         int high = fTransitionCount;
@@ -48,7 +48,7 @@ class TransitionVector {
                 low = mid + 1;
         }
 
-        return new Iterator(low == 0 ? 0 : low - 1);
+        return new TransitionVectorIterator(low == 0 ? 0 : low - 1);
     }
 
     long getMaxTimestamp() {
@@ -64,8 +64,8 @@ class TransitionVector {
 
     /// This augments the normal iterator with methods to obtain
     /// the timestamp of the next and previous events.
-    public class Iterator implements java.util.Iterator<Transition> {
-        Iterator(int index) {
+    private class TransitionVectorIterator implements Iterator<Transition> {
+        TransitionVectorIterator(int index) {
             assert index >= 0;
             fNextIndex = index;
             fTransition.setWidth(fWidth);
@@ -102,20 +102,6 @@ class TransitionVector {
             fNextIndex++;
 
             return fTransition;
-        }
-
-        public long getNextTimestamp() {
-            if (fNextIndex >= fTransitionCount)
-                return -1;
-
-            return fTimestamps[fNextIndex];
-        }
-
-        public long getPrevTimestamp() {
-            if (fNextIndex < 2)
-                return -1;
-
-            return fTimestamps[fNextIndex - 2];
         }
 
         @Override
