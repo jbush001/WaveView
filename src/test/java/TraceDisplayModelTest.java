@@ -171,6 +171,16 @@ public class TraceDisplayModelTest {
         assertEquals(0, tdm.getMarkerCount());
     }
 
+    // Regression test: when the timescale is 1ns, couldn't remove markers
+    @Test
+    public void removeMarkerHighZoom() {
+        TraceDisplayModel tdm = new TraceDisplayModel();
+        tdm.setHorizontalScale(0.037);
+        tdm.addMarker("marker1", 14);
+        tdm.removeMarkerAtTime(14);
+        assertEquals(0, tdm.getMarkerCount());
+    }
+
     @Test
     public void testSetDescriptionForMarker() {
         TraceDisplayModel tdm = new TraceDisplayModel();

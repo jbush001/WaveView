@@ -249,19 +249,19 @@ public class TraceDisplayModel {
 
         // Because it's hard to click exactly on the marker, allow removing
         // markers a few pixels to the right or left of the current cursor.
-        final int kMarkerRemoveSize = (int)(5.0 * getHorizontalScale());
+        final long MARKER_REMOVE_SLACK = (long)(5.0 * getHorizontalScale());
 
         int index = fMarkers.findIndex(timestamp);
         long targetTimestamp = fMarkers.get(index).fTimestamp;
 
         // The lookup function sometimes rounds to the lower marker, so
         // check both the current marker and the next one.
-        if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize) {
+        if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
             fMarkers.remove(index);
             notifyMarkerChanged(targetTimestamp);
         } else if (index < fMarkers.size() - 1) {
             targetTimestamp = fMarkers.get(index + 1).fTimestamp;
-            if (Math.abs(timestamp - targetTimestamp) < kMarkerRemoveSize) {
+            if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
                 fMarkers.remove(index + 1);
                 notifyMarkerChanged(targetTimestamp);
             }
