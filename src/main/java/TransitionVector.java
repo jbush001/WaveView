@@ -17,8 +17,12 @@
 import java.util.*;
 
 ///
-/// A compact representation of a time series of value changes on a single net
-/// This is a convenience class to be used inside TraceDataModel.
+/// An ordered series of value changes on a single net (which may have
+/// one or more bits).  This is a convenience class used by TraceDataModel.
+/// Allocating hundreds of thousands of Transition objects would be slow and
+/// inefficient, so this stores the values packed into a single array.
+/// Because it is sorted, it supports efficient binary searches for values
+/// at specific timestamps.
 ///
 /// @bug This doesn't propertly handle nets that are uninitalized at the beginning
 /// of the trace.  They are assumed to have the value of the first transition.
@@ -117,6 +121,7 @@ class TransitionVector {
         private Transition fTransition = new Transition();
     }
 
+    /// Called while the waveform is being loaded.
     /// The timestamp must be after the last transition that was
     /// appended
     public void appendTransition(long timestamp, BitVector values) {
@@ -169,10 +174,16 @@ class TransitionVector {
         fTransitionCount++;
     }
 
+    // Number of bits for this net
     private int fWidth;
+
     private long[] fTimestamps;
 
-    // Values are packed into this array
+    // Values are packed into this array. Each bit in the output requires two
+    // bits in this array (to represent four values: 0, 1, X, and Z). These
+    // are stored starting with the first bit as the LSB of each array word
+    // up to the MSB. The next bit is then stored in the next higher array
+    // entry. There is no padding between adjacent transitions.
     private int[] fValues;
     private int fTransitionCount;
     private int fAllocSize; // Used only while building

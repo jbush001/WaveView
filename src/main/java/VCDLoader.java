@@ -14,14 +14,13 @@
 // limitations under the License.
 //
 
+import java.io.*;
+import java.util.*;
+
 ///
 /// Parse a value change dump (VCD) formatted text file and push the contents into a
 /// provided trace model
 ///
-
-import java.io.*;
-import java.util.*;
-
 class VCDLoader implements TraceLoader {
     @Override
     public void load(File file, TraceBuilder builder, ProgressListener listener)

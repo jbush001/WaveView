@@ -36,20 +36,20 @@ public class SortedArrayListTest {
         SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
 
         // Note: odd number of elements
-        vec.addSorted(new KeyedElement(100));
-        vec.addSorted(new KeyedElement(117));
-        vec.addSorted(new KeyedElement(110));
-        vec.addSorted(new KeyedElement(116));
-        vec.addSorted(new KeyedElement(115));
+        vec.add(new KeyedElement(100));
+        vec.add(new KeyedElement(117));
+        vec.add(new KeyedElement(110));
+        vec.add(new KeyedElement(116));
+        vec.add(new KeyedElement(115));
 
-        assertEquals(0, vec.lookupValue(10));
-        assertEquals(0, vec.lookupValue(100));
-        assertEquals(1, vec.lookupValue(110));
-        assertEquals(1, vec.lookupValue(112));
-        assertEquals(2, vec.lookupValue(115));
-        assertEquals(3, vec.lookupValue(116));
-        assertEquals(4, vec.lookupValue(117));
-        assertEquals(4, vec.lookupValue(120));
+        assertEquals(0, vec.findIndex(10));
+        assertEquals(0, vec.findIndex(100));
+        assertEquals(1, vec.findIndex(110));
+        assertEquals(1, vec.findIndex(112));
+        assertEquals(2, vec.findIndex(115));
+        assertEquals(3, vec.findIndex(116));
+        assertEquals(4, vec.findIndex(117));
+        assertEquals(4, vec.findIndex(120));
     }
 
     @Test
@@ -57,29 +57,29 @@ public class SortedArrayListTest {
         SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
 
         // Note: even number of elements
-        vec.addSorted(new KeyedElement(100));
-        vec.addSorted(new KeyedElement(115));
-        vec.addSorted(new KeyedElement(110));
-        vec.addSorted(new KeyedElement(116));
+        vec.add(new KeyedElement(100));
+        vec.add(new KeyedElement(115));
+        vec.add(new KeyedElement(110));
+        vec.add(new KeyedElement(116));
 
-        assertEquals(0, vec.lookupValue(10));
-        assertEquals(0, vec.lookupValue(100));
-        assertEquals(1, vec.lookupValue(110));
-        assertEquals(1, vec.lookupValue(112));
-        assertEquals(2, vec.lookupValue(115));
-        assertEquals(3, vec.lookupValue(116));
-        assertEquals(3, vec.lookupValue(117));
-        assertEquals(3, vec.lookupValue(120));
+        assertEquals(0, vec.findIndex(10));
+        assertEquals(0, vec.findIndex(100));
+        assertEquals(1, vec.findIndex(110));
+        assertEquals(1, vec.findIndex(112));
+        assertEquals(2, vec.findIndex(115));
+        assertEquals(3, vec.findIndex(116));
+        assertEquals(3, vec.findIndex(117));
+        assertEquals(3, vec.findIndex(120));
     }
 
     @Test
     public void testIterator() {
         SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
-        vec.addSorted(new KeyedElement(140));
-        vec.addSorted(new KeyedElement(100));
-        vec.addSorted(new KeyedElement(120));
-        vec.addSorted(new KeyedElement(130));
-        vec.addSorted(new KeyedElement(110));
+        vec.add(new KeyedElement(140));
+        vec.add(new KeyedElement(100));
+        vec.add(new KeyedElement(120));
+        vec.add(new KeyedElement(130));
+        vec.add(new KeyedElement(110));
 
         Iterator<KeyedElement> kei = vec.find(110);
         assertTrue(kei.hasNext());
@@ -91,5 +91,10 @@ public class SortedArrayListTest {
         assertTrue(kei.hasNext());
         assertEquals(140, kei.next().getKey());
         assertTrue(!kei.hasNext());
+        try {
+            kei.next();
+            fail("didn't throw exception");
+        } catch (NoSuchElementException exc) {
+        }
     }
 }

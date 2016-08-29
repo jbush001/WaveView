@@ -17,7 +17,8 @@
 import java.awt.*;
 
 ///
-/// Used to draw a waveform for a single net
+/// Delegate used to draw a waveform for a single net
+/// This is subclassed for single and multi-bit nets.
 ///
 
 interface WaveformPainter {

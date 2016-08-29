@@ -27,11 +27,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
 
     public SortedArrayList() {}
 
-    public SortedArrayList(int initialCapacity) {
-        super(initialCapacity);
-    }
-
-    void addSorted(T value) {
+    public boolean add(T value) {
         long key = ((Keyed) value).getKey();
         for (int i = 0; ; i++) {
             if (i == size()
@@ -40,20 +36,21 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
                 break;
             }
         }
+
+        return true;
     }
 
-    Iterator<T> find(long key) {
-        return new SortedArrayListIterator(this, lookupValue(key));
+    public Iterator<T> find(long key) {
+        return new SortedArrayListIterator(this, findIndex(key));
     }
 
     /// @param key key value to search for
     /// @returns index into array of element that matches key. If this
     ///   element isn't matched exactly, return the element before this one.
     ///   If the key is before the first element, return 0.
-    /// @todo better name like getIndexForKey?
     /// @todo Investigate using java.util.Arrays.binarySearch instead of
     ///    hand rolled implementation here.
-    int lookupValue(long key) {
+    public int findIndex(long key) {
         // Binary search
         int low = 0;
         int high = size();
@@ -88,6 +85,9 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
 
         @Override
         public T next() {
+            if (!hasNext())
+                throw new NoSuchElementException();
+
             T val = fVector.get(fIndex);
             fIndex++;
             return val;

@@ -27,7 +27,7 @@ import javax.swing.text.*;
 /// Displays searchable lists of all nets in a design. Can be dragged onto
 /// the visible net view to see them.
 ///
-public class NetSearchPanel extends JPanel implements ActionListener {
+public class NetSearchPanel extends JPanel {
 
     /// Allow user to drag signals out of this view and drop
     /// in currently displayed nets
@@ -110,9 +110,6 @@ public class NetSearchPanel extends JPanel implements ActionListener {
         searchTab.add(listScroller, BorderLayout.CENTER);
         listScroller.add(new JTextArea());
     }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {}
 
     private JTree fTree;
     private TraceDisplayModel fTraceDisplayModel;

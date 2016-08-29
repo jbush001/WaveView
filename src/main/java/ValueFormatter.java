@@ -16,7 +16,9 @@
 
 ///
 /// This is the base class for classes that convert a binary representation
-/// of 4 valued logic into human readable strings.
+/// of 4 valued logic into human readable strings. The idea behind making
+/// this a class was to allow dynamically loading classes to decode custom
+/// logic types.
 ///
 
 public interface ValueFormatter {

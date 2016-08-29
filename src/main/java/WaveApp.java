@@ -287,8 +287,7 @@ public class WaveApp extends JPanel implements ActionListener {
             initialQuery.append(t.toString(16));
         }
 
-        FindPanel findPanel = new FindPanel(this);
-        findPanel.setInitialQuery(initialQuery.toString());
+        FindPanel findPanel = new FindPanel(this, initialQuery.toString());
         JDialog frame = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Find", true);
         frame.getContentPane().add(findPanel);
         frame.setSize(new Dimension(450, 150));

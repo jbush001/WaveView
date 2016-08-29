@@ -23,7 +23,7 @@ import javax.swing.table.*;
 import javax.swing.text.*;
 
 class FindPanel extends JPanel implements ActionListener {
-    public FindPanel(WaveApp app) {
+    public FindPanel(WaveApp app, String initialQuery) {
         fWaveApp = app;
 
         setLayout(new BorderLayout());
@@ -31,6 +31,7 @@ class FindPanel extends JPanel implements ActionListener {
         JLabel findLabel = new JLabel("Find:");
         fTextArea = new JTextArea(5, 30);
         fTextArea.setLineWrap(true);
+        fTextArea.setText(initialQuery);
         fTextArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
@@ -69,10 +70,7 @@ class FindPanel extends JPanel implements ActionListener {
         add(buttonContainer, BorderLayout.SOUTH);
     }
 
-    public void setInitialQuery(String string) {
-        fTextArea.setText(string);
-    }
-
+    /// Called when the user alters the current query string.
     void invalidateText() {
         // The next time the user hits next/prev, need to regenerate the query.
         fNeedsQueryUpdate = true;
@@ -82,6 +80,9 @@ class FindPanel extends JPanel implements ActionListener {
         fHighlighter.removeAllHighlights();
     }
 
+    /// If the query has been updated, try to parse it and generate a new query
+    /// object. If the query string is invalid, highlight the incorrect portion
+    /// and pop up an error message.
     private void checkUpdateQuery() {
         if (fNeedsQueryUpdate) {
             try {
@@ -105,10 +106,10 @@ class FindPanel extends JPanel implements ActionListener {
         }
     }
 
+    /// Handle button presses
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
-
         if (cmd.equals("Prev")) {
             checkUpdateQuery();
             fWaveApp.findPrev();

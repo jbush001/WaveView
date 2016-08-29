@@ -235,12 +235,12 @@ public class TraceDisplayModel {
         marker.fDescription = description;
         marker.fTimestamp = timestamp;
 
-        fMarkers.addSorted(marker);
+        fMarkers.add(marker);
         notifyMarkerChanged(timestamp);
     }
 
     public int getMarkerAtTime(long timestamp) {
-        return fMarkers.lookupValue(timestamp);
+        return fMarkers.findIndex(timestamp);
     }
 
     public void removeMarkerAtTime(long timestamp) {
@@ -251,7 +251,7 @@ public class TraceDisplayModel {
         // markers a few pixels to the right or left of the current cursor.
         final int kMarkerRemoveSize = (int)(5.0 * getHorizontalScale());
 
-        int index = fMarkers.lookupValue(timestamp);
+        int index = fMarkers.findIndex(timestamp);
         long targetTimestamp = fMarkers.get(index).fTimestamp;
 
         // The lookup function sometimes rounds to the lower marker, so
