@@ -97,7 +97,7 @@ public class NetTreeModel implements TreeModel {
         throw new UnsupportedOperationException();
     }
 
-    private class NetTreeNode {
+    private static class NetTreeNode {
         // Interior nodes only
         NetTreeNode(String name) {
             fName = name;

@@ -80,7 +80,7 @@ class TraceDataModel {
         return fAllNets.get(index).getFullName();
     }
 
-    private class NetDataModel {
+    private static class NetDataModel {
         NetDataModel(String shortName, int width) {
             fShortName = shortName;
             fTransitionVector = new TransitionVector(width);

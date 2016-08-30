@@ -30,8 +30,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
     public boolean add(T value) {
         long key = ((Keyed) value).getKey();
         for (int i = 0; ; i++) {
-            if (i == size()
-                    || ((Keyed) get(i)).getKey() > key) {
+            if (i == size() || ((Keyed) get(i)).getKey() > key) {
                 add(i, value);
                 break;
             }
@@ -41,7 +40,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
     }
 
     public Iterator<T> find(long key) {
-        return new SortedArrayListIterator(this, findIndex(key));
+        return new SortedArrayListIterator(findIndex(key));
     }
 
     /// @param key key value to search for
@@ -73,14 +72,13 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
     }
 
     private class SortedArrayListIterator implements Iterator<T> {
-        public SortedArrayListIterator(SortedArrayList<T> vector, int index) {
-            fVector = vector;
+        public SortedArrayListIterator(int index) {
             fIndex = index;
         }
 
         @Override
         public boolean hasNext() {
-            return fIndex < fVector.size();
+            return fIndex < SortedArrayList.this.size();
         }
 
         @Override
@@ -88,7 +86,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
             if (!hasNext())
                 throw new NoSuchElementException();
 
-            T val = fVector.get(fIndex);
+            T val = SortedArrayList.this.get(fIndex);
             fIndex++;
             return val;
         }
@@ -98,7 +96,6 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
             throw new UnsupportedOperationException();
         }
 
-        private SortedArrayList<T> fVector;
         private int fIndex;
     }
 }

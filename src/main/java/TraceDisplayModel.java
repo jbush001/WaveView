@@ -316,7 +316,7 @@ public class TraceDisplayModel {
         }
     }
 
-    class Marker implements SortedArrayList.Keyed {
+    private static class Marker implements SortedArrayList.Keyed {
         @Override
         public long getKey() {
             return fTimestamp;
@@ -327,7 +327,7 @@ public class TraceDisplayModel {
         long fTimestamp;
     }
 
-    class NetSet {
+    private static class NetSet {
         NetSet(String name, ArrayList<NetViewModel> visibleNets) {
             fName = name;
             fVisibleNets = new ArrayList<NetViewModel>(visibleNets);
@@ -337,7 +337,7 @@ public class TraceDisplayModel {
         private ArrayList<NetViewModel> fVisibleNets;
     }
 
-    private class NetViewModel {
+    private static class NetViewModel {
         public NetViewModel(int _index, ValueFormatter _formatter) {
             index = _index;
             if (_formatter == null)

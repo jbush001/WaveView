@@ -37,9 +37,9 @@ public class Query {
     }
 
     /// Mainly useful for unit testing
-    /// @returns true if this query matches at the given timestamp
+    /// @returns true if this query matches at the passed timestamp
     public boolean matches(long timestamp) {
-        return fExpression.evaluate(timestamp, fQueryHint);
+        return fExpression.evaluate(fTraceDataModel, timestamp, fQueryHint);
     }
 
     ///
@@ -54,7 +54,7 @@ public class Query {
     ///
     public long getNextMatch(long startTimestamp) {
         long currentTime = startTimestamp;
-        boolean currentValue = fExpression.evaluate(currentTime, fQueryHint);
+        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
 
         // If the start timestamp is already at a region that is true, scan first
         // to find a place where the expression is false. We'll then scan again
@@ -64,7 +64,7 @@ public class Query {
                 return -1;  // End of trace
 
             currentTime = fQueryHint.forwardTimestamp;
-            currentValue = fExpression.evaluate(currentTime, fQueryHint);
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
         }
 
         while (!currentValue) {
@@ -72,7 +72,7 @@ public class Query {
                 return -1;  // End of trace
 
             currentTime = fQueryHint.forwardTimestamp;
-            currentValue = fExpression.evaluate(currentTime, fQueryHint);
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
         }
 
         return currentTime;
@@ -88,13 +88,13 @@ public class Query {
     ///
     public long getPreviousMatch(long startTimestamp) {
         long currentTime = startTimestamp;
-        boolean currentValue = fExpression.evaluate(currentTime, fQueryHint);
+        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
         while (currentValue) {
             if (fQueryHint.backwardTimestamp == -1)
                 return -1;  // End of trace
 
             currentTime = fQueryHint.backwardTimestamp;
-            currentValue = fExpression.evaluate(currentTime, fQueryHint);
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
         }
 
         while (!currentValue) {
@@ -102,14 +102,14 @@ public class Query {
                 return -1;  // End of trace
 
             currentTime = fQueryHint.backwardTimestamp;
-            currentValue = fExpression.evaluate(currentTime, fQueryHint);
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
         }
 
         return currentTime;
     }
 
     class ParseException extends Exception {
-        public ParseException(String what) {
+        ParseException(String what) {
             super(what);
             fErrorMessage = what;
             fStartOffset = fTokenStart;
@@ -124,11 +124,11 @@ public class Query {
             return fErrorMessage;
         }
 
-        public int getStartOffset() {
+        int getStartOffset() {
             return fStartOffset;
         }
 
-        public int getEndOffset() {
+        int getEndOffset() {
             return fEndOffset;
         }
 
@@ -154,42 +154,30 @@ public class Query {
     private static final int LITERAL_TYPE_HEX = 1;
     private static final int LITERAL_TYPE_BINARY = 2;
 
-    String fQueryString;
-    int fLexerOffset;
-    StringBuffer fCurrentTokenValue = new StringBuffer();
-    int fCurrentTokenType;
-    int fPushBackChar = -1;
-    int fPushBackToken = -1;
-    int fTokenStart;
-    BitVector fBitVector;
 
-    void pushBackToken(int tok) {
-        fPushBackToken = tok;
-    }
-
-    static boolean isAlpha(int value) {
+    private static boolean isAlpha(int value) {
         return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
     }
 
-    static boolean isNum(int value) {
+    private static boolean isNum(int value) {
         return value >= '0' && value <= '9';
     }
 
-    static boolean isHexDigit(int value) {
+    private static boolean isHexDigit(int value) {
         return (value >= '0' && value <= '9')
                || (value >= 'a' && value <='f')
                || (value >= 'A' && value <= 'F');
     }
 
-    static boolean isAlphaNum(int value) {
+    private static boolean isAlphaNum(int value) {
         return isAlpha(value) || isNum(value);
     }
 
-    static boolean isSpace(int value) {
+    private static boolean isSpace(int value) {
         return value == ' ' || value == '\t' || value == '\n' || value == '\r';
     }
 
-    int nextToken() throws ParseException {
+    private int nextToken() throws ParseException {
         if (fPushBackToken != -1) {
             int token = fPushBackToken;
             fPushBackToken = -1;
@@ -284,7 +272,11 @@ public class Query {
         }
     }
 
-    void match(int tokenType) throws ParseException {
+    private void pushBackToken(int tok) {
+        fPushBackToken = tok;
+    }
+
+    private void match(int tokenType) throws ParseException {
         int got = nextToken();
         if (got != tokenType) {
             if (got == TOK_END)
@@ -294,11 +286,11 @@ public class Query {
         }
     }
 
-    ExpressionNode parseExpression() throws ParseException {
+    private ExpressionNode parseExpression() throws ParseException {
         return parseOr();
     }
 
-    ExpressionNode parseOr() throws ParseException {
+    private ExpressionNode parseOr() throws ParseException {
         ExpressionNode left = parseAnd();
 
         while (true) {
@@ -313,7 +305,7 @@ public class Query {
         }
     }
 
-    ExpressionNode parseAnd() throws ParseException {
+    private ExpressionNode parseAnd() throws ParseException {
         ExpressionNode left = parseCondition();
 
         while (true) {
@@ -328,7 +320,7 @@ public class Query {
         }
     }
 
-    ExpressionNode parseCondition() throws ParseException {
+    private ExpressionNode parseCondition() throws ParseException {
         int lookahead = nextToken();
         if (lookahead == '(') {
             ExpressionNode node = parseExpression();
@@ -361,12 +353,12 @@ public class Query {
         }
     }
 
-    private class QueryHint {
+    private static class QueryHint {
         long forwardTimestamp;
         long backwardTimestamp;
     }
 
-    private abstract class ExpressionNode {
+    private static abstract class ExpressionNode {
         /// Determine if this subexpression is true at the timestamp provided.
         /// @param timestamp Timestamp and which to evaluate.  If timestamp
         ///  is on a transition, the value after the transition will be used
@@ -376,19 +368,19 @@ public class Query {
         /// @return
         ///   - true if the value at the timestamp makes this expression true
         ///   - false if the value at the timestamp makes this expression true
-        abstract public boolean evaluate(long timestamp, QueryHint outHint);
+        abstract boolean evaluate(TraceDataModel model, long timestamp, QueryHint outHint);
     }
 
-    private abstract class BooleanExpressionNode extends ExpressionNode {
+    private static abstract class BooleanExpressionNode extends ExpressionNode {
         BooleanExpressionNode(ExpressionNode left, ExpressionNode right) {
             fLeftChild = left;
             fRightChild = right;
         }
 
         @Override
-        public boolean evaluate(long timestamp, QueryHint outHint) {
-            boolean leftResult = fLeftChild.evaluate(timestamp, fLeftHint);
-            boolean rightResult = fRightChild.evaluate(timestamp, fRightHint);
+        boolean evaluate(TraceDataModel model, long timestamp, QueryHint outHint) {
+            boolean leftResult = fLeftChild.evaluate(model, timestamp, fLeftHint);
+            boolean rightResult = fRightChild.evaluate(model, timestamp, fRightHint);
 
             // Compute the hints, which are the soonest time this expression
             // *could* change value. We will call the subclassed methods to determine
@@ -428,8 +420,8 @@ public class Query {
         private QueryHint fRightHint = new QueryHint();
     }
 
-    private class OrExpressionNode extends BooleanExpressionNode {
-        public OrExpressionNode(ExpressionNode left, ExpressionNode right) {
+    private static class OrExpressionNode extends BooleanExpressionNode {
+        OrExpressionNode(ExpressionNode left, ExpressionNode right) {
             super(left, right);
         }
 
@@ -474,8 +466,8 @@ public class Query {
         }
     }
 
-    private class AndExpressionNode extends BooleanExpressionNode {
-        public AndExpressionNode(ExpressionNode left, ExpressionNode right) {
+    private static class AndExpressionNode extends BooleanExpressionNode {
+        AndExpressionNode(ExpressionNode left, ExpressionNode right) {
             super(left, right);
         }
 
@@ -521,15 +513,15 @@ public class Query {
         }
     }
 
-    private abstract class ComparisonExpressionNode extends ExpressionNode {
+    private static abstract class ComparisonExpressionNode extends ExpressionNode {
         protected ComparisonExpressionNode(int netId, BitVector expected) {
             fNetId = netId;
             fExpected = expected;
         }
 
         @Override
-        public boolean evaluate(long timestamp, QueryHint outHint) {
-            Iterator<Transition> i = fTraceDataModel.findTransition(fNetId, timestamp);
+        boolean evaluate(TraceDataModel model, long timestamp, QueryHint outHint) {
+            Iterator<Transition> i = model.findTransition(fNetId, timestamp);
             Transition t = i.next();
             boolean result = doCompare(t, fExpected);
             if (timestamp >= t.getTimestamp())
@@ -553,8 +545,8 @@ public class Query {
         protected BitVector fExpected;
     }
 
-    private class EqualExpressionNode extends ComparisonExpressionNode {
-        public EqualExpressionNode(int netId, BitVector match) {
+    private static class EqualExpressionNode extends ComparisonExpressionNode {
+        EqualExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
@@ -569,8 +561,8 @@ public class Query {
         }
     }
 
-    private class NotEqualExpressionNode extends ComparisonExpressionNode {
-        public NotEqualExpressionNode(int netId, BitVector match) {
+    private static class NotEqualExpressionNode extends ComparisonExpressionNode {
+        NotEqualExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
@@ -585,8 +577,8 @@ public class Query {
         }
     }
 
-    private class GreaterThanExpressionNode extends ComparisonExpressionNode {
-        public GreaterThanExpressionNode(int netId, BitVector match) {
+    private static class GreaterThanExpressionNode extends ComparisonExpressionNode {
+        GreaterThanExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
@@ -601,8 +593,8 @@ public class Query {
         }
     }
 
-    private class LessThanExpressionNode extends ComparisonExpressionNode {
-        public LessThanExpressionNode(int netId, BitVector match) {
+    private static class LessThanExpressionNode extends ComparisonExpressionNode {
+        LessThanExpressionNode(int netId, BitVector match) {
             super(netId, match);
         }
 
@@ -617,6 +609,14 @@ public class Query {
         }
     }
 
+    private String fQueryString;
+    private int fLexerOffset;
+    private StringBuffer fCurrentTokenValue = new StringBuffer();
+    private int fCurrentTokenType;
+    private int fPushBackChar = -1;
+    private int fPushBackToken = -1;
+    private int fTokenStart;
+    private BitVector fBitVector;
     private TraceDataModel fTraceDataModel;
     private QueryHint fQueryHint = new QueryHint();
     private ExpressionNode fExpression;

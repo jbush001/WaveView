@@ -51,7 +51,7 @@ class VCDLoader implements TraceLoader {
         System.out.println("" + fNetMap.size() + " total nets");
     }
 
-    private class Net {
+    private static class Net {
         Net(int builderID, int width) {
             fBuilderID = builderID;
             fWidth = width;
@@ -271,7 +271,7 @@ class VCDLoader implements TraceLoader {
         return fTokenizer.sval;
     }
 
-    private class ProgressInputStream extends InputStream {
+    private static class ProgressInputStream extends InputStream {
         ProgressInputStream(InputStream wrapped) {
             fWrapped = wrapped;
         }
