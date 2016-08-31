@@ -29,7 +29,7 @@ import javax.swing.event.ListDataEvent;
 ///
 
 class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
-    public NetSearchListModelAdapter(TraceDataModel model) {
+    NetSearchListModelAdapter(TraceDataModel model) {
         fTraceDataModel = model;
         setPattern("");
     }
@@ -38,7 +38,7 @@ class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     ///   Investigate java.util.regex.Pattern for more complex matches
     /// @param pattern Only items that contain this pattern in some part of
     ///    them will be displayed.
-    public void setPattern(String pattern) {
+    void setPattern(String pattern) {
         if (pattern.equals("")) {
             fMatches.clear();
             for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++)

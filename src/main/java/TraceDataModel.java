@@ -22,7 +22,7 @@ import java.util.*;
 ///
 
 class TraceDataModel {
-    public NetTreeModel getNetTree() {
+    NetTreeModel getNetTree() {
         return fNetTree;
     }
 
@@ -46,21 +46,21 @@ class TraceDataModel {
         return fAllNets.get(netId).findTransition(timestamp);
     }
 
-    public long getMaxTimestamp() {
+    long getMaxTimestamp() {
         return fMaxTimestamp;
     }
 
     /// @bug Is this needed if we already have the NetTreeModel exposed?
-    public int getNetFromTreeObject(Object o) {
+    int getNetFromTreeObject(Object o) {
         return fNetTree.getNetFromTreeObject(o);
     }
 
-    public int getTotalNetCount() {
+    int getTotalNetCount() {
         return fAllNets.size();
     }
 
     /// look up by fully qualified name
-    public int findNet(String name) {
+    int findNet(String name) {
         Integer i = fFullNameToNetMap.get(name);
         if (i == null)
             return -1;
@@ -68,15 +68,15 @@ class TraceDataModel {
         return i.intValue();
     }
 
-    public int getNetWidth(int index) {
+    int getNetWidth(int index) {
         return fAllNets.get(index).getWidth();
     }
 
-    public String getShortNetName(int index) {
+    String getShortNetName(int index) {
         return fAllNets.get(index).getShortName();
     }
 
-    public String getFullNetName(int index) {
+    String getFullNetName(int index) {
         return fAllNets.get(index).getFullName();
     }
 

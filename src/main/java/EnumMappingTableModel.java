@@ -21,7 +21,7 @@ import javax.swing.table.*;
 ///
 
 class EnumMappingTableModel extends AbstractTableModel {
-    public EnumMappingTableModel(EnumValueFormatter formatter) {
+    EnumMappingTableModel(EnumValueFormatter formatter) {
         fFormatter = formatter;
     }
 

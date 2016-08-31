@@ -124,7 +124,7 @@ class TransitionVector {
     /// Called while the waveform is being loaded.
     /// The timestamp must be after the last transition that was
     /// appended
-    public void appendTransition(long timestamp, BitVector values) {
+    void appendTransition(long timestamp, BitVector values) {
         if (fTransitionCount == fAllocSize) {
             // Grow the array
             if (fAllocSize < 128)

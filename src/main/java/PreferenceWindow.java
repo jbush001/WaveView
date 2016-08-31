@@ -24,7 +24,7 @@ import java.awt.datatransfer.*;
 import javax.swing.text.*;
 
 class PreferenceWindow extends JFrame {
-    public PreferenceWindow() {
+    PreferenceWindow() {
         super("Preferences");
 
         setPreferredSize(new Dimension(500, 400));

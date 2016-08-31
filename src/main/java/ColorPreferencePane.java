@@ -22,7 +22,7 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 
 class ColorPreferencePane extends PreferencePane {
-    public ColorPreferencePane() {
+    ColorPreferencePane() {
         super(new FlowLayout());
         AppPreferences prefs = AppPreferences.getInstance();
 
@@ -53,11 +53,10 @@ class ColorPreferencePane extends PreferencePane {
     }
 
     @Override
-    public void loadSettings() {
-    }
+    void loadSettings() {}
 
     @Override
-    public void saveSettings() {
+    void saveSettings() {
         AppPreferences prefs = AppPreferences.getInstance();
         prefs.traceColor = fTraceColorButton.getColor();
         prefs.conflictColor = fConflictColorButton.getColor();

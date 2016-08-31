@@ -21,8 +21,8 @@ import java.util.*;
 /// encoding state variables.
 ///
 
-public class EnumValueFormatter implements ValueFormatter {
-    public class Mapping {
+class EnumValueFormatter implements ValueFormatter {
+    private class Mapping {
         Mapping(int _value, String _name) {
             value = _value;
             name = _name;
@@ -32,8 +32,7 @@ public class EnumValueFormatter implements ValueFormatter {
         String name;
     };
 
-    public EnumValueFormatter() {
-    }
+    EnumValueFormatter() {}
 
     void addMapping(int value, String name) {
         fMappings.add(new Mapping(value, name));

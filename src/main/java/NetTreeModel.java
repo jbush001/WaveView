@@ -24,14 +24,14 @@ import javax.swing.tree.*;
 /// Maintains module/net hieararchy, where leaf nodes are nets and interior nodes
 /// are modules.
 ///
-public class NetTreeModel implements TreeModel {
-    public NetTreeModel() {}
+class NetTreeModel implements TreeModel {
+    NetTreeModel() {}
 
-    public void clear() {
+    void clear() {
         fRoot = null;
     }
 
-    public void enterScope(String name) {
+    void enterScope(String name) {
         if (fNodeStack.empty() && fRoot != null) {
             // If you call $dumpvars more than once with iverilog, it will pop the root
             // node off and re-push it.  Handle this case here.
@@ -48,19 +48,20 @@ public class NetTreeModel implements TreeModel {
         fNodeStack.push(node);
     }
 
-    public void leaveScope() {
+    void leaveScope() {
         fNodeStack.pop();
     }
 
-    public void addNet(String name, int netId) {
+    void addNet(String name, int netId) {
         fNodeStack.peek().fChildren.add(new NetTreeNode(name, netId));
     }
 
-    public int getNetFromTreeObject(Object o) {
+    int getNetFromTreeObject(Object o) {
         return ((NetTreeNode)o).fNet;
     }
 
-    // Tree model methods
+    // Tree model methods. Listeners are unimplemented because the tree is
+    // immutable.
     @Override
     public void addTreeModelListener(TreeModelListener l) {}
 

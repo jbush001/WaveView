@@ -32,7 +32,7 @@ import javax.swing.table.*;
 ///   listeners that enum mappings have changed.
 ///
 class EnumMappingPanel extends JPanel {
-    public EnumMappingPanel(EnumValueFormatter formatter) {
+    EnumMappingPanel(EnumValueFormatter formatter) {
         super(new BorderLayout());
 
         fTable = new JTable(new EnumMappingTableModel(formatter));

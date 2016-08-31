@@ -22,10 +22,10 @@ import java.awt.event.*;
 ///
 /// Draws the ruler with times at the top of the trace view.
 ///
-public class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, ActionListener {
+class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, ActionListener {
     private static final int TIMESTAMP_DISAPPEAR_INTERVAL = 500;
 
-    public TimescalePanel(TraceDisplayModel displayModel, TraceDataModel dataModel) {
+    TimescalePanel(TraceDisplayModel displayModel, TraceDataModel dataModel) {
         fTraceDisplayModel = displayModel;
         fTraceDataModel = dataModel;
         fTraceDisplayModel.addListener(this);

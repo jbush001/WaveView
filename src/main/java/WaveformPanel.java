@@ -24,10 +24,10 @@ import java.util.*;
 /// This view displays the waveforms.
 ///
 
-public class WaveformPanel extends JPanel implements MouseListener,
+class WaveformPanel extends JPanel implements MouseListener,
     MouseMotionListener, TraceDisplayModel.Listener {
 
-    public WaveformPanel(TraceDisplayModel traceViewModel, TraceDataModel traceDataModel) {
+    WaveformPanel(TraceDisplayModel traceViewModel, TraceDataModel traceDataModel) {
         fTraceDisplayModel = traceViewModel;
         fTraceDataModel = traceDataModel;
         traceViewModel.addListener(this);

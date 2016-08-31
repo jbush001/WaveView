@@ -37,7 +37,7 @@ interface TraceLoader {
         boolean updateProgress(int percentRead);
     }
 
-    public void load(File file, TraceBuilder builder, ProgressListener listener)
+    void load(File file, TraceBuilder builder, ProgressListener listener)
         throws LoadException, IOException;
 }
 

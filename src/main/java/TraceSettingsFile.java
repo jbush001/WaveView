@@ -33,18 +33,18 @@ class TraceSettingsFile {
     /// @param file Name of a trace file
     /// @returns configuration file for this (a .dotfile in the same
     ///  directory)
-    public static File configFileName(File file) throws IOException {
+    static File configFileName(File file) throws IOException {
         return new File(file.getParent() + "/." + file.getName() + ".traceconfig");
     }
 
-    public TraceSettingsFile(File file, TraceDataModel dataModel,
+    TraceSettingsFile(File file, TraceDataModel dataModel,
                              TraceDisplayModel displayModel) {
         fFile = file;
         fDataModel = dataModel;
         fDisplayModel = displayModel;
     }
 
-    public void write() throws Exception {
+    void write() throws Exception {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.newDocument();
 
@@ -97,7 +97,7 @@ class TraceSettingsFile {
         transformer.transform(source, result);
     }
 
-    public Element makeVisibleNetList(Document document) {
+    private Element makeVisibleNetList(Document document) {
         Element netSetElement = document.createElement("netset");
 
         for (int i = 0; i < fDisplayModel.getVisibleNetCount(); i++) {
@@ -150,7 +150,7 @@ class TraceSettingsFile {
         return elem.getData();
     }
 
-    public void readNetSet(Element element) throws ClassNotFoundException {
+    private void readNetSet(Element element) throws ClassNotFoundException {
         fDisplayModel.removeAllNets();
 
         NodeList netElements = element.getElementsByTagName("net");
@@ -195,7 +195,7 @@ class TraceSettingsFile {
         }
     }
 
-    public void read() throws Exception {
+    void read() throws Exception {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(fFile);
 

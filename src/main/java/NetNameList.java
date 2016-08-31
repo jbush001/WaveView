@@ -106,7 +106,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
     }
 
     class ListModelAdapter implements ListModel<Integer>, TraceDisplayModel.Listener {
-        public ListModelAdapter() {
+        ListModelAdapter() {
             fTraceDisplayModel.addListener(this);
         }
 
@@ -214,7 +214,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         private int[] fLocalIndices;
     }
 
-    public NetNameList(TraceDisplayModel displayModel, TraceDataModel dataModel) {
+    NetNameList(TraceDisplayModel displayModel, TraceDataModel dataModel) {
         fTraceDisplayModel = displayModel;
         fTraceDataModel = dataModel;
         displayModel.addListener(this);

@@ -21,6 +21,6 @@
 /// logic types.
 ///
 
-public interface ValueFormatter {
+interface ValueFormatter {
     String format(BitVector values);
 }

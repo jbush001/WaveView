@@ -20,8 +20,8 @@
 /// the given timestamp.
 ///
 
-public class Transition extends BitVector {
-    public long getTimestamp() {
+class Transition extends BitVector {
+    long getTimestamp() {
         return fTimestamp;
     }
 

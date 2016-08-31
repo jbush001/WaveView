@@ -24,7 +24,7 @@ class MarkerTableModel extends AbstractTableModel {
     private static final int NUM_COLUMNS = 3;
     private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
 
-    public MarkerTableModel(TraceDisplayModel model) {
+    MarkerTableModel(TraceDisplayModel model) {
         fTraceDisplayModel = model;
     }
 

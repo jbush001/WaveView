@@ -21,11 +21,11 @@ import java.util.*;
 ///
 
 class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
-    public interface Keyed {
-        public long getKey();
+    interface Keyed {
+        long getKey();
     }
 
-    public SortedArrayList() {}
+    SortedArrayList() {}
 
     public boolean add(T value) {
         long key = ((Keyed) value).getKey();
@@ -39,7 +39,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
         return true;
     }
 
-    public Iterator<T> find(long key) {
+    Iterator<T> find(long key) {
         return new SortedArrayListIterator(findIndex(key));
     }
 
@@ -49,7 +49,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
     ///   If the key is before the first element, return 0.
     /// @todo Investigate using java.util.Arrays.binarySearch instead of
     ///    hand rolled implementation here.
-    public int findIndex(long key) {
+    int findIndex(long key) {
         // Binary search
         int low = 0;
         int high = size();
@@ -72,7 +72,7 @@ class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
     }
 
     private class SortedArrayListIterator implements Iterator<T> {
-        public SortedArrayListIterator(int index) {
+        SortedArrayListIterator(int index) {
             fIndex = index;
         }
 

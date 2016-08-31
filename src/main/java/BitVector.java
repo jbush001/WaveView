@@ -21,31 +21,30 @@ import java.lang.*;
 /// Array of arbitrary lengthed four-valued logic values
 ///
 class BitVector {
-    public static final byte VALUE_0 = 0;
-    public static final byte VALUE_1 = 1;
-    public static final byte VALUE_X = 2;
-    public static final byte VALUE_Z = 3;
+    static final byte VALUE_0 = 0;
+    static final byte VALUE_1 = 1;
+    static final byte VALUE_X = 2;
+    static final byte VALUE_Z = 3;
 
-    public BitVector() {
-    }
+    BitVector() {}
 
-    public BitVector(String string, int radix) throws NumberFormatException {
+    BitVector(String string, int radix) throws NumberFormatException {
         parseString(string, radix);
     }
 
-    public BitVector(int width) {
+    BitVector(int width) {
         fValues = new byte[width];
     }
 
     /// @param index bit number, where 0 is least significant
     /// @returns Value of bit at position, one of VALUE_0, VALUE_1, VALUE_X, VALUE_Z
-    public int getBit(int index) {
+    int getBit(int index) {
         return fValues[index];
     }
 
     /// @param index bit number, where 0 is least significant
     /// @parma value of bit at position, one of VALUE_0, VALUE_1, VALUE_X, VALUE_Z
-    public void setBit(int index, int value) {
+    void setBit(int index, int value) {
         if (value > VALUE_Z || value < 0)
             throw new NumberFormatException("invalid bit value");
 
@@ -54,7 +53,7 @@ class BitVector {
 
     /// @returns total number of bits in this vector (which may contain some number
     /// of leading zeroes)
-    public int getWidth() {
+    int getWidth() {
         return fValues.length;
     }
 
@@ -65,7 +64,7 @@ class BitVector {
     }
 
     /// @returns true if this is all Zs
-    public boolean isZ() {
+    boolean isZ() {
         for (int i = 0; i < fValues.length; i++) {
             if (fValues[i] != VALUE_Z)
                 return false;
@@ -75,7 +74,7 @@ class BitVector {
     }
 
     /// @returns true if this contains any Z or X values in any positions
-    public boolean isX() {
+    boolean isX() {
         for (int i = 0; i < fValues.length; i++) {
             if (fValues[i] == VALUE_Z || fValues[i] == VALUE_X)
                 return true;
@@ -85,7 +84,7 @@ class BitVector {
     }
 
     /// @param radix May be 2, 10, or 16
-    public void parseString(String string, int radix) throws NumberFormatException {
+    void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
         case 2:
             parseBinaryValue(string);
@@ -107,7 +106,7 @@ class BitVector {
     /// @returns 1 if this is greater than the other bit vector, -1 if it is
     /// less than, 0 if equal
     /// @bug Ignores X and Z values, should have a rule for those.
-    public int compare(BitVector other) {
+    int compare(BitVector other) {
         int myWidth = getWidth();
         int otherWidth = other.getWidth();
         if (otherWidth > myWidth) {
@@ -171,7 +170,7 @@ class BitVector {
 
     /// @param radix may be 2, 10, or 16
     /// @returns A string representation of this BitVector with the given radix
-    public String toString(int radix) {
+    String toString(int radix) {
         switch (radix) {
         case 2:
             return toBinaryString();

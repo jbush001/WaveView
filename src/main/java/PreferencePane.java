@@ -22,10 +22,10 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 
 abstract class PreferencePane extends JPanel {
-    public PreferencePane(LayoutManager manager) {
+    PreferencePane(LayoutManager manager) {
         super(manager);
     }
 
-    abstract public void loadSettings();
-    abstract public void saveSettings();
+    abstract void loadSettings();
+    abstract void saveSettings();
 }

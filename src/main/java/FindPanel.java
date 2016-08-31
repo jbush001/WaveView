@@ -23,7 +23,7 @@ import javax.swing.table.*;
 import javax.swing.text.*;
 
 class FindPanel extends JPanel implements ActionListener {
-    public FindPanel(WaveApp app, String initialQuery) {
+    FindPanel(WaveApp app, String initialQuery) {
         fWaveApp = app;
 
         setLayout(new BorderLayout());

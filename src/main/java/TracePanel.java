@@ -27,8 +27,8 @@ import java.io.File;
 ///
 /// Container for the timescale view, net names, and waveforms.
 ///
-public class TracePanel extends JPanel {
-    public TracePanel(TraceDisplayModel displayModel, TraceDataModel dataModel,
+class TracePanel extends JPanel {
+    TracePanel(TraceDisplayModel displayModel, TraceDataModel dataModel,
     WaveApp waveApp) {
         super(new BorderLayout());
 
@@ -82,15 +82,15 @@ public class TracePanel extends JPanel {
         });
     }
 
-    public void zoomIn() {
+    void zoomIn() {
         setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() / 1.25);
     }
 
-    public void zoomOut() {
+    void zoomOut() {
         setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() * 1.25);
     }
 
-    public void setScaleKeepCentered(double newScale) {
+    void setScaleKeepCentered(double newScale) {
         Rectangle oldVisibleRect = fWaveformPanel.getVisibleRect();
         long centerTimestamp = (long)((oldVisibleRect.x + oldVisibleRect.width / 2) * fTraceDisplayModel.getHorizontalScale());
 
@@ -104,7 +104,7 @@ public class TracePanel extends JPanel {
         fWaveformPanel.scrollRectToVisible(newVisibleRect);
     }
 
-    public void zoomToSelection() {
+    void zoomToSelection() {
         // Determine what the new size of the selection window should be.
         long selectionStartTimestamp = fTraceDisplayModel.getSelectionStart();
         long cursorPositionTimestamp = fTraceDisplayModel.getCursorPosition();
@@ -129,7 +129,7 @@ public class TracePanel extends JPanel {
         fWaveformPanel.scrollRectToVisible(newRect);
     }
 
-    public int[] getSelectedNets() {
+    int[] getSelectedNets() {
         return fNetNameList.getSelectedIndices();
     }
 

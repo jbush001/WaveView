@@ -22,8 +22,8 @@ import javax.swing.text.*;
 import java.io.*;
 
 /// @todo Add menu item to jump to specific timestamp
-public class WaveApp extends JPanel implements ActionListener {
-    public WaveApp() {
+class WaveApp extends JPanel implements ActionListener {
+    WaveApp() {
         super(new BorderLayout());
 
         JToolBar toolBar = new JToolBar();

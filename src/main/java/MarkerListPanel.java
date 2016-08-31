@@ -29,10 +29,10 @@ import javax.swing.table.*;
 /// to jump to that point in the trace.
 /// @todo Add a way to remove entries directly from this list
 ///
-public class MarkerListPanel extends JPanel implements ActionListener,
+class MarkerListPanel extends JPanel implements ActionListener,
     TraceDisplayModel.Listener {
 
-    public MarkerListPanel(TraceDisplayModel traceModel) {
+    MarkerListPanel(TraceDisplayModel traceModel) {
         setLayout(new GridLayout(1, 1));
 
         fTraceDisplayModel = traceModel;

@@ -27,33 +27,33 @@ import java.io.*;
 class AppPreferences {
     private static final int MAX_RECENT_FILES = 10;
 
-    public static AppPreferences getInstance() {
+    static AppPreferences getInstance() {
         if (fInstance == null)
             fInstance = new AppPreferences();
 
         return fInstance;
     }
 
-    public Color traceColor;
-    public Color conflictColor;
-    public Color selectionColor;
-    public Color cursorColor;
-    public Color backgroundColor;
-    public Color timingMarkerColor;
-    public Color markerColor;
-    public Color listSelectionBgColor;
-    public Color listSelectionFgColor;
-    public Color valueColor;
+    Color traceColor;
+    Color conflictColor;
+    Color selectionColor;
+    Color cursorColor;
+    Color backgroundColor;
+    Color timingMarkerColor;
+    Color markerColor;
+    Color listSelectionBgColor;
+    Color listSelectionFgColor;
+    Color valueColor;
 
-    public void setInitialTraceDirectory(File file) {
+    void setInitialTraceDirectory(File file) {
         fPrefs.put("initialTraceDirectory", file.toString());
     }
 
-    public File getInitialTraceDirectory() {
+    File getInitialTraceDirectory() {
         return new File(fPrefs.get("initialTraceDirectory", ""));
     }
 
-    public void addFileToRecents(String path) {
+    void addFileToRecents(String path) {
         // check if this is already in the recent files list
         for (String recentFile : fRecentFiles) {
             if (recentFile.equals(path))
@@ -78,11 +78,11 @@ class AppPreferences {
         fPrefs.put("recentFiles", recentList.toString());
     }
 
-    public ArrayList<String> getRecentFileList() {
+    ArrayList<String> getRecentFileList() {
         return fRecentFiles;
     }
 
-    public void writeColors() {
+    void writeColors() {
         writeColor("traceColor", traceColor);
         writeColor("conflictColor", conflictColor);
         writeColor("selectionColor", selectionColor);

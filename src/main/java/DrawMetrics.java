@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-public class DrawMetrics {
+class DrawMetrics {
     public static final int MIN_MINOR_TICK_H_SPACE = 5;
     public static final int MINOR_TICKS_PER_MAJOR = 10;
     public static final int MINOR_TICK_TOP = 18;

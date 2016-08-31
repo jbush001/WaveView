@@ -27,8 +27,8 @@ import java.util.*;
 /// @todo Support proper logical operators &&, ||
 /// @todo Support partial multi-net matches
 ///
-public class Query {
-    public Query(TraceDataModel traceModel, String queryString) throws ParseException {
+class Query {
+    Query(TraceDataModel traceModel, String queryString) throws ParseException {
         fTraceDataModel = traceModel;
         fQueryString = queryString;
         fLexerOffset = 0;
@@ -38,7 +38,7 @@ public class Query {
 
     /// Mainly useful for unit testing
     /// @returns true if this query matches at the passed timestamp
-    public boolean matches(long timestamp) {
+    boolean matches(long timestamp) {
         return fExpression.evaluate(fTraceDataModel, timestamp, fQueryHint);
     }
 
@@ -52,7 +52,7 @@ public class Query {
     ///   -1 If there are no matches in the forward direction
     ///      timestamp of the next forward match otherwise
     ///
-    public long getNextMatch(long startTimestamp) {
+    long getNextMatch(long startTimestamp) {
         long currentTime = startTimestamp;
         boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
 
@@ -86,7 +86,7 @@ public class Query {
     ///   -1 If there are no matches in the backward direction
     ///      timestamp of the next backward match otherwise
     ///
-    public long getPreviousMatch(long startTimestamp) {
+    long getPreviousMatch(long startTimestamp) {
         long currentTime = startTimestamp;
         boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fQueryHint);
         while (currentValue) {

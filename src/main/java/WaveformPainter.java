@@ -31,7 +31,7 @@ interface WaveformPainter {
     /// @param horizontalScale nanoseconds per pixel.
     /// @param formatter Used to convert the BitVector to a readable string
     ///        that is drawn on top of the trace waveform.
-    public void paint(Graphics g, TraceDataModel model, int netId,
-                      int y, Rectangle visibleRect, double horizontalScale,
-                      ValueFormatter formatter);
+    void paint(Graphics g, TraceDataModel model, int netId,
+               int y, Rectangle visibleRect, double horizontalScale,
+               ValueFormatter formatter);
 }
