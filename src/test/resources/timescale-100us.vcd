@@ -1,4 +1,4 @@
 $timescale
-   1s
+   100us
 $end
 $enddefinitions $end

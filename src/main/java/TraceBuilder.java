@@ -19,6 +19,10 @@
 ///
 
 interface TraceBuilder {
+    /// Set timescale. @param order 10 raised to this number is the number of
+    /// seconds per time unit.
+    public void setTimescale(int order);
+
     /// Adds another module to the fully qualified path of any nets
     /// that are subsequently added via newNet.
     void enterModule(String name);
@@ -40,7 +44,7 @@ interface TraceBuilder {
     /// Add a new transition
     /// @param netId Identifier of the net for which the transition takes place. This
     ///    is the value that was returned by newNet.
-    /// @param timestamp timestamp of the transition, in nanoseconds from start.
+    /// @param timestamp timestamp of the transition, in time units from start.
     /// @param values New values the signal will take after the transition.
     void appendTransition(int netId, long timestamp, BitVector values);
 

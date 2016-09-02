@@ -24,6 +24,7 @@ public class TraceDataModelTest {
         TraceDataModel model = new TraceDataModel();
         TraceBuilder builder = model.startBuilding();
 
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int net1 = builder.newNet("net1", -1, 1);
         int net2 = builder.newNet("net2", -1, 3);
@@ -90,6 +91,7 @@ public class TraceDataModelTest {
         TraceDataModel model = new TraceDataModel();
         TraceBuilder builder = model.startBuilding();
 
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int net1 = builder.newNet("net1", -1, 1);
         int net2 = builder.newNet("net2", net1, 1);
@@ -119,6 +121,7 @@ public class TraceDataModelTest {
         TraceDataModel model1 = new TraceDataModel();
         TraceBuilder builder = model1.startBuilding();
 
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int net1 = builder.newNet("net1", -1, 1);
         int net2 = builder.newNet("net2", net1, 1);

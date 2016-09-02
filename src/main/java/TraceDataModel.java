@@ -124,6 +124,14 @@ class TraceDataModel {
 
     private class ConcreteTraceBuilder implements TraceBuilder {
         @Override
+        public void setTimescale(int order) {
+            if (order < -9)
+                System.out.println("unsupported timescale");    // @fixme
+
+            fNanoSecondsPerUnit = (int) Math.pow(10, order + 9);
+        }
+
+        @Override
         public void enterModule(String name) {
             fNetTree.enterScope(name);
             fScopeStack.push(name);
@@ -145,7 +153,8 @@ class TraceDataModel {
         @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
             NetDataModel model = fAllNets.get(id);
-            model.fTransitionVector.appendTransition(timestamp, values);
+            model.fTransitionVector.appendTransition(timestamp * fNanoSecondsPerUnit,
+                values);
         }
 
         @Override
@@ -177,6 +186,7 @@ class TraceDataModel {
         }
 
         private Stack<String> fScopeStack = new Stack<String>();
+        private int fNanoSecondsPerUnit;
     }
 
     private long fMaxTimestamp;

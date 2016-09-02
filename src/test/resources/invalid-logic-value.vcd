@@ -1,6 +1,10 @@
+$timescale
+   1ns
+$end
 $scope module mod1 $end
-$var wire 1 ! clk $end
+$var wire 16 A addr [15:0] $end
 $upscope $end
 $enddefinitions $end
 #0
-2!
+b1210111000101011 A
+

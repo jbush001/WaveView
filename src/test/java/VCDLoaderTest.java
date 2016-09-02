@@ -33,6 +33,7 @@ public class VCDLoaderTest {
         static final int EXPECT_NET = 2;
         static final int EXPECT_TRANSITION = 3;
         static final int EXPECT_FINISHED = 4;
+        static final int EXPECT_TIMESCALE = 5;
 
         class Event {
             Event(int type) {
@@ -45,6 +46,15 @@ public class VCDLoaderTest {
             int fWidth;
             long fTimestamp;
             BitVector fValues;
+        }
+
+        @Override
+        public void setTimescale(int order) {
+            System.out.println("setTimescale " + order);
+
+            Event event = fEventList.elementAt(fCurrentEvent++);
+            assertEquals(event.fType, EXPECT_TIMESCALE);
+            assertEquals(event.fTimestamp, (long) order);
         }
 
         @Override
@@ -96,6 +106,12 @@ public class VCDLoaderTest {
             assertEquals(event.fType, EXPECT_FINISHED);
         }
 
+        void expectTimescale(int order) {
+            Event event = new Event(EXPECT_TIMESCALE);
+            event.fTimestamp = order;
+            fEventList.add(event);
+        }
+
         void expectEnterModule(String name) {
             Event event = new Event(EXPECT_ENTER);
             event.fName = name;
@@ -133,6 +149,9 @@ public class VCDLoaderTest {
 
     public class DummyTraceBuilder implements TraceBuilder {
         @Override
+        public void setTimescale(int order) {}
+
+        @Override
         public void enterModule(String name) {}
 
         @Override
@@ -156,12 +175,13 @@ public class VCDLoaderTest {
     // Simulataneously builds VCD file contents and populates the
     // ExpectTraceBuilder with matching events
     class TestBuilder {
-        void setTimestampMultiplier(int value) {
-            fTimestampMultiplier = value;
-        }
-
         void addString(String data) {
             fVCDContents.append(data);
+        }
+
+        void setTimescale(String str, int order) {
+            fVCDContents.append("$timescale\n  1us\n$end\n");
+            fTraceBuilder.expectTimescale(order);
         }
 
         void enterModule(String name) {
@@ -227,7 +247,7 @@ public class VCDLoaderTest {
             fVCDContents.append(getIdForIndex(netId));
             fVCDContents.append('\n');
 
-            fTraceBuilder.expectAppendTransition(netId, timestamp * fTimestampMultiplier, bitString);
+            fTraceBuilder.expectAppendTransition(netId, timestamp, bitString);
         }
 
         void finish() {
@@ -250,7 +270,6 @@ public class VCDLoaderTest {
         Vector<Boolean> fNetIsMultiBit = new Vector<Boolean>();
         ExpectTraceBuilder fTraceBuilder = new ExpectTraceBuilder();
         StringBuffer fVCDContents = new StringBuffer();
-        int fTimestampMultiplier = 1;
         long fLastTimestamp = -1;
     }
 
@@ -269,97 +288,81 @@ public class VCDLoaderTest {
         return new File("src/test/resources/" + name);
     }
 
-    // Timescale is one microsecond
     @Test
-    public void testTimescaleUs() {
+    public void testTimescaleFs() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
-        builder.expectEnterModule("mod1");
-        builder.expectNewNet("clk", -1, 1);
-        builder.expectExitModule();
-        builder.expectAppendTransition(0, 0, "1");
-        builder.expectAppendTransition(0, 1000, "0");
-        builder.expectAppendTransition(0, 2000, "1");
-        builder.expectAppendTransition(0, 3000, "0");
-        builder.expectAppendTransition(0, 4000, "1");
+        builder.expectTimescale(-15);
         builder.expectLoadFinished();
-
-        try {
-            (new VCDLoader()).load(testFile("timescale-us.vcd"),
-                builder, null);
-        } catch (Exception exc) {
-            fail("caught exception");
-        }
-    }
-
-    // Timescale is two microsecond. Ensure it handles both
-    // the unit and the number correctly.
-    @Test
-    public void testTimescale2Us() {
-        ExpectTraceBuilder builder = new ExpectTraceBuilder();
-        builder.expectEnterModule("mod1");
-        builder.expectNewNet("clk", -1, 1);
-        builder.expectExitModule();
-        builder.expectAppendTransition(0, 0, "1");
-        builder.expectAppendTransition(0, 2000, "0");
-        builder.expectAppendTransition(0, 4000, "1");
-        builder.expectAppendTransition(0, 6000, "0");
-        builder.expectAppendTransition(0, 8000, "1");
-        builder.expectLoadFinished();
-
-        try {
-            (new VCDLoader()).load(testFile("timescale-2us.vcd"),
-                builder, null);
-        } catch (Exception exc) {
-            fail("caught exception");
-        }
-    }
-
-    // Timescale is one nanosecond
-    @Test
-    public void testTimescaleNs() {
-        ExpectTraceBuilder builder = new ExpectTraceBuilder();
-        builder.expectEnterModule("mod1");
-        builder.expectNewNet("clk", -1, 1);
-        builder.expectExitModule();
-        builder.expectAppendTransition(0, 0, "1");
-        builder.expectAppendTransition(0, 1, "0");
-        builder.expectAppendTransition(0, 2, "1");
-        builder.expectAppendTransition(0, 3, "0");
-        builder.expectAppendTransition(0, 4, "1");
-        builder.expectLoadFinished();
-
-        try {
-            (new VCDLoader()).load(testFile("timescale-ns.vcd"),
-                builder, null);
-        } catch (Exception exc) {
-            fail("caught exception");
-        }
-    }
-
-    // Timescale is one second
-    @Test
-    public void testTimescaleS() {
-        ExpectTraceBuilder builder = new ExpectTraceBuilder();
-        builder.expectEnterModule("mod1");
-        builder.expectNewNet("clk", -1, 1);
-        builder.expectExitModule();
-        builder.expectAppendTransition(0, 0, "1");
-        builder.expectAppendTransition(0, 1000000000L, "0");
-        builder.expectAppendTransition(0, 2000000000L, "1");
-        builder.expectAppendTransition(0, 3000000000L, "0");
-        builder.expectAppendTransition(0, 4000000000L, "1");
-        builder.expectLoadFinished();
-
-        try {
-            (new VCDLoader()).load(testFile("timescale-s.vcd"),
-                builder, null);
-        } catch (Exception exc) {
-            fail("caught exception");
-        }
+        (new VCDLoader()).load(testFile("timescale-fs.vcd"),
+            builder, null);
     }
 
     @Test
-    public void testUnknownTimescale() {
+    public void testTimescalePs() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-12);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-ps.vcd"),
+            builder, null);
+    }
+
+    @Test
+    public void testTimescaleNs() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-9);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-ns.vcd"),
+            builder, null);
+    }
+
+    @Test
+    public void testTimescaleUs() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-6);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-us.vcd"),
+            builder, null);
+    }
+
+    @Test
+    public void testTimescaleMs() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-3);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-ms.vcd"),
+            builder, null);
+    }
+
+    @Test
+    public void testTimescaleS() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(0);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-s.vcd"),
+            builder, null);
+    }
+
+    // Ensure it handles both the unit and the number correctly.
+    @Test
+    public void testTimescale10Us() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-5);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-10us.vcd"),
+            builder, null);
+    }
+
+    @Test
+    public void testTimescale100Us() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-4);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-100us.vcd"),
+            builder, null);
+    }
+
+    @Test
+    public void testUnknownTimescale() throws Exception {
         try {
             (new VCDLoader()).load(testFile("unknown-timescale.vcd"),
                 new DummyTraceBuilder(), null);
@@ -367,13 +370,11 @@ public class VCDLoaderTest {
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 2: unknown timescale value 1qs",
                          exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
         }
     }
 
     @Test
-    public void testTimescaleMissingUnit() {
+    public void testTimescaleMissingUnit() throws Exception {
         try {
             (new VCDLoader()).load(testFile("timescale-missing-unit.vcd"),
                 new DummyTraceBuilder(), null);
@@ -381,28 +382,54 @@ public class VCDLoaderTest {
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 2: unknown timescale value 1",
                          exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
+        }
+    }
+
+    @Test
+    public void testTimescaleBadValue() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        try {
+            (new VCDLoader()).load(testFile("timescale-bad-value.vcd"),
+                builder, null);
+            fail("didn't throw exception");
+        } catch (TraceLoader.LoadException exc) {
+            assertEquals("line 2: bad timescale value 17us", exc.getMessage());
         }
     }
 
     // Ensure it doesn't choke when it gets types it doesn't recognize
     // (for example $date, $version)
     @Test
-    public void testUnknownHeaderFields() {
+    public void testUnknownHeaderFields() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-6);
         builder.expectEnterModule("mod1");
         builder.expectNewNet("clk", -1, 1);
         builder.expectExitModule();
         builder.expectAppendTransition(0, 0, "1");
         builder.expectLoadFinished();
 
-        try {
-            (new VCDLoader()).load(testFile("unknown-fields.vcd"),
-                builder, null);
-        } catch (Exception exc) {
-            fail("caught exception");
-        }
+        (new VCDLoader()).load(testFile("unknown-header-fields.vcd"),
+            builder, null);
+    }
+
+    // When a timestamp is out of order, the loader will set it to the
+    // last value silently.
+    @Test
+    public void testTimestampOutOfOrder() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-9);
+        builder.expectEnterModule("mod1");
+        builder.expectNewNet("foo", -1, 1);
+        builder.expectExitModule();
+        builder.expectAppendTransition(0, 0, "1");
+        builder.expectAppendTransition(0, 5, "0");
+        builder.expectAppendTransition(0, 5, "1");
+        builder.expectAppendTransition(0, 6, "0");
+        builder.expectLoadFinished();
+
+        (new VCDLoader()).load(testFile("timestamp-out-of-order.vcd"), builder,
+            null);
     }
 
     // This tests a few things:
@@ -412,8 +439,9 @@ public class VCDLoaderTest {
     //    $var wire 16 A addr [15:0] $end
     //    $var wire 3 B data[2:0] $end
     @Test
-    public void testMultibit() {
+    public void testMultibit() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-9);
         builder.expectEnterModule("mod1");
         builder.expectNewNet("addr", -1, 16);
         builder.expectNewNet("data", -1, 3);
@@ -431,18 +459,15 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(1, 15, "xxx");
         builder.expectLoadFinished();
 
-        try {
-            (new VCDLoader()).load(testFile("multibit.vcd"), builder,
-                null);
-        } catch (Exception exc) {
-            fail("caught exception " + exc);
-        }
+        (new VCDLoader()).load(testFile("multibit.vcd"), builder,
+            null);
     }
 
     // Test that $dumpvars is handled correctly
     @Test
-    public void testDumpvars() {
+    public void testDumpvars() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-9);
         builder.expectEnterModule("mod1");
         builder.expectNewNet("addr", -1, 16);
         builder.expectNewNet("data", -1, 3);
@@ -455,44 +480,34 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(1, 5, "100");
         builder.expectAppendTransition(2, 5, "x");
         builder.expectLoadFinished();
-
-        try {
-            (new VCDLoader()).load(testFile("dumpvars.vcd"), builder,
-                null);
-        } catch (Exception exc) {
-            fail("caught exception " + exc);
-        }
+        (new VCDLoader()).load(testFile("dumpvars.vcd"), builder,
+            null);
     }
 
     @Test
-    public void testUnknownNetId() {
+    public void testUnknownNetId() throws Exception {
         try {
             (new VCDLoader()).load(testFile("unknown-net-id.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 6: Unknown net id $", exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
         }
     }
 
     @Test
-    public void testInvalidLogicValue() {
+    public void testUnsupportedValueType() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("invalid-logic-value.vcd"),
+            (new VCDLoader()).load(testFile("bad-transition-type.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
-            assertEquals("line 6: Invalid logic value",
-                         exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
+            assertEquals("line 6: unsupported value type '2'", exc.getMessage());
         }
     }
 
     @Test
-    public void testInvalidScope() {
+    public void testInvalidScope() throws Exception {
         try {
             (new VCDLoader()).load(testFile("scope-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -500,13 +515,11 @@ public class VCDLoaderTest {
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 2: parse error, expected $end got $var",
                          exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
         }
     }
 
     @Test
-    public void testInvalidUpscope() {
+    public void testInvalidUpscope() throws Exception {
         try {
             (new VCDLoader()).load(testFile("upscope-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -514,13 +527,11 @@ public class VCDLoaderTest {
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 4: parse error, expected $end got $enddefinitions",
                          exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
         }
     }
 
     @Test
-    public void testVarParseError() {
+    public void testVarParseError() throws Exception {
         try {
             (new VCDLoader()).load(testFile("var-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -528,13 +539,11 @@ public class VCDLoaderTest {
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 3: parse error, expected $end got $upscope",
                          exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
         }
     }
 
     @Test
-    public void testTimescaleParseError() {
+    public void testTimescaleParseError() throws Exception {
         try {
             (new VCDLoader()).load(testFile("timescale-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
@@ -542,26 +551,33 @@ public class VCDLoaderTest {
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 3: parse error, expected $end got $scope",
                          exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
         }
     }
 
     @Test
-    public void testTruncatedFile() {
+    public void invalidLogicValue() throws Exception {
+        try {
+            (new VCDLoader()).load(testFile("invalid-logic-value.vcd"),
+                new DummyTraceBuilder(), null);
+            fail("Didn't throw exception");
+        } catch (TraceLoader.LoadException exc) {
+            assertEquals("line 9: invalid logic value", exc.getMessage());
+        }
+    }
+
+    @Test
+    public void testTruncatedFile() throws Exception {
         try {
             (new VCDLoader()).load(testFile("truncated.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 2: unexpected end of file", exc.getMessage());
-        } catch (IOException exc) {
-            fail("IOException " + exc);
         }
     }
 
     @Test
-    public void testTraceAlias() {
+    public void testTraceAlias() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectEnterModule("mod1");
         builder.expectNewNet("foo", -1, 1);
@@ -571,24 +587,18 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(1, 0, "1");
         builder.expectLoadFinished();
 
-        try {
-            (new VCDLoader()).load(testFile("trace-alias.vcd"),
-                builder, null);
-        } catch (Exception exc) {
-            fail("Threw exception " + exc);
-        }
+        (new VCDLoader()).load(testFile("trace-alias.vcd"),
+            builder, null);
     }
 
     // Put everything together with more data and multiple signals
     @Test
-    public void testMixed() {
+    public void testMixed() throws Exception {
         TestBuilder builder = new TestBuilder();
         builder.addString("$date\n	Mon Aug 15 22:28:13 2016\n$end\n");
         builder.addString("$version\n	Icarus Verilog\n$end\n");
-        builder.addString("$timescale\n	1us\n$end\n");
-
+        builder.setTimescale("1us", -6);
         builder.enterModule("mod1");
-        builder.setTimestampMultiplier(1000);
         builder.defineNet("clk", -1, 1);
         builder.defineNet("reset", -1, 1);
         builder.enterModule("mod2");
@@ -617,14 +627,9 @@ public class VCDLoaderTest {
         }
 
         builder.finish();
-
-        try {
-            VCDLoader loader = new VCDLoader();
-            loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
-                        null);
-        } catch (Exception exc) {
-            fail("caught exception " + exc);
-        }
+        VCDLoader loader = new VCDLoader();
+        loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
+                    null);
     }
 
     class TestProgressListener implements TraceLoader.ProgressListener {
@@ -641,9 +646,9 @@ public class VCDLoaderTest {
 
     // Write a bunch of data, make sure we get callbacks
     @Test
-    public void testProgressListener() {
+    public void testProgressListener() throws Exception {
         TestBuilder builder = new TestBuilder();
-        builder.addString("$timescale\n	1ns\n$end\n");
+        builder.setTimescale("1us", -6);
         builder.enterModule("mod1");
         builder.defineNet("value", -1, 16);
         builder.exitModule();
@@ -657,14 +662,9 @@ public class VCDLoaderTest {
         builder.finish();
 
         TestProgressListener listener = new TestProgressListener();
-        try {
-            VCDLoader loader = new VCDLoader();
-            loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
-                        listener);
-        } catch (Exception exc) {
-            fail("caught exception " + exc);
-        }
-
+        VCDLoader loader = new VCDLoader();
+        loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
+                    listener);
         assertNotEquals(-1, listener.fLastUpdate);
     }
 
@@ -673,7 +673,7 @@ public class VCDLoaderTest {
     @Test
     public void testInterruptedLoad() {
         TestBuilder builder = new TestBuilder();
-        builder.addString("$timescale\n	1ns\n$end\n");
+        builder.setTimescale("1us", -6);
         builder.enterModule("mod1");
         builder.defineNet("value", -1, 16);
         builder.exitModule();

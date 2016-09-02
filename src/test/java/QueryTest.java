@@ -22,6 +22,7 @@ public class QueryTest {
     TraceDataModel makeSingleBitModel() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("clk", -1, 1);
         builder.exitModule();
@@ -37,6 +38,7 @@ public class QueryTest {
     TraceDataModel makeFourBitModel() {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("m");
         builder.newNet("a", -1, 1);
         builder.newNet("b", -1, 1);
@@ -74,6 +76,7 @@ public class QueryTest {
     public void testIdentifier() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", -1, 1);
         builder.exitModule();
@@ -108,6 +111,7 @@ public class QueryTest {
     public void testLiteralBases() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("value", -1, 4);
         builder.exitModule();
@@ -277,6 +281,7 @@ public class QueryTest {
     public void testAnd() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("a", -1, 1);
         int id2 = builder.newNet("b", -1, 1);
@@ -343,6 +348,7 @@ public class QueryTest {
     public void testOr() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("a", -1, 1);
         int id2 = builder.newNet("b", -1, 1);
@@ -406,6 +412,7 @@ public class QueryTest {
     public void testComparisons() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("value", -1, 4);
         builder.exitModule();
@@ -643,6 +650,7 @@ public class QueryTest {
     public void testGetNextMatchEnd1() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitModule();
@@ -657,6 +665,7 @@ public class QueryTest {
     public void testGetNextMatchEnd2() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitModule();
@@ -671,6 +680,7 @@ public class QueryTest {
     public void testGetPrevMatchEnd1() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitModule();
@@ -684,6 +694,7 @@ public class QueryTest {
     public void testGetPrevMatchEnd2() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
         builder.enterModule("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitModule();

@@ -20,6 +20,7 @@ import java.util.*;
 ///
 /// Parse a value change dump (VCD) formatted text file and push the contents into a
 /// provided trace model
+/// All section references are to IEEE 1364-2001.
 ///
 class VCDLoader implements TraceLoader {
     @Override
@@ -61,20 +62,34 @@ class VCDLoader implements TraceLoader {
         int fWidth;
     }
 
+    /// 18.2.3.4 $scope
+    /// var_declaration_scope ::= $scope scope_type scope_identifier $end
+    /// scope_type ::= begin | fork | function | module | task
+    /// @todo Record type and put into model
     private void parseScope() throws LoadException, IOException {
-        nextToken(true);    // Scope type (ignore)
+        nextToken(true);   // Scope type
         nextToken(true);
-        fTraceBuilder.enterModule(getTokenString());
+        String scopeIdentifier = getTokenString();
+        fTraceBuilder.enterModule(scopeIdentifier);
         match("$end");
     }
 
+    // 18.2.3.6 $upscope
     private void parseUpscope() throws LoadException, IOException {
         match("$end");
         fTraceBuilder.exitModule();
     }
 
+    /// 18.2.3.8 $var
+    /// vcd_declaration_vars ::= $var var_type identifer_code reference $end
+    /// var_type ::= event | integer | parameter | real | reg | supply0
+    ///              | tri | triand | trior | tri0 | tri1 | wand | wire | wor
+    /// size ::= decimal_number
+    /// reference ::= identifier | identifier [bit_select_index]
+    ///               | identifier[msb_index:lsb_index]
+    /// index := decimal_number
     private void parseVar() throws LoadException, IOException {
-        nextToken(true);    // type
+        nextToken(true);    // type (ignored)
         nextToken(true);    // size
         int width = Integer.parseInt(getTokenString());
 
@@ -83,7 +98,7 @@ class VCDLoader implements TraceLoader {
         nextToken(true);
         String netName = getTokenString();
 
-        // If this has a width like [16:0], Ignore it.
+        // Bit select index (ignore)
         nextToken(true);
         if (getTokenString().charAt(0) != '[')
             fTokenizer.pushBack();
@@ -106,6 +121,10 @@ class VCDLoader implements TraceLoader {
         }
     }
 
+    /// 18.2.3.5 $timescale
+    /// vcd_declaration_timescale ::= $timescale time_number time_unit $end
+    /// time_number ::= 1 | 10 | 100
+    /// time_unit ::= s | ms | us | ns | ps | fs
     private void parseTimescale() throws LoadException, IOException {
         nextToken(true);
 
@@ -115,20 +134,36 @@ class VCDLoader implements TraceLoader {
             unitStart++;
 
         String unit = s.substring(unitStart);
-
-        if (unit.equals("ns"))
-            fNanoSecondsPerIncrement = 1;
+        int order = 1;
+        if (unit.equals("fs"))
+            order = -15;
+        else if (unit.equals("ps"))
+            order = -12;
+        else if (unit.equals("ns"))
+            order = -9;
         else if (unit.equals("us"))
-            fNanoSecondsPerIncrement = 1000;
+            order = -6;
+        else if (unit.equals("ms"))
+            order = -3;
         else if (unit.equals("s"))
-            fNanoSecondsPerIncrement = 1000000000;
+            order = 0;
         else {
-            throw new LoadException("line " + fTokenizer.lineno() + ": unknown timescale value "
-                                    + getTokenString());
+            throw new LoadException("line " + fTokenizer.lineno()
+                + ": unknown timescale value " + getTokenString());
         }
 
-        fNanoSecondsPerIncrement *= Long.parseLong(s.substring(0, unitStart));
+        int timeNumber = Integer.parseInt(s.substring(0, unitStart));
+        if (timeNumber == 100)
+            order += 2;
+        else if (timeNumber == 10)
+            order += 1;
+        else if (timeNumber != 1) {
+            throw new LoadException("line " + fTokenizer.lineno()
+                + ": bad timescale value " + getTokenString());
+        }
+
         match("$end");
+        fTraceBuilder.setTimescale(order);
     }
 
     /// @returns true if there are more definitions, false if it has hit
@@ -164,24 +199,44 @@ class VCDLoader implements TraceLoader {
 
         if (getTokenString().charAt(0) == '#') {
             // If the line begins with a #, this is a timestamp.
-            fCurrentTime = Long.parseLong(getTokenString().substring(1))
-                           * fNanoSecondsPerIncrement;
+            long nextTimestamp = Long.parseLong(getTokenString().substring(1));
+            if (nextTimestamp >= fCurrentTime)
+                fCurrentTime = nextTimestamp;
+            else
+                System.out.println("warning: timestamp out of order line " + fTokenizer.lineno());
         } else {
             if (getTokenString().equals("$dumpvars") || getTokenString().equals("$end"))
                 return true;
 
             String value;
             String id;
+            char leadingVal = getTokenString().charAt(0);
 
-            if (getTokenString().charAt(0) == 'b') {
-                // Multiple value net.  Value appears first, followed by space, then identifier
-                value = getTokenString().substring(1);
-                nextToken(true);
-                id = getTokenString();
-            } else {
-                // Single value net.  identifier first, then value, no space.
-                value = getTokenString().substring(0, 1);
-                id = getTokenString().substring(1);
+            // @todo Does not support real types.
+            switch (leadingVal) {
+                case '0':
+                case '1':
+                case 'z':
+                case 'Z':
+                case 'x':
+                case 'X':
+                    // 18.2.1 scalar_value_change ::= value identifier_code
+                    // (no space)
+                    value = getTokenString().substring(0, 1);
+                    id = getTokenString().substring(1);
+                    break;
+
+                case 'b':
+                    // 18.2.1 vector_value_change ::= b binary_number_identification_code
+                    // Multiple value net.  Value appears first, followed by space, then identifier
+                    value = getTokenString().substring(1);
+                    nextToken(true);
+                    id = getTokenString();
+                    break;
+
+                default:
+                    throw new LoadException("line " + fTokenizer.lineno()
+                        + ": unsupported value type '" + leadingVal + "'");
             }
 
             Net net = fNetMap.get(id);
@@ -199,13 +254,19 @@ class VCDLoader implements TraceLoader {
                     decodedValues.setBit(i, BitVector.VALUE_X);
             } else {
                 // Decode and pad if necessary.
-                // XXX should this be done inside BitVector
+                // 18.2.1 value ::= 0 | 1 | x | X | z | Z
                 int bitIndex = net.fWidth - 1;
                 for (int i = 0; i < value.length(); i++) {
                     int bitValue;
                     switch (value.charAt(i)) {
                     case 'z':
+                    case 'Z':
                         bitValue = BitVector.VALUE_Z;
+                        break;
+
+                    case 'x':
+                    case 'X':
+                        bitValue = BitVector.VALUE_X;
                         break;
 
                     case '1':
@@ -216,12 +277,8 @@ class VCDLoader implements TraceLoader {
                         bitValue = BitVector.VALUE_0;
                         break;
 
-                    case 'x':
-                        bitValue = BitVector.VALUE_X;
-                        break;
-
                     default:
-                        throw new LoadException("line " + fTokenizer.lineno() + ": Invalid logic value");
+                        throw new LoadException("line " + fTokenizer.lineno() + ": invalid logic value");
                     }
 
                     decodedValues.setBit(bitIndex--, bitValue);
@@ -300,7 +357,6 @@ class VCDLoader implements TraceLoader {
     private InputStream fInputStream;
     private long fCurrentTime;
     private HashMap<String, Net> fNetMap = new HashMap<String, Net>();
-    private long fNanoSecondsPerIncrement;    /// @todo Switch to be unit agnostic
     private int fTotalTransitions;
     private ProgressListener fProgressListener;
     private ProgressInputStream fProgressStream;
