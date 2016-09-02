@@ -28,8 +28,10 @@ class VCDLoader implements TraceLoader {
         throws LoadException, IOException {
         fProgressListener = listener;
         fProgressStream = new ProgressInputStream(new FileInputStream(file));
-        fTokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(fProgressStream)));
+        fTokenizer = new StreamTokenizer(new BufferedReader(
+            new InputStreamReader(fProgressStream)));
         fFileLength = file.length();
+        fUpdateInterval = fFileLength / 100;
         fTokenizer.resetSyntax();
         fTokenizer.wordChars(33, 126);
         fTokenizer.whitespaceChars('\r', '\r');
@@ -220,6 +222,7 @@ class VCDLoader implements TraceLoader {
                 case 'Z':
                 case 'x':
                 case 'X':
+                    // Single bit value
                     // 18.2.1 scalar_value_change ::= value identifier_code
                     // (no space)
                     value = getTokenString().substring(0, 1);
@@ -227,8 +230,8 @@ class VCDLoader implements TraceLoader {
                     break;
 
                 case 'b':
-                    // 18.2.1 vector_value_change ::= b binary_number_identification_code
-                    // Multiple value net.  Value appears first, followed by space, then identifier
+                    // Multi bit value
+                    // 18.2.1 vector_value_change ::= b binary_number identification_code
                     value = getTokenString().substring(1);
                     nextToken(true);
                     id = getTokenString();
@@ -278,7 +281,8 @@ class VCDLoader implements TraceLoader {
                         break;
 
                     default:
-                        throw new LoadException("line " + fTokenizer.lineno() + ": invalid logic value");
+                        throw new LoadException("line " + fTokenizer.lineno()
+                            + ": invalid logic value");
                     }
 
                     decodedValues.setBit(bitIndex--, bitValue);
@@ -294,19 +298,22 @@ class VCDLoader implements TraceLoader {
     private void match(String value) throws LoadException, IOException {
         nextToken(true);
         if (!getTokenString().equals(value)) {
-            throw new LoadException("line " + fTokenizer.lineno() + ": parse error, expected " + value + " got "
-                                    + getTokenString());
+            throw new LoadException("line " + fTokenizer.lineno()
+                + ": parse error, expected " + value + " got "
+                + getTokenString());
         }
     }
 
-    /// @param require If true and the next token is the end of file, this will throw an exception.
+    /// @param require If true and the next token is the end of file, this will
+    ///        throw an exception.
     /// @returns True if token was returned, false if not
     private boolean nextToken(boolean require) throws LoadException, IOException {
         if (fProgressListener != null) {
             // Update periodically
             long totalRead = fProgressStream.getTotalRead();
-            if (totalRead - fLastProgressUpdate > 0x10000) {
-                if (!fProgressListener.updateProgress((int)(totalRead * 100 / fFileLength)))
+            if (totalRead - fLastProgressUpdate > fUpdateInterval) {
+                if (!fProgressListener.updateProgress((int)(totalRead
+                    * 100 / fFileLength)))
                     throw new LoadException("load cancelled");
 
                 fLastProgressUpdate = totalRead;
@@ -362,4 +369,5 @@ class VCDLoader implements TraceLoader {
     private ProgressInputStream fProgressStream;
     private long fLastProgressUpdate;
     private long fFileLength;
+    private long fUpdateInterval;
 };
