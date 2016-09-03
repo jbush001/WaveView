@@ -19,12 +19,10 @@ import java.util.*;
 
 ///
 /// The Query class allows searching for logic conditions using complex boolean expressions
-/// For example: (ena = 1 & (addr = 'h1000 or addr = 'h2000))
+/// For example: (ena = 1 and (addr = 'h1000 or addr = 'h2000))
 /// It builds an expression tree to represent the search criteria. It is optimized
 /// for fast searching, skipping events that cannot meet the criteria.
 ///
-/// @todo Support >=, <=, ~, etc
-/// @todo Support proper logical operators &&, ||
 /// @todo Support partial multi-net matches
 ///
 class Query {
@@ -157,11 +155,9 @@ class Query {
     private static final int STATE_SCAN_GEN_NUM = 4;
     private static final int STATE_SCAN_GREATER = 5;
     private static final int STATE_SCAN_LESS = 6;
-
-    private static final int LITERAL_TYPE_DECIMAL = 0;
-    private static final int LITERAL_TYPE_HEX = 1;
-    private static final int LITERAL_TYPE_BINARY = 2;
-
+    private static final int STATE_SCAN_BINARY = 7;
+    private static final int STATE_SCAN_DECIMAL = 8;
+    private static final int STATE_SCAN_HEXADECIMAL = 9;
 
     private static boolean isAlpha(int value) {
         return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
@@ -220,8 +216,7 @@ class Query {
                     state = STATE_SCAN_IDENTIFIER;
                 } else if (isNum(c)) {
                     fPushBackChar = c;
-                    fCurrentTokenType = LITERAL_TYPE_DECIMAL;
-                    state = STATE_SCAN_LITERAL;
+                    state = STATE_SCAN_DECIMAL;
                 } else if (c == '>')
                     state = STATE_SCAN_GREATER;
                 else if (c == '<')
@@ -275,37 +270,43 @@ class Query {
 
             case STATE_SCAN_LITERAL_TYPE:
                 if (c == 'b')
-                    fCurrentTokenType = LITERAL_TYPE_BINARY;
+                    state = STATE_SCAN_BINARY;
                 else if (c == 'h')
-                    fCurrentTokenType = LITERAL_TYPE_HEX;
+                    state = STATE_SCAN_HEXADECIMAL;
                 else if (c == 'd')
-                    fCurrentTokenType = LITERAL_TYPE_DECIMAL;
+                    state = STATE_SCAN_DECIMAL;
                 else
                     throw new ParseException("unknown type " + (char) c);
 
-                state = STATE_SCAN_LITERAL;
                 break;
 
-            case STATE_SCAN_LITERAL:
-                if (isHexDigit(c)
-                        || ((fCurrentTokenType == LITERAL_TYPE_BINARY || fCurrentTokenType == LITERAL_TYPE_HEX)
-                            && (c == 'x' || c == 'z' || c == 'X' || c == 'Z'))) {
+            case STATE_SCAN_BINARY:
+                if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
                     fCurrentTokenValue.append((char) c);
-                } else {
-                    switch (fCurrentTokenType) {
-                    case LITERAL_TYPE_BINARY:
-                        fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
-                        break;
+                else {
+                    fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
+                    fPushBackChar = c;
+                    return TOK_LITERAL;
+                }
 
-                    case LITERAL_TYPE_HEX:
-                        fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
-                        break;
+                break;
 
-                    case LITERAL_TYPE_DECIMAL:
-                        fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
-                        break;
-                    }
+            case STATE_SCAN_DECIMAL:
+                if (c >= '0' && c <= '9')
+                    fCurrentTokenValue.append((char) c);
+                else {
+                    fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
+                    fPushBackChar = c;
+                    return TOK_LITERAL;
+                }
 
+                break;
+
+            case STATE_SCAN_HEXADECIMAL:
+                if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
+                    fCurrentTokenValue.append((char) c);
+                else {
+                    fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
                     fPushBackChar = c;
                     return TOK_LITERAL;
                 }
@@ -706,7 +707,6 @@ class Query {
     private String fQueryString;
     private int fLexerOffset;
     private StringBuffer fCurrentTokenValue = new StringBuffer();
-    private int fCurrentTokenType;
     private int fPushBackChar = -1;
     private int fPushBackToken = -1;
     private int fTokenStart;
