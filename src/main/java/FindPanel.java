@@ -60,7 +60,7 @@ class FindPanel extends JPanel implements ActionListener {
         JPanel findContainer = new JPanel();
         findContainer.setLayout(new FlowLayout(FlowLayout.LEFT));
         findContainer.add(findLabel);
-        findContainer.add(fTextArea);
+        findContainer.add(new JScrollPane(fTextArea));
         add(findContainer, BorderLayout.CENTER);
 
         JPanel buttonContainer = new JPanel();
