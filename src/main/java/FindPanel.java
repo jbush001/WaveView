@@ -98,7 +98,7 @@ class FindPanel extends JPanel implements ActionListener {
                 }
 
                 /// @todo Should this be displayed in the window somewhere?
-                JOptionPane.showMessageDialog(null, exc.toString(),"Error parsing query",
+                JOptionPane.showMessageDialog(null, exc.getMessage(), "Error parsing query",
                                               JOptionPane.ERROR_MESSAGE);
             }
 
