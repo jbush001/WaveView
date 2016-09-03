@@ -1,0 +1,16 @@
+$timescale
+   1ns
+$end
+$scope module mod1 $end
+$var wire 16 A value [15:0] $end
+$upscope $end
+$enddefinitions $end
+#0
+bzx1010 A
+#1
+bxz1010 A
+#2
+b1101 A
+#3
+b010 A
+

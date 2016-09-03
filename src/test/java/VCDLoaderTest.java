@@ -463,6 +463,23 @@ public class VCDLoaderTest {
             null);
     }
 
+    @Test
+    public void testPadding() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-9);
+        builder.expectEnterModule("mod1");
+        builder.expectNewNet("value", -1, 16);
+        builder.expectExitModule();
+        builder.expectAppendTransition(0, 0, "zzzzzzzzzzzx1010");
+        builder.expectAppendTransition(0, 1, "xxxxxxxxxxxz1010");
+        builder.expectAppendTransition(0, 2, "0000000000001101");
+        builder.expectAppendTransition(0, 3, "0000000000000010");
+        builder.expectLoadFinished();
+
+        (new VCDLoader()).load(testFile("padding.vcd"), builder,
+            null);
+    }
+
     // Test that $dumpvars is handled correctly
     @Test
     public void testDumpvars() throws Exception {

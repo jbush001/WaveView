@@ -249,45 +249,53 @@ class VCDLoader implements TraceLoader {
             }
 
             BitVector decodedValues = new BitVector(net.fWidth);
-            if (value.equals("z") && net.fWidth > 1) {
-                for (int i = 0; i < net.fWidth; i++)
-                    decodedValues.setBit(i, BitVector.VALUE_Z);
-            } else if (value.equals("x") && net.fWidth > 1) {
-                for (int i = 0; i < net.fWidth; i++)
-                    decodedValues.setBit(i, BitVector.VALUE_X);
-            } else {
-                // Decode and pad if necessary.
-                // 18.2.1 value ::= 0 | 1 | x | X | z | Z
-                int bitIndex = net.fWidth - 1;
-                for (int i = 0; i < value.length(); i++) {
-                    int bitValue;
-                    switch (value.charAt(i)) {
-                    case 'z':
-                    case 'Z':
-                        bitValue = BitVector.VALUE_Z;
-                        break;
 
-                    case 'x':
-                    case 'X':
-                        bitValue = BitVector.VALUE_X;
-                        break;
+            // Decode and pad if necessary.
+            // 18.2.1 value ::= 0 | 1 | x | X | z | Z
+            int valueLength = value.length();
+            int bitsToCopy = Math.min(valueLength, net.fWidth);
+            int outBit = 0;
+            int bitValue = BitVector.VALUE_0;
+            while (outBit < bitsToCopy) {
+                switch (value.charAt(valueLength - outBit - 1)) {
+                case 'z':
+                case 'Z':
+                    bitValue = BitVector.VALUE_Z;
+                    break;
 
-                    case '1':
-                        bitValue = BitVector.VALUE_1;
-                        break;
+                case 'x':
+                case 'X':
+                    bitValue = BitVector.VALUE_X;
+                    break;
 
-                    case '0':
-                        bitValue = BitVector.VALUE_0;
-                        break;
+                case '1':
+                    bitValue = BitVector.VALUE_1;
+                    break;
 
-                    default:
-                        throw new LoadException("line " + fTokenizer.lineno()
-                            + ": invalid logic value");
-                    }
+                case '0':
+                    bitValue = BitVector.VALUE_0;
+                    break;
 
-                    decodedValues.setBit(bitIndex--, bitValue);
+                default:
+                    throw new LoadException("line " + fTokenizer.lineno()
+                        + ": invalid logic value");
                 }
+
+                decodedValues.setBit(outBit++, bitValue);
             }
+
+            // Table 83: Rules for left-extending vector values
+            // 0 & 1 extend with 0. Z extends with Z, X extends with X.
+            int padValue;
+            if (bitValue == BitVector.VALUE_Z)
+                padValue = BitVector.VALUE_Z;
+            else if (bitValue == BitVector.VALUE_X)
+                padValue = BitVector.VALUE_X;
+            else
+                padValue = BitVector.VALUE_0;
+
+            while (outBit < net.fWidth)
+                decodedValues.setBit(outBit++, padValue);
 
             fTraceBuilder.appendTransition(net.fBuilderID, fCurrentTime, decodedValues);
         }
