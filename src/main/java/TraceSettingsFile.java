@@ -143,7 +143,7 @@ class TraceSettingsFile {
         return elem.getData();
     }
 
-    private void readNetSet(Element element) throws ClassNotFoundException {
+    private void readNetSet(Element element) {
         fDisplayModel.removeAllNets();
 
         NodeList netElements = element.getElementsByTagName("net");
@@ -155,20 +155,23 @@ class TraceSettingsFile {
             ValueFormatter formatter = null;
             Element formatTag = (Element) netElem.getElementsByTagName("format").item(0);
             String formatStr = ((Text)formatTag.getFirstChild()).getData();
-            Class c = Class.forName(formatStr);
-            if (c != null) {
-                try {
-                    formatter = (ValueFormatter) c.newInstance();
-                    if (formatStr.equals("EnumValueFormatter")) {
-                        String pathStr = ((Text)formatTag.getElementsByTagName("path").item(0)
-                            .getFirstChild()).getData();
-                        ((EnumValueFormatter) formatter).loadFromFile(new File(pathStr));
-                    }
-                } catch (Exception exc) {
-                    System.out.println(exc);
-                    formatter = new BinaryValueFormatter();
+
+            //
+            // My original idea was to allow creating custom formatters by creating
+            // dynamically loadable classes. Not sure if this is still a good idea.
+            //
+            try {
+                Class c = Class.forName(formatStr);
+                formatter = (ValueFormatter) c.newInstance();
+                if (formatStr.equals("EnumValueFormatter")) {
+                    String pathStr = ((Text)formatTag.getElementsByTagName("path").item(0)
+                        .getFirstChild()).getData();
+                    ((EnumValueFormatter) formatter).loadFromFile(new File(pathStr));
                 }
-            } else {
+            }
+            catch (Exception exc) {
+                // Can be: LinkageError, ExceptionInInitializerError, ClassNotFoundException,
+                // InstantiationException. Fall back gracefully to a binary value formatter.
                 System.out.println("unable to find class" + formatStr);
                 formatter = new BinaryValueFormatter();
             }
