@@ -149,6 +149,7 @@ class Query {
     private static final int STATE_SCAN_IDENTIFIER = 1;
     private static final int STATE_SCAN_LITERAL = 2;
     private static final int STATE_SCAN_LITERAL_TYPE = 3;
+    private static final int STATE_SCAN_GEN_NUM = 4;
 
     private static final int LITERAL_TYPE_DECIMAL = 0;
     private static final int LITERAL_TYPE_HEX = 1;
@@ -223,12 +224,24 @@ class Query {
             case STATE_SCAN_IDENTIFIER:
                 if (isAlphaNum(c) || c == '_' || c == '.')
                     fCurrentTokenValue.append((char) c);
+                else if (c == '(') {    // Start generate index
+                    fCurrentTokenValue.append((char) c);
+                    state = STATE_SCAN_GEN_NUM;
+                }
                 else {
                     fPushBackChar = c;
                     return TOK_IDENTIFIER;
                 }
 
                 break;
+
+            case STATE_SCAN_GEN_NUM:
+                fCurrentTokenValue.append((char) c);
+                if (c == ')')
+                    state = STATE_SCAN_IDENTIFIER;
+
+                break;
+
 
             case STATE_SCAN_LITERAL_TYPE:
                 if (c == 'b')

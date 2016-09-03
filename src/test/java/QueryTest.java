@@ -732,5 +732,27 @@ public class QueryTest {
         assertEquals("(or (or (or (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
             (new Query(traceDataModel, "m.a | m.b | m.c | m.d")).toString());
     }
+
+    // Basically tests that parens are treated as part of an indeitifer.
+    // When a module is generated, it has the instance number: mod1.core_gen(0).mod2
+    @Test
+    public void testGenerateInstance() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
+        builder.enterModule("mod1");
+        builder.enterModule("mod_gen(0)");
+        builder.enterModule("mod2");
+        int id1 = builder.newNet("a", -1, 1);
+        builder.exitModule();
+        builder.exitModule();
+        builder.exitModule();
+        builder.appendTransition(id1, 0, new BitVector("0", 2));
+        builder.appendTransition(id1, 5, new BitVector("1", 2));
+        builder.loadFinished();
+
+        Query query = new Query(traceDataModel, "mod1.mod_gen(0).mod2.a = 1");
+        assertEquals(5, query.getNextMatch(0));
+    }
 }
 
