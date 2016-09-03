@@ -18,23 +18,11 @@ import java.util.*;
 import java.io.*;
 
 ///
-/// Converts a bitvector to a set of strings from an enumeration. Useful for
-/// encoding state variables.
+/// Converts a bitvector to one of a set of strings from an enumeration.
+/// Useful for encoding state variables.
 ///
 
 class EnumValueFormatter implements ValueFormatter {
-    private class Mapping {
-        Mapping(int _value, String _name) {
-            value = _value;
-            name = _name;
-        }
-
-        int value;
-        String name;
-    };
-
-    EnumValueFormatter() {}
-
     void loadFromFile(File file) throws IOException {
         fFile = file;
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
