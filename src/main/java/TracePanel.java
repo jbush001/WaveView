@@ -40,6 +40,8 @@ class TracePanel extends JPanel {
         fScrollPane = new JScrollPane(fWaveformPanel);
         fScrollPane.setColumnHeaderView(fTimescalePanel);
         fScrollPane.setViewportBorder(BorderFactory.createLineBorder(Color.black));
+        fScrollPane.getVerticalScrollBar().setUnitIncrement(DrawMetrics.WAVEFORM_HEIGHT);
+        fScrollPane.getHorizontalScrollBar().setUnitIncrement(DrawMetrics.MIN_MINOR_TICK_H_SPACE);
 
         // Always keep the horizontal scroll bar. In 99% of cases, we need it,
         // and it simplifies the net name layout if we don't need to worry about
