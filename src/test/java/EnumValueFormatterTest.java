@@ -16,32 +16,21 @@
 
 import static org.junit.Assert.*;
 import org.junit.*;
+import java.io.File;
+import java.io.IOException;
 
 public class EnumValueFormatterTest {
+    File getTestFile(String name) {
+        return new File("src/test/resources/enum_mapping/" + name);
+    }
+
     @Test
-    public void testFormat() {
+    public void testFormat() throws IOException {
         EnumValueFormatter vf = new EnumValueFormatter();
-        vf.addMapping(11, "primero");
-        vf.addMapping(13, "segundo");
-        vf.addMapping(17, "tercero");
-        assertEquals(3, vf.getMappingCount());
-
-        assertEquals(11, vf.getValue(0));
-        assertEquals("primero", vf.getName(0));
-        assertEquals(13, vf.getValue(1));
-        assertEquals("segundo", vf.getName(1));
-        assertEquals(17, vf.getValue(2));
-        assertEquals("tercero", vf.getName(2));
-
-        vf.setValue(1, 12);
-        vf.setName(1, "secondo");
-        assertEquals(12, vf.getValue(1));
-        assertEquals("secondo", vf.getName(1));
-
-        assertEquals("primero", vf.format(new BitVector("1011", 2)));
-        assertEquals("secondo", vf.format(new BitVector("1100", 2)));
-        assertEquals("??? (13)", vf.format(new BitVector("1101", 2)));
-        assertEquals("tercero", vf.format(new BitVector("10001", 2)));
-        assertEquals("??? (256)", vf.format(new BitVector("100000000", 2)));
+        vf.loadFromFile(getTestFile("test1.txt"));
+        assertEquals("STATE_INIT", vf.format(new BitVector("1", 10)));
+        assertEquals("STATE_LOAD", vf.format(new BitVector("2", 10)));
+        assertEquals("STATE_WAIT", vf.format(new BitVector("3", 10)));
+        assertEquals("??? (4)", vf.format(new BitVector("4", 10)));
     }
 }

@@ -312,19 +312,18 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
             clearSelection();
         } else {
             if (e.getActionCommand().equals("Enum")) {
-                if (indices.length > 0) {
-                    ValueFormatter formatter = fTraceDisplayModel.getValueFormatter(indices[0]);
-                    if (!(formatter instanceof EnumValueFormatter)) {
-                        formatter = new EnumValueFormatter();
+                JFileChooser chooser = new JFileChooser();
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setMultiSelectionEnabled(false);
+                int returnValue = chooser.showOpenDialog(this);
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    try {
+                        EnumValueFormatter formatter = new EnumValueFormatter();
+                        formatter.loadFromFile(chooser.getSelectedFile());
                         fTraceDisplayModel.setValueFormatter(indices[0], formatter);
+                    } catch (Exception exc) {
+                        JOptionPane.showMessageDialog(this, "Error opening enum mapping file");
                     }
-
-                    JFrame frame = new JFrame("Mapping for " + fTraceDataModel.getShortNetName(fTraceDisplayModel.getVisibleNet(indices[0])));
-                    JPanel contentPane = new EnumMappingPanel((EnumValueFormatter) formatter);
-                    contentPane.setOpaque(true);
-                    frame.setContentPane(contentPane);
-                    frame.pack();
-                    frame.setVisible(true);
                 }
             } else if (e.getActionCommand().equals("Custom Formatter...")) {
                 JFileChooser chooser = new JFileChooser();

@@ -116,26 +116,19 @@ class TraceSettingsFile {
             sigElement.appendChild(format);
 
             ValueFormatter formatter = fDisplayModel.getValueFormatter(i);
+            Class c = formatter.getClass();
+            format.appendChild(document.createTextNode(c.getName()));
+
             if (formatter instanceof EnumValueFormatter) {
                 EnumValueFormatter ivf = (EnumValueFormatter) formatter;
-                for (int j = 0; j < ivf.getMappingCount(); j++) {
-                    Text idNode = document.createTextNode("" + ivf.getValue(j));
-                    Text valueNode = document.createTextNode(ivf.getName(j));
-
-                    Element mappingElement = document.createElement("mapping");
-                    format.appendChild(mappingElement);
-
-                    Element idElement = document.createElement("id");
-                    mappingElement.appendChild(idElement);
-                    idElement.appendChild(idNode);
-
-                    Element textElement = document.createElement("text");
-                    mappingElement.appendChild(textElement);
-                    textElement.appendChild(valueNode);
+                try {
+                    Text path = document.createTextNode(ivf.getFile().getCanonicalPath());
+                    Element pathElement = document.createElement("path");
+                    pathElement.appendChild(path);
+                    format.appendChild(pathElement);
+                } catch (IOException exc) {
+                    System.out.println("Failed to save formatter " + exc);
                 }
-            } else {
-                Class c = formatter.getClass();
-                format.appendChild(document.createTextNode(c.getName()));
             }
         }
 
@@ -160,29 +153,24 @@ class TraceSettingsFile {
             String name = getSubTag(netElem, "name");
 
             ValueFormatter formatter = null;
-            NodeList mappings = netElem.getElementsByTagName("mapping");
-            if (mappings.getLength() > 0) {
-                formatter = new EnumValueFormatter();
-                for (int j = 0; j < mappings.getLength(); j++) {
-                    Element mappingElem = (Element) mappings.item(j);
-                    String id = getSubTag(mappingElem, "id");
-                    String text = getSubTag(mappingElem, "text");
-                    ((EnumValueFormatter)formatter).addMapping(Integer.parseInt(id), text);
-                }
-            } else {
-                String format = getSubTag(netElem, "format");
-                Class c = Class.forName(format);
-                if (c != null) {
-                    try {
-                        formatter = (ValueFormatter) c.newInstance();
-                    } catch (Exception exc) {
-                        System.out.println(exc);
-                        formatter = new BinaryValueFormatter();
+            Element formatTag = (Element) netElem.getElementsByTagName("format").item(0);
+            String formatStr = ((Text)formatTag.getFirstChild()).getData();
+            Class c = Class.forName(formatStr);
+            if (c != null) {
+                try {
+                    formatter = (ValueFormatter) c.newInstance();
+                    if (formatStr.equals("EnumValueFormatter")) {
+                        String pathStr = ((Text)formatTag.getElementsByTagName("path").item(0)
+                            .getFirstChild()).getData();
+                        ((EnumValueFormatter) formatter).loadFromFile(new File(pathStr));
                     }
-                } else {
-                    System.out.println("unable to find class" + format);
+                } catch (Exception exc) {
+                    System.out.println(exc);
                     formatter = new BinaryValueFormatter();
                 }
+            } else {
+                System.out.println("unable to find class" + formatStr);
+                formatter = new BinaryValueFormatter();
             }
 
             int netId = fDataModel.findNet(name);

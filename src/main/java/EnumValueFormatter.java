@@ -15,6 +15,7 @@
 //
 
 import java.util.*;
+import java.io.*;
 
 ///
 /// Converts a bitvector to a set of strings from an enumeration. Useful for
@@ -34,41 +35,30 @@ class EnumValueFormatter implements ValueFormatter {
 
     EnumValueFormatter() {}
 
-    void addMapping(int value, String name) {
-        fMappings.add(new Mapping(value, name));
+    void loadFromFile(File file) throws IOException {
+        fFile = file;
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+        String line;
+        while ((line = br.readLine()) != null) {
+            String [] tokens = line.split(" ");
+            if (tokens.length >= 2)
+                fMappings.put(Integer.parseInt(tokens[0]), tokens[1]);
+        }
     }
 
-    void setName(int index, String name) {
-        fMappings.get(index).name = name;
-    }
-
-    void setValue(int index, int value) {
-        fMappings.get(index).value = value;
-    }
-
-    int getValue(int index) {
-        return fMappings.get(index).value;
-    }
-
-    String getName(int index) {
-        return fMappings.get(index).name;
-    }
-
-    int getMappingCount() {
-        return fMappings.size();
+    File getFile() {
+        return fFile;
     }
 
     @Override
     public String format(BitVector bits) {
         int mapIndex = bits.intValue();
-        for (Mapping m : fMappings) {
-            if (m.value == mapIndex)
-                return m.name;
-        }
-
-        // If this doesn't have a mapping, print the raw value
-        return "??? (" + Integer.toString(mapIndex) + ")";
+        if (fMappings.containsKey(mapIndex))
+            return fMappings.get(mapIndex);
+        else
+            return "??? (" + mapIndex + ")";
     }
 
-    private ArrayList<Mapping> fMappings = new ArrayList<Mapping>();
+    private HashMap<Integer, String> fMappings = new HashMap<Integer, String>();
+    private File fFile;
 }

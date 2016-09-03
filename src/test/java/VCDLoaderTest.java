@@ -285,7 +285,7 @@ public class VCDLoaderTest {
     }
 
     File testFile(String name) {
-        return new File("src/test/resources/" + name);
+        return new File("src/test/resources/vcd/" + name);
     }
 
     @Test

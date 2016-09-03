@@ -65,9 +65,7 @@ public class TraceSettingsFileTest {
         sourceDisplayModel.setValueFormatter(1, new DecimalValueFormatter());
         sourceDisplayModel.setValueFormatter(2, new HexadecimalValueFormatter());
         EnumValueFormatter enumFormatter = new EnumValueFormatter();
-        enumFormatter.addMapping(0, "STATE_INIT");
-        enumFormatter.addMapping(1, "STATE_LOAD");
-        enumFormatter.addMapping(2, "STATE_STORE");
+        enumFormatter.loadFromFile(new File("src/test/resources/enum_mapping/test1.txt"));
         sourceDisplayModel.setValueFormatter(3, enumFormatter);
 
         sourceDisplayModel.addMarker("marker1", 1234);
@@ -95,10 +93,9 @@ public class TraceSettingsFileTest {
         assertTrue(destDisplayModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
         enumFormatter = (EnumValueFormatter) destDisplayModel.getValueFormatter(3);
         assertTrue(enumFormatter instanceof EnumValueFormatter);
-        assertEquals(3, enumFormatter.getMappingCount());
-        assertEquals("STATE_INIT", enumFormatter.getName(0));
-        assertEquals("STATE_LOAD", enumFormatter.getName(1));
-        assertEquals("STATE_STORE", enumFormatter.getName(2));
+        assertEquals("STATE_INIT", enumFormatter.format(new BitVector("1", 10)));
+        assertEquals("STATE_LOAD", enumFormatter.format(new BitVector("2", 10)));
+        assertEquals("STATE_WAIT", enumFormatter.format(new BitVector("3", 10)));
 
         assertEquals(2, destDisplayModel.getNetSetCount());
         assertEquals("set1", destDisplayModel.getNetSetName(0));
