@@ -42,8 +42,8 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
 
     @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        int oldX = (int)(oldTimestamp / fTraceDisplayModel.getHorizontalScale());
-        int newX = (int)(newTimestamp / fTraceDisplayModel.getHorizontalScale());
+        int oldX = (int)(oldTimestamp * fTraceDisplayModel.getHorizontalScale());
+        int newX = (int)(newTimestamp * fTraceDisplayModel.getHorizontalScale());
         int leftEdge = Math.min(oldX, newX) - DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         int rightEdge = Math.max(oldX, newX) + DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         repaint(leftEdge, 0, rightEdge - leftEdge, getHeight());
@@ -61,7 +61,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
         if (timestamp < 0)
             repaint();
         else {
-            int x = (int)(timestamp / fTraceDisplayModel.getHorizontalScale());
+            int x = (int)(timestamp * fTraceDisplayModel.getHorizontalScale());
             repaint(x - (DrawMetrics.MAX_MARKER_LABEL_WIDTH / 2), 0,
                 DrawMetrics.MAX_MARKER_LABEL_WIDTH,
                 DrawMetrics.TIMESCALE_HEIGHT);
@@ -101,7 +101,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
         // Not sure the best approach for that.
 
         Dimension d = getPreferredSize();
-        d.width = (int)(fTraceDataModel.getMaxTimestamp() / fTraceDisplayModel.getHorizontalScale());
+        d.width = (int)(fTraceDataModel.getMaxTimestamp() * fTraceDisplayModel.getHorizontalScale());
         setPreferredSize(d);
         revalidate();
         repaint();
@@ -119,14 +119,15 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
 
         // The -100 in start time keeps labels that are to the left of the window from not being drawn
         // (which causes artifacts when scrolling).  It needs to be bigger than the largest label.
-        long startTime = (long)((visibleRect.x - 100) * fTraceDisplayModel.getHorizontalScale());
-        long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceDisplayModel.getHorizontalScale());
+        long startTime = (long)((visibleRect.x - 100) / fTraceDisplayModel.getHorizontalScale());
+        long endTime = (long) ((visibleRect.x + visibleRect.width) / fTraceDisplayModel.getHorizontalScale());
         if (startTime < 0)
             startTime = 0;
 
+        double horizontalScale = fTraceDisplayModel.getHorizontalScale();
         startTime = (startTime / minorTickInterval) * minorTickInterval;    // Round to an event tick boundary
         for (long ts = startTime; ts < endTime; ts += minorTickInterval) {
-            int x = (int)(ts / fTraceDisplayModel.getHorizontalScale());
+            int x = (int)(ts * horizontalScale);
             if ((ts / minorTickInterval) % DrawMetrics.MINOR_TICKS_PER_MAJOR == 0) {
                 g.drawLine(x, 5, x, DrawMetrics.TIMESCALE_HEIGHT);
                 g.drawString(Long.toString(ts / fUnitMagnitude) + " " + fUnit, x + 3, DrawMetrics.MINOR_TICK_TOP
@@ -144,7 +145,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
 
             String labelString = "" + fTraceDisplayModel.getIdForMarker(markerIndex);
             int labelWidth = g.getFontMetrics().stringWidth(labelString);
-            int x = (int) (timestamp / fTraceDisplayModel.getHorizontalScale());
+            int x = (int) (timestamp * horizontalScale);
             g.setColor(AppPreferences.getInstance().backgroundColor);
             g.fillRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP),
                 DrawMetrics.TIMESCALE_HEIGHT - 12,
@@ -163,7 +164,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
                                 / fUnitMagnitude + " " + fUnit;
             int timeWidth = g.getFontMetrics().stringWidth(timeString);
             int cursorX = (int) (fTraceDisplayModel.getCursorPosition()
-                                 / fTraceDisplayModel.getHorizontalScale());
+                                 * horizontalScale);
             int labelLeft = cursorX + timeWidth > visibleRect.x + visibleRect.width
                             ? cursorX - timeWidth : cursorX;
 

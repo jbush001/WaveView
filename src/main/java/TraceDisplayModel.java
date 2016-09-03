@@ -58,7 +58,7 @@ class TraceDisplayModel {
     void setHorizontalScale(double scale) {
         fHorizontalScale = scale;
         fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
-            scale * DrawMetrics.MIN_MINOR_TICK_H_SPACE)));
+            DrawMetrics.MIN_MINOR_TICK_H_SPACE / scale)));
         if (fMinorTickInterval <= 0)
             fMinorTickInterval = 1;
 
@@ -66,7 +66,7 @@ class TraceDisplayModel {
             listener.scaleChanged(scale);
     }
 
-    // @returns Nanoseconds per pixel
+    // @returns Pixels per nanosecond
     double getHorizontalScale() {
         return fHorizontalScale;
     }
@@ -249,7 +249,7 @@ class TraceDisplayModel {
 
         // Because it's hard to click exactly on the marker, allow removing
         // markers a few pixels to the right or left of the current cursor.
-        final long MARKER_REMOVE_SLACK = (long)(5.0 * getHorizontalScale());
+        final long MARKER_REMOVE_SLACK = (long)(5.0 / getHorizontalScale());
 
         int index = fMarkers.findIndex(timestamp);
         long targetTimestamp = fMarkers.get(index).fTimestamp;
@@ -355,7 +355,7 @@ class TraceDisplayModel {
     private ArrayList<NetSet> fNetSets = new ArrayList<NetSet>();
     private long fCursorPosition;
     private long fSelectionStart;
-    private double fHorizontalScale; // Nanoseconds per pixel
+    private double fHorizontalScale; // Pixels per nanosecond
     private boolean fAdjustingCursor;
     private SortedArrayList<Marker> fMarkers = new SortedArrayList<Marker>();
     private int fNextMarkerId = 1;

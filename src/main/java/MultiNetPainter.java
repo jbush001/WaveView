@@ -34,7 +34,7 @@ class MultiNetPainter implements WaveformPainter {
         boolean lastValueWasX = false;
         int lastX = visibleRect.x + visibleRect.width;    // Don't draw before the first segment
         String previousValue = "";
-        long firstTimestamp = (long)(visibleRect.x * horizontalScale);
+        long firstTimestamp = (long)(visibleRect.x / horizontalScale);
 
         g.setColor(AppPreferences.getInstance().traceColor);
 
@@ -47,7 +47,7 @@ class MultiNetPainter implements WaveformPainter {
             boolean isX = !isZ && transition.isX();
 
             // Compute the boundaries of this segment
-            int x = (int)(transition.getTimestamp() / horizontalScale);
+            int x = (int)(transition.getTimestamp() * horizontalScale);
 
             // Draw transition
             if (x - lastX > DrawMetrics.WAVEFORM_TRANSITION_WIDTH * 2) {

@@ -83,21 +83,22 @@ class TracePanel extends JPanel {
     }
 
     void zoomIn() {
-        setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() / 1.25);
+        setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() * 1.25);
     }
 
     void zoomOut() {
-        setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() * 1.25);
+        setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() * 0.8);
     }
 
     void setScaleKeepCentered(double newScale) {
         Rectangle oldVisibleRect = fWaveformPanel.getVisibleRect();
-        long centerTimestamp = (long)((oldVisibleRect.x + oldVisibleRect.width / 2) * fTraceDisplayModel.getHorizontalScale());
+        long centerTimestamp = (long)((oldVisibleRect.x + oldVisibleRect.width / 2)
+            / fTraceDisplayModel.getHorizontalScale());
 
         fTraceDisplayModel.setHorizontalScale(newScale);
 
         // Scroll to new center timestamp
-        int centerX = (int)(centerTimestamp / newScale);
+        int centerX = (int)(centerTimestamp * newScale);
         Rectangle newVisibleRect = fWaveformPanel.getVisibleRect();
         newVisibleRect.x = centerX - newVisibleRect.width / 2;
 
@@ -106,6 +107,7 @@ class TracePanel extends JPanel {
 
     void zoomToSelection() {
         // Determine what the new size of the selection window should be.
+        double oldScale = fTraceDisplayModel.getHorizontalScale();
         long selectionStartTimestamp = fTraceDisplayModel.getSelectionStart();
         long cursorPositionTimestamp = fTraceDisplayModel.getCursorPosition();
         if (selectionStartTimestamp == cursorPositionTimestamp)
@@ -113,19 +115,17 @@ class TracePanel extends JPanel {
 
         long lowTimestamp = Math.min(selectionStartTimestamp, cursorPositionTimestamp);
         long highTimestamp = Math.max(selectionStartTimestamp, cursorPositionTimestamp);
-        int left = (int)(lowTimestamp / fTraceDisplayModel.getHorizontalScale());
-        int right = (int)(highTimestamp / fTraceDisplayModel.getHorizontalScale());
+        int left = (int)(lowTimestamp * oldScale);
+        int right = (int)(highTimestamp * oldScale);
+        int selectionWidth = right - left;
+        int windowWidth = fWaveformPanel.getVisibleRect().width;
 
-        int newSize = right - left;
-        int currentSize = fWaveformPanel.getVisibleRect().width;
-
-        double newScale = ((double) newSize / currentSize) * fTraceDisplayModel.getHorizontalScale();
-
+        double newScale = oldScale * ((double) windowWidth / selectionWidth);
         fTraceDisplayModel.setHorizontalScale(newScale);
 
         Rectangle newRect = fWaveformPanel.getVisibleRect();
-        newRect.x = (int)(lowTimestamp / fTraceDisplayModel.getHorizontalScale());
-        newRect.width = (int)(highTimestamp / fTraceDisplayModel.getHorizontalScale()) - newRect.x;
+        newRect.x = (int)(lowTimestamp * newScale);
+        newRect.width = (int)(highTimestamp * newScale) - newRect.x;
         fWaveformPanel.scrollRectToVisible(newRect);
     }
 

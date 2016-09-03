@@ -30,13 +30,13 @@ class SingleNetPainter implements WaveformPainter {
 
         int lastValue = 0;
         int lastX = visibleRect.x + visibleRect.width;
-        long firstTimestamp = (long)(visibleRect.x * horizontalScale);
+        long firstTimestamp = (long)(visibleRect.x / horizontalScale);
         Iterator<Transition> i = model.findTransition(netId, firstTimestamp);
         while (true) {
             Transition transition = i.next();
 
             // Compute the boundaries of this segment
-            int x = (int)(transition.getTimestamp() / horizontalScale);
+            int x = (int)(transition.getTimestamp() * horizontalScale);
             int value = transition.getBit(0);
 
             drawSpan(g, lastValue, lastX, x, topOffset);

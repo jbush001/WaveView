@@ -41,11 +41,11 @@ class WaveformPanel extends JPanel implements MouseListener,
     }
 
     private void computeBounds() {
-        Dimension d = getPreferredSize();
+        Dimension d = new Dimension();
         d.width = timestampToXCoordinate(fTraceDataModel.getMaxTimestamp());
         d.height = fTraceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
         setPreferredSize(d);
-        validate();
+        revalidate();
     }
 
     @Override
@@ -103,19 +103,14 @@ class WaveformPanel extends JPanel implements MouseListener,
     public void markerChanged(long timestamp) {
         if (timestamp < 0)
             repaint();
-        else {
-            int x = (int)(timestamp / fTraceDisplayModel.getHorizontalScale());
-            repaint(x - 1, 0, 2, getVisibleRect().height);
-        }
+        else
+            repaint(timestampToXCoordinate(timestamp) - 1, 0, 2, getVisibleRect().height);
     }
 
     @Override
     public void scaleChanged(double newScale) {
         // Adjust size of canvas
-        Dimension d = getPreferredSize();
-        d.width = timestampToXCoordinate(fTraceDataModel.getMaxTimestamp());
-        setPreferredSize(d);
-        revalidate();
+        computeBounds();
         repaint();
     }
 
@@ -152,6 +147,7 @@ class WaveformPanel extends JPanel implements MouseListener,
         if (waveformIndex > 0)
             waveformIndex--;
 
+        double horizontalScale = fTraceDisplayModel.getHorizontalScale();
         while (waveformIndex * DrawMetrics.WAVEFORM_V_SPACING < visibleRect.y + visibleRect.height
                 && waveformIndex < fTraceDisplayModel.getVisibleNetCount()) {
             ValueFormatter formatter = fTraceDisplayModel.getValueFormatter(waveformIndex);
@@ -159,11 +155,11 @@ class WaveformPanel extends JPanel implements MouseListener,
             if (fTraceDataModel.getNetWidth(netId) > 1) {
                 fMultiNetPainter.paint(g, fTraceDataModel, netId,
                     waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP,
-                    visibleRect, fTraceDisplayModel.getHorizontalScale(), formatter);
+                    visibleRect, horizontalScale, formatter);
             } else {
                 fSingleNetPainter.paint(g, fTraceDataModel, netId,
                     waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP,
-                    visibleRect, fTraceDisplayModel.getHorizontalScale(), formatter);
+                    visibleRect, horizontalScale, formatter);
             }
 
             waveformIndex++;
@@ -182,8 +178,8 @@ class WaveformPanel extends JPanel implements MouseListener,
         g2d.setStroke(kDashedStroke);
         g2d.setColor(AppPreferences.getInstance().markerColor);
 
-        long startTime = (long)(visibleRect.x * fTraceDisplayModel.getHorizontalScale());
-        long endTime = (long) ((visibleRect.x + visibleRect.width) * fTraceDisplayModel.getHorizontalScale());
+        long startTime = xCoordinateToTimestamp(visibleRect.x);
+        long endTime = xCoordinateToTimestamp(visibleRect.x + visibleRect.width);
 
         // Draw Markers
         int markerIndex = fTraceDisplayModel.getMarkerAtTime(startTime);
@@ -192,7 +188,7 @@ class WaveformPanel extends JPanel implements MouseListener,
             if (timestamp > endTime)
                 break;
 
-            int x = (int) (timestamp / fTraceDisplayModel.getHorizontalScale());
+            int x = timestampToXCoordinate(timestamp);
             g2d.drawLine(x, 0, x, visibleRect.y + visibleRect.height);
             markerIndex++;
         }
@@ -201,16 +197,16 @@ class WaveformPanel extends JPanel implements MouseListener,
     }
 
     private void drawTimingLines(Graphics g, Rectangle visibleRect) {
-        double scale = fTraceDisplayModel.getHorizontalScale();
-        long startTime = (long)(visibleRect.x * scale);
-        long endTime = (long) ((visibleRect.x + visibleRect.width) * scale);
+        double horizontalScale = fTraceDisplayModel.getHorizontalScale();
+        long startTime = (long)(visibleRect.x / horizontalScale);
+        long endTime = (long) ((visibleRect.x + visibleRect.width) / horizontalScale);
         int minorTickInterval = (int) fTraceDisplayModel.getMinorTickInterval();
         int majorTickInterval = minorTickInterval * DrawMetrics.MINOR_TICKS_PER_MAJOR;
         startTime = ((startTime + majorTickInterval - 1) / majorTickInterval) * majorTickInterval;
 
         g.setColor(AppPreferences.getInstance().timingMarkerColor);
         for (long ts = startTime; ts < endTime; ts += majorTickInterval) {
-            int x = (int) (ts / scale);
+            int x = (int)(ts * horizontalScale);
             g.drawLine(x, visibleRect.y, x, visibleRect.y + visibleRect.height);
         }
     }
@@ -264,11 +260,11 @@ class WaveformPanel extends JPanel implements MouseListener,
     public void mouseMoved(MouseEvent e) {}
 
     private long xCoordinateToTimestamp(int coordinate) {
-        return (long)(coordinate * fTraceDisplayModel.getHorizontalScale());
+        return (long)(coordinate / fTraceDisplayModel.getHorizontalScale());
     }
 
     private int timestampToXCoordinate(long timestamp) {
-        return (int)(timestamp / fTraceDisplayModel.getHorizontalScale());
+        return (int)(timestamp * fTraceDisplayModel.getHorizontalScale());
     }
 
     private float kDashDescription[] = { 10.0f };

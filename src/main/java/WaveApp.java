@@ -95,9 +95,9 @@ class WaveApp extends JPanel implements ActionListener {
                 AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
                 loadTraceFile(chooser.getSelectedFile());
             }
-        } else if (cmd.equals("reloadtrace")) {
+        } else if (cmd.equals("reloadtrace"))
             loadTraceFile(fCurrentTraceFile);
-        } else if (cmd.equals("quit")) {
+        else if (cmd.equals("quit")) {
             saveConfig();
             System.exit(0);
         } else if (cmd.equals("removeAllMarkers"))

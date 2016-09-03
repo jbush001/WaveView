@@ -101,7 +101,7 @@ public class TraceDisplayModelTest {
         assertEquals(TestModelListener.MARKER_CHANGED, listener.fNotifications);
         assertEquals(1000, listener.fLongArg0);
         assertEquals(0, tdm.getMarkerAtTime(1000)); // Now there is a marker
-        tdm.setHorizontalScale(10.0);   // 50 pixels each direction
+        tdm.setHorizontalScale(0.1);   // 50 pixels each direction
 
         listener.reset();
         tdm.removeMarkerAtTime(925);
@@ -464,7 +464,7 @@ public class TraceDisplayModelTest {
     @Test
     public void testZeroMinorTick() {
         TraceDisplayModel tdm = new TraceDisplayModel();
-        tdm.setHorizontalScale(0.01);
+        tdm.setHorizontalScale(100);
         assertEquals(1, tdm.getMinorTickInterval());
     }
 
