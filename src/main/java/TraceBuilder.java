@@ -25,10 +25,10 @@ interface TraceBuilder {
 
     /// Adds another module to the fully qualified path of any nets
     /// that are subsequently added via newNet.
-    void enterModule(String name);
+    void enterScope(String name);
 
-    /// Pops up to the previous module pushed by enterModule.
-    void exitModule();
+    /// Pops up to the previous module pushed by enterScope.
+    void exitScope();
 
     /// Create a new net
     /// @param shortName Name of the signal. It's called 'short' to distinguish

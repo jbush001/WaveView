@@ -30,20 +30,20 @@ public class TraceSettingsFileTest {
         TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
 
         TraceBuilder builder = dataModel.startBuilding();
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         builder.newNet("net1", -1, 1);
         builder.newNet("net2", -1, 1);
-        builder.enterModule("mod2");
+        builder.enterScope("mod2");
         builder.newNet("net3", -1, 1);
         builder.newNet("net4", -1, 1);
-        builder.enterModule("mod3");
+        builder.enterScope("mod3");
         builder.newNet("net5", -1, 1);
         builder.newNet("net6", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.newNet("net7", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.newNet("net8", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
 
         // Populate sourceDisplayModel
         sourceDisplayModel.makeNetVisible(1);
@@ -132,11 +132,11 @@ public class TraceSettingsFileTest {
         TraceDataModel sourceDataModel = new TraceDataModel();
         TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
         TraceBuilder builder1 = sourceDataModel.startBuilding();
-        builder1.enterModule("mod1");
+        builder1.enterScope("mod1");
         builder1.newNet("net1", -1, 1);
         builder1.newNet("net2", -1, 1);
         builder1.newNet("net3", -1, 1);
-        builder1.exitModule();
+        builder1.exitScope();
         sourceDisplayModel.makeNetVisible(0);
         sourceDisplayModel.makeNetVisible(1);
         sourceDisplayModel.makeNetVisible(2);
@@ -145,11 +145,11 @@ public class TraceSettingsFileTest {
         TraceDisplayModel destDisplayModel = new TraceDisplayModel();
 
         TraceBuilder builder2 = destDataModel.startBuilding();
-        builder2.enterModule("mod1");
+        builder2.enterScope("mod1");
         builder2.newNet("net1", -1, 1);
         builder2.newNet("net4", -1, 1);
         builder2.newNet("net3", -1, 1);
-        builder2.exitModule();
+        builder2.exitScope();
 
         File file = fTempFolder.newFile("test2.settings");
         (new TraceSettingsFile(file, sourceDataModel, sourceDisplayModel)).write();

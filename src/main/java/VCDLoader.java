@@ -72,14 +72,14 @@ class VCDLoader implements TraceLoader {
         nextToken(true);   // Scope type
         nextToken(true);
         String scopeIdentifier = getTokenString();
-        fTraceBuilder.enterModule(scopeIdentifier);
+        fTraceBuilder.enterScope(scopeIdentifier);
         match("$end");
     }
 
     // 18.2.3.6 $upscope
     private void parseUpscope() throws LoadException, IOException {
         match("$end");
-        fTraceBuilder.exitModule();
+        fTraceBuilder.exitScope();
     }
 
     /// 18.2.3.8 $var

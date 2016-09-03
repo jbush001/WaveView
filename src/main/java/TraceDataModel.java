@@ -132,13 +132,13 @@ class TraceDataModel {
         }
 
         @Override
-        public void enterModule(String name) {
+        public void enterScope(String name) {
             fNetTree.enterScope(name);
             fScopeStack.push(name);
         }
 
         @Override
-        public void exitModule() {
+        public void exitScope() {
             fNetTree.leaveScope();
             fScopeStack.pop();
         }

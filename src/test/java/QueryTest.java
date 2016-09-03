@@ -23,9 +23,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("clk", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 5, new BitVector("0", 2));
         builder.appendTransition(id1, 10, new BitVector("1", 2));
         builder.appendTransition(id1, 15, new BitVector("0", 2));
@@ -39,12 +39,12 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("m");
+        builder.enterScope("m");
         builder.newNet("a", -1, 1);
         builder.newNet("b", -1, 1);
         builder.newNet("c", -1, 1);
         builder.newNet("d", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
 
         BitVector bv = new BitVector(1);
         for (int t = 0; t < 16; t++)
@@ -77,9 +77,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 5, new BitVector("0", 2));
         builder.appendTransition(id1, 10, new BitVector("1", 2));
         builder.loadFinished();
@@ -112,9 +112,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("value", -1, 4);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 17, new BitVector("5", 10));
         builder.appendTransition(id1, 23, new BitVector("10", 10));
         builder.loadFinished();
@@ -142,9 +142,9 @@ public class QueryTest {
     public void testMatchXZ() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("value", -1, 4);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 17, new BitVector("1111", 2));
         builder.appendTransition(id1, 23, new BitVector("xxxx", 2));
         builder.loadFinished();
@@ -282,10 +282,10 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
         int id2 = builder.newNet("b", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
 
         // Fast toggle (a).
         // True 5-9, 15-19, 25-29, 35-40, 45-
@@ -351,10 +351,10 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
         int id2 = builder.newNet("b", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
 
         // Fast toggle (a).
         // True 5-9, 15-19, 25-29, 35-40, 45-
@@ -416,9 +416,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("value", -1, 4);
-        builder.exitModule();
+        builder.exitScope();
 
         builder.appendTransition(id1, 1, new BitVector("0", 16));
         builder.appendTransition(id1, 2, new BitVector("2", 16));
@@ -666,9 +666,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         Query query = new Query(traceDataModel, "mod1.a");
         assertEquals(-1, query.getNextMatch(0));
@@ -681,9 +681,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         builder.appendTransition(id1, 10, new BitVector("0", 2));
         Query query = new Query(traceDataModel, "mod1.a");
@@ -696,9 +696,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         Query query = new Query(traceDataModel, "mod1.a");
         assertEquals(-1, query.getPreviousMatch(50));
@@ -710,9 +710,9 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         builder.appendTransition(id1, 40, new BitVector("1", 2));
         Query query = new Query(traceDataModel, "mod1.a");
@@ -759,13 +759,13 @@ public class QueryTest {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
-        builder.enterModule("mod_gen(0)");
-        builder.enterModule("mod2");
+        builder.enterScope("mod1");
+        builder.enterScope("mod_gen(0)");
+        builder.enterScope("mod2");
         int id1 = builder.newNet("a", -1, 1);
-        builder.exitModule();
-        builder.exitModule();
-        builder.exitModule();
+        builder.exitScope();
+        builder.exitScope();
+        builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("0", 2));
         builder.appendTransition(id1, 5, new BitVector("1", 2));
         builder.loadFinished();

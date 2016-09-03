@@ -57,7 +57,7 @@ public class NetSearchListModelAdapterTest {
         TraceDataModel model = new TraceDataModel();
         TraceBuilder builder = model.startBuilding();
 
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         builder.newNet("fooxxx", -1, 1);
         builder.newNet("xfooxx", -1, 1);
         builder.newNet("xxfoox", -1, 1);
@@ -67,7 +67,7 @@ public class NetSearchListModelAdapterTest {
         builder.newNet("bbb", -1, 1);
         builder.newNet("bb", -1, 1);
         builder.newNet("yyy", -1, 1);
-        builder.exitModule();
+        builder.exitScope();
 
         TestListDataListener listener = new TestListDataListener();
         NetSearchListModelAdapter nslma = new NetSearchListModelAdapter(model);

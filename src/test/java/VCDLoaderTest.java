@@ -58,16 +58,16 @@ public class VCDLoaderTest {
         }
 
         @Override
-        public void enterModule(String name) {
-            System.out.println("enterModule " + name);
+        public void enterScope(String name) {
+            System.out.println("enterScope " + name);
 
             Event event = fEventList.elementAt(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_ENTER);
         }
 
         @Override
-        public void exitModule() {
-            System.out.println("exitModule");
+        public void exitScope() {
+            System.out.println("exitScope");
 
             Event event = fEventList.elementAt(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_EXIT);
@@ -152,10 +152,10 @@ public class VCDLoaderTest {
         public void setTimescale(int order) {}
 
         @Override
-        public void enterModule(String name) {}
+        public void enterScope(String name) {}
 
         @Override
-        public void exitModule() {}
+        public void exitScope() {}
 
         @Override
         public int newNet(String shortName, int cloneId, int width) {
@@ -184,14 +184,14 @@ public class VCDLoaderTest {
             fTraceBuilder.expectTimescale(order);
         }
 
-        void enterModule(String name) {
+        void enterScope(String name) {
             fVCDContents.append("$scope module ");
             fVCDContents.append(name);
             fVCDContents.append(" $end\n");
             fTraceBuilder.expectEnterModule(name);
         }
 
-        void exitModule() {
+        void exitScope() {
             fVCDContents.append("$upscope $end\n");
             fTraceBuilder.expectExitModule();
         }
@@ -615,14 +615,14 @@ public class VCDLoaderTest {
         builder.addString("$date\n	Mon Aug 15 22:28:13 2016\n$end\n");
         builder.addString("$version\n	Icarus Verilog\n$end\n");
         builder.setTimescale("1us", -6);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         builder.defineNet("clk", -1, 1);
         builder.defineNet("reset", -1, 1);
-        builder.enterModule("mod2");
+        builder.enterScope("mod2");
         builder.defineNet("addr", -1, 32);
         builder.defineNet("data", -1, 32);
-        builder.exitModule();
-        builder.exitModule();
+        builder.exitScope();
+        builder.exitScope();
         builder.endDefinitions();
         for (int i = 0; i < 10000; i++) {
             long time = i * 5;
@@ -666,9 +666,9 @@ public class VCDLoaderTest {
     public void testProgressListener() throws Exception {
         TestBuilder builder = new TestBuilder();
         builder.setTimescale("1us", -6);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         builder.defineNet("value", -1, 16);
-        builder.exitModule();
+        builder.exitScope();
         builder.endDefinitions();
 
         // Need to append enough data to cause at least one progress
@@ -691,9 +691,9 @@ public class VCDLoaderTest {
     public void testInterruptedLoad() {
         TestBuilder builder = new TestBuilder();
         builder.setTimescale("1us", -6);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         builder.defineNet("value", -1, 16);
-        builder.exitModule();
+        builder.exitScope();
         builder.endDefinitions();
         for (int i = 0; i < 10000; i++)
             builder.appendTransition(0, i * 5, "0000000000000000");

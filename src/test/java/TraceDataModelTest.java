@@ -25,13 +25,13 @@ public class TraceDataModelTest {
         TraceBuilder builder = model.startBuilding();
 
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
         int net2 = builder.newNet("net2", -1, 3);
-        builder.enterModule("mod2");
+        builder.enterScope("mod2");
         int net3 = builder.newNet("net3", -1, 2);
-        builder.exitModule();
-        builder.exitModule();
+        builder.exitScope();
+        builder.exitScope();
 
         builder.appendTransition(net1, 10, new BitVector("1", 2));
         builder.appendTransition(net1, 20, new BitVector("0", 2));
@@ -92,10 +92,10 @@ public class TraceDataModelTest {
         TraceBuilder builder = model.startBuilding();
 
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
         int net2 = builder.newNet("net2", net1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(net1, 17, new BitVector("1", 2));
         builder.loadFinished();
 
@@ -122,10 +122,10 @@ public class TraceDataModelTest {
         TraceBuilder builder = model1.startBuilding();
 
         builder.setTimescale(-9);
-        builder.enterModule("mod1");
+        builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
         int net2 = builder.newNet("net2", net1, 1);
-        builder.exitModule();
+        builder.exitScope();
         builder.appendTransition(net1, 17, new BitVector("1", 2));
         builder.loadFinished();
 
