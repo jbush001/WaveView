@@ -144,12 +144,19 @@ class Query {
     private static final int TOK_IDENTIFIER = 1000;
     private static final int TOK_END = 1001;
     private static final int TOK_LITERAL = 1002;
+    private static final int TOK_GREATER = 1003;
+    private static final int TOK_GREATER_EQUAL = 1004;
+    private static final int TOK_LESS_THAN = 1005;
+    private static final int TOK_LESS_EQUAL = 1006;
+    private static final int TOK_NOT_EQUAL = 1007;
 
     private static final int STATE_INIT = 0;
     private static final int STATE_SCAN_IDENTIFIER = 1;
     private static final int STATE_SCAN_LITERAL = 2;
     private static final int STATE_SCAN_LITERAL_TYPE = 3;
     private static final int STATE_SCAN_GEN_NUM = 4;
+    private static final int STATE_SCAN_GREATER = 5;
+    private static final int STATE_SCAN_LESS = 6;
 
     private static final int LITERAL_TYPE_DECIMAL = 0;
     private static final int LITERAL_TYPE_HEX = 1;
@@ -215,11 +222,34 @@ class Query {
                     fPushBackChar = c;
                     fCurrentTokenType = LITERAL_TYPE_DECIMAL;
                     state = STATE_SCAN_LITERAL;
-                }
+                } else if (c == '>')
+                    state = STATE_SCAN_GREATER;
+                else if (c == '<')
+                    state = STATE_SCAN_LESS;
                 else if (!isSpace(c))
                     return c;
 
                 break;
+
+            case STATE_SCAN_GREATER:
+                if (c == '<')
+                    return TOK_NOT_EQUAL;
+                else if (c == '=')
+                    return TOK_GREATER_EQUAL;
+                else {
+                    fPushBackChar = c;
+                    return TOK_GREATER;
+                }
+
+            case STATE_SCAN_LESS:
+                if (c == '>')
+                    return TOK_NOT_EQUAL;
+                else if (c == '=')
+                    return TOK_LESS_EQUAL;
+                else {
+                    fPushBackChar = c;
+                    return TOK_LESS_THAN;
+                }
 
             case STATE_SCAN_IDENTIFIER:
                 if (isAlphaNum(c) || c == '_' || c == '.')
@@ -289,6 +319,8 @@ class Query {
         fPushBackToken = tok;
     }
 
+    /// Read the next token and throw an exception if the type does
+    /// not match the given type
     private void match(int tokenType) throws ParseException {
         int got = nextToken();
         if (got != tokenType) {
@@ -299,6 +331,20 @@ class Query {
         }
     }
 
+    /// Read the next token and check if is an identifier that matches
+    /// the passed type. If not, push back the token and return false.
+    /// @note this is case insensitive
+    private boolean tryToMatch(String value) throws ParseException {
+        int lookahead = nextToken();
+        if (lookahead != TOK_IDENTIFIER
+            || !fCurrentTokenValue.toString().equalsIgnoreCase(value)) {
+            pushBackToken(lookahead);
+            return false;
+        }
+
+        return true;
+    }
+
     private ExpressionNode parseExpression() throws ParseException {
         return parseOr();
     }
@@ -307,11 +353,8 @@ class Query {
         ExpressionNode left = parseAnd();
 
         while (true) {
-            int lookahead = nextToken();
-            if (lookahead != '|') {
-                pushBackToken(lookahead);
+            if (!tryToMatch("or"))
                 return left;
-            }
 
             ExpressionNode right = parseAnd();
             left = new OrExpressionNode(left, right);
@@ -322,11 +365,8 @@ class Query {
         ExpressionNode left = parseCondition();
 
         while (true) {
-            int lookahead = nextToken();
-            if (lookahead != '&') {
-                pushBackToken(lookahead);
+            if (!tryToMatch("and"))
                 return left;
-            }
 
             ExpressionNode right = parseCondition();
             left = new AndExpressionNode(left, right);
@@ -350,12 +390,21 @@ class Query {
 
         lookahead = nextToken();
         switch (lookahead) {
-        case '>':
+        case TOK_GREATER:
             match(TOK_LITERAL);
             return new GreaterThanExpressionNode(netId, fBitVector);
-        case '<':
+        case TOK_GREATER_EQUAL:
+            match(TOK_LITERAL);
+            return new GreaterEqualExpressionNode(netId, fBitVector);
+        case TOK_LESS_THAN:
             match(TOK_LITERAL);
             return new LessThanExpressionNode(netId, fBitVector);
+        case TOK_LESS_EQUAL:
+            match(TOK_LITERAL);
+            return new LessEqualExpressionNode(netId, fBitVector);
+        case TOK_NOT_EQUAL:
+            match(TOK_LITERAL);
+            return new NotEqualExpressionNode(netId, fBitVector);
         case '=':
             match(TOK_LITERAL);
             return new EqualExpressionNode(netId, fBitVector);
@@ -570,7 +619,7 @@ class Query {
 
         @Override
         public String toString() {
-            return "(equal net" + fNetId + " " + fExpected + ")";
+            return "(eq net" + fNetId + " " + fExpected + ")";
         }
     }
 
@@ -586,7 +635,7 @@ class Query {
 
         @Override
         public String toString() {
-            return "(notequal net" + fNetId + " " + fExpected + ")";
+            return "(ne net" + fNetId + " " + fExpected + ")";
         }
     }
 
@@ -602,7 +651,23 @@ class Query {
 
         @Override
         public String toString() {
-            return "(greater net" + fNetId + " " + fExpected + ")";
+            return "(gt net" + fNetId + " " + fExpected + ")";
+        }
+    }
+
+    private static class GreaterEqualExpressionNode extends ComparisonExpressionNode {
+        GreaterEqualExpressionNode(int netId, BitVector match) {
+            super(netId, match);
+        }
+
+        @Override
+        protected boolean doCompare(BitVector value1, BitVector value2) {
+            return value1.compare(value2) >= 0;
+        }
+
+        @Override
+        public String toString() {
+            return "(ge net" + fNetId + " " + fExpected + ")";
         }
     }
 
@@ -618,7 +683,23 @@ class Query {
 
         @Override
         public String toString() {
-            return "(lessthan net" + fNetId + " " + fExpected + ")";
+            return "(lt net" + fNetId + " " + fExpected + ")";
+        }
+    }
+
+    private static class LessEqualExpressionNode extends ComparisonExpressionNode {
+        LessEqualExpressionNode(int netId, BitVector match) {
+            super(netId, match);
+        }
+
+        @Override
+        protected boolean doCompare(BitVector value1, BitVector value2) {
+            return value1.compare(value2) <= 0;
+        }
+
+        @Override
+        public String toString() {
+            return "(le net" + fNetId + " " + fExpected + ")";
         }
     }
 

@@ -274,7 +274,7 @@ public class QueryTest {
         }
     }
 
-    /// Basic test for 'and' functionailty
+    /// Basic test for 'and' search functionailty
     /// This implicitly verifies query hinting by starting at different
     /// transition points
     @Test
@@ -309,7 +309,9 @@ public class QueryTest {
 
         builder.loadFinished();
 
-        Query query = new Query(traceDataModel, "mod1.a & mod1.b");
+        System.out.println("parse query");
+        Query query = new Query(traceDataModel, "mod1.a and mod1.b");
+        System.out.println("finished parsing");
 
         // Expression is true:
         // 15-19, 25-29, 45-
@@ -341,7 +343,7 @@ public class QueryTest {
         assertEquals(29, query.getPreviousMatch(50)); // false & true = false
     }
 
-    /// Basic test for 'or' functionailty
+    /// Basic test for 'or' search functionailty
     /// This implicitly verifies query hinting by starting at different
     /// transition points
     @Test
@@ -376,7 +378,8 @@ public class QueryTest {
 
         builder.loadFinished();
 
-        Query query = new Query(traceDataModel, "mod1.a | mod1.b");
+        Query query = new Query(traceDataModel, "mod1.a or mod1.b");
+        System.out.println("query is " + query.toString());
 
         // Expression is true:
         // 5-9, 15-29, 35-39, 45-
@@ -431,11 +434,23 @@ public class QueryTest {
         Query query = new Query(traceDataModel, "mod1.value > 'h5");
         assertEquals(6, query.getNextMatch(0));
 
+        query = new Query(traceDataModel, "mod1.value >= 'h5");
+        assertEquals(5, query.getNextMatch(0));
+
         query = new Query(traceDataModel, "mod1.value < 'h5");
         assertEquals(4, query.getPreviousMatch(10));
 
-        query = new Query(traceDataModel, "mod1.value = 'h5");
+        query = new Query(traceDataModel, "mod1.value <= 'h5");
         assertEquals(5, query.getPreviousMatch(10));
+
+        query = new Query(traceDataModel, "mod1.value = 'h5");
+        assertEquals(5, query.getNextMatch(0));
+
+        query = new Query(traceDataModel, "mod1.value <> 'h5");
+        assertEquals(6, query.getNextMatch(4));
+
+        query = new Query(traceDataModel, "mod1.value >< 'h5");
+        assertEquals(6, query.getNextMatch(4));
     }
 
     @Test
@@ -443,7 +458,7 @@ public class QueryTest {
         TraceDataModel traceDataModel = makeFourBitModel();
         Query query;
 
-        query = new Query(traceDataModel, "m.a & m.b & m.c & m.d");
+        query = new Query(traceDataModel, "m.a and m.b and m.c and m.d");
         assertFalse(query.matches(0));
         assertFalse(query.matches(1));
         assertFalse(query.matches(2));
@@ -461,7 +476,7 @@ public class QueryTest {
         assertFalse(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a & m.b & m.c | m.d");
+        query = new Query(traceDataModel, "m.a and m.b and m.c or m.d");
         assertFalse(query.matches(0));
         assertTrue(query.matches(1));
         assertFalse(query.matches(2));
@@ -479,7 +494,7 @@ public class QueryTest {
         assertTrue(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a & m.b | m.c & m.d");
+        query = new Query(traceDataModel, "m.a and m.b or m.c and m.d");
         assertFalse(query.matches(0));
         assertFalse(query.matches(1));
         assertFalse(query.matches(2));
@@ -497,7 +512,7 @@ public class QueryTest {
         assertTrue(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a & m.b | m.c | m.d");
+        query = new Query(traceDataModel, "m.a and m.b or m.c or m.d");
         assertFalse(query.matches(0));
         assertTrue(query.matches(1));
         assertTrue(query.matches(2));
@@ -515,7 +530,7 @@ public class QueryTest {
         assertTrue(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a | m.b & m.c & m.d");
+        query = new Query(traceDataModel, "m.a or m.b and m.c and m.d");
         assertFalse(query.matches(0));
         assertFalse(query.matches(1));
         assertFalse(query.matches(2));
@@ -533,7 +548,7 @@ public class QueryTest {
         assertTrue(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a | m.b & m.c | m.d");
+        query = new Query(traceDataModel, "m.a or m.b and m.c or m.d");
         assertFalse(query.matches(0));
         assertTrue(query.matches(1));
         assertFalse(query.matches(2));
@@ -551,7 +566,7 @@ public class QueryTest {
         assertTrue(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a | m.b | m.c & m.d");
+        query = new Query(traceDataModel, "m.a or m.b or m.c and m.d");
         assertFalse(query.matches(0));
         assertFalse(query.matches(1));
         assertFalse(query.matches(2));
@@ -569,7 +584,7 @@ public class QueryTest {
         assertTrue(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a | m.b | m.c | m.d");
+        query = new Query(traceDataModel, "m.a or m.b or m.c or m.d");
         assertFalse(query.matches(0));
         assertTrue(query.matches(1));
         assertTrue(query.matches(2));
@@ -588,7 +603,7 @@ public class QueryTest {
         assertTrue(query.matches(15));
 
         // Parentheses
-        query = new Query(traceDataModel, "m.a & (m.b | m.c) & m.d");
+        query = new Query(traceDataModel, "m.a and (m.b or m.c) and m.d");
         assertFalse(query.matches(0));
         assertFalse(query.matches(1));
         assertFalse(query.matches(2));
@@ -606,7 +621,7 @@ public class QueryTest {
         assertFalse(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "m.a & m.b & (m.c | m.d)");
+        query = new Query(traceDataModel, "m.a and m.b and (m.c or m.d)");
         assertFalse(query.matches(0));
         assertFalse(query.matches(1));
         assertFalse(query.matches(2));
@@ -624,7 +639,7 @@ public class QueryTest {
         assertTrue(query.matches(14));
         assertTrue(query.matches(15));
 
-        query = new Query(traceDataModel, "(m.a | m.b) & m.c & m.d");
+        query = new Query(traceDataModel, "(m.a or m.b) and m.c and m.d");
         assertFalse(query.matches(0));
         assertFalse(query.matches(1));
         assertFalse(query.matches(2));
@@ -704,33 +719,37 @@ public class QueryTest {
         assertEquals(-1, query.getPreviousMatch(50));
     }
 
-    /// Converting a query to a string is a debug feature.
+    // Tests that the query expression is parsed and converted to an expression
+    // tree correctly, as well as various operators.
     @Test
     public void testQueryToString() throws Exception {
         TraceDataModel traceDataModel = makeFourBitModel();
 
-        // Use all comparison operators
-        assertEquals("(or (and (equal net0 00000000) (lessthan net1 00000001)) (and (greater net2 00000010) (notequal net3 0)))",
-            (new Query(traceDataModel, "m.a = 0 & m.b < 1 | m.c > 2 & m.d")).toString());
+        // Use all comparison operators.
+        assertEquals("(or (and (ne net0 0) (lt net1 00000001)) (and (gt net2 00000010) (eq net3 00000000)))",
+            (new Query(traceDataModel, "m.a and m.b < 1 or m.c > 2 and m.d = 0")).toString());
+
+        assertEquals("(or (and (ne net0 00000000) (le net1 00000001)) (and (ge net2 00000010) (ne net3 00000101)))",
+            (new Query(traceDataModel, "m.a >< 0 and m.b <= 1 or m.c >= 2 and m.d <> 5")).toString());
 
         // Precedence tests. These mirror the test above, but ensure the expression tree was
         // set up correctly.
-        assertEquals("(and (and (and (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
-            (new Query(traceDataModel, "m.a & m.b & m.c & m.d")).toString());
-        assertEquals("(or (and (and (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
-            (new Query(traceDataModel, "m.a & m.b & m.c | m.d")).toString());
-        assertEquals("(or (and (notequal net0 0) (notequal net1 0)) (and (notequal net2 0) (notequal net3 0)))",
-            (new Query(traceDataModel, "m.a & m.b | m.c & m.d")).toString());
-        assertEquals("(or (or (and (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
-            (new Query(traceDataModel, "m.a & m.b | m.c | m.d")).toString());
-        assertEquals("(or (notequal net0 0) (and (and (notequal net1 0) (notequal net2 0)) (notequal net3 0)))",
-            (new Query(traceDataModel, "m.a | m.b & m.c & m.d")).toString());
-        assertEquals("(or (or (notequal net0 0) (and (notequal net1 0) (notequal net2 0))) (notequal net3 0))",
-            (new Query(traceDataModel, "m.a | m.b & m.c | m.d")).toString());
-        assertEquals("(or (or (notequal net0 0) (notequal net1 0)) (and (notequal net2 0) (notequal net3 0)))",
-            (new Query(traceDataModel, "m.a | m.b | m.c & m.d")).toString());
-        assertEquals("(or (or (or (notequal net0 0) (notequal net1 0)) (notequal net2 0)) (notequal net3 0))",
-            (new Query(traceDataModel, "m.a | m.b | m.c | m.d")).toString());
+        assertEquals("(and (and (and (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+            (new Query(traceDataModel, "m.a and m.b and m.c and m.d")).toString());
+        assertEquals("(or (and (and (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+            (new Query(traceDataModel, "m.a and m.b and m.c or m.d")).toString());
+        assertEquals("(or (and (ne net0 0) (ne net1 0)) (and (ne net2 0) (ne net3 0)))",
+            (new Query(traceDataModel, "m.a and m.b or m.c and m.d")).toString());
+        assertEquals("(or (or (and (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+            (new Query(traceDataModel, "m.a and m.b or m.c or m.d")).toString());
+        assertEquals("(or (ne net0 0) (and (and (ne net1 0) (ne net2 0)) (ne net3 0)))",
+            (new Query(traceDataModel, "m.a or m.b and m.c and m.d")).toString());
+        assertEquals("(or (or (ne net0 0) (and (ne net1 0) (ne net2 0))) (ne net3 0))",
+            (new Query(traceDataModel, "m.a or m.b and m.c or m.d")).toString());
+        assertEquals("(or (or (ne net0 0) (ne net1 0)) (and (ne net2 0) (ne net3 0)))",
+            (new Query(traceDataModel, "m.a or m.b or m.c and m.d")).toString());
+        assertEquals("(or (or (or (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+            (new Query(traceDataModel, "m.a or m.b or m.c or m.d")).toString());
     }
 
     // Basically tests that parens are treated as part of an indeitifer.

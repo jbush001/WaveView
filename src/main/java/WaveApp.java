@@ -277,7 +277,7 @@ class WaveApp extends JPanel implements ActionListener {
             if (first)
                 first = false;
             else
-                initialQuery.append(" & ");
+                initialQuery.append(" and ");
 
             initialQuery.append(fTraceDataModel.getFullNetName(netId));
             Transition t = fTraceDataModel.findTransition(netId,

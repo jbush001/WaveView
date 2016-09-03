@@ -202,7 +202,8 @@ class WaveformPanel extends JPanel implements MouseListener,
         long endTime = (long) ((visibleRect.x + visibleRect.width) / horizontalScale);
         int minorTickInterval = (int) fTraceDisplayModel.getMinorTickInterval();
         int majorTickInterval = minorTickInterval * DrawMetrics.MINOR_TICKS_PER_MAJOR;
-        startTime = ((startTime + majorTickInterval - 1) / majorTickInterval) * majorTickInterval;
+        startTime = ((startTime + majorTickInterval - 1) / majorTickInterval)
+            * majorTickInterval;
 
         g.setColor(AppPreferences.getInstance().timingMarkerColor);
         for (long ts = startTime; ts < endTime; ts += majorTickInterval) {
