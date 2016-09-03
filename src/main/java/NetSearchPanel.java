@@ -90,10 +90,14 @@ class NetSearchPanel extends JPanel {
         tabView.addTab("Tree", null, treeTab, "tree view");
         treeTab.setLayout(new BorderLayout());
         fTree = new JTree(fTraceDataModel.getNetTree());
+        fTree.setCellRenderer(new NetTreeCellRenderer());
         fTree.setDragEnabled(true);
         fTree.setTransferHandler(new NetTreeTransferHandler());
         JScrollPane scroller = new JScrollPane(fTree);
         treeTab.add(scroller, BorderLayout.CENTER);
+
+        fNetIcon = loadResourceIcon("tree-net.png");
+        fModuleIcon = loadResourceIcon("tree-module.png");
 
         // Set up net search view
         JPanel searchTab = new JPanel();
@@ -111,7 +115,38 @@ class NetSearchPanel extends JPanel {
         listScroller.add(new JTextArea());
     }
 
+    class NetTreeCellRenderer extends DefaultTreeCellRenderer {
+        public Component getTreeCellRendererComponent(
+            JTree tree,
+            Object value,
+            boolean sel,
+            boolean expanded,
+            boolean leaf,
+            int row,
+            boolean hasFocus) {
+
+            NetTreeModel.Node node = (NetTreeModel.Node) value;
+            super.getTreeCellRendererComponent(
+                tree, value, sel,
+                expanded, leaf, row,
+                hasFocus);
+
+            if (node.isLeaf())
+                setIcon(fNetIcon);
+            else
+                setIcon(fModuleIcon);
+
+            return this;
+        }
+    }
+
+    private ImageIcon loadResourceIcon(String name) {
+        return new ImageIcon(this.getClass().getClassLoader().getResource(name));
+    }
+
     private JTree fTree;
     private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
+    private ImageIcon fNetIcon;
+    private ImageIcon fModuleIcon;
 }

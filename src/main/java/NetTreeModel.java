@@ -39,7 +39,7 @@ class NetTreeModel implements TreeModel {
             return;
         }
 
-        NetTreeNode node = new NetTreeNode(name);
+        Node node = new Node(name);
         if (fRoot == null)
             fRoot = node;
         else
@@ -53,11 +53,11 @@ class NetTreeModel implements TreeModel {
     }
 
     void addNet(String name, int netId) {
-        fNodeStack.peek().fChildren.add(new NetTreeNode(name, netId));
+        fNodeStack.peek().fChildren.add(new Node(name, netId));
     }
 
     int getNetFromTreeObject(Object o) {
-        return ((NetTreeNode)o).fNet;
+        return ((Node)o).fNet;
     }
 
     // Tree model methods. Listeners are unimplemented because the tree is
@@ -70,17 +70,21 @@ class NetTreeModel implements TreeModel {
 
     @Override
     public Object getChild(Object parent, int index) {
-        return ((NetTreeNode) parent).fChildren.get(index);
+        return ((Node) parent).fChildren.get(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
-        return ((NetTreeNode) parent).fChildren.size();
+        Node n = (Node) parent;
+        if (n.isLeaf())
+            return 0;
+        else
+            return n.fChildren.size();
     }
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        return ((NetTreeNode) parent).fChildren.indexOf(child);
+        return ((Node) parent).fChildren.indexOf(child);
     }
 
     @Override
@@ -90,7 +94,7 @@ class NetTreeModel implements TreeModel {
 
     @Override
     public boolean isLeaf(Object node) {
-        return ((NetTreeNode) node).fNet != -1;
+        return ((Node) node).isLeaf();
     }
 
     @Override
@@ -98,14 +102,15 @@ class NetTreeModel implements TreeModel {
         throw new UnsupportedOperationException();
     }
 
-    private static class NetTreeNode {
+    static class Node {
         // Interior nodes only
-        NetTreeNode(String name) {
+        Node(String name) {
             fName = name;
+            fChildren = new ArrayList<Node>();
         }
 
         // Leaf nodes only
-        NetTreeNode(String name, int net) {
+        Node(String name, int net) {
             fName = name;
             fNet = net;
         }
@@ -114,11 +119,15 @@ class NetTreeModel implements TreeModel {
             return fName;
         }
 
-        private ArrayList<NetTreeNode> fChildren = new ArrayList<NetTreeNode>();
+        boolean isLeaf() {
+            return fChildren == null;
+        }
+
+        private ArrayList<Node> fChildren;
         private String fName;
         private int fNet = -1;
     };
 
-    private NetTreeNode fRoot;
-    private Stack<NetTreeNode> fNodeStack = new Stack<NetTreeNode>();
+    private Node fRoot;
+    private Stack<Node> fNodeStack = new Stack<Node>();
 }
