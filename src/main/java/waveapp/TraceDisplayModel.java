@@ -245,9 +245,11 @@ public class TraceDisplayModel {
         return fMarkers.findIndex(timestamp);
     }
 
-    public void removeMarkerAtTime(long timestamp) {
+    /// @returns -1 if no marker was found near this timestamp. The index
+    ///    into the list of markers otherwise.
+    private int findMarkerNear(long timestamp) {
         if (fMarkers.size() == 0)
-            return;
+            return -1;
 
         // Because it's hard to click exactly on the marker, allow removing
         // markers a few pixels to the right or left of the current cursor.
@@ -258,15 +260,23 @@ public class TraceDisplayModel {
 
         // The lookup function sometimes rounds to the lower marker, so
         // check both the current marker and the next one.
-        if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
-            fMarkers.remove(index);
-            notifyMarkerChanged(targetTimestamp);
-        } else if (index < fMarkers.size() - 1) {
+        if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK)
+            return index;
+        else if (index < fMarkers.size() - 1) {
             targetTimestamp = fMarkers.get(index + 1).fTimestamp;
-            if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
-                fMarkers.remove(index + 1);
-                notifyMarkerChanged(targetTimestamp);
-            }
+            if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK)
+                return index + 1;
+        }
+
+        return -1;
+    }
+
+    public void removeMarkerAtTime(long timestamp) {
+        int index = findMarkerNear(timestamp);
+        if (index != -1) {
+            long actualTimestamp = fMarkers.get(index).fTimestamp;
+            fMarkers.remove(index);
+            notifyMarkerChanged(actualTimestamp);
         }
     }
 
