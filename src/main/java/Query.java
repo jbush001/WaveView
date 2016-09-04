@@ -58,7 +58,7 @@ class Query {
         // to find a place where the expression is false. We'll then scan again
         // to where it is true.
         while (currentValue) {
-            if (fSearchHint.forwardTimestamp == -1)
+            if (fSearchHint.forwardTimestamp == Long.MAX_VALUE)
                 return -1;  // End of trace
 
             currentTime = fSearchHint.forwardTimestamp;
@@ -66,7 +66,7 @@ class Query {
         }
 
         while (!currentValue) {
-            if (fSearchHint.forwardTimestamp == -1)
+            if (fSearchHint.forwardTimestamp == Long.MAX_VALUE)
                 return -1;  // End of trace
 
             currentTime = fSearchHint.forwardTimestamp;
@@ -88,7 +88,7 @@ class Query {
         long currentTime = startTimestamp;
         boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fSearchHint);
         while (currentValue) {
-            if (fSearchHint.backwardTimestamp == -1)
+            if (fSearchHint.backwardTimestamp == Long.MIN_VALUE)
                 return -1;  // End of trace
 
             currentTime = fSearchHint.backwardTimestamp;
@@ -96,7 +96,7 @@ class Query {
         }
 
         while (!currentValue) {
-            if (fSearchHint.backwardTimestamp == -1)
+            if (fSearchHint.backwardTimestamp == Long.MIN_VALUE)
                 return -1;  // End of trace
 
             currentTime = fSearchHint.backwardTimestamp;
@@ -345,26 +345,22 @@ class Query {
 
     private ExpressionNode parseOr() throws ParseException {
         ExpressionNode left = parseAnd();
-
-        while (true) {
-            if (!tryToMatch("or"))
-                return left;
-
+        while (tryToMatch("or")) {
             ExpressionNode right = parseAnd();
             left = new OrExpressionNode(left, right);
         }
+
+        return left;
     }
 
     private ExpressionNode parseAnd() throws ParseException {
         ExpressionNode left = parseCondition();
-
-        while (true) {
-            if (!tryToMatch("and"))
-                return left;
-
+        while (tryToMatch("and")) {
             ExpressionNode right = parseCondition();
             left = new AndExpressionNode(left, right);
         }
+
+        return left;
     }
 
     private ExpressionNode parseCondition() throws ParseException {
@@ -441,23 +437,10 @@ class Query {
             // Compute the hints, which are the soonest time this expression
             // *could* change value. We will call the subclassed methods to determine
             // the actual hint type.
-            long nextLeft = fLeftHint.forwardTimestamp >= 0
-                ? fLeftHint.forwardTimestamp : Long.MAX_VALUE;
-            long nextRight = fRightHint.forwardTimestamp >= 0
-                ? fRightHint.forwardTimestamp : Long.MAX_VALUE;
-            outHint.forwardTimestamp = nextHint(leftResult, rightResult, nextLeft, nextRight,
-                false);
-            if (outHint.forwardTimestamp == Long.MAX_VALUE)
-                outHint.forwardTimestamp = -1;
-
-            long prevLeft = fLeftHint.backwardTimestamp >= 0
-                ? fLeftHint.backwardTimestamp : -Long.MAX_VALUE;
-            long prevRight = fRightHint.backwardTimestamp >= 0
-                ? fRightHint.backwardTimestamp : -Long.MAX_VALUE;
-            outHint.backwardTimestamp = nextHint(leftResult, rightResult, prevLeft, prevRight,
-                true);
-            if (outHint.backwardTimestamp == -Long.MAX_VALUE)
-                outHint.backwardTimestamp = -1;
+            outHint.forwardTimestamp = nextHint(leftResult, rightResult,
+                fLeftHint.forwardTimestamp, fRightHint.forwardTimestamp, false);
+            outHint.backwardTimestamp = nextHint(leftResult, rightResult,
+                fLeftHint.backwardTimestamp, fRightHint.backwardTimestamp, true);
 
             // Return the result at this time
             return compareResults(leftResult, rightResult);
@@ -583,14 +566,13 @@ class Query {
             if (timestamp >= t.getTimestamp())
                 outHint.backwardTimestamp = t.getTimestamp() - 1;
             else
-                outHint.backwardTimestamp = -1;
+                outHint.backwardTimestamp = Long.MIN_VALUE;
 
             if (i.hasNext()) {
                 t = i.next();
                 outHint.forwardTimestamp = t.getTimestamp();
-            }
-            else
-                outHint.forwardTimestamp = -1;
+            } else
+                outHint.forwardTimestamp = Long.MAX_VALUE;
 
             return result;
         }
