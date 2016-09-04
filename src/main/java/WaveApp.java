@@ -207,7 +207,7 @@ class WaveApp extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(WaveApp.this, "Error opening waveform file: "
                                               + fErrorMessage);
             } else {
-                fCurrentQuery = null;
+                fCurrentSearch = null;
 
                 // XXX hack
                 // Because this is running a separate thread, and I don't want to add locking
@@ -265,9 +265,9 @@ class WaveApp extends JPanel implements ActionListener {
     }
 
     private void showFindDialog() {
-        // The initial query string is formed by the selected nets and
+        // The initial search string is formed by the selected nets and
         // their values at the cursor position.
-        StringBuffer initialQuery = new StringBuffer();
+        StringBuffer initialSearch = new StringBuffer();
         boolean first = true;
         long cursorPosition = fTraceDisplayModel.getCursorPosition();
 
@@ -276,17 +276,17 @@ class WaveApp extends JPanel implements ActionListener {
             if (first)
                 first = false;
             else
-                initialQuery.append(" and ");
+                initialSearch.append(" and ");
 
-            initialQuery.append(fTraceDataModel.getFullNetName(netId));
+            initialSearch.append(fTraceDataModel.getFullNetName(netId));
             Transition t = fTraceDataModel.findTransition(netId,
                            cursorPosition).next();
 
-            initialQuery.append(" = 'h");
-            initialQuery.append(t.toString(16));
+            initialSearch.append(" = 'h");
+            initialSearch.append(t.toString(16));
         }
 
-        FindPanel findPanel = new FindPanel(this, initialQuery.toString());
+        FindPanel findPanel = new FindPanel(this, initialSearch.toString());
         JDialog frame = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Find", true);
         frame.getContentPane().add(findPanel);
         frame.setSize(new Dimension(450, 150));
@@ -295,13 +295,13 @@ class WaveApp extends JPanel implements ActionListener {
         frame.setVisible(true);
     }
 
-    void setQuery(String query) throws Query.ParseException {
-        fCurrentQuery = new Query(fTraceDataModel, query);
+    void setSearch(String searchString) throws Search.ParseException {
+        fCurrentSearch = new Search(fTraceDataModel, searchString);
     }
 
     void findNext() {
-        if (fCurrentQuery != null) {
-            long newTimestamp = fCurrentQuery.getNextMatch(fTraceDisplayModel.getCursorPosition());
+        if (fCurrentSearch != null) {
+            long newTimestamp = fCurrentSearch.getNextMatch(fTraceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
                 fTraceDisplayModel.setSelectionStart(newTimestamp);
                 fTraceDisplayModel.setCursorPosition(newTimestamp);
@@ -310,8 +310,8 @@ class WaveApp extends JPanel implements ActionListener {
     }
 
     void findPrev() {
-        if (fCurrentQuery != null) {
-            long newTimestamp = fCurrentQuery.getPreviousMatch(fTraceDisplayModel.getCursorPosition());
+        if (fCurrentSearch != null) {
+            long newTimestamp = fCurrentSearch.getPreviousMatch(fTraceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
                 fTraceDisplayModel.setSelectionStart(newTimestamp);
                 fTraceDisplayModel.setCursorPosition(newTimestamp);
@@ -485,7 +485,7 @@ class WaveApp extends JPanel implements ActionListener {
     private TracePanel fTracePanel;
     private TraceDisplayModel fTraceDisplayModel = new TraceDisplayModel();
     private TraceDataModel fTraceDataModel = new TraceDataModel();
-    private Query fCurrentQuery;
+    private Search fCurrentSearch;
     private JFrame fAddNetsWindow;
     private JFrame fMarkersWindow;
     private JFrame fPrefsWindow;

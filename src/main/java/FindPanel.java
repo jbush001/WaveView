@@ -23,7 +23,7 @@ import javax.swing.table.*;
 import javax.swing.text.*;
 
 class FindPanel extends JPanel implements ActionListener {
-    FindPanel(WaveApp app, String initialQuery) {
+    FindPanel(WaveApp app, String initialSearch) {
         fWaveApp = app;
 
         setLayout(new BorderLayout());
@@ -31,7 +31,7 @@ class FindPanel extends JPanel implements ActionListener {
         JLabel findLabel = new JLabel("Find:");
         fTextArea = new JTextArea(5, 30);
         fTextArea.setLineWrap(true);
-        fTextArea.setText(initialQuery);
+        fTextArea.setText(initialSearch);
         fTextArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
@@ -70,24 +70,24 @@ class FindPanel extends JPanel implements ActionListener {
         add(buttonContainer, BorderLayout.SOUTH);
     }
 
-    /// Called when the user alters the current query string.
+    /// Called when the user alters the current search string.
     void invalidateText() {
-        // The next time the user hits next/prev, need to regenerate the query.
-        fNeedsQueryUpdate = true;
+        // The next time the user hits next/prev, need to regenerate the Search.
+        fNeedsSearchUpdate = true;
 
         // When the user beings editing, remove the error highlights
         // so they don't leave boogers all over the place.
         fHighlighter.removeAllHighlights();
     }
 
-    /// If the query has been updated, try to parse it and generate a new query
-    /// object. If the query string is invalid, highlight the incorrect portion
+    /// If the search has been updated, try to parse it and generate a new Search
+    /// object. If the search string is invalid, highlight the incorrect portion
     /// and pop up an error message.
-    private void checkUpdateQuery() {
-        if (fNeedsQueryUpdate) {
+    private void checkUpdateSearch() {
+        if (fNeedsSearchUpdate) {
             try {
-                fWaveApp.setQuery(fTextArea.getText());
-            } catch (Query.ParseException exc) {
+                fWaveApp.setSearch(fTextArea.getText());
+            } catch (Search.ParseException exc) {
                 // Highlight error
                 fHighlighter.removeAllHighlights();
                 try {
@@ -98,11 +98,11 @@ class FindPanel extends JPanel implements ActionListener {
                 }
 
                 /// @todo Should this be displayed in the window somewhere?
-                JOptionPane.showMessageDialog(null, exc.getMessage(), "Error parsing query",
+                JOptionPane.showMessageDialog(null, exc.getMessage(), "Error parsing expression",
                                               JOptionPane.ERROR_MESSAGE);
             }
 
-            fNeedsQueryUpdate = false;
+            fNeedsSearchUpdate = false;
         }
     }
 
@@ -111,10 +111,10 @@ class FindPanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if (cmd.equals("Prev")) {
-            checkUpdateQuery();
+            checkUpdateSearch();
             fWaveApp.findPrev();
         } else if (cmd.equals("Next")) {
-            checkUpdateQuery();
+            checkUpdateSearch();
             fWaveApp.findNext();
         }
     }
@@ -122,7 +122,7 @@ class FindPanel extends JPanel implements ActionListener {
     private JTextArea fTextArea;
     private JScrollPane fScrollPane;
     private WaveApp fWaveApp;
-    private boolean fNeedsQueryUpdate = true;
+    private boolean fNeedsSearchUpdate = true;
     private Highlighter fHighlighter;
     private Highlighter.HighlightPainter fHighlightPainter;
 }

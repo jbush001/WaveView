@@ -18,19 +18,19 @@ import java.lang.Math;
 import java.util.*;
 
 ///
-/// The Query class allows searching for logic conditions using complex boolean expressions
+/// The Search class allows searching for logic conditions using complex boolean expressions
 /// For example: (ena = 1 and (addr = 'h1000 or addr = 'h2000))
 /// It builds an expression tree to represent the search criteria. It is optimized
 /// for fast searching, skipping events that cannot meet the criteria.
 ///
 /// @todo Support partial multi-net matches
 ///
-class Query {
-    Query(TraceDataModel traceModel, String queryString) throws ParseException {
+class Search {
+    Search(TraceDataModel traceModel, String searchString) throws ParseException {
         fTraceDataModel = traceModel;
-        fQueryString = queryString;
+        fSearchString = searchString;
         fLexerOffset = 0;
-        fExpression = parseExpression();
+        fSearchExpression = parseExpression();
         match(TOK_END);
     }
 
@@ -38,7 +38,7 @@ class Query {
     /// @returns true if this query matches at the passed timestamp
     boolean matches(long timestamp) {
         SearchHint hint = new SearchHint();
-        return fExpression.evaluate(fTraceDataModel, timestamp, hint);
+        return fSearchExpression.evaluate(fTraceDataModel, timestamp, hint);
     }
 
     ///
@@ -54,7 +54,7 @@ class Query {
     long getNextMatch(long startTimestamp) {
         SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
+        boolean currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
 
         // If the start timestamp is already at a region that is true, scan first
         // to find a place where the expression is false. We'll then scan again
@@ -64,7 +64,7 @@ class Query {
                 return -1;  // End of trace
 
             currentTime = hint.forwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         while (!currentValue) {
@@ -72,7 +72,7 @@ class Query {
                 return -1;  // End of trace
 
             currentTime = hint.forwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         return currentTime;
@@ -89,13 +89,13 @@ class Query {
     long getPreviousMatch(long startTimestamp) {
         SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
+        boolean currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
         while (currentValue) {
             if (hint.backwardTimestamp == Long.MIN_VALUE)
                 return -1;  // End of trace
 
             currentTime = hint.backwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         while (!currentValue) {
@@ -103,7 +103,7 @@ class Query {
                 return -1;  // End of trace
 
             currentTime = hint.backwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         return currentTime;
@@ -133,7 +133,7 @@ class Query {
 
     @Override
     public String toString() {
-        return fExpression.toString();
+        return fSearchExpression.toString();
     }
 
     private static final int TOK_IDENTIFIER = 1000;
@@ -195,10 +195,10 @@ class Query {
                 c = fPushBackChar;
                 fPushBackChar = -1;
             } else {
-                if (fLexerOffset == fQueryString.length())
+                if (fLexerOffset == fSearchString.length())
                     c = -1;
                 else
-                    c = fQueryString.charAt(fLexerOffset++);
+                    c = fSearchString.charAt(fLexerOffset++);
             }
 
             switch (state) {
@@ -679,7 +679,7 @@ class Query {
         }
     }
 
-    private String fQueryString;
+    private String fSearchString;
     private int fLexerOffset;
     private StringBuffer fCurrentTokenValue = new StringBuffer();
     private int fPushBackChar = -1;
@@ -687,7 +687,7 @@ class Query {
     private int fTokenStart;
     private BitVector fLiteralValue;
     private TraceDataModel fTraceDataModel;
-    private ExpressionNode fExpression;
+    private ExpressionNode fSearchExpression;
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
 }
 
