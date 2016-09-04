@@ -50,7 +50,6 @@ class TraceDataModel {
         return fMaxTimestamp;
     }
 
-    /// @bug Is this needed if we already have the NetTreeModel exposed?
     int getNetFromTreeObject(Object o) {
         return fNetTree.getNetFromTreeObject(o);
     }
@@ -81,20 +80,17 @@ class TraceDataModel {
     }
 
     private static class NetDataModel {
-        NetDataModel(String shortName, int width) {
+        NetDataModel(String shortName, String fullName, int width) {
             fShortName = shortName;
+            fFullName = fullName;
             fTransitionVector = new TransitionVector(width);
         }
 
         // This NetDataModel shares its transition data with another one.
-        /// @todo clean this up by separating into another class
-        NetDataModel(String shortName, NetDataModel cloneFrom) {
+        NetDataModel(String shortName, String fullName, NetDataModel cloneFrom) {
             fShortName = shortName;
+            fFullName = fullName;
             fTransitionVector = cloneFrom.fTransitionVector;
-        }
-
-        void setFullName(String name) {
-            fFullName = name;
         }
 
         String getFullName() {
@@ -173,11 +169,10 @@ class TraceDataModel {
 
             NetDataModel net;
             if (cloneId != -1)
-                net = new NetDataModel(shortName, fAllNets.get(cloneId));
+                net = new NetDataModel(shortName, fullName.toString(), fAllNets.get(cloneId));
             else
-                net = new NetDataModel(shortName, width);
+                net = new NetDataModel(shortName, fullName.toString(), width);
 
-            net.setFullName(fullName.toString());
             fAllNets.add(net);
             int thisNetIndex = fAllNets.size() - 1;
             fNetTree.addNet(shortName, thisNetIndex);
