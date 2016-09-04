@@ -90,7 +90,7 @@ class WaveformPanel extends JPanel implements MouseListener,
             // scroll up so there's no space at the bottom. If we don't do
             // this, the name view and waveform view will become vertically
             // unaligned.
-            visibleRect.y -= (visibleRect.y + visibleRect.height) - preferredSize.height;
+            visibleRect.y -= visibleRect.y + visibleRect.height - preferredSize.height;
             scrollRectToVisible(visibleRect);
         } else if (visibleRect.y > getHeight()) {
             // This happens if all nets are removed. Scroll back to top.

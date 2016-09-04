@@ -254,6 +254,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         fPopupMenu.add(item);
 
         addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent event) {
                 if (event.isPopupTrigger())
                     fPopupMenu.show(event.getComponent(), event.getX(), event.getY());
@@ -334,7 +335,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
                 int returnValue = chooser.showOpenDialog(this);
 
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    try {
+//                    try {
 //                         String jarFileName = chooser.getSelectedFile().getCanonicalPath();
 //                         URL[] urls = { (new File(jarFileName)).toURL() };
 //                         URLClassLoader loader = new URLClassLoader(urls);
@@ -346,9 +347,9 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
 //                             net.setCustomValueFormatterPath(jarFileName);
 //                             net.setValueFormatter(formatter);
 //                         }
-                    } catch (Exception exc) {
-                        JOptionPane.showMessageDialog(this, "Error opening configuration file");
-                    }
+//                    } catch (Exception exc) {
+//                        JOptionPane.showMessageDialog(this, "Error opening configuration file");
+//                    }
                 }
             } else {
                 ValueFormatter formatter = null;

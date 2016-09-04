@@ -88,7 +88,7 @@ public class TransitionVector {
             if (!hasNext())
                 throw new NoSuchElementException();
 
-            int bitOffset = (fNextIndex * fWidth * 2);
+            int bitOffset = fNextIndex * fWidth * 2;
             int wordOffset = bitOffset >> 5;
             bitOffset &= 31;
             int currentWord = fValues[wordOffset] >> bitOffset;

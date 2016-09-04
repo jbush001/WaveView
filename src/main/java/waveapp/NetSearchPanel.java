@@ -118,6 +118,7 @@ class NetSearchPanel extends JPanel {
     }
 
     class NetTreeCellRenderer extends DefaultTreeCellRenderer {
+        @Override
         public Component getTreeCellRendererComponent(
             JTree tree,
             Object value,

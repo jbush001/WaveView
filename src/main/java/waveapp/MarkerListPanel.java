@@ -50,6 +50,7 @@ class MarkerListPanel extends JPanel implements ActionListener,
         // the area between the old cursor and new location (consistent
         // with normal click selection in the view)
         fTable.addMouseListener(new MouseAdapter() {
+            @Override
             public void mouseClicked(MouseEvent e) {
                 if (e.getClickCount() == 2)
                     select(e.isShiftDown());

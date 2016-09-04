@@ -72,12 +72,14 @@ class TracePanel extends JPanel {
         fSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, netNameContainer, fScrollPane);
         add(fSplitPane, BorderLayout.CENTER);
         fScrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            @Override
             public void adjustmentValueChanged(AdjustmentEvent ae) {
                 netNameViewport.setViewPosition(new Point(0, ae.getValue()));
             }
         });
 
         fScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+            @Override
             public void adjustmentValueChanged(AdjustmentEvent ae) {
                 // Need to repaint when scrolling because values on partially visible
                 // nets will be centered.

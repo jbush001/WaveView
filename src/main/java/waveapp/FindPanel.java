@@ -96,7 +96,7 @@ class FindPanel extends JPanel implements ActionListener {
                     fHighlighter.addHighlight(exc.getStartOffset(), exc.getEndOffset() + 1,
                                               fHighlightPainter);
                 } catch (BadLocationException ble) {
-                    // Ignore
+                    System.out.println("execption " + ble);
                 }
 
                 /// @todo Should this be displayed in the window somewhere?

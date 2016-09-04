@@ -188,6 +188,7 @@ public class BitVector {
         }
     }
 
+    @Override
     public String toString() {
         return toString(2);
     }
@@ -296,10 +297,10 @@ public class BitVector {
 
         for (int i = 0; i < fValues.length; i++) {
             if (fValues[i] == VALUE_1)
-                bytes[bytes.length - (i / 8) - 1] |= (1 << (i % 8));
+                bytes[bytes.length - (i / 8) - 1] |= 1 << (i % 8);
         }
 
-        return (new BigInteger(bytes)).toString();
+        return new BigInteger(bytes).toString();
     }
 
     private char bitsToHexDigit(int offset, int count) {

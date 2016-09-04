@@ -43,6 +43,7 @@ class PreferenceWindow extends JDialog {
         okCancelContainer.setLayout(new FlowLayout());
         JButton okButton = new JButton("Ok");
         okButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 ok();
             }
@@ -52,6 +53,7 @@ class PreferenceWindow extends JDialog {
 
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent evt) {
                 cancel();
             }

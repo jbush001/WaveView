@@ -117,6 +117,7 @@ public class NetTreeModel implements TreeModel {
             fNet = net;
         }
 
+        @Override
         public String toString() {
             return fName;
         }

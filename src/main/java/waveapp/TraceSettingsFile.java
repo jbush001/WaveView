@@ -164,7 +164,7 @@ public class TraceSettingsFile {
             //
             try {
                 Class c = Class.forName(formatStr);
-                formatter = (ValueFormatter) c.newInstance();
+                formatter = (ValueFormatter) c.getConstructor().newInstance();
                 if (formatStr.equals("waveapp.EnumValueFormatter")) {
                     String pathStr = ((Text)formatTag.getElementsByTagName("path").item(0)
                         .getFirstChild()).getData();

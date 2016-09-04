@@ -171,6 +171,7 @@ class WaveApp extends JPanel implements ActionListener {
                 TraceLoader loader = new VCDLoader();
                 fNewModel = new TraceDataModel();
                 TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
+                    @Override
                     public boolean updateProgress(final int percentRead) {
                         // Accessing the component from a different thread, technically
                         // a no no, but probably okay.
@@ -178,6 +179,7 @@ class WaveApp extends JPanel implements ActionListener {
                             return false;
 
                         SwingUtilities.invokeLater(new Runnable() {
+                            @Override
                             public void run() {
                                 fProgressMonitor.setProgress(percentRead);
                             }
@@ -499,6 +501,7 @@ class WaveApp extends JPanel implements ActionListener {
 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
                 contentPane.saveConfig();
             }
@@ -516,6 +519,7 @@ class WaveApp extends JPanel implements ActionListener {
     public static void main(String[] args) {
         final String[] _args = args;
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 createAndShowGUI(_args);
             }

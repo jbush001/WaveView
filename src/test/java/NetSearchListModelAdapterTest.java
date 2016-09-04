@@ -26,6 +26,7 @@ public class NetSearchListModelAdapterTest {
         TestListDataListener() {
         }
 
+        @Override
         public void contentsChanged(ListDataEvent evt) {
             fGotEvent = true;
             assertEquals(0, evt.getIndex0());
@@ -33,10 +34,12 @@ public class NetSearchListModelAdapterTest {
         }
 
 
+        @Override
         public void intervalAdded(ListDataEvent evt) {
             fail("unexpected intervalAdded");
         }
 
+        @Override
         public void intervalRemoved(ListDataEvent evt) {
             fail("unexpected intervalAdded");
         }

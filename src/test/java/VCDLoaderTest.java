@@ -101,6 +101,7 @@ public class VCDLoaderTest {
             assertEquals(event.fValues.toString(2), values.toString(2));
         }
 
+        @Override
         public void loadFinished() {
             System.out.println("loadFinished");
 
@@ -665,6 +666,7 @@ public class VCDLoaderTest {
     }
 
     static class TestProgressListener implements TraceLoader.ProgressListener {
+        @Override
         public boolean updateProgress(int percentRead) {
             assertTrue(percentRead >= fLastUpdate);
             assertTrue(percentRead >= 0);
@@ -719,6 +721,7 @@ public class VCDLoaderTest {
             VCDLoader loader = new VCDLoader();
             loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
                 new VCDLoader.ProgressListener() {
+                    @Override
                     public boolean updateProgress(int percentRead) {
                         return false;
                     }

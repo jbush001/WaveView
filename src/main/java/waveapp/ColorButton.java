@@ -24,6 +24,7 @@ class ColorButton extends JPanel {
     ColorButton(String label, Color initialColor) {
         setPreferredSize(new Dimension(180, 32));
         addMouseListener(new MouseAdapter() {
+            @Override
             public void mousePressed(MouseEvent event) {
                 showColorChooser();
             }
