@@ -1,7 +1,6 @@
 $scope module mod1 $end
-$var wire 8 ! value $end
+$var wire 32 ! value $end
 $upscope $end
 $enddefinitions $end
 #0
-q11010011 !
-
+r1.0000000000000000 !

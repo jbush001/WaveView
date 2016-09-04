@@ -237,9 +237,14 @@ class VCDLoader implements TraceLoader {
                     id = getTokenString();
                     break;
 
+                case 'r':
+                case 'R':
+                    throw new LoadException("line " + fTokenizer.lineno()
+                        + ": real values are not supported");
+
                 default:
                     throw new LoadException("line " + fTokenizer.lineno()
-                        + ": unsupported value type '" + leadingVal + "'");
+                        + ": invalid value type '" + leadingVal + "'");
             }
 
             Net net = fNetMap.get(id);

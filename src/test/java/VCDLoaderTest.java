@@ -513,13 +513,13 @@ public class VCDLoaderTest {
     }
 
     @Test
-    public void testUnsupportedValueType() throws Exception {
+    public void testInvalidValueType() throws Exception {
         try {
             (new VCDLoader()).load(testFile("bad-transition-type.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
-            assertEquals("line 6: unsupported value type '2'", exc.getMessage());
+            assertEquals("line 6: invalid value type 'q'", exc.getMessage());
         }
     }
 
@@ -590,6 +590,18 @@ public class VCDLoaderTest {
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
             assertEquals("line 2: unexpected end of file", exc.getMessage());
+        }
+    }
+
+    // This file is spec compliant, but we don't support real values
+    @Test
+    public void testRealValueType() throws Exception {
+        try {
+            (new VCDLoader()).load(testFile("real-value.vcd"),
+                new DummyTraceBuilder(), null);
+            fail("Didn't throw exception");
+        } catch (TraceLoader.LoadException exc) {
+            assertEquals("line 6: real values are not supported", exc.getMessage());
         }
     }
 
