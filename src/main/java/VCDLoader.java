@@ -362,7 +362,23 @@ class VCDLoader implements TraceLoader {
             return got;
         }
 
-        // @note skip and byte array versions of read are not used by the Tokenizer
+        @Override
+        public int read(byte[] b) throws IOException {
+            int got = fWrapped.read(b);
+            if (got >= 0)
+                fTotalRead += got;
+
+            return got;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int got = fWrapped.read(b, off, len);
+            if (got >= 0)
+                fTotalRead += got;
+
+            return got;
+        }
 
         long getTotalRead() {
             return fTotalRead;

@@ -169,8 +169,6 @@ class WaveApp extends JPanel implements ActionListener {
         @Override
         public Void doInBackground() {
             try {
-                System.out.println("Loading " + fFile.getCanonicalPath());
-
                 /// @todo Determine the loader type dynamically
                 TraceLoader loader = new VCDLoader();
                 fNewModel = new TraceDataModel();
@@ -191,7 +189,9 @@ class WaveApp extends JPanel implements ActionListener {
                     }
                 };
 
+                long startTime = System.currentTimeMillis();
                 loader.load(fFile, fNewModel.startBuilding(), progressListener);
+                System.out.println("Loaded in " + (System.currentTimeMillis() - startTime) + " ms");
             } catch (Exception exc) {
                 fErrorMessage = exc.getMessage();
             }
@@ -202,7 +202,6 @@ class WaveApp extends JPanel implements ActionListener {
         // Executed on main thread
         @Override
         protected void done() {
-            System.out.println("finished loading trace file");
             fProgressMonitor.close();
             if (fErrorMessage != null) {
                 JOptionPane.showMessageDialog(WaveApp.this, "Error opening waveform file: "
