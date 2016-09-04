@@ -147,16 +147,17 @@ public class Search {
     private static final int TOK_LESS_EQUAL = 1006;
     private static final int TOK_NOT_EQUAL = 1007;
 
-    private static final int STATE_INIT = 0;
-    private static final int STATE_SCAN_IDENTIFIER = 1;
-    private static final int STATE_SCAN_LITERAL = 2;
-    private static final int STATE_SCAN_LITERAL_TYPE = 3;
-    private static final int STATE_SCAN_GEN_NUM = 4;
-    private static final int STATE_SCAN_GREATER = 5;
-    private static final int STATE_SCAN_LESS = 6;
-    private static final int STATE_SCAN_BINARY = 7;
-    private static final int STATE_SCAN_DECIMAL = 8;
-    private static final int STATE_SCAN_HEXADECIMAL = 9;
+    private enum LexState {
+        INIT,
+        SCAN_IDENTIFIER,
+        SCAN_LITERAL_TYPE,
+        SCAN_GEN_NUM,
+        SCAN_GREATER,
+        SCAN_LESS,
+        SCAN_BINARY,
+        SCAN_DECIMAL,
+        SCAN_HEXADECIMAL
+    }
 
     private static boolean isAlpha(int value) {
         return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
@@ -187,7 +188,7 @@ public class Search {
             return token;
         }
 
-        int state = STATE_INIT;
+        LexState state = LexState.INIT;
         fCurrentTokenValue.setLength(0);
 
         for (;;) {
@@ -204,28 +205,28 @@ public class Search {
             }
 
             switch (state) {
-            case STATE_INIT:
+            case INIT:
                 fTokenStart = fLexerOffset - 1;
                 if (c == -1)
                     return TOK_END;
                 else if (c == '\'')
-                    state = STATE_SCAN_LITERAL_TYPE;
+                    state = LexState.SCAN_LITERAL_TYPE;
                 else if (isAlpha(c)) {
                     fPushBackChar = c;
-                    state = STATE_SCAN_IDENTIFIER;
+                    state = LexState.SCAN_IDENTIFIER;
                 } else if (isNum(c)) {
                     fPushBackChar = c;
-                    state = STATE_SCAN_DECIMAL;
+                    state = LexState.SCAN_DECIMAL;
                 } else if (c == '>')
-                    state = STATE_SCAN_GREATER;
+                    state = LexState.SCAN_GREATER;
                 else if (c == '<')
-                    state = STATE_SCAN_LESS;
+                    state = LexState.SCAN_LESS;
                 else if (!isSpace(c))
                     return c;
 
                 break;
 
-            case STATE_SCAN_GREATER:
+            case SCAN_GREATER:
                 if (c == '<')
                     return TOK_NOT_EQUAL;
                 else if (c == '=')
@@ -235,7 +236,7 @@ public class Search {
                     return TOK_GREATER;
                 }
 
-            case STATE_SCAN_LESS:
+            case SCAN_LESS:
                 if (c == '>')
                     return TOK_NOT_EQUAL;
                 else if (c == '=')
@@ -245,12 +246,12 @@ public class Search {
                     return TOK_LESS_THAN;
                 }
 
-            case STATE_SCAN_IDENTIFIER:
+            case SCAN_IDENTIFIER:
                 if (isAlphaNum(c) || c == '_' || c == '.')
                     fCurrentTokenValue.append((char) c);
                 else if (c == '(') {    // Start generate index
                     fCurrentTokenValue.append((char) c);
-                    state = STATE_SCAN_GEN_NUM;
+                    state = LexState.SCAN_GEN_NUM;
                 }
                 else {
                     fPushBackChar = c;
@@ -259,27 +260,27 @@ public class Search {
 
                 break;
 
-            case STATE_SCAN_GEN_NUM:
+            case SCAN_GEN_NUM:
                 fCurrentTokenValue.append((char) c);
                 if (c == ')')
-                    state = STATE_SCAN_IDENTIFIER;
+                    state = LexState.SCAN_IDENTIFIER;
 
                 break;
 
 
-            case STATE_SCAN_LITERAL_TYPE:
+            case SCAN_LITERAL_TYPE:
                 if (c == 'b')
-                    state = STATE_SCAN_BINARY;
+                    state = LexState.SCAN_BINARY;
                 else if (c == 'h')
-                    state = STATE_SCAN_HEXADECIMAL;
+                    state = LexState.SCAN_HEXADECIMAL;
                 else if (c == 'd')
-                    state = STATE_SCAN_DECIMAL;
+                    state = LexState.SCAN_DECIMAL;
                 else
                     throw new ParseException("unknown type " + (char) c);
 
                 break;
 
-            case STATE_SCAN_BINARY:
+            case SCAN_BINARY:
                 if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
                     fCurrentTokenValue.append((char) c);
                 else {
@@ -290,7 +291,7 @@ public class Search {
 
                 break;
 
-            case STATE_SCAN_DECIMAL:
+            case SCAN_DECIMAL:
                 if (c >= '0' && c <= '9')
                     fCurrentTokenValue.append((char) c);
                 else {
@@ -301,7 +302,7 @@ public class Search {
 
                 break;
 
-            case STATE_SCAN_HEXADECIMAL:
+            case SCAN_HEXADECIMAL:
                 if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
                     fCurrentTokenValue.append((char) c);
                 else {
