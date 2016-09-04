@@ -1,8 +1,14 @@
 language: java
 sudo: false
+
+# Default JDK for Travis is v7, but this project uses
+# some features from v8
 jdk:
   - oraclejdk8
 
+# This is recommended by the Travis CI docs to properly cache
+# dependencies downloaded by gradle.
+# https://docs.travis-ci.com/user/languages/java#Caching
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
