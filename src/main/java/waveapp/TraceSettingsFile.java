@@ -170,8 +170,9 @@ public class TraceSettingsFile {
                         .getFirstChild()).getData();
                     ((EnumValueFormatter) formatter).loadFromFile(new File(pathStr));
                 }
-            }
-            catch (Exception exc) {
+            } catch (RuntimeException exc) {
+                throw exc;
+            } catch (Exception exc) {
                 // Can be: LinkageError, ExceptionInInitializerError, ClassNotFoundException,
                 // InstantiationException. Fall back gracefully to a binary value formatter.
                 System.out.println("unable to find class" + formatStr);

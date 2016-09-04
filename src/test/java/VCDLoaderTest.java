@@ -19,6 +19,7 @@ import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.io.*;
 import java.util.Vector;
 
@@ -28,7 +29,7 @@ public class VCDLoaderTest {
 
     // Implements TraceBuilder interface, which the VCDLoader will write into,
     // but asserts if events don't match a pre-defined sequence.
-    public class ExpectTraceBuilder implements TraceBuilder {
+    static class ExpectTraceBuilder implements TraceBuilder {
         static final int EXPECT_ENTER = 0;
         static final int EXPECT_EXIT = 1;
         static final int EXPECT_NET = 2;
@@ -36,7 +37,7 @@ public class VCDLoaderTest {
         static final int EXPECT_FINISHED = 4;
         static final int EXPECT_TIMESCALE = 5;
 
-        class Event {
+        static class Event {
             Event(int type) {
                 fType = type;
             }
@@ -148,7 +149,7 @@ public class VCDLoaderTest {
         private int fNextNetId;
     }
 
-    public class DummyTraceBuilder implements TraceBuilder {
+    static class DummyTraceBuilder implements TraceBuilder {
         @Override
         public void setTimescale(int order) {}
 
@@ -169,7 +170,6 @@ public class VCDLoaderTest {
         @Override
         public void loadFinished() {}
 
-        private Vector<Integer> fNetWidths = new Vector<Integer>();
         private int fNextNetId;
     }
 
@@ -277,7 +277,9 @@ public class VCDLoaderTest {
     File tempFileFrom(String contents) {
         try {
             File f = fTempFolder.newFile("test.vcd");
-            (new FileOutputStream(f)).write(contents.getBytes());
+            FileOutputStream fos = new FileOutputStream(f);
+            fos.write(contents.getBytes(StandardCharsets.US_ASCII));
+            fos.close();
             return f;
         } catch (IOException exc) {
             fail("Caught I/O exception trying to create temporary file");
@@ -662,7 +664,7 @@ public class VCDLoaderTest {
                     null);
     }
 
-    class TestProgressListener implements TraceLoader.ProgressListener {
+    static class TestProgressListener implements TraceLoader.ProgressListener {
         public boolean updateProgress(int percentRead) {
             assertTrue(percentRead >= fLastUpdate);
             assertTrue(percentRead >= 0);
@@ -701,7 +703,7 @@ public class VCDLoaderTest {
     // If the user clicks cancel, the progress listener update
     // method will return false. Ensure this aborts the load.
     @Test
-    public void testInterruptedLoad() {
+    public void testInterruptedLoad() throws IOException {
         TestBuilder builder = new TestBuilder();
         builder.setTimescale("1us", -6);
         builder.enterScope("mod1");
@@ -713,7 +715,6 @@ public class VCDLoaderTest {
 
         builder.finish();
 
-        TestProgressListener listener = new TestProgressListener();
         try {
             VCDLoader loader = new VCDLoader();
             loader.load(builder.getVCDFile(), builder.getTraceBuilder(),
@@ -723,7 +724,8 @@ public class VCDLoaderTest {
                     }
                 });
             fail("Loader didn't throw exception");
-        } catch (Exception exc) {
+        } catch (TraceLoader.LoadException exc) {
+            assertEquals("load cancelled", exc.getMessage());
         }
     }
 }

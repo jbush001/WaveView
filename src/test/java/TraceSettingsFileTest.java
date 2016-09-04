@@ -92,8 +92,8 @@ public class TraceSettingsFileTest {
         assertTrue(destDisplayModel.getValueFormatter(0) instanceof BinaryValueFormatter);
         assertTrue(destDisplayModel.getValueFormatter(1) instanceof DecimalValueFormatter);
         assertTrue(destDisplayModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
+        assertTrue(destDisplayModel.getValueFormatter(3) instanceof EnumValueFormatter);
         enumFormatter = (EnumValueFormatter) destDisplayModel.getValueFormatter(3);
-        assertTrue(enumFormatter instanceof EnumValueFormatter);
         assertEquals("STATE_INIT", enumFormatter.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", enumFormatter.format(new BitVector("2", 10)));
         assertEquals("STATE_WAIT", enumFormatter.format(new BitVector("3", 10)));
@@ -163,8 +163,8 @@ public class TraceSettingsFileTest {
 
     @Test
     public void testConfigFileName() throws Exception {
-        assertEquals("/home/foo/bar/.trace.vcd.traceconfig",
+        assertEquals("foo/bar/.trace.vcd.traceconfig",
             TraceSettingsFile.configFileName(new File(
-            "/home/foo/bar/trace.vcd")).toString());
+            "foo/bar/trace.vcd")).toString());
     }
 }

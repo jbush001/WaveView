@@ -125,7 +125,7 @@ class FindPanel extends JPanel implements ActionListener {
     private JScrollPane fScrollPane;
     private WaveApp fWaveApp;
     private boolean fNeedsSearchUpdate = true;
-    private Highlighter fHighlighter;
-    private Highlighter.HighlightPainter fHighlightPainter;
+    private transient Highlighter fHighlighter;
+    private transient Highlighter.HighlightPainter fHighlightPainter;
 }
 

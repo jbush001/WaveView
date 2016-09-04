@@ -25,9 +25,9 @@ import javax.swing.event.*;
 import java.awt.datatransfer.*;
 import javax.swing.text.*;
 
-class PreferenceWindow extends JFrame {
-    PreferenceWindow() {
-        super("Preferences");
+class PreferenceWindow extends JDialog {
+    PreferenceWindow(JFrame parent) {
+        super(parent, "Preferences", true);
 
         setPreferredSize(new Dimension(500, 400));
 

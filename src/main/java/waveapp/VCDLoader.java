@@ -31,7 +31,7 @@ public class VCDLoader implements TraceLoader {
         fProgressListener = listener;
         fProgressStream = new ProgressInputStream(new FileInputStream(file));
         fTokenizer = new StreamTokenizer(new BufferedReader(
-            new InputStreamReader(fProgressStream)));
+            new InputStreamReader(fProgressStream, "UTF8")));
         fFileLength = file.length();
         fUpdateInterval = fFileLength / 100;
         fTokenizer.resetSyntax();
@@ -40,8 +40,6 @@ public class VCDLoader implements TraceLoader {
         fTokenizer.whitespaceChars('\n', '\n');
         fTokenizer.whitespaceChars(' ', ' ');
         fTokenizer.whitespaceChars('\t', '\t');
-
-        fInputStream = new BufferedInputStream(new FileInputStream(file));
         fTraceBuilder = builder;
 
         while (parseDefinition())
@@ -392,7 +390,6 @@ public class VCDLoader implements TraceLoader {
 
     private StreamTokenizer fTokenizer;
     private TraceBuilder fTraceBuilder;
-    private InputStream fInputStream;
     private long fCurrentTime;
     private HashMap<String, Net> fNetMap = new HashMap<String, Net>();
     private int fTotalTransitions;

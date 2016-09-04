@@ -19,7 +19,7 @@ import static org.junit.Assert.*;
 import org.junit.*;
 
 public class TraceDisplayModelTest {
-    class TestModelListener implements TraceDisplayModel.Listener {
+    static class TestModelListener implements TraceDisplayModel.Listener {
         public static final int CURSOR_CHANGED = 1;
         public static final int NETS_ADDED = 2;
         public static final int NETS_REMOVED = 4;

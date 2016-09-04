@@ -151,40 +151,40 @@ public class SearchTest {
         builder.loadFinished();
 
         // Try upper and lower case versions of X and Z for hex and decimal
-        // bases
-        Search search = new Search(traceDataModel, "mod1.value = 'bxxxx");
-        search = new Search(traceDataModel, "mod1.value = 'bXXXX");
-        search = new Search(traceDataModel, "mod1.value = 'hx");
-        search = new Search(traceDataModel, "mod1.value = 'hX");
-        search = new Search(traceDataModel, "mod1.value = 'bzzzz");
-        search = new Search(traceDataModel, "mod1.value = 'bZZZZ");
-        search = new Search(traceDataModel, "mod1.value = 'hz");
-        search = new Search(traceDataModel, "mod1.value = 'hZ");
+        // bases. Ensure this doesn't throw an exception.
+        new Search(traceDataModel, "mod1.value = 'bxxxx");
+        new Search(traceDataModel, "mod1.value = 'bXXXX");
+        new Search(traceDataModel, "mod1.value = 'hx");
+        new Search(traceDataModel, "mod1.value = 'hX");
+        new Search(traceDataModel, "mod1.value = 'bzzzz");
+        new Search(traceDataModel, "mod1.value = 'bZZZZ");
+        new Search(traceDataModel, "mod1.value = 'hz");
+        new Search(traceDataModel, "mod1.value = 'hZ");
 
         // X and Z with decimal values should fail
         try {
-            search = new Search(traceDataModel, "mod1.value = 'dx");
+            new Search(traceDataModel, "mod1.value = 'dx");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
         }
 
         try {
-            search = new Search(traceDataModel, "mod1.value = 'dX");
+            new Search(traceDataModel, "mod1.value = 'dX");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
         }
 
         try {
-            search = new Search(traceDataModel, "mod1.value = 'dz");
+            new Search(traceDataModel, "mod1.value = 'dz");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
         }
 
         try {
-            search = new Search(traceDataModel, "mod1.value = 'dZ");
+            new Search(traceDataModel, "mod1.value = 'dZ");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
@@ -194,7 +194,7 @@ public class SearchTest {
     @Test
     public void testUnknownNet() {
         try {
-            Search search = new Search(makeSingleBitModel(), "mod1.stall_pipeline = 2");
+            new Search(makeSingleBitModel(), "mod1.stall_pipeline = 2");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unknown net \"mod1.stall_pipeline\"", exc.getMessage());
@@ -206,7 +206,7 @@ public class SearchTest {
     @Test
     public void testStrayIdentifier() {
         try {
-            Search search = new Search(makeSingleBitModel(), "mod1.clk = 'h2 foo");
+            new Search(makeSingleBitModel(), "mod1.clk = 'h2 foo");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unexpected value", exc.getMessage());
@@ -218,7 +218,7 @@ public class SearchTest {
     @Test
     public void testMissingCompareValue() {
         try {
-            Search search = new Search(makeSingleBitModel(), "mod1.clk = ");
+            new Search(makeSingleBitModel(), "mod1.clk = ");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unexpected end of string", exc.getMessage());
@@ -230,7 +230,7 @@ public class SearchTest {
     @Test
     public void testMissingLiteral() {
         try {
-            Search search = new Search(makeSingleBitModel(), "mod1.clk = mod2");
+            new Search(makeSingleBitModel(), "mod1.clk = mod2");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unexpected value", exc.getMessage());
@@ -242,7 +242,7 @@ public class SearchTest {
     @Test
     public void testUnknownLiteralType() {
         try {
-            Search search = new Search(makeSingleBitModel(), "mod1.clk = 'q3z");
+            new Search(makeSingleBitModel(), "mod1.clk = 'q3z");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unknown type q", exc.getMessage());
@@ -254,7 +254,7 @@ public class SearchTest {
     @Test
     public void testMissingParen() {
         try {
-            Search search = new Search(makeSingleBitModel(), "(mod1.clk = 'h3 foo");
+            new Search(makeSingleBitModel(), "(mod1.clk = 'h3 foo");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unexpected value", exc.getMessage());
@@ -266,7 +266,7 @@ public class SearchTest {
     @Test
     public void testMissingIdentifier() {
         try {
-            Search search = new Search(makeSingleBitModel(), "> 'h12");
+            new Search(makeSingleBitModel(), "> 'h12");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unexpected value", exc.getMessage());

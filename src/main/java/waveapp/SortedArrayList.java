@@ -58,7 +58,7 @@ public class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<
         int high = size();
 
         while (low < high) {
-            int mid = (low + high) / 2;
+            int mid = (low + high) >>> 1;
             long elemKey = ((Keyed) get(mid)).getKey();
             if (key == elemKey)
                 return mid;

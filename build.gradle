@@ -1,5 +1,6 @@
 apply plugin: 'application'
 apply plugin: 'jacoco'
+apply plugin: 'findbugs'
 
 mainClassName = "waveapp.WaveApp"
 
@@ -16,5 +17,12 @@ jar {
         attributes(
             'Main-Class': 'waveapp.WaveApp'
         )
+    }
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
     }
 }

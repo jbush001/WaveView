@@ -46,7 +46,7 @@ public class TransitionVector {
         int high = fTransitionCount;
 
         while (low < high) {
-            int mid = (low + high) / 2;
+            int mid = (low + high) >>> 1;
             long elemKey = fTimestamps[mid];
             if (timestamp < elemKey)
                 high = mid;

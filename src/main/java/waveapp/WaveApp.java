@@ -99,30 +99,27 @@ class WaveApp extends JPanel implements ActionListener {
             }
         } else if (cmd.equals("reloadtrace"))
             loadTraceFile(fCurrentTraceFile);
-        else if (cmd.equals("quit")) {
-            saveConfig();
-            System.exit(0);
-        } else if (cmd.equals("removeAllMarkers"))
+        else if (cmd.equals("quit"))
+            fFrame.dispose();
+        else if (cmd.equals("removeAllMarkers"))
             fTraceDisplayModel.removeAllMarkers();
         else if (cmd.equals("removeAllNets"))
             fTraceDisplayModel.removeAllNets();
         else if (cmd.equals("insertMarker")) {
             String description = (String) JOptionPane.showInputDialog(
-                                     SwingUtilities.getWindowAncestor(this), "Description for this marker", "New Marker",
-                                     JOptionPane.PLAIN_MESSAGE, null, null, null);
+                 fFrame, "Description for this marker", "New Marker",
+                 JOptionPane.PLAIN_MESSAGE, null, null, null);
             fTraceDisplayModel.addMarker(description, fTraceDisplayModel.getCursorPosition());
         } else if (cmd.equals("showmarkerlist")) {
-            if (fMarkersWindow == null) {
-                fMarkersWindow = new JFrame("Markers");
-                MarkerListPanel contentPane = new MarkerListPanel(fTraceDisplayModel);
-                contentPane.setOpaque(true);
-                fMarkersWindow.setPreferredSize(new Dimension(400, 300));
-                fMarkersWindow.setContentPane(contentPane);
-                fMarkersWindow.pack();
-            }
-
-            fMarkersWindow.setLocationRelativeTo(this);
-            fMarkersWindow.setVisible(true);
+            JDialog markersWindow = new JDialog(fFrame, "Markers", true);
+            markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            MarkerListPanel contentPane = new MarkerListPanel(fTraceDisplayModel);
+            contentPane.setOpaque(true);
+            markersWindow.setPreferredSize(new Dimension(400, 300));
+            markersWindow.setContentPane(contentPane);
+            markersWindow.pack();
+            markersWindow.setLocationRelativeTo(this);
+            markersWindow.setVisible(true);
         } else if (cmd.equals("nextMarker"))
             fTraceDisplayModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("prevMarker"))
@@ -137,8 +134,8 @@ class WaveApp extends JPanel implements ActionListener {
             findPrev();
         else if (cmd.equals("saveNetSet")) {
             String name = (String) JOptionPane.showInputDialog(
-                              SwingUtilities.getWindowAncestor(this), "Net Set Name", "Save Net Set",
-                              JOptionPane.PLAIN_MESSAGE, null, null, null);
+                fFrame, "Net Set Name", "Save Net Set",
+                JOptionPane.PLAIN_MESSAGE, null, null, null);
             if (!name.equals("")) {
                 fTraceDisplayModel.saveNetSet(name);
                 buildNetMenu();
@@ -150,11 +147,10 @@ class WaveApp extends JPanel implements ActionListener {
             // Load from recents menu
             loadTraceFile(cmd.substring(5));
         } else if (cmd.equals("prefs")) {
-            if (fPrefsWindow == null)
-                fPrefsWindow = new PreferenceWindow();
-
-            fPrefsWindow.setLocationRelativeTo(this);
-            fPrefsWindow.setVisible(true);
+            JDialog prefsWindow = new PreferenceWindow(fFrame);
+            prefsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            prefsWindow.setLocationRelativeTo(this);
+            prefsWindow.setVisible(true);
         }
     }
 
@@ -289,7 +285,7 @@ class WaveApp extends JPanel implements ActionListener {
         }
 
         FindPanel findPanel = new FindPanel(this, initialSearch.toString());
-        JDialog frame = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Find", true);
+        JDialog frame = new JDialog(fFrame, "Find", true);
         frame.getContentPane().add(findPanel);
         frame.setSize(new Dimension(450, 150));
         frame.setResizable(false);
@@ -488,9 +484,6 @@ class WaveApp extends JPanel implements ActionListener {
     private TraceDisplayModel fTraceDisplayModel = new TraceDisplayModel();
     private TraceDataModel fTraceDataModel = new TraceDataModel();
     private Search fCurrentSearch;
-    private JFrame fAddNetsWindow;
-    private JFrame fMarkersWindow;
-    private JFrame fPrefsWindow;
     private JMenu fNetMenu;
     private JFrame fFrame;
     private JMenu fRecentFilesMenu;
@@ -504,11 +497,10 @@ class WaveApp extends JPanel implements ActionListener {
         contentPane.fFrame = frame;
         contentPane.buildMenus();
 
-        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 contentPane.saveConfig();
-                System.exit(0);
             }
         });
 

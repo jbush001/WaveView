@@ -275,11 +275,12 @@ public class BitVector {
             case VALUE_1:
                 result.append('1');
                 break;
-            case VALUE_X:
-                result.append('x');
-                break;
             case VALUE_Z:
                 result.append('z');
+                break;
+            case VALUE_X:
+            default:
+                result.append('x');
                 break;
             }
         }

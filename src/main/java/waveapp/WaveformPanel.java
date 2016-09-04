@@ -271,11 +271,11 @@ class WaveformPanel extends JPanel implements MouseListener,
     }
 
     private float kDashDescription[] = { 10.0f };
-    private Stroke kDashedStroke = new BasicStroke(1, 0, 0, 10, kDashDescription, 0);
-    private Stroke kSolidStroke = new BasicStroke(1);
-    private SingleNetPainter fSingleNetPainter = new SingleNetPainter();
-    private MultiNetPainter fMultiNetPainter = new MultiNetPainter();
-    private TraceDisplayModel fTraceDisplayModel;
-    private TraceDataModel fTraceDataModel;
+    private transient Stroke kDashedStroke = new BasicStroke(1, 0, 0, 10, kDashDescription, 0);
+    private transient Stroke kSolidStroke = new BasicStroke(1);
+    private transient SingleNetPainter fSingleNetPainter = new SingleNetPainter();
+    private transient MultiNetPainter fMultiNetPainter = new MultiNetPainter();
+    private transient TraceDisplayModel fTraceDisplayModel;
+    private transient TraceDataModel fTraceDataModel;
     private int fOldCursor;
 }

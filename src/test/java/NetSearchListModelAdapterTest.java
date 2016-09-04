@@ -22,7 +22,7 @@ import javax.swing.event.ListDataEvent;
 
 public class NetSearchListModelAdapterTest {
 
-    class TestListDataListener implements ListDataListener {
+    static class TestListDataListener implements ListDataListener {
         TestListDataListener() {
         }
 

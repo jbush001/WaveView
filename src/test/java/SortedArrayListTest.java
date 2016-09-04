@@ -20,7 +20,7 @@ import org.junit.*;
 import java.util.*;
 
 public class SortedArrayListTest {
-    class KeyedElement implements SortedArrayList.Keyed {
+    static class KeyedElement implements SortedArrayList.Keyed {
         public KeyedElement(long keyval) {
             fKeyValue = keyval;
         }

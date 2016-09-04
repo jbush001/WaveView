@@ -93,6 +93,7 @@ class SingleNetPainter implements WaveformPainter {
                 + DrawMetrics.WAVEFORM_HEIGHT / 2);
             break;
 
+        default:
         case BitVector.VALUE_X:
             g.setColor(AppPreferences.getInstance().conflictColor);
             g.fillRect(left, top + 1, right - left, DrawMetrics.WAVEFORM_HEIGHT - 1);

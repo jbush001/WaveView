@@ -126,7 +126,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
 
         @Override
         public Integer getElementAt(int index) {
-            return new Integer(index);  // @todo preallocate?
+            return Integer.valueOf(index);
         }
 
         @Override

@@ -26,6 +26,11 @@ separately. It will download other dependencies automatically.
 
     ./gradlew build
 
+This will run unit tests and the linter, which can take a while. To only create
+a new JAR file:
+
+    ./gradlew assemble
+
 # Running
 
     java -jar build/libs/WaveView.jar [waveform file]
