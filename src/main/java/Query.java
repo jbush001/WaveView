@@ -37,7 +37,8 @@ class Query {
     /// Mainly useful for unit testing
     /// @returns true if this query matches at the passed timestamp
     boolean matches(long timestamp) {
-        return fExpression.evaluate(fTraceDataModel, timestamp, fSearchHint);
+        SearchHint hint = new SearchHint();
+        return fExpression.evaluate(fTraceDataModel, timestamp, hint);
     }
 
     ///
@@ -51,26 +52,27 @@ class Query {
     ///      timestamp of the next forward match otherwise
     ///
     long getNextMatch(long startTimestamp) {
+        SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fSearchHint);
+        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
 
         // If the start timestamp is already at a region that is true, scan first
         // to find a place where the expression is false. We'll then scan again
         // to where it is true.
         while (currentValue) {
-            if (fSearchHint.forwardTimestamp == Long.MAX_VALUE)
+            if (hint.forwardTimestamp == Long.MAX_VALUE)
                 return -1;  // End of trace
 
-            currentTime = fSearchHint.forwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fSearchHint);
+            currentTime = hint.forwardTimestamp;
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         while (!currentValue) {
-            if (fSearchHint.forwardTimestamp == Long.MAX_VALUE)
+            if (hint.forwardTimestamp == Long.MAX_VALUE)
                 return -1;  // End of trace
 
-            currentTime = fSearchHint.forwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fSearchHint);
+            currentTime = hint.forwardTimestamp;
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         return currentTime;
@@ -85,22 +87,23 @@ class Query {
     ///      timestamp of the next backward match otherwise
     ///
     long getPreviousMatch(long startTimestamp) {
+        SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fSearchHint);
+        boolean currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
         while (currentValue) {
-            if (fSearchHint.backwardTimestamp == Long.MIN_VALUE)
+            if (hint.backwardTimestamp == Long.MIN_VALUE)
                 return -1;  // End of trace
 
-            currentTime = fSearchHint.backwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fSearchHint);
+            currentTime = hint.backwardTimestamp;
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         while (!currentValue) {
-            if (fSearchHint.backwardTimestamp == Long.MIN_VALUE)
+            if (hint.backwardTimestamp == Long.MIN_VALUE)
                 return -1;  // End of trace
 
-            currentTime = fSearchHint.backwardTimestamp;
-            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, fSearchHint);
+            currentTime = hint.backwardTimestamp;
+            currentValue = fExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
         return currentTime;
@@ -128,6 +131,7 @@ class Query {
         private int fEndOffset;
     }
 
+    @Override
     public String toString() {
         return fExpression.toString();
     }
@@ -277,7 +281,7 @@ class Query {
                 if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
                     fCurrentTokenValue.append((char) c);
                 else {
-                    fBitVector = new BitVector(fCurrentTokenValue.toString(), 2);
+                    fLiteralValue = new BitVector(fCurrentTokenValue.toString(), 2);
                     fPushBackChar = c;
                     return TOK_LITERAL;
                 }
@@ -288,7 +292,7 @@ class Query {
                 if (c >= '0' && c <= '9')
                     fCurrentTokenValue.append((char) c);
                 else {
-                    fBitVector = new BitVector(fCurrentTokenValue.toString(), 10);
+                    fLiteralValue = new BitVector(fCurrentTokenValue.toString(), 10);
                     fPushBackChar = c;
                     return TOK_LITERAL;
                 }
@@ -299,7 +303,7 @@ class Query {
                 if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
                     fCurrentTokenValue.append((char) c);
                 else {
-                    fBitVector = new BitVector(fCurrentTokenValue.toString(), 16);
+                    fLiteralValue = new BitVector(fCurrentTokenValue.toString(), 16);
                     fPushBackChar = c;
                     return TOK_LITERAL;
                 }
@@ -345,20 +349,16 @@ class Query {
 
     private ExpressionNode parseOr() throws ParseException {
         ExpressionNode left = parseAnd();
-        while (tryToMatch("or")) {
-            ExpressionNode right = parseAnd();
-            left = new OrExpressionNode(left, right);
-        }
+        while (tryToMatch("or"))
+            left = new OrExpressionNode(left, parseAnd());
 
         return left;
     }
 
     private ExpressionNode parseAnd() throws ParseException {
         ExpressionNode left = parseCondition();
-        while (tryToMatch("and")) {
-            ExpressionNode right = parseCondition();
-            left = new AndExpressionNode(left, right);
-        }
+        while (tryToMatch("and"))
+            left = new AndExpressionNode(left, parseCondition());
 
         return left;
     }
@@ -382,22 +382,22 @@ class Query {
         switch (lookahead) {
         case TOK_GREATER:
             match(TOK_LITERAL);
-            return new GreaterThanExpressionNode(netId, fBitVector);
+            return new GreaterThanExpressionNode(netId, fLiteralValue);
         case TOK_GREATER_EQUAL:
             match(TOK_LITERAL);
-            return new GreaterEqualExpressionNode(netId, fBitVector);
+            return new GreaterEqualExpressionNode(netId, fLiteralValue);
         case TOK_LESS_THAN:
             match(TOK_LITERAL);
-            return new LessThanExpressionNode(netId, fBitVector);
+            return new LessThanExpressionNode(netId, fLiteralValue);
         case TOK_LESS_EQUAL:
             match(TOK_LITERAL);
-            return new LessEqualExpressionNode(netId, fBitVector);
+            return new LessEqualExpressionNode(netId, fLiteralValue);
         case TOK_NOT_EQUAL:
             match(TOK_LITERAL);
-            return new NotEqualExpressionNode(netId, fBitVector);
+            return new NotEqualExpressionNode(netId, fLiteralValue);
         case '=':
             match(TOK_LITERAL);
-            return new EqualExpressionNode(netId, fBitVector);
+            return new EqualExpressionNode(netId, fLiteralValue);
         default:
             // If there's not an operator, treat as != 0
             pushBackToken(lookahead);
@@ -685,9 +685,8 @@ class Query {
     private int fPushBackChar = -1;
     private int fPushBackToken = -1;
     private int fTokenStart;
-    private BitVector fBitVector;
+    private BitVector fLiteralValue;
     private TraceDataModel fTraceDataModel;
-    private SearchHint fSearchHint = new SearchHint();
     private ExpressionNode fExpression;
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
 }
