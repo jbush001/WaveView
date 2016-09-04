@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+import waveapp.*;
 import static org.junit.Assert.*;
 import org.junit.*;
 

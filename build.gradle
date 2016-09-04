@@ -1,7 +1,7 @@
 apply plugin: 'application'
 apply plugin: 'jacoco'
 
-mainClassName = "WaveApp"
+mainClassName = "waveapp.WaveApp"
 
 repositories {
     mavenCentral()
@@ -14,7 +14,7 @@ dependencies {
 jar {
     manifest {
         attributes(
-            'Main-Class': 'WaveApp'
+            'Main-Class': 'waveapp.WaveApp'
         )
     }
 }

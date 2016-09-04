@@ -14,6 +14,7 @@
 // limitations under the License.
 //
 
+import waveapp.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
