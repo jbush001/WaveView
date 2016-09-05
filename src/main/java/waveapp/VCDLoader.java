@@ -51,7 +51,7 @@ public class VCDLoader implements TraceLoader {
         builder.loadFinished();
 
         System.out.println("parsed " + fTotalTransitions + " total transitions");
-        System.out.println("" + fNetMap.size() + " total nets");
+        System.out.println(Integer.toString(fNetMap.size()) + " total nets");
     }
 
     private static class Net {

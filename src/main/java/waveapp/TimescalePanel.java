@@ -132,8 +132,8 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
             int x = (int)(ts * horizontalScale);
             if ((ts / minorTickInterval) % DrawMetrics.MINOR_TICKS_PER_MAJOR == 0) {
                 g.drawLine(x, 5, x, DrawMetrics.TIMESCALE_HEIGHT);
-                g.drawString(Long.toString(ts / fUnitMagnitude) + " " + fUnit, x + 3, DrawMetrics.MINOR_TICK_TOP
-                             - metrics.getDescent() - 2);
+                g.drawString(Long.toString(ts / fUnitMagnitude) + " " + fUnit, x + 3,
+                             DrawMetrics.MINOR_TICK_TOP - metrics.getDescent() - 2);
             } else
                 g.drawLine(x, DrawMetrics.MINOR_TICK_TOP, x, DrawMetrics.TIMESCALE_HEIGHT);
         }
@@ -145,7 +145,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
             if (timestamp > endTime)
                 break;
 
-            String labelString = "" + fTraceDisplayModel.getIdForMarker(markerIndex);
+            String labelString = Integer.toString(fTraceDisplayModel.getIdForMarker(markerIndex));
             int labelWidth = g.getFontMetrics().stringWidth(labelString);
             int x = (int) (timestamp * horizontalScale);
             g.setColor(AppPreferences.getInstance().backgroundColor);
@@ -162,8 +162,8 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
         }
 
         if (fShowTimestamp) {
-            String timeString = "" + (double) fTraceDisplayModel.getCursorPosition()
-                                / fUnitMagnitude + " " + fUnit;
+            String timeString = Double.toString((double) fTraceDisplayModel.getCursorPosition()
+                / fUnitMagnitude) + " " + fUnit;
             int timeWidth = g.getFontMetrics().stringWidth(timeString);
             int cursorX = (int) (fTraceDisplayModel.getCursorPosition()
                                  * horizontalScale);
