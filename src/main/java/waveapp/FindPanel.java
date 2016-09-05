@@ -114,10 +114,10 @@ class FindPanel extends JPanel implements ActionListener {
         String cmd = e.getActionCommand();
         if (cmd.equals("Prev")) {
             checkUpdateSearch();
-            fWaveApp.findPrev();
+            fWaveApp.findPrev(false);
         } else if (cmd.equals("Next")) {
             checkUpdateSearch();
-            fWaveApp.findNext();
+            fWaveApp.findNext(false);
         }
     }
 

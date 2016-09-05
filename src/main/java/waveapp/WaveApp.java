@@ -109,7 +109,8 @@ class WaveApp extends JPanel implements ActionListener {
             String description = (String) JOptionPane.showInputDialog(
                  fFrame, "Description for this marker", "New Marker",
                  JOptionPane.PLAIN_MESSAGE, null, null, null);
-            fTraceDisplayModel.addMarker(description, fTraceDisplayModel.getCursorPosition());
+            if (description != null)
+                fTraceDisplayModel.addMarker(description, fTraceDisplayModel.getCursorPosition());
         } else if (cmd.equals("showmarkerlist")) {
             JDialog markersWindow = new JDialog(fFrame, "Markers", true);
             markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -129,9 +130,9 @@ class WaveApp extends JPanel implements ActionListener {
         else if (cmd.equals("findbyvalue"))
             showFindDialog();
         else if (cmd.equals("findnext"))
-            findNext();
+            findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("findprev"))
-            findPrev();
+            findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
         else if (cmd.equals("saveNetSet")) {
             String name = (String) JOptionPane.showInputDialog(
                 fFrame, "Net Set Name", "Save Net Set",
@@ -299,21 +300,25 @@ class WaveApp extends JPanel implements ActionListener {
         fCurrentSearch = new Search(fTraceDataModel, searchString);
     }
 
-    void findNext() {
+    void findNext(boolean extendSelection) {
         if (fCurrentSearch != null) {
             long newTimestamp = fCurrentSearch.getNextMatch(fTraceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                fTraceDisplayModel.setSelectionStart(newTimestamp);
+                if (!extendSelection)
+                    fTraceDisplayModel.setSelectionStart(newTimestamp);
+
                 fTraceDisplayModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
-    void findPrev() {
+    void findPrev(boolean extendSelection) {
         if (fCurrentSearch != null) {
             long newTimestamp = fCurrentSearch.getPreviousMatch(fTraceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                fTraceDisplayModel.setSelectionStart(newTimestamp);
+                if (!extendSelection)
+                    fTraceDisplayModel.setSelectionStart(newTimestamp);
+
                 fTraceDisplayModel.setCursorPosition(newTimestamp);
             }
         }
