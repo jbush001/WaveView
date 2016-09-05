@@ -31,17 +31,38 @@ class PreferenceWindow extends JDialog {
 
         setPreferredSize(new Dimension(500, 400));
 
-        JPanel contentPane = new JPanel();
-
+        Container contentPane = new Container();
         contentPane.setLayout(new BorderLayout());
-        fTabbedPane = new JTabbedPane();
-        fTabbedPane.addTab("Colors", null, new ColorPreferencePane(), "");
-        fTabbedPane.setOpaque(true);
-        contentPane.add(fTabbedPane, BorderLayout.CENTER);
+
+        JPanel bodyArea = new JPanel();
+        AppPreferences prefs = AppPreferences.getInstance();
+        fTraceColorButton = new ColorButton("Trace", prefs.traceColor);
+        bodyArea.add(fTraceColorButton);
+        fConflictColorButton = new ColorButton("Conflict", prefs.conflictColor);
+        bodyArea.add(fConflictColorButton);
+        fSelectionColorButton = new ColorButton("Selection", prefs.selectionColor);
+        bodyArea.add(fSelectionColorButton);
+        fCursorColorButton = new ColorButton("Cursor", prefs.cursorColor);
+        bodyArea.add(fCursorColorButton);
+        fBackgroundColorButton = new ColorButton("Background", prefs.backgroundColor);
+        bodyArea.add(fBackgroundColorButton);
+        fTimingMarkerColorButton = new ColorButton("Timing Mark", prefs.timingMarkerColor);
+        bodyArea.add(fTimingMarkerColorButton);
+        fMarkerColorButton = new ColorButton("Marker", prefs.markerColor);
+        bodyArea.add(fMarkerColorButton);
+        fListSelectionBgColorButton = new ColorButton("List Selection Background",
+                prefs.listSelectionBgColor);
+        bodyArea.add(fListSelectionBgColorButton);
+        fListSelectionFgColorButton = new ColorButton("List Selection Foreground",
+                prefs.listSelectionFgColor);
+        bodyArea.add(fListSelectionFgColorButton);
+        fValueColorButton = new ColorButton("Value", prefs.valueColor);
+        bodyArea.add(fValueColorButton);
+        contentPane.add(bodyArea, BorderLayout.CENTER);
 
         Container okCancelContainer = new Container();
         okCancelContainer.setLayout(new FlowLayout());
-        JButton okButton = new JButton("Ok");
+        JButton okButton = new JButton("OK");
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
@@ -66,15 +87,33 @@ class PreferenceWindow extends JDialog {
     }
 
     protected void cancel() {
-        setVisible(false);
+        dispose();
     }
 
     protected void ok() {
-        for (int i = 0; i < fTabbedPane.getTabCount(); i++)
-            ((PreferencePane) fTabbedPane.getComponentAt(i)).saveSettings();
-
-        setVisible(false);
+        AppPreferences prefs = AppPreferences.getInstance();
+        prefs.traceColor = fTraceColorButton.getColor();
+        prefs.conflictColor = fConflictColorButton.getColor();
+        prefs.selectionColor = fSelectionColorButton.getColor();
+        prefs.cursorColor = fCursorColorButton.getColor();
+        prefs.backgroundColor = fBackgroundColorButton.getColor();
+        prefs.timingMarkerColor = fTimingMarkerColorButton.getColor();
+        prefs.markerColor = fMarkerColorButton.getColor();
+        prefs.listSelectionBgColor = fListSelectionBgColorButton.getColor();
+        prefs.listSelectionFgColor = fListSelectionFgColorButton.getColor();
+        prefs.valueColor = fValueColorButton.getColor();
+        prefs.writeColors();
+        dispose();
     }
 
-    JTabbedPane fTabbedPane;
+    private ColorButton fTraceColorButton;
+    private ColorButton fConflictColorButton;
+    private ColorButton fSelectionColorButton;
+    private ColorButton fCursorColorButton;
+    private ColorButton fBackgroundColorButton;
+    private ColorButton fTimingMarkerColorButton;
+    private ColorButton fMarkerColorButton;
+    private ColorButton fListSelectionBgColorButton;
+    private ColorButton fListSelectionFgColorButton;
+    private ColorButton fValueColorButton;
 }

@@ -132,17 +132,17 @@ public class TraceDisplayModel {
     /// @param index Index of net in order displayed in net list
     /// @returns netID (as referenced in TraceDataModel)
     public int getVisibleNet(int index) {
-        return fVisibleNets.get(index).index;
+        return fVisibleNets.get(index).fIndex;
     }
 
     public void setValueFormatter(int listIndex, ValueFormatter formatter) {
-        fVisibleNets.get(listIndex).formatter = formatter;
+        fVisibleNets.get(listIndex).fFormatter = formatter;
         for (Listener listener : fTraceListeners)
             listener.formatChanged(listIndex);
     }
 
     public ValueFormatter getValueFormatter(int listIndex) {
-        return fVisibleNets.get(listIndex).formatter;
+        return fVisibleNets.get(listIndex).fFormatter;
     }
 
     public int getNetSetCount() {
@@ -350,16 +350,16 @@ public class TraceDisplayModel {
     }
 
     private static class NetViewModel {
-        NetViewModel(int _index, ValueFormatter _formatter) {
-            index = _index;
-            if (_formatter == null)
-                formatter = new HexadecimalValueFormatter();
+        NetViewModel(int index, ValueFormatter formatter) {
+            fIndex = index;
+            if (formatter == null)
+                fFormatter = new HexadecimalValueFormatter();
             else
-                formatter = _formatter;
+                fFormatter = formatter;
         }
 
-        private int index;
-        private ValueFormatter formatter;
+        private int fIndex;
+        private ValueFormatter fFormatter;
     }
 
     private ArrayList<Listener> fTraceListeners = new ArrayList<Listener>();

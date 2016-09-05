@@ -248,12 +248,13 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         subItem = new JMenuItem("Enum");
         subItem.addActionListener(this);
         item.add(subItem);
-        subItem = new JMenuItem("Custom Formatter...");
-        subItem.addActionListener(this);
-        item.add(subItem);
         fPopupMenu.add(item);
 
         addMouseListener(new MouseAdapter() {
+            /// @bug If shift isn't held, this first deselects the other items
+            ///    that are selected. This should not happen when the context menu
+            ///    is brought up, since the action likely applies to the selected
+            ///    entries.
             @Override
             public void mousePressed(MouseEvent event) {
                 if (event.isPopupTrigger())
@@ -327,29 +328,6 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
                     } catch (Exception exc) {
                         JOptionPane.showMessageDialog(this, "Error opening enum mapping file");
                     }
-                }
-            } else if (e.getActionCommand().equals("Custom Formatter...")) {
-                JFileChooser chooser = new JFileChooser();
-                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                chooser.setMultiSelectionEnabled(false);
-                int returnValue = chooser.showOpenDialog(this);
-
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-//                    try {
-//                         String jarFileName = chooser.getSelectedFile().getCanonicalPath();
-//                         URL[] urls = { (new File(jarFileName)).toURL() };
-//                         URLClassLoader loader = new URLClassLoader(urls);
-//                         Class c = loader.loadClass("CustomFormatter");
-//                         ValueFormatter formatter = (ValueFormatter) c.newInstance();
-//                         for (int i = 0; i < indices.length; i++)
-//                         {
-//                             NetModel net = fTraceDisplayModel.getVisibleNet(indices[i]);
-//                             net.setCustomValueFormatterPath(jarFileName);
-//                             net.setValueFormatter(formatter);
-//                         }
-//                    } catch (Exception exc) {
-//                        JOptionPane.showMessageDialog(this, "Error opening configuration file");
-//                    }
                 }
             } else {
                 ValueFormatter formatter = null;

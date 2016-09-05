@@ -195,6 +195,5 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
     private String fUnit = "s";
     private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
-    private int fOldCursor;
     private javax.swing.Timer fTimestampDisplayTimer = new javax.swing.Timer(TIMESTAMP_DISAPPEAR_INTERVAL, this);
 }
