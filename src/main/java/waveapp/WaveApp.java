@@ -52,6 +52,19 @@ class WaveApp extends JPanel implements ActionListener {
         button.addActionListener(this);
         button.setToolTipText("Add nets");
         toolBar.add(button);
+
+        button = new JButton(loadResourceIcon("add-marker.png"));
+        button.setActionCommand("insertMarker");
+        button.addActionListener(this);
+        button.setToolTipText("Insert Marker");
+        toolBar.add(button);
+
+        button = new JButton(loadResourceIcon("remove-marker.png"));
+        button.setActionCommand("removeMarker");
+        button.addActionListener(this);
+        button.setToolTipText("Remove Marker");
+        toolBar.add(button);
+
         add(toolBar, BorderLayout.PAGE_START);
 
         fTracePanel = new TracePanel(fTraceDisplayModel, fTraceDataModel, this);
