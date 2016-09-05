@@ -20,6 +20,11 @@ jar {
     }
 }
 
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
 tasks.withType(FindBugs) {
     reports {
         xml.enabled false

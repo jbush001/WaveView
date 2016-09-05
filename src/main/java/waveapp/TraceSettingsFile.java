@@ -163,7 +163,7 @@ public class TraceSettingsFile {
             // dynamically loadable classes. Not sure if this is still a good idea.
             //
             try {
-                Class c = Class.forName(formatStr);
+                Class<?> c = Class.forName(formatStr);
                 formatter = (ValueFormatter) c.getConstructor().newInstance();
                 if (formatStr.equals("waveapp.EnumValueFormatter")) {
                     String pathStr = ((Text)formatTag.getElementsByTagName("path").item(0)
