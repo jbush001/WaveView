@@ -38,22 +38,26 @@ public class TransitionVector {
     /// @returns Iterator at transition. If there isn't a transition at this transition,
     ///   returns the transition before it. If this is before the first transition, returns
     ///   the first transition.
-    /// @todo Investigate using java.util.Arrays.binarySearch instead of a hand rolled
-    ///   implementation here.
     public Iterator<Transition> findTransition(long timestamp) {
         // Binary search
-        int low = 0;
-        int high = fTransitionCount;
+        int low = 0;                      // Lowest possible index
+        int high = fTransitionCount - 1;  // Highest possible index
 
-        while (low < high) {
+        while (low <= high) {
             int mid = (low + high) >>> 1;
-            long elemKey = fTimestamps[mid];
-            if (timestamp < elemKey)
-                high = mid;
-            else
+            long midKey = fTimestamps[mid];
+            if (timestamp < midKey)
+                high = mid - 1;
+            else if (timestamp > midKey)
                 low = mid + 1;
+            else
+                return new TransitionVectorIterator(mid);
         }
 
+        // No exact match. Low is equal to the index the element would be
+        // at if it existed. We want to return the element before the
+        // timestamp. If low == 0, this is before the first element:
+        // return 0.
         return new TransitionVectorIterator(low == 0 ? 0 : low - 1);
     }
 

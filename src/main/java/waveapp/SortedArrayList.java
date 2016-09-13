@@ -50,28 +50,30 @@ public class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<
     /// @returns index into array of element that matches key. If this
     ///   element isn't matched exactly, return the element before this one.
     ///   If the key is before the first element, return 0.
-    /// @todo Investigate using java.util.Arrays.binarySearch instead of
-    ///    hand rolled implementation here.
     public int findIndex(long key) {
         // Binary search
-        int low = 0;
-        int high = size();
+        int low = 0;            // Lowest possible index
+        int high = size() - 1;  // Highest possible index
 
-        while (low < high) {
+        while (low <= high) {
             int mid = (low + high) >>> 1;
-            long elemKey = ((Keyed) get(mid)).getKey();
-            if (key == elemKey)
-                return mid;
-            else if (key < elemKey)
-                high = mid;
-            else
+            long midKey = ((Keyed) get(mid)).getKey();
+            if (key < midKey)
+                high = mid - 1;
+            else if (key > midKey)
                 low = mid + 1;
+            else
+                return mid;
         }
 
-        if (low > 0)
-            return low - 1;
+        // No exact match. Low is equal to the index the transition would be
+        // at if it existed. We want to return the transition before the
+        // timestamp. If low == 0, this is before the first transition:
+        // return 0.
+        if (low == 0)
+            return 0;
 
-        return 0;    // Before the first entry
+        return low - 1;
     }
 
     private class SortedArrayListIterator implements Iterator<T> {
