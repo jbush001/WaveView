@@ -594,8 +594,9 @@ public class Search {
             return "net" + fNetId;
         }
 
-        // Preallocated for efficiency. This is returned by evaluate.
         int fNetId;
+
+        // Preallocated for efficiency. This is returned by evaluate.
         BitVector fValue = new BitVector();
     }
 
