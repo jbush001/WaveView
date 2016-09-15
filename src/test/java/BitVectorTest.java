@@ -260,4 +260,36 @@ public class BitVectorTest {
             assertEquals("invalid bit value", exc.getMessage());
         }
     }
+
+    @Test
+    public void testCopy() {
+        final String SRC_VALUE = "010001001";
+
+        BitVector bv1 = new BitVector(SRC_VALUE, 2);
+
+        // Copy constructor
+        BitVector bv2 = new BitVector(bv1);
+        assertEquals(SRC_VALUE, bv2.toString());
+
+        // Assign with same width
+        BitVector bv3 = new BitVector("000000000", 2);
+        bv3.assign(bv1);
+        assertEquals(SRC_VALUE, bv3.toString());
+
+        // Assign with different width
+        BitVector bv4 = new BitVector("101", 2);
+        bv4.assign(bv1);
+        assertEquals(SRC_VALUE, bv4.toString());
+
+        // Assign to empty bitvector
+        BitVector bv5 = new BitVector();
+        bv5.assign(bv1);
+        assertEquals(SRC_VALUE, bv5.toString());
+
+        // Assign from empty bitvector
+        BitVector bv6 = new BitVector();
+        BitVector bv7 = new BitVector(SRC_VALUE, 2);
+        bv7.assign(bv6);
+        assertEquals("0", bv7.toString());
+    }
 }

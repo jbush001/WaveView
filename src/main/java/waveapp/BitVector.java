@@ -38,6 +38,21 @@ public class BitVector {
         fValues = new byte[width];
     }
 
+    public BitVector(BitVector from) {
+        assign(from);
+    }
+
+    public void assign(BitVector from) {
+        if (from.fValues != null) {
+            if (fValues == null || fValues.length != from.fValues.length)
+                fValues = new byte[from.fValues.length];
+
+            System.arraycopy(from.fValues, 0, fValues, 0, from.fValues.length);
+        }
+        else
+            fValues = null;
+    }
+
     /// @param index bit number, where 0 is least significant
     /// @returns Value of bit at position, one of VALUE_0, VALUE_1, VALUE_X, VALUE_Z
     public int getBit(int index) {
@@ -173,6 +188,9 @@ public class BitVector {
     /// @param radix may be 2, 10, or 16
     /// @returns A string representation of this BitVector with the given radix
     public String toString(int radix) {
+        if (fValues == null)
+            return "0";
+
         switch (radix) {
         case 2:
             return toBinaryString();

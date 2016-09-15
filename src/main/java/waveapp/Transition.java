@@ -31,5 +31,10 @@ public class Transition extends BitVector {
         fTimestamp = timestamp;
     }
 
+    void assign(Transition t) {
+        super.assign(t);
+        fTimestamp = t.fTimestamp;
+    }
+
     private long fTimestamp;
 }

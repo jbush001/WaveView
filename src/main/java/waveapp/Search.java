@@ -366,6 +366,21 @@ public class Search {
         return left;
     }
 
+    private ValueNode parseValue() throws ParseException {
+        int lookahead = nextToken();
+        if (lookahead == TOK_IDENTIFIER) {
+            int netId = fTraceDataModel.findNet(fCurrentTokenValue.toString());
+            if (netId < 0)
+                throw new ParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
+
+            return new NetValueNode(netId, fTraceDataModel.getNetWidth(netId));
+        } else {
+            pushBackToken(lookahead);
+            match(TOK_LITERAL);
+            return new ConstValueNode(fLiteralValue);
+        }
+    }
+
     private ExpressionNode parseCondition() throws ParseException {
         int lookahead = nextToken();
         if (lookahead == '(') {
@@ -374,37 +389,26 @@ public class Search {
             return node;
         }
 
-        if (lookahead != TOK_IDENTIFIER)
-            throw new ParseException("unexpected value");
-
-        int netId = fTraceDataModel.findNet(fCurrentTokenValue.toString());
-        if (netId < 0)
-            throw new ParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
-
+        pushBackToken(lookahead);
+        ValueNode left = parseValue();
         lookahead = nextToken();
         switch (lookahead) {
         case TOK_GREATER:
-            match(TOK_LITERAL);
-            return new GreaterThanExpressionNode(netId, fLiteralValue);
+            return new GreaterThanExpressionNode(left, parseValue());
         case TOK_GREATER_EQUAL:
-            match(TOK_LITERAL);
-            return new GreaterEqualExpressionNode(netId, fLiteralValue);
+            return new GreaterEqualExpressionNode(left, parseValue());
         case TOK_LESS_THAN:
-            match(TOK_LITERAL);
-            return new LessThanExpressionNode(netId, fLiteralValue);
+            return new LessThanExpressionNode(left, parseValue());
         case TOK_LESS_EQUAL:
-            match(TOK_LITERAL);
-            return new LessEqualExpressionNode(netId, fLiteralValue);
+            return new LessEqualExpressionNode(left, parseValue());
         case TOK_NOT_EQUAL:
-            match(TOK_LITERAL);
-            return new NotEqualExpressionNode(netId, fLiteralValue);
+            return new NotEqualExpressionNode(left, parseValue());
         case '=':
-            match(TOK_LITERAL);
-            return new EqualExpressionNode(netId, fLiteralValue);
+            return new EqualExpressionNode(left, parseValue());
         default:
             // If there's not an operator, treat as != 0
             pushBackToken(lookahead);
-            return new NotEqualExpressionNode(netId, ZERO_VEC);
+            return new NotEqualExpressionNode(left, new ConstValueNode(ZERO_VEC));
         }
     }
 
@@ -555,17 +559,22 @@ public class Search {
         }
     }
 
-    private static abstract class ComparisonExpressionNode extends ExpressionNode {
-        protected ComparisonExpressionNode(int netId, BitVector expected) {
+    private static abstract class ValueNode {
+        abstract BitVector evaluate(TraceDataModel model, long timestamp,
+            SearchHint outHint);
+    }
+
+    private static class NetValueNode extends ValueNode {
+        NetValueNode(int netId, int width) {
             fNetId = netId;
-            fExpected = expected;
+            fValue = new BitVector(width);
         }
 
         @Override
-        boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
+        BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
             Iterator<Transition> i = model.findTransition(fNetId, timestamp);
             Transition t = i.next();
-            boolean result = doCompare(t, fExpected);
+            fValue.assign(t);
             if (timestamp >= t.getTimestamp())
                 outHint.backwardTimestamp = t.getTimestamp() - 1;
             else
@@ -577,18 +586,71 @@ public class Search {
             } else
                 outHint.forwardTimestamp = Long.MAX_VALUE;
 
+            return fValue;
+        }
+
+        @Override
+        public String toString() {
+            return "net" + fNetId;
+        }
+
+        // Preallocated for efficiency. This is returned by evaluate.
+        int fNetId;
+        BitVector fValue = new BitVector();
+    }
+
+    private static class ConstValueNode extends ValueNode {
+        ConstValueNode(BitVector constValue) {
+            fValue = new BitVector(constValue);
+        }
+
+        @Override
+        BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
+            outHint.backwardTimestamp = Long.MIN_VALUE;
+            outHint.forwardTimestamp = Long.MAX_VALUE;
+            return fValue;
+        }
+
+        @Override
+        public String toString() {
+            return fValue.toString();
+        }
+
+        BitVector fValue;
+    }
+
+    private static abstract class ComparisonExpressionNode extends ExpressionNode {
+        protected ComparisonExpressionNode(ValueNode left, ValueNode right) {
+            fLeftNode = left;
+            fRightNode = right;
+        }
+
+        @Override
+        boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
+            BitVector leftValue = fLeftNode.evaluate(model, timestamp, fLeftHint);
+            BitVector rightValue = fRightNode.evaluate(model, timestamp, fRightHint);
+            boolean result = doCompare(leftValue, rightValue);
+            outHint.backwardTimestamp = Math.max(fLeftHint.backwardTimestamp,
+                fRightHint.backwardTimestamp);
+            outHint.forwardTimestamp = Math.min(fLeftHint.forwardTimestamp,
+                fRightHint.forwardTimestamp);
             return result;
         }
 
         abstract protected boolean doCompare(BitVector value1, BitVector value2);
 
-        protected int fNetId;
-        protected BitVector fExpected;
+        protected ValueNode fLeftNode;
+        protected ValueNode fRightNode;
+
+        // These are preallocated for efficiency and aren't used outside
+        // the evaluate() call.
+        private SearchHint fLeftHint = new SearchHint();
+        private SearchHint fRightHint = new SearchHint();
     }
 
     private static class EqualExpressionNode extends ComparisonExpressionNode {
-        EqualExpressionNode(int netId, BitVector match) {
-            super(netId, match);
+        EqualExpressionNode(ValueNode left, ValueNode right) {
+            super(left, right);
         }
 
         @Override
@@ -598,13 +660,13 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(eq net" + fNetId + " " + fExpected + ")";
+            return "(eq " + fLeftNode + " " + fRightNode + ")";
         }
     }
 
     private static class NotEqualExpressionNode extends ComparisonExpressionNode {
-        NotEqualExpressionNode(int netId, BitVector match) {
-            super(netId, match);
+        NotEqualExpressionNode(ValueNode left, ValueNode right) {
+            super(left, right);
         }
 
         @Override
@@ -614,13 +676,13 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(ne net" + fNetId + " " + fExpected + ")";
+            return "(ne " + fLeftNode + " " + fRightNode + ")";
         }
     }
 
     private static class GreaterThanExpressionNode extends ComparisonExpressionNode {
-        GreaterThanExpressionNode(int netId, BitVector match) {
-            super(netId, match);
+        GreaterThanExpressionNode(ValueNode left, ValueNode right) {
+            super(left, right);
         }
 
         @Override
@@ -630,13 +692,13 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(gt net" + fNetId + " " + fExpected + ")";
+            return "(gt " + fLeftNode + " " + fRightNode + ")";
         }
     }
 
     private static class GreaterEqualExpressionNode extends ComparisonExpressionNode {
-        GreaterEqualExpressionNode(int netId, BitVector match) {
-            super(netId, match);
+        GreaterEqualExpressionNode(ValueNode left, ValueNode right) {
+            super(left, right);
         }
 
         @Override
@@ -646,13 +708,13 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(ge net" + fNetId + " " + fExpected + ")";
+            return "(ge " + fLeftNode + " " + fRightNode + ")";
         }
     }
 
     private static class LessThanExpressionNode extends ComparisonExpressionNode {
-        LessThanExpressionNode(int netId, BitVector match) {
-            super(netId, match);
+        LessThanExpressionNode(ValueNode left, ValueNode right) {
+            super(left, right);
         }
 
         @Override
@@ -662,13 +724,13 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(lt net" + fNetId + " " + fExpected + ")";
+            return "(lt " + fLeftNode + " " + fRightNode + ")";
         }
     }
 
     private static class LessEqualExpressionNode extends ComparisonExpressionNode {
-        LessEqualExpressionNode(int netId, BitVector match) {
-            super(netId, match);
+        LessEqualExpressionNode(ValueNode left, ValueNode right) {
+            super(left, right);
         }
 
         @Override
@@ -678,7 +740,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(le net" + fNetId + " " + fExpected + ")";
+            return "(le " + fLeftNode + " " + fRightNode + ")";
         }
     }
 

@@ -230,12 +230,12 @@ public class SearchTest {
     @Test
     public void testMissingLiteral() {
         try {
-            new Search(makeSingleBitModel(), "mod1.clk = mod2");
+            new Search(makeSingleBitModel(), "mod1.clk = >");
             fail("Did not throw exception");
         } catch (Search.ParseException exc) {
             assertEquals("unexpected value", exc.getMessage());
             assertEquals(11, exc.getStartOffset());
-            assertEquals(14, exc.getEndOffset());
+            assertEquals(11, exc.getEndOffset());
         }
     }
 
@@ -435,23 +435,51 @@ public class SearchTest {
         Search search = new Search(traceDataModel, "mod1.value > 'h5");
         assertEquals(6, search.getNextMatch(0));
 
+        search = new Search(traceDataModel, "'h5 < mod1.value");
+        assertEquals(6, search.getNextMatch(0));
+
         search = new Search(traceDataModel, "mod1.value >= 'h5");
+        assertEquals(5, search.getNextMatch(0));
+
+        search = new Search(traceDataModel, "'h5 <= mod1.value");
         assertEquals(5, search.getNextMatch(0));
 
         search = new Search(traceDataModel, "mod1.value < 'h5");
         assertEquals(4, search.getPreviousMatch(10));
 
+        search = new Search(traceDataModel, "'h5 > mod1.value");
+        assertEquals(4, search.getPreviousMatch(10));
+
         search = new Search(traceDataModel, "mod1.value <= 'h5");
+        assertEquals(5, search.getPreviousMatch(10));
+
+        search = new Search(traceDataModel, "'h5 >= mod1.value");
         assertEquals(5, search.getPreviousMatch(10));
 
         search = new Search(traceDataModel, "mod1.value = 'h5");
         assertEquals(5, search.getNextMatch(0));
 
+        search = new Search(traceDataModel, "'h5 = mod1.value");
+        assertEquals(5, search.getNextMatch(0));
+
         search = new Search(traceDataModel, "mod1.value <> 'h5");
+        assertEquals(6, search.getNextMatch(4));
+
+        search = new Search(traceDataModel, "'h5 <> mod1.value");
         assertEquals(6, search.getNextMatch(4));
 
         search = new Search(traceDataModel, "mod1.value >< 'h5");
         assertEquals(6, search.getNextMatch(4));
+
+        // This will never find the next, because it is never false.
+        // Ensure it doesn't go into an infinite loop
+        search = new Search(traceDataModel, "mod1.value = mod1.value");
+        assertEquals(-1, search.getNextMatch(4));
+
+        // Likewise, this will never find the next, because it is never
+        // true
+        search = new Search(traceDataModel, "mod1.value <> mod1.value");
+        assertEquals(-1, search.getNextMatch(4));
     }
 
     @Test
@@ -726,6 +754,12 @@ public class SearchTest {
     public void testSearchToString() throws Exception {
         TraceDataModel traceDataModel = makeFourBitModel();
 
+        // Basic comparisons
+        assertEquals("(eq net0 net1)", (new Search(traceDataModel, "m.a = m.b")).toString());
+        assertEquals("(eq 00000111 net1)", (new Search(traceDataModel, "7 = m.b")).toString());
+        assertEquals("(eq net0 00000101)", (new Search(traceDataModel, "m.a = 5")).toString());
+        assertEquals("(eq 00001000 00000101)", (new Search(traceDataModel, "8 = 5")).toString());
+
         // Use all comparison operators.
         assertEquals("(or (and (ne net0 0) (lt net1 00000001)) (and (gt net2 00000010) (eq net3 00000000)))",
             (new Search(traceDataModel, "m.a and m.b < 1 or m.c > 2 and m.d = 0")).toString());
@@ -773,6 +807,34 @@ public class SearchTest {
 
         Search search = new Search(traceDataModel, "mod1.mod_gen(0).mod2.a = 1");
         assertEquals(5, search.getNextMatch(0));
+    }
+
+    /// Test comparing a net to another instead of a constant value
+    @Test
+    public void testCompareNets() throws Exception {
+        TraceDataModel traceDataModel = new TraceDataModel();
+        TraceBuilder builder = traceDataModel.startBuilding();
+        builder.setTimescale(-9);
+        builder.enterScope("mod1");
+        int id1 = builder.newNet("a", -1, 4);
+        int id2 = builder.newNet("b", -1, 4);
+        builder.exitScope();
+        builder.appendTransition(id1, 0, new BitVector("0", 10));
+        builder.appendTransition(id1, 1, new BitVector("1", 10));
+        builder.appendTransition(id1, 2, new BitVector("2", 10));
+        builder.appendTransition(id1, 3, new BitVector("3", 10));
+        builder.appendTransition(id2, 0, new BitVector("3", 10));
+        builder.appendTransition(id2, 2, new BitVector("2", 10));
+        builder.appendTransition(id2, 3, new BitVector("1", 10));
+
+        Search search = new Search(traceDataModel, "mod1.a = mod1.b");
+        assertEquals(2, search.getNextMatch(0));
+        assertEquals(2, search.getPreviousMatch(5));
+
+        // Swap the terms to ensure the hint is handled correctly.
+        search = new Search(traceDataModel, "mod1.b = mod1.a");
+        assertEquals(2, search.getNextMatch(0));
+        assertEquals(2, search.getPreviousMatch(5));
     }
 }
 
