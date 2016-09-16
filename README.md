@@ -40,6 +40,6 @@ a new JAR file:
 
 The following command will run the unit tests and generate a coverage report:
 
-    ./gradlew test jacocoTestReport
+    ./gradlew check
 
 The report is written to build/reports/jacoco/test/html/index.html

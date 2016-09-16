@@ -259,6 +259,13 @@ public class BitVectorTest {
         } catch (NumberFormatException exc) {
             assertEquals("invalid bit value", exc.getMessage());
         }
+
+        try {
+            bv.setBit(0, -1);
+            fail("did not throw exception");
+        } catch (NumberFormatException exc) {
+            assertEquals("invalid bit value", exc.getMessage());
+        }
     }
 
     @Test
