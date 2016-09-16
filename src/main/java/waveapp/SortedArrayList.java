@@ -47,9 +47,9 @@ public class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<
     }
 
     /// @param key key value to search for
-    /// @returns index into array of element that matches key. If this
-    ///   element isn't matched exactly, return the element before this one.
-    ///   If the key is before the first element, return 0.
+    /// @returns index into array of element that matches key. If an
+    ///   element isn't at this timestamp, return the element before the
+    ///   timestamp. If the key is before the first element, return 0.
     public int findIndex(long key) {
         // Binary search
         int low = 0;            // Lowest possible index

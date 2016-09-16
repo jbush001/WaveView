@@ -72,19 +72,19 @@ class FindPanel extends JPanel implements ActionListener {
         add(buttonContainer, BorderLayout.SOUTH);
     }
 
-    /// Called when the user alters the current search string.
+    /// Called when the user changes the search string.
     void invalidateText() {
         // The next time the user hits next/prev, need to regenerate the Search.
         fNeedsSearchUpdate = true;
 
-        // When the user beings editing, remove the error highlights
+        // When the user begins editing, remove the error highlights
         // so they don't leave boogers all over the place.
         fHighlighter.removeAllHighlights();
     }
 
-    /// If the search has been updated, try to parse it and generate a new Search
-    /// object. If the search string is invalid, highlight the incorrect portion
-    /// and pop up an error message.
+    /// If the user changed the search string, try to parse it and generate
+    /// a new Search object. If the search string is invalid, highlight the
+    /// incorrect portion and pop up an error message.
     private void checkUpdateSearch() {
         if (fNeedsSearchUpdate) {
             try {

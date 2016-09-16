@@ -21,15 +21,15 @@ package waveapp;
 ///
 
 public interface TraceBuilder {
-    /// Set timescale. @param order 10 raised to this number is the number of
-    /// seconds per time unit.
+    /// Set timescale.
+    /// @param order 10 raised to this number is the number of seconds per
+    /// time unit.
     public void setTimescale(int order);
 
-    /// Adds another module to the fully qualified path of any nets
-    /// that are subsequently added via newNet.
+    /// Adds another module to the path of any nets that are added via newNet.
     public void enterScope(String name);
 
-    /// Pops up to the previous module pushed by enterScope.
+    /// Pops previous module pushed by enterScope.
     public void exitScope();
 
     /// Create a new net

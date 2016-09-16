@@ -251,9 +251,9 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         fPopupMenu.add(item);
 
         addMouseListener(new MouseAdapter() {
-            /// @bug If shift isn't held, this first deselects the other items
+            /// @bug If shift isn't held, first deselect the other items
             ///    that are selected. This should not happen when the context menu
-            ///    is brought up, since the action likely applies to the selected
+            ///    is brought up since the action likely applies to the selected
             ///    entries.
             @Override
             public void mousePressed(MouseEvent event) {
@@ -275,8 +275,9 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
     @Override
     protected void processKeyEvent(KeyEvent e) {
         /// @bug Eat key events so up/down arrows don't change selection
-        /// If we allow arrows to change selection, the net name view scrolls without moving the other views.
-        /// That really seems like a bug in the swing components.
+        /// If we allow arrows to change selection, the net name view scrolls
+        /// without moving the other views. This seems like a bug in the swing
+        /// components.
     }
 
     @Override

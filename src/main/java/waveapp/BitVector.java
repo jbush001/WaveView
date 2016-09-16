@@ -142,7 +142,7 @@ public class BitVector {
 
         int index = Math.min(myWidth, otherWidth) - 1;
 
-        // Now compare remaining digits directly.
+        // Compare remaining digits
         while (index >= 0) {
             switch (other.fValues[index]) {
             case VALUE_0:

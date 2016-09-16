@@ -321,7 +321,7 @@ public class Search {
     }
 
     /// Read the next token and throw an exception if the type does
-    /// not match the given type
+    /// not match the parameter.
     private void match(int tokenType) throws ParseException {
         int got = nextToken();
         if (got != tokenType) {
@@ -418,9 +418,9 @@ public class Search {
     }
 
     private static abstract class ExpressionNode {
-        /// Determine if this subexpression is true at the timestamp provided.
+        /// Determine if this subexpression is true at the passed timestamp.
         /// @param timestamp Timestamp and which to evaluate.  If timestamp
-        ///  is on a transition, the value after the transition will be used
+        ///  is at a transition, the value after the transition will be used
         /// @param outHint Contains the next timestamp where the value of the
         ///   expression may change. It is guaranteed that no transition will occur
         ///   sooner than this value.
@@ -442,8 +442,7 @@ public class Search {
             boolean rightResult = fRightChild.evaluate(model, timestamp, fRightHint);
 
             // Compute the hints, which are the soonest time this expression
-            // *could* change value. We will call the subclassed methods to determine
-            // the actual hint type.
+            // *could* change value. Call the subclassed methods.
             outHint.forwardTimestamp = nextHint(leftResult, rightResult,
                 fLeftHint.forwardTimestamp, fRightHint.forwardTimestamp, false);
             outHint.backwardTimestamp = nextHint(leftResult, rightResult,
@@ -482,7 +481,7 @@ public class Search {
 
             if (leftResult && rightResult) {
                 // Both expressions are true. The only way for this to become
-                // false is if when both change to false.
+                // false is if both change to false.
                 if (searchBackward)
                     return Math.min(nextLeftTimestamp, nextRightTimestamp);
                 else

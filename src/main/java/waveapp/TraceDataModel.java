@@ -60,7 +60,7 @@ public class TraceDataModel {
         return fAllNets.size();
     }
 
-    /// look up by fully qualified name
+    /// Look up net by full path
     public int findNet(String name) {
         Integer i = fFullNameToNetMap.get(name);
         if (i == null)

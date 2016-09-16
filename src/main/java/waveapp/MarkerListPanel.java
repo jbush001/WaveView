@@ -27,9 +27,9 @@ import javax.swing.text.*;
 import javax.swing.table.*;
 
 ///
-/// Displays a list of all markers and their timestamps.  The user can click on them
-/// to jump to that point in the trace.
-/// @todo Add a way to remove entries directly from this list
+/// Displays a list of all markers and their timestamps.  The user can click
+/// on them to jump to that point in the trace.
+/// @todo Add a way to remove entries from this list
 ///
 class MarkerListPanel extends JPanel implements ActionListener,
     TraceDisplayModel.Listener {
@@ -48,7 +48,7 @@ class MarkerListPanel extends JPanel implements ActionListener,
         // Double clicking an item in the list will cause the trace
         // view to jump to that location. Holding shift will select
         // the area between the old cursor and new location (consistent
-        // with normal click selection in the view)
+        // with click selection in the trace view)
         fTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {

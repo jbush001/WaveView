@@ -174,7 +174,7 @@ public class TraceSettingsFile {
                 throw exc;
             } catch (Exception exc) {
                 // Can be: LinkageError, ExceptionInInitializerError, ClassNotFoundException,
-                // InstantiationException. Fall back gracefully to a binary value formatter.
+                // InstantiationException. Fall back to a binary value formatter.
                 System.out.println("unable to find class" + formatStr);
                 formatter = new BinaryValueFormatter();
             }

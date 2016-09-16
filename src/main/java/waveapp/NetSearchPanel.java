@@ -31,8 +31,8 @@ import javax.swing.text.*;
 ///
 class NetSearchPanel extends JPanel {
 
-    /// Allow user to drag signals out of this view and drop
-    /// in currently displayed nets
+    /// Allow user to drag signals out of this view and drop in currently
+    /// displayed nets
     class NetTreeTransferHandler extends TransferHandler {
         @Override
         public int getSourceActions(JComponent component) {
@@ -41,7 +41,8 @@ class NetSearchPanel extends JPanel {
 
         private void buildNetListRecursive(Object node, StringBuffer indexList) {
             if (fTree.getModel().isLeaf(node)) {
-                indexList.append(fTraceDataModel.getFullNetName(fTraceDataModel.getNetFromTreeObject(node)));
+                indexList.append(fTraceDataModel.getFullNetName(fTraceDataModel
+                    .getNetFromTreeObject(node)));
                 indexList.append('\n');
                 return;
             }

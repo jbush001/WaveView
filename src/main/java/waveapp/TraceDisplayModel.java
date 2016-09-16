@@ -56,7 +56,7 @@ public class TraceDisplayModel {
         fTraceListeners.add(listener);
     }
 
-    // @param scale Nanoseconds per pixel
+    // @param scale Pixels per nanosecond
     public void setHorizontalScale(double scale) {
         fHorizontalScale = scale;
         fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
@@ -198,9 +198,10 @@ public class TraceDisplayModel {
     public void setAdjustingCursor(boolean adjust) {
         fAdjustingCursor = adjust;
 
-        /// @bug This is a hacky way to force everyone to update, but has odd side effects if
-        /// it is done in the wrong order.  There should most likely be another way to do this,
-        /// like, for example, another event to notify clients that the cursor is in the adjusting state.
+        /// @bug This is a hacky way to force everyone to update, but has odd
+        /// side effects if it is done in the wrong order.  There should most
+        /// likely be another way to do this, like, for example, another event
+        /// to notify clients that the cursor is in the adjusting state.
         setCursorPosition(fCursorPosition);
     }
 
