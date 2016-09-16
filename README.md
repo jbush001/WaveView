@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/jbush001/WaveView.svg?branch=master)](https://travis-ci.org/jbush001/WaveView)
+[![codecov](https://codecov.io/gh/jbush001/WaveView/branch/master/graph/badge.svg)](https://codecov.io/gh/jbush001/WaveView)
 
 WaveView is a Java based waveform viewer. It is useful for viewing output from
 hardware simulation tools like [Verilator](http://www.veripool.org/wiki/verilator)

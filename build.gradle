@@ -44,3 +44,13 @@ buildscript {
 }
 
 apply plugin: "net.ltgt.errorprone"
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
+check.dependsOn jacocoTestReport
+
