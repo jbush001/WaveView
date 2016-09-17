@@ -29,7 +29,13 @@ class WaveApp extends JPanel implements ActionListener {
         super(new BorderLayout());
 
         JToolBar toolBar = new JToolBar();
-        JButton button = new JButton(loadResourceIcon("zoom-in.png"));
+        JButton button = new JButton(loadResourceIcon("net-search.png"));
+        button.setActionCommand("addnet");
+        button.addActionListener(this);
+        button.setToolTipText("Add nets");
+        toolBar.add(button);
+
+        button = new JButton(loadResourceIcon("zoom-in.png"));
         button.setActionCommand("zoomin");
         button.addActionListener(this);
         button.setToolTipText("Zoom In");
@@ -45,12 +51,6 @@ class WaveApp extends JPanel implements ActionListener {
         button.setActionCommand("zoomselection");
         button.addActionListener(this);
         button.setToolTipText("Zoom to selected region");
-        toolBar.add(button);
-
-        button = new JButton(loadResourceIcon("net-search.png"));
-        button.setActionCommand("addnet");
-        button.addActionListener(this);
-        button.setToolTipText("Add nets");
         toolBar.add(button);
 
         button = new JButton(loadResourceIcon("add-marker.png"));
