@@ -30,21 +30,20 @@ import java.util.*;
 public class Search {
     public Search(TraceDataModel traceModel, String searchString) throws ParseException {
         fTraceDataModel = traceModel;
-        fSearchString = searchString;
-        fLexerOffset = 0;
+        fLexer = new Lexer(searchString);
         fSearchExpression = parseExpression();
-        match(TOK_END);
+        match(Lexer.TOK_END);
     }
 
     /// Mainly useful for unit testing
-    /// @returns true if this query matches at the passed timestamp
+    /// @returns true if this search string matches at the passed timestamp
     public boolean matches(long timestamp) {
         SearchHint hint = new SearchHint();
         return fSearchExpression.evaluate(fTraceDataModel, timestamp, hint);
     }
 
     ///
-    /// Scan forward to find the next timestamp that matches this query's expression
+    /// Scan forward to find the next timestamp that matches this search's expression
     /// If the startTimestamp is already a match, it will not be returned. This will
     ///  instead scan to the next transition
     /// @bug If startTimestamp is before the first event, and the first event matches,
@@ -82,7 +81,7 @@ public class Search {
 
     ///
     /// Scan backward to find the end of the region that
-    /// matches this query's expression If the startTimestamp is already
+    /// matches this search's expression If the startTimestamp is already
     /// in a match, it will jump to end of the previous region that matches.
     /// @returns
     ///   -1 If there are no matches in the backward direction
@@ -111,14 +110,11 @@ public class Search {
         return currentTime;
     }
 
-    public class ParseException extends Exception {
-        ParseException(String what) {
+    static public class ParseException extends Exception {
+        ParseException(String what, int start, int end) {
             super(what);
-            fStartOffset = fTokenStart;
-            if (fCurrentTokenValue.length() > 0)
-                fEndOffset = fTokenStart + fCurrentTokenValue.length() - 1;
-            else
-                fEndOffset = fTokenStart;
+            fStartOffset = start;
+            fEndOffset = end;
         }
 
         public int getStartOffset() {
@@ -138,197 +134,233 @@ public class Search {
         return fSearchExpression.toString();
     }
 
-    private static final int TOK_IDENTIFIER = 1000;
-    private static final int TOK_END = 1001;
-    private static final int TOK_LITERAL = 1002;
-    private static final int TOK_GREATER = 1003;
-    private static final int TOK_GREATER_EQUAL = 1004;
-    private static final int TOK_LESS_THAN = 1005;
-    private static final int TOK_LESS_EQUAL = 1006;
-    private static final int TOK_NOT_EQUAL = 1007;
+    static private class Lexer {
+        static final int TOK_IDENTIFIER = 1000;
+        static final int TOK_END = 1001;
+        static final int TOK_LITERAL = 1002;
+        static final int TOK_GREATER = 1003;
+        static final int TOK_GREATER_EQUAL = 1004;
+        static final int TOK_LESS_THAN = 1005;
+        static final int TOK_LESS_EQUAL = 1006;
+        static final int TOK_NOT_EQUAL = 1007;
 
-    private enum LexState {
-        INIT,
-        SCAN_IDENTIFIER,
-        SCAN_LITERAL_TYPE,
-        SCAN_GEN_NUM,
-        SCAN_GREATER,
-        SCAN_LESS,
-        SCAN_BINARY,
-        SCAN_DECIMAL,
-        SCAN_HEXADECIMAL
-    }
-
-    private static boolean isAlpha(int value) {
-        return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
-    }
-
-    private static boolean isNum(int value) {
-        return value >= '0' && value <= '9';
-    }
-
-    private static boolean isHexDigit(int value) {
-        return (value >= '0' && value <= '9')
-               || (value >= 'a' && value <='f')
-               || (value >= 'A' && value <= 'F');
-    }
-
-    private static boolean isAlphaNum(int value) {
-        return isAlpha(value) || isNum(value);
-    }
-
-    private static boolean isSpace(int value) {
-        return value == ' ' || value == '\t' || value == '\n' || value == '\r';
-    }
-
-    private int nextToken() throws ParseException {
-        if (fPushBackToken != -1) {
-            int token = fPushBackToken;
-            fPushBackToken = -1;
-            return token;
+        private enum State {
+            INIT,
+            SCAN_IDENTIFIER,
+            SCAN_LITERAL_TYPE,
+            SCAN_GEN_NUM,
+            SCAN_GREATER,
+            SCAN_LESS,
+            SCAN_BINARY,
+            SCAN_DECIMAL,
+            SCAN_HEXADECIMAL
         }
 
-        LexState state = LexState.INIT;
-        fCurrentTokenValue.setLength(0);
+        Lexer(String searchString) {
+            fSearchString = searchString;
+        }
 
-        for (;;) {
-            int c;
+        private static boolean isAlpha(int value) {
+            return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
+        }
 
-            if (fPushBackChar != -1) {
-                c = fPushBackChar;
-                fPushBackChar = -1;
-            } else {
-                if (fLexerOffset == fSearchString.length())
-                    c = -1;
-                else
-                    c = fSearchString.charAt(fLexerOffset++);
+        private static boolean isNum(int value) {
+            return value >= '0' && value <= '9';
+        }
+
+        private static boolean isHexDigit(int value) {
+            return (value >= '0' && value <= '9')
+                   || (value >= 'a' && value <='f')
+                   || (value >= 'A' && value <= 'F');
+        }
+
+        private static boolean isAlphaNum(int value) {
+            return isAlpha(value) || isNum(value);
+        }
+
+        private static boolean isSpace(int value) {
+            return value == ' ' || value == '\t' || value == '\n' || value == '\r';
+        }
+
+        int nextToken() throws ParseException {
+            if (fPushBackToken != -1) {
+                int token = fPushBackToken;
+                fPushBackToken = -1;
+                return token;
             }
 
-            switch (state) {
-            case INIT:
-                fTokenStart = fLexerOffset - 1;
-                if (c == -1)
-                    return TOK_END;
-                else if (c == '\'')
-                    state = LexState.SCAN_LITERAL_TYPE;
-                else if (isAlpha(c)) {
-                    fPushBackChar = c;
-                    state = LexState.SCAN_IDENTIFIER;
-                } else if (isNum(c)) {
-                    fPushBackChar = c;
-                    state = LexState.SCAN_DECIMAL;
-                } else if (c == '>')
-                    state = LexState.SCAN_GREATER;
-                else if (c == '<')
-                    state = LexState.SCAN_LESS;
-                else if (!isSpace(c))
-                    return c;
+            State state = State.INIT;
+            fCurrentTokenValue.setLength(0);
 
-                break;
+            for (;;) {
+                int c;
 
-            case SCAN_GREATER:
-                if (c == '<')
-                    return TOK_NOT_EQUAL;
-                else if (c == '=')
-                    return TOK_GREATER_EQUAL;
-                else {
-                    fPushBackChar = c;
-                    return TOK_GREATER;
+                if (fPushBackChar != -1) {
+                    c = fPushBackChar;
+                    fPushBackChar = -1;
+                } else {
+                    if (fLexerOffset == fSearchString.length())
+                        c = -1;
+                    else
+                        c = fSearchString.charAt(fLexerOffset++);
                 }
 
-            case SCAN_LESS:
-                if (c == '>')
-                    return TOK_NOT_EQUAL;
-                else if (c == '=')
-                    return TOK_LESS_EQUAL;
-                else {
-                    fPushBackChar = c;
-                    return TOK_LESS_THAN;
-                }
+                switch (state) {
+                case INIT:
+                    fTokenStart = fLexerOffset - 1;
+                    if (c == -1)
+                        return TOK_END;
+                    else if (c == '\'')
+                        state = State.SCAN_LITERAL_TYPE;
+                    else if (isAlpha(c)) {
+                        fPushBackChar = c;
+                        state = State.SCAN_IDENTIFIER;
+                    } else if (isNum(c)) {
+                        fPushBackChar = c;
+                        state = State.SCAN_DECIMAL;
+                    } else if (c == '>')
+                        state = State.SCAN_GREATER;
+                    else if (c == '<')
+                        state = State.SCAN_LESS;
+                    else if (!isSpace(c))
+                        return c;
 
-            case SCAN_IDENTIFIER:
-                if (isAlphaNum(c) || c == '_' || c == '.')
+                    break;
+
+                case SCAN_GREATER:
+                    if (c == '<')
+                        return TOK_NOT_EQUAL;
+                    else if (c == '=')
+                        return TOK_GREATER_EQUAL;
+                    else {
+                        fPushBackChar = c;
+                        return TOK_GREATER;
+                    }
+
+                case SCAN_LESS:
+                    if (c == '>')
+                        return TOK_NOT_EQUAL;
+                    else if (c == '=')
+                        return TOK_LESS_EQUAL;
+                    else {
+                        fPushBackChar = c;
+                        return TOK_LESS_THAN;
+                    }
+
+                case SCAN_IDENTIFIER:
+                    if (isAlphaNum(c) || c == '_' || c == '.')
+                        fCurrentTokenValue.append((char) c);
+                    else if (c == '(') {    // Start generate index
+                        fCurrentTokenValue.append((char) c);
+                        state = State.SCAN_GEN_NUM;
+                    }
+                    else {
+                        fPushBackChar = c;
+                        return TOK_IDENTIFIER;
+                    }
+
+                    break;
+
+                case SCAN_GEN_NUM:
                     fCurrentTokenValue.append((char) c);
-                else if (c == '(') {    // Start generate index
-                    fCurrentTokenValue.append((char) c);
-                    state = LexState.SCAN_GEN_NUM;
+                    if (c == ')')
+                        state = State.SCAN_IDENTIFIER;
+
+                    break;
+
+
+                case SCAN_LITERAL_TYPE:
+                    if (c == 'b')
+                        state = State.SCAN_BINARY;
+                    else if (c == 'h')
+                        state = State.SCAN_HEXADECIMAL;
+                    else if (c == 'd')
+                        state = State.SCAN_DECIMAL;
+                    else
+                        throw new ParseException("unknown type " + (char) c, getTokenStart(),
+                            getTokenEnd());
+
+                    break;
+
+                case SCAN_BINARY:
+                    if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
+                        fCurrentTokenValue.append((char) c);
+                    else {
+                        fLiteralValue = new BitVector(getTokenString(), 2);
+                        fPushBackChar = c;
+                        return TOK_LITERAL;
+                    }
+
+                    break;
+
+                case SCAN_DECIMAL:
+                    if (c >= '0' && c <= '9')
+                        fCurrentTokenValue.append((char) c);
+                    else {
+                        fLiteralValue = new BitVector(getTokenString(), 10);
+                        fPushBackChar = c;
+                        return TOK_LITERAL;
+                    }
+
+                    break;
+
+                case SCAN_HEXADECIMAL:
+                    if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
+                        fCurrentTokenValue.append((char) c);
+                    else {
+                        fLiteralValue = new BitVector(getTokenString(), 16);
+                        fPushBackChar = c;
+                        return TOK_LITERAL;
+                    }
+
+                    break;
                 }
-                else {
-                    fPushBackChar = c;
-                    return TOK_IDENTIFIER;
-                }
-
-                break;
-
-            case SCAN_GEN_NUM:
-                fCurrentTokenValue.append((char) c);
-                if (c == ')')
-                    state = LexState.SCAN_IDENTIFIER;
-
-                break;
-
-
-            case SCAN_LITERAL_TYPE:
-                if (c == 'b')
-                    state = LexState.SCAN_BINARY;
-                else if (c == 'h')
-                    state = LexState.SCAN_HEXADECIMAL;
-                else if (c == 'd')
-                    state = LexState.SCAN_DECIMAL;
-                else
-                    throw new ParseException("unknown type " + (char) c);
-
-                break;
-
-            case SCAN_BINARY:
-                if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
-                    fCurrentTokenValue.append((char) c);
-                else {
-                    fLiteralValue = new BitVector(fCurrentTokenValue.toString(), 2);
-                    fPushBackChar = c;
-                    return TOK_LITERAL;
-                }
-
-                break;
-
-            case SCAN_DECIMAL:
-                if (c >= '0' && c <= '9')
-                    fCurrentTokenValue.append((char) c);
-                else {
-                    fLiteralValue = new BitVector(fCurrentTokenValue.toString(), 10);
-                    fPushBackChar = c;
-                    return TOK_LITERAL;
-                }
-
-                break;
-
-            case SCAN_HEXADECIMAL:
-                if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
-                    fCurrentTokenValue.append((char) c);
-                else {
-                    fLiteralValue = new BitVector(fCurrentTokenValue.toString(), 16);
-                    fPushBackChar = c;
-                    return TOK_LITERAL;
-                }
-
-                break;
             }
         }
-    }
 
-    private void pushBackToken(int tok) {
-        fPushBackToken = tok;
+        void pushBackToken(int tok) {
+            fPushBackToken = tok;
+        }
+
+        String getTokenString() {
+            return fCurrentTokenValue.toString();
+        }
+
+        BitVector getLiteralValue() {
+            return fLiteralValue;
+        }
+
+        int getTokenStart() {
+            return fTokenStart;
+        }
+
+        int getTokenEnd() {
+            if (fCurrentTokenValue.length() == 0)
+                return fTokenStart;
+            else
+                return fTokenStart + fCurrentTokenValue.length() - 1;
+        }
+
+        private int fLexerOffset;
+        private StringBuffer fCurrentTokenValue = new StringBuffer();
+        private int fPushBackChar = -1;
+        private int fPushBackToken = -1;
+        private int fTokenStart;
+        private BitVector fLiteralValue;
+        private String fSearchString;
     }
 
     /// Read the next token and throw an exception if the type does
     /// not match the parameter.
     private void match(int tokenType) throws ParseException {
-        int got = nextToken();
+        int got = fLexer.nextToken();
         if (got != tokenType) {
-            if (got == TOK_END)
-                throw new ParseException("unexpected end of string");
+            if (got == Lexer.TOK_END)
+                throw new ParseException("unexpected end of string",
+                    fLexer.getTokenStart(), fLexer.getTokenEnd());
             else
-                throw new ParseException("unexpected value");
+                throw new ParseException("unexpected value",
+                    fLexer.getTokenStart(), fLexer.getTokenEnd());
         }
     }
 
@@ -336,10 +368,10 @@ public class Search {
     /// the passed type. If not, push back the token and return false.
     /// @note this is case insensitive
     private boolean tryToMatch(String value) throws ParseException {
-        int lookahead = nextToken();
-        if (lookahead != TOK_IDENTIFIER
-            || !fCurrentTokenValue.toString().equalsIgnoreCase(value)) {
-            pushBackToken(lookahead);
+        int lookahead = fLexer.nextToken();
+        if (lookahead != Lexer.TOK_IDENTIFIER
+            || !fLexer.getTokenString().equalsIgnoreCase(value)) {
+            fLexer.pushBackToken(lookahead);
             return false;
         }
 
@@ -367,47 +399,48 @@ public class Search {
     }
 
     private ValueNode parseValue() throws ParseException {
-        int lookahead = nextToken();
-        if (lookahead == TOK_IDENTIFIER) {
-            int netId = fTraceDataModel.findNet(fCurrentTokenValue.toString());
+        int lookahead = fLexer.nextToken();
+        if (lookahead == Lexer.TOK_IDENTIFIER) {
+            int netId = fTraceDataModel.findNet(fLexer.getTokenString());
             if (netId < 0)
-                throw new ParseException("unknown net \"" + fCurrentTokenValue.toString() + "\"");
+                throw new ParseException("unknown net \"" + fLexer.getTokenString() + "\"",
+                    fLexer.getTokenStart(), fLexer.getTokenEnd());
 
             return new NetValueNode(netId, fTraceDataModel.getNetWidth(netId));
         } else {
-            pushBackToken(lookahead);
-            match(TOK_LITERAL);
-            return new ConstValueNode(fLiteralValue);
+            fLexer.pushBackToken(lookahead);
+            match(Lexer.TOK_LITERAL);
+            return new ConstValueNode(fLexer.getLiteralValue());
         }
     }
 
     private ExpressionNode parseCondition() throws ParseException {
-        int lookahead = nextToken();
+        int lookahead = fLexer.nextToken();
         if (lookahead == '(') {
             ExpressionNode node = parseExpression();
             match(')');
             return node;
         }
 
-        pushBackToken(lookahead);
+        fLexer.pushBackToken(lookahead);
         ValueNode left = parseValue();
-        lookahead = nextToken();
+        lookahead = fLexer.nextToken();
         switch (lookahead) {
-        case TOK_GREATER:
+        case Lexer.TOK_GREATER:
             return new GreaterThanExpressionNode(left, parseValue());
-        case TOK_GREATER_EQUAL:
+        case Lexer.TOK_GREATER_EQUAL:
             return new GreaterEqualExpressionNode(left, parseValue());
-        case TOK_LESS_THAN:
+        case Lexer.TOK_LESS_THAN:
             return new LessThanExpressionNode(left, parseValue());
-        case TOK_LESS_EQUAL:
+        case Lexer.TOK_LESS_EQUAL:
             return new LessEqualExpressionNode(left, parseValue());
-        case TOK_NOT_EQUAL:
+        case Lexer.TOK_NOT_EQUAL:
             return new NotEqualExpressionNode(left, parseValue());
         case '=':
             return new EqualExpressionNode(left, parseValue());
         default:
             // If there's not an operator, treat as != 0
-            pushBackToken(lookahead);
+            fLexer.pushBackToken(lookahead);
             return new NotEqualExpressionNode(left, new ConstValueNode(ZERO_VEC));
         }
     }
@@ -744,13 +777,7 @@ public class Search {
         }
     }
 
-    private String fSearchString;
-    private int fLexerOffset;
-    private StringBuffer fCurrentTokenValue = new StringBuffer();
-    private int fPushBackChar = -1;
-    private int fPushBackToken = -1;
-    private int fTokenStart;
-    private BitVector fLiteralValue;
+    private Lexer fLexer;
     private TraceDataModel fTraceDataModel;
     private ExpressionNode fSearchExpression;
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
