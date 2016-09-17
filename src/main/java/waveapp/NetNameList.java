@@ -227,6 +227,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         setDragEnabled(true);
         setDropMode(DropMode.ON_OR_INSERT);
         setTransferHandler(new NetTransferHandler());
+        setBackground(AppPreferences.getInstance().backgroundColor);
 
         fPopupMenu = new JPopupMenu();
         JMenuItem item = new JMenuItem("Remove Net");
