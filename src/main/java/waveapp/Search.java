@@ -145,7 +145,7 @@ public class Search {
         static final int TOK_NOT_EQUAL = 1007;
 
         private enum State {
-            INIT,
+            SCAN_INIT,
             SCAN_IDENTIFIER,
             SCAN_LITERAL_TYPE,
             SCAN_GEN_NUM,
@@ -189,7 +189,7 @@ public class Search {
                 return token;
             }
 
-            State state = State.INIT;
+            State state = State.SCAN_INIT;
             fCurrentTokenValue.setLength(0);
 
             for (;;) {
@@ -206,7 +206,7 @@ public class Search {
                 }
 
                 switch (state) {
-                case INIT:
+                case SCAN_INIT:
                     fTokenStart = fLexerOffset - 1;
                     if (c == -1)
                         return TOK_END;
