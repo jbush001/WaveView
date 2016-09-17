@@ -180,6 +180,11 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
             g.drawString(timeString, labelLeft + DrawMetrics.TIMESTAMP_H_GAP,
                          DrawMetrics.TIMESCALE_HEIGHT - DrawMetrics.TIMESTAMP_H_GAP);
         }
+
+        // Draw underline
+        g.setColor(AppPreferences.getInstance().traceColor);
+        g.drawLine(visibleRect.x, DrawMetrics.TIMESCALE_HEIGHT, visibleRect.x
+            + visibleRect.width, DrawMetrics.TIMESCALE_HEIGHT);
     }
 
     /// This is called when the timer expires. It hides the timestamp displayed above

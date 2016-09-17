@@ -41,7 +41,6 @@ class TracePanel extends JPanel {
         fTimescalePanel = new TimescalePanel(displayModel, dataModel);
         fScrollPane = new JScrollPane(fWaveformPanel);
         fScrollPane.setColumnHeaderView(fTimescalePanel);
-        fScrollPane.setViewportBorder(BorderFactory.createLineBorder(Color.black));
         fScrollPane.getVerticalScrollBar().setUnitIncrement(DrawMetrics.WAVEFORM_HEIGHT);
         fScrollPane.getHorizontalScrollBar().setUnitIncrement(DrawMetrics.MIN_MINOR_TICK_H_SPACE);
 
