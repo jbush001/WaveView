@@ -175,10 +175,7 @@ class WaveformPanel extends JPanel implements MouseListener,
     }
 
     private void drawMarkers(Graphics g, Rectangle visibleRect) {
-        Graphics2D g2d = (Graphics2D) g;
-
-        g2d.setStroke(kDashedStroke);
-        g2d.setColor(AppPreferences.getInstance().markerColor);
+        g.setColor(AppPreferences.getInstance().markerColor);
 
         long startTime = xCoordinateToTimestamp(visibleRect.x);
         long endTime = xCoordinateToTimestamp(visibleRect.x + visibleRect.width);
@@ -191,14 +188,14 @@ class WaveformPanel extends JPanel implements MouseListener,
                 break;
 
             int x = timestampToXCoordinate(timestamp);
-            g2d.drawLine(x, 0, x, visibleRect.y + visibleRect.height);
+            g.drawLine(x, 0, x, visibleRect.y + visibleRect.height);
             markerIndex++;
         }
-
-        g2d.setStroke(kSolidStroke);
     }
 
     private void drawTimingLines(Graphics g, Rectangle visibleRect) {
+        Graphics2D g2d = (Graphics2D) g;
+
         double horizontalScale = fTraceDisplayModel.getHorizontalScale();
         long startTime = (long)(visibleRect.x / horizontalScale);
         long endTime = (long) ((visibleRect.x + visibleRect.width) / horizontalScale);
@@ -207,11 +204,14 @@ class WaveformPanel extends JPanel implements MouseListener,
         startTime = ((startTime + majorTickInterval - 1) / majorTickInterval)
             * majorTickInterval;
 
+        g2d.setStroke(DOTTED_STROKE);
         g.setColor(AppPreferences.getInstance().timingMarkerColor);
         for (long ts = startTime; ts < endTime; ts += majorTickInterval) {
             int x = (int)(ts * horizontalScale);
             g.drawLine(x, visibleRect.y, x, visibleRect.y + visibleRect.height);
         }
+
+        g2d.setStroke(SOLID_STROKE);
     }
 
     @Override
@@ -270,9 +270,10 @@ class WaveformPanel extends JPanel implements MouseListener,
         return (int)(timestamp * fTraceDisplayModel.getHorizontalScale());
     }
 
-    private float kDashDescription[] = { 10.0f };
-    private transient Stroke kDashedStroke = new BasicStroke(1, 0, 0, 10, kDashDescription, 0);
-    private transient Stroke kSolidStroke = new BasicStroke(1);
+    private float DOT_DESCRIPTION[] = { 2.0f, 4.0f };
+    private float DASH_DESCRIPTION[] = { 10.0f };
+    private transient Stroke DOTTED_STROKE = new BasicStroke(1, 0, 0, 10, DOT_DESCRIPTION, 0);
+    private transient Stroke SOLID_STROKE = new BasicStroke(1);
     private transient SingleNetPainter fSingleNetPainter = new SingleNetPainter();
     private transient MultiNetPainter fMultiNetPainter = new MultiNetPainter();
     private transient TraceDisplayModel fTraceDisplayModel;
