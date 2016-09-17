@@ -22,7 +22,7 @@ import java.awt.event.*;
 
 class ColorButton extends JPanel {
     ColorButton(String label, Color initialColor) {
-        setPreferredSize(new Dimension(180, 32));
+        setPreferredSize(new Dimension(180, DrawMetrics.COLOR_BUTTON_HEIGHT));
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent event) {
@@ -46,15 +46,24 @@ class ColorButton extends JPanel {
 
     @Override
     protected void paintComponent(Graphics g) {
+        FontMetrics metrics = g.getFontMetrics();
+        int fontBaseline = (DrawMetrics.COLOR_BUTTON_HEIGHT + metrics.getHeight()) / 2
+            - metrics.getDescent();
+
         g.setColor(fColor);
-        g.fillRect(0, 0, 32, 32);
+        g.fillRect(DrawMetrics.COLOR_BUTTON_INSET * 2, DrawMetrics.COLOR_BUTTON_INSET * 2,
+            DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
+            DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
 
         g.setColor(Color.black);
-        g.drawString(fLabel, 35, 32);
-        g.drawLine(0, 0, 32, 0);
-        g.drawLine(32, 0, 32, 32);
-        g.drawLine(0, 32, 32, 32);
-        g.drawLine(0, 0, 0, 32);
+        g.drawRect(DrawMetrics.COLOR_BUTTON_INSET * 2, DrawMetrics.COLOR_BUTTON_INSET * 2,
+            DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
+            DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
+        g.drawRect(DrawMetrics.COLOR_BUTTON_INSET, DrawMetrics.COLOR_BUTTON_INSET,
+            DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 2,
+            DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 2);
+        g.drawString(fLabel, DrawMetrics.COLOR_BUTTON_INSET + DrawMetrics.COLOR_BUTTON_WIDTH,
+            fontBaseline);
     }
 
     private Color fColor;

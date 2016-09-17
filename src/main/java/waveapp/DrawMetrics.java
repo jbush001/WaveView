@@ -28,4 +28,8 @@ class DrawMetrics {
     public static final int MAX_TIMESTAMP_LABEL_WIDTH = 65;
     public static final int TIMESTAMP_H_GAP = 2;
     public static final int MAX_MARKER_LABEL_WIDTH = 15;
+
+    public static final int COLOR_BUTTON_WIDTH = 40;
+    public static final int COLOR_BUTTON_HEIGHT = 26;
+    public static final int COLOR_BUTTON_INSET = 2;
 }

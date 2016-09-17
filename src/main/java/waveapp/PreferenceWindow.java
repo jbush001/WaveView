@@ -35,6 +35,7 @@ class PreferenceWindow extends JDialog {
         contentPane.setLayout(new BorderLayout());
 
         JPanel bodyArea = new JPanel();
+        bodyArea.setLayout(new GridLayout(10, 1));
         AppPreferences prefs = AppPreferences.getInstance();
         fTraceColorButton = new ColorButton("Trace", prefs.traceColor);
         bodyArea.add(fTraceColorButton);
