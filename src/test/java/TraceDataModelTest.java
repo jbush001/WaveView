@@ -133,7 +133,10 @@ public class TraceDataModelTest {
         TraceDataModel model2 = new TraceDataModel();
         model2.copyFrom(model1);
 
-        // Ensure timestamp was copied
+        // Ensure timescale was copied
+        assertEquals(-9, model2.getTimescale());
+
+        // Ensure max timestamp was copied
         assertEquals(17, model2.getMaxTimestamp());
 
         // Ensure net name map was copied

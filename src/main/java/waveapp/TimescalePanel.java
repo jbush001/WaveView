@@ -84,20 +84,27 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
     @Override
     public void scaleChanged(double newScale) {
         // Make sure minor ticks are large enough
-        long minorTickInterval = fTraceDisplayModel.getMinorTickInterval();
-        if (minorTickInterval < 100) {
-            fUnitMagnitude = 1;
+        // XXX hack. Works in nanoseconds. This is a holdover from the previous
+        // implementation. Need to clean up.
+        int nanoSecondsPerUnit = (int) Math.pow(10, fTraceDataModel.getTimescale() + 9);
+        long minorTickIntervalNs = fTraceDisplayModel.getMinorTickInterval()
+            * nanoSecondsPerUnit;
+        int unitMagnitudeNs;
+        if (minorTickIntervalNs < 100) {
+            unitMagnitudeNs = 1;
             fUnit = "ns";
-        } else if (minorTickInterval < 100000) {
-            fUnitMagnitude = 1000;
+        } else if (minorTickIntervalNs < 100000) {
+            unitMagnitudeNs = 1000;
             fUnit = "us";
-        } else if (minorTickInterval < 100000000) {
-            fUnitMagnitude = 1000000;
+        } else if (minorTickIntervalNs < 100000000) {
+            unitMagnitudeNs = 1000000;
             fUnit = "ms";
         } else {
-            fUnitMagnitude = 1000000000;
+            unitMagnitudeNs = 1000000000;
             fUnit = "s";
         }
+
+        fUnitMagnitude = unitMagnitudeNs / nanoSecondsPerUnit;
 
         // XXX if things zoom out a lot more, second will be too small.
         // Not sure the best approach for that.

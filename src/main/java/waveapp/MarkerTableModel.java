@@ -51,7 +51,8 @@ public class MarkerTableModel extends AbstractTableModel {
         case 0:
             return Integer.toString(fTraceDisplayModel.getIdForMarker(row));
         case 1:
-            return Long.toString(fTraceDisplayModel.getTimestampForMarker(row)) + " ns";
+            // XXX add suffix with units here.
+            return Long.toString(fTraceDisplayModel.getTimestampForMarker(row));
         case 2:
             return fTraceDisplayModel.getDescriptionForMarker(row);
         }

@@ -36,10 +36,10 @@ public class MarkerTableModelTest {
 
         assertEquals(2, mtm.getRowCount());
         assertEquals("1", (String) mtm.getValueAt(0, 0));
-        assertEquals("1234 ns", (String) mtm.getValueAt(0, 1));
+        assertEquals("1234", (String) mtm.getValueAt(0, 1));
         assertEquals("foo", (String) mtm.getValueAt(0, 2));
         assertEquals("2", (String) mtm.getValueAt(1, 0));
-        assertEquals("5678 ns", (String) mtm.getValueAt(1, 1));
+        assertEquals("5678", (String) mtm.getValueAt(1, 1));
         assertEquals("bar", (String) mtm.getValueAt(1, 2));
 
         assertFalse(mtm.isCellEditable(0, 0));

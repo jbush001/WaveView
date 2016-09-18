@@ -30,7 +30,7 @@ interface WaveformPainter {
     /// @param y Vertical offset of top of waveform
     /// @param visibleRect This is used to constrain what subset of the
     ///         wave is drawn.
-    /// @param horizontalScale nanoseconds per pixel.
+    /// @param horizontalScale pixels per time unit
     /// @param formatter Used to convert the BitVector to a readable string
     ///        that is drawn on top of the trace waveform.
     void paint(Graphics g, TraceDataModel model, int netId,

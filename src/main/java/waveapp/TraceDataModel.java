@@ -34,6 +34,7 @@ public class TraceDataModel {
         fFullNameToNetMap = from.fFullNameToNetMap;
         fAllNets = from.fAllNets;
         fNetTree = from.fNetTree;
+        fTimescale = from.fTimescale;
     }
 
     public TraceBuilder startBuilding() {
@@ -50,6 +51,10 @@ public class TraceDataModel {
 
     public long getMaxTimestamp() {
         return fMaxTimestamp;
+    }
+
+    public int getTimescale() {
+        return fTimescale;
     }
 
     public int getNetFromTreeObject(Object o) {
@@ -123,10 +128,7 @@ public class TraceDataModel {
     private class ConcreteTraceBuilder implements TraceBuilder {
         @Override
         public void setTimescale(int order) {
-            if (order < -9)
-                System.out.println("unsupported timescale");    // @fixme
-
-            fNanoSecondsPerUnit = (int) Math.pow(10, order + 9);
+            fTimescale = order;
         }
 
         @Override
@@ -151,8 +153,7 @@ public class TraceDataModel {
         @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
             NetDataModel model = fAllNets.get(id);
-            model.fTransitionVector.appendTransition(timestamp * fNanoSecondsPerUnit,
-                values);
+            model.fTransitionVector.appendTransition(timestamp, values);
         }
 
         @Override
@@ -183,11 +184,11 @@ public class TraceDataModel {
         }
 
         private Stack<String> fScopeStack = new Stack<String>();
-        private int fNanoSecondsPerUnit;
     }
 
     private long fMaxTimestamp;
     private HashMap<String, Integer> fFullNameToNetMap = new HashMap<String, Integer>();
     private ArrayList<NetDataModel> fAllNets = new ArrayList<NetDataModel>();
     private NetTreeModel fNetTree = new NetTreeModel();
+    private int fTimescale;
 }

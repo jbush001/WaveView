@@ -56,7 +56,7 @@ public class TraceDisplayModel {
         fTraceListeners.add(listener);
     }
 
-    // @param scale Pixels per nanosecond
+    // @param scale Pixels per time unit
     public void setHorizontalScale(double scale) {
         fHorizontalScale = scale;
         fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
@@ -68,12 +68,12 @@ public class TraceDisplayModel {
             listener.scaleChanged(scale);
     }
 
-    // @returns Pixels per nanosecond
+    // @returns Pixels per time unit
     public double getHorizontalScale() {
         return fHorizontalScale;
     }
 
-    // @returns Duration between horizontal ticks, in nanoseconds
+    // @returns Duration between horizontal ticks, in time units
     public long getMinorTickInterval() {
         return fMinorTickInterval;
     }
@@ -368,7 +368,7 @@ public class TraceDisplayModel {
     private ArrayList<NetSet> fNetSets = new ArrayList<NetSet>();
     private long fCursorPosition;
     private long fSelectionStart;
-    private double fHorizontalScale; // Pixels per nanosecond
+    private double fHorizontalScale; // Pixels per time units
     private boolean fAdjustingCursor;
     private SortedArrayList<Marker> fMarkers = new SortedArrayList<Marker>();
     private int fNextMarkerId = 1;
