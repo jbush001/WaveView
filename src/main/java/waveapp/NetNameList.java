@@ -250,18 +250,14 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         subItem.addActionListener(this);
         item.add(subItem);
         fPopupMenu.add(item);
+    }
 
-        addMouseListener(new MouseAdapter() {
-            /// @bug If shift isn't held, first deselect the other items
-            ///    that are selected. This should not happen when the context menu
-            ///    is brought up since the action likely applies to the selected
-            ///    entries.
-            @Override
-            public void mousePressed(MouseEvent event) {
-                if (event.isPopupTrigger())
-                    fPopupMenu.show(event.getComponent(), event.getX(), event.getY());
-            }
-        });
+    @Override
+    protected void processMouseEvent(MouseEvent event) {
+        if (event.isPopupTrigger())
+            fPopupMenu.show(event.getComponent(), event.getX(), event.getY());
+        else
+            super.processMouseEvent(event);
     }
 
     private void computeBounds() {
