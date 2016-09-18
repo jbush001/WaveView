@@ -199,8 +199,8 @@ class WaveformPanel extends JPanel implements MouseListener,
         double horizontalScale = fTraceDisplayModel.getHorizontalScale();
         long startTime = (long)(visibleRect.x / horizontalScale);
         long endTime = (long) ((visibleRect.x + visibleRect.width) / horizontalScale);
-        int minorTickInterval = (int) fTraceDisplayModel.getMinorTickInterval();
-        int majorTickInterval = minorTickInterval * DrawMetrics.MINOR_TICKS_PER_MAJOR;
+        long minorTickInterval = fTraceDisplayModel.getMinorTickInterval();
+        long majorTickInterval = minorTickInterval * DrawMetrics.MINOR_TICKS_PER_MAJOR;
         startTime = ((startTime + majorTickInterval - 1) / majorTickInterval)
             * majorTickInterval;
 

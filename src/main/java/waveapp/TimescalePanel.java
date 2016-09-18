@@ -84,27 +84,34 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
     @Override
     public void scaleChanged(double newScale) {
         // Make sure minor ticks are large enough
-        // XXX hack. Works in nanoseconds. This is a holdover from the previous
-        // implementation. Need to clean up.
-        int nanoSecondsPerUnit = (int) Math.pow(10, fTraceDataModel.getTimescale() + 9);
-        long minorTickIntervalNs = fTraceDisplayModel.getMinorTickInterval()
-            * nanoSecondsPerUnit;
-        int unitMagnitudeNs;
-        if (minorTickIntervalNs < 100) {
-            unitMagnitudeNs = 1;
+
+        // Convert to femto seconds, compute unit, then convert back to
+        // time units.
+        long femtoSecondsPerTimeUnit = (long) Math.pow(10, fTraceDataModel.getTimescale() + 15);
+        long minorTickIntervalFs = fTraceDisplayModel.getMinorTickInterval()
+            * femtoSecondsPerTimeUnit;
+        long unitMagnitudeFs;
+        if (minorTickIntervalFs < 100L) {
+            unitMagnitudeFs = 1L;
+            fUnit = "fs";
+        } else if (minorTickIntervalFs < 100000L) {
+            unitMagnitudeFs = 1000L;
+            fUnit = "ps";
+        } else if (minorTickIntervalFs < 100000000L) {
+            unitMagnitudeFs = 1000000L;
             fUnit = "ns";
-        } else if (minorTickIntervalNs < 100000) {
-            unitMagnitudeNs = 1000;
+        } else if (minorTickIntervalFs < 100000000000L) {
+            unitMagnitudeFs = 1000000000L;
             fUnit = "us";
-        } else if (minorTickIntervalNs < 100000000) {
-            unitMagnitudeNs = 1000000;
+        } else if (minorTickIntervalFs < 100000000000000L) {
+            unitMagnitudeFs = 1000000000000L;
             fUnit = "ms";
         } else {
-            unitMagnitudeNs = 1000000000;
+            unitMagnitudeFs = 1000000000000000L;
             fUnit = "s";
         }
 
-        fUnitMagnitude = unitMagnitudeNs / nanoSecondsPerUnit;
+        fUnitMagnitude = unitMagnitudeFs / femtoSecondsPerTimeUnit;
 
         // XXX if things zoom out a lot more, second will be too small.
         // Not sure the best approach for that.
@@ -203,7 +210,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
     }
 
     private boolean fShowTimestamp;
-    private int fUnitMagnitude = 1;
+    private long fUnitMagnitude = 1;
     private String fUnit = "s";
     private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
