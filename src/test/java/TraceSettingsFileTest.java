@@ -161,10 +161,22 @@ public class TraceSettingsFileTest {
         assertEquals(2, destDisplayModel.getVisibleNet(1));
     }
 
+    // Test generating config file name for subdirectory
     @Test
-    public void testConfigFileName() throws Exception {
+    public void testConfigFileName1() throws Exception {
         assertEquals("foo/bar/.trace.vcd.traceconfig",
-            TraceSettingsFile.configFileName(new File(
+            TraceSettingsFile.settingsFileName(new File(
             "foo/bar/trace.vcd")).toString());
     }
+
+    /// Regression test. In this case, the full path isn't passed.
+    /// It was putting 'null' inside the filename.
+    @Test
+    public void testConfigFileName2() throws Exception {
+        assertEquals(".trace.vcd.traceconfig",
+            TraceSettingsFile.settingsFileName(new File(
+            "trace.vcd")).toString());
+    }
+
+
 }

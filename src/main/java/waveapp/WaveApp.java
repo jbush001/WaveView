@@ -238,10 +238,10 @@ class WaveApp extends JPanel implements ActionListener {
                 try {
                     AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
 
-                    File configFile = TraceSettingsFile.configFileName(fFile);
-                    fTraceSettingsFile = new TraceSettingsFile(configFile,
+                    File settingsFile = TraceSettingsFile.settingsFileName(fFile);
+                    fTraceSettingsFile = new TraceSettingsFile(settingsFile,
                             fTraceDataModel, fTraceDisplayModel);
-                    if (configFile.exists())
+                    if (settingsFile.exists())
                         fTraceSettingsFile.read();
                 } catch (Exception exc) {
                     exc.printStackTrace();

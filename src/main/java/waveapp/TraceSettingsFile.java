@@ -35,8 +35,15 @@ public class TraceSettingsFile {
     /// @param file Name of a trace file
     /// @returns configuration file for this (a .dotfile in the same
     ///  directory)
-    public static File configFileName(File file) throws IOException {
-        return new File(file.getParent() + "/." + file.getName() + ".traceconfig");
+    public static File settingsFileName(File file) throws IOException {
+        String parent = file.getParent();
+        String path;
+        if (parent == null)
+            path = "." + file.getName() + ".traceconfig";
+        else
+            path =  file.getParent() + "/." + file.getName() + ".traceconfig";
+
+        return new File(path);
     }
 
     public TraceSettingsFile(File file, TraceDataModel dataModel,
