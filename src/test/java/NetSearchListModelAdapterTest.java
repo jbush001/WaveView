@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import waveapp.*;
+import waveview.*;
 import org.junit.*;
 import static org.junit.Assert.*;
 import javax.swing.event.ListDataListener;

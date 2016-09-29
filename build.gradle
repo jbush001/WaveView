@@ -2,7 +2,7 @@ apply plugin: 'application'
 apply plugin: 'jacoco'
 apply plugin: 'findbugs'
 
-mainClassName = "waveapp.WaveApp"
+mainClassName = "waveview.MainWindow"
 
 repositories {
     mavenCentral()
@@ -15,7 +15,7 @@ dependencies {
 jar {
     manifest {
         attributes(
-            'Main-Class': 'waveapp.WaveApp'
+            'Main-Class': 'waveview.MainWindow'
         )
     }
 }

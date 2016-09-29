@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-import waveapp.*;
+import waveview.*;
 import static org.junit.Assert.*;
 import org.junit.*;
 import java.util.Iterator;
