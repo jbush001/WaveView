@@ -155,11 +155,11 @@ class WaveformPanel extends JPanel implements MouseListener,
             ValueFormatter formatter = fTraceDisplayModel.getValueFormatter(waveformIndex);
             int netId = fTraceDisplayModel.getVisibleNet(waveformIndex);
             if (fTraceDataModel.getNetWidth(netId) > 1) {
-                fMultiNetPainter.paint(g, fTraceDataModel, netId,
+                fMultiBitPainter.paint(g, fTraceDataModel, netId,
                     waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP,
                     visibleRect, horizontalScale, formatter);
             } else {
-                fSingleNetPainter.paint(g, fTraceDataModel, netId,
+                fSingleBitPainter.paint(g, fTraceDataModel, netId,
                     waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP,
                     visibleRect, horizontalScale, formatter);
             }
@@ -274,8 +274,8 @@ class WaveformPanel extends JPanel implements MouseListener,
     private float DASH_DESCRIPTION[] = { 10.0f };
     private transient Stroke DOTTED_STROKE = new BasicStroke(1, 0, 0, 10, DOT_DESCRIPTION, 0);
     private transient Stroke SOLID_STROKE = new BasicStroke(1);
-    private transient SingleNetPainter fSingleNetPainter = new SingleNetPainter();
-    private transient MultiNetPainter fMultiNetPainter = new MultiNetPainter();
+    private transient SingleBitPainter fSingleBitPainter = new SingleBitPainter();
+    private transient MultiBitPainter fMultiBitPainter = new MultiBitPainter();
     private transient TraceDisplayModel fTraceDisplayModel;
     private transient TraceDataModel fTraceDataModel;
     private int fOldCursor;

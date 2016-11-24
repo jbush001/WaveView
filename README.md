@@ -1,10 +1,9 @@
 [![Build Status](https://travis-ci.org/jbush001/WaveView.svg?branch=master)](https://travis-ci.org/jbush001/WaveView)
 [![codecov](https://codecov.io/gh/jbush001/WaveView/branch/master/graph/badge.svg)](https://codecov.io/gh/jbush001/WaveView)
 
-WaveView is a Java based waveform viewer. It is useful for viewing output from
+WaveView allows viewing waveform files produced by
 hardware simulation tools like [Verilator](http://www.veripool.org/wiki/verilator)
-and [Icarus Verilog](http://iverilog.icarus.com/). It currently reads
-Value Change Dump (VCD) files.
+and [Icarus Verilog](http://iverilog.icarus.com/).
 
 ![screenshot](https://raw.githubusercontent.com/wiki/jbush001/WaveView/screenshot.png)
 
@@ -35,11 +34,3 @@ a new JAR file:
 # Running
 
     java -jar build/libs/WaveView.jar [waveform file]
-
-## Test Coverage
-
-The following command will run the unit tests and generate a coverage report:
-
-    ./gradlew check
-
-The report is written to build/reports/jacoco/test/html/index.html

@@ -398,22 +398,6 @@ public class Search {
         return left;
     }
 
-    private ValueNode parseValue() throws ParseException {
-        int lookahead = fLexer.nextToken();
-        if (lookahead == Lexer.TOK_IDENTIFIER) {
-            int netId = fTraceDataModel.findNet(fLexer.getTokenString());
-            if (netId < 0)
-                throw new ParseException("unknown net \"" + fLexer.getTokenString() + "\"",
-                    fLexer.getTokenStart(), fLexer.getTokenEnd());
-
-            return new NetValueNode(netId, fTraceDataModel.getNetWidth(netId));
-        } else {
-            fLexer.pushBackToken(lookahead);
-            match(Lexer.TOK_LITERAL);
-            return new ConstValueNode(fLexer.getLiteralValue());
-        }
-    }
-
     private ExpressionNode parseCondition() throws ParseException {
         int lookahead = fLexer.nextToken();
         if (lookahead == '(') {
@@ -442,6 +426,22 @@ public class Search {
             // If there's not an operator, treat as != 0
             fLexer.pushBackToken(lookahead);
             return new NotEqualExpressionNode(left, new ConstValueNode(ZERO_VEC));
+        }
+    }
+
+    private ValueNode parseValue() throws ParseException {
+        int lookahead = fLexer.nextToken();
+        if (lookahead == Lexer.TOK_IDENTIFIER) {
+            int netId = fTraceDataModel.findNet(fLexer.getTokenString());
+            if (netId < 0)
+                throw new ParseException("unknown net \"" + fLexer.getTokenString() + "\"",
+                    fLexer.getTokenStart(), fLexer.getTokenEnd());
+
+            return new NetValueNode(netId, fTraceDataModel.getNetWidth(netId));
+        } else {
+            fLexer.pushBackToken(lookahead);
+            match(Lexer.TOK_LITERAL);
+            return new ConstValueNode(fLexer.getLiteralValue());
         }
     }
 
