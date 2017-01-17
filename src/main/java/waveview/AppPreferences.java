@@ -113,7 +113,7 @@ class AppPreferences {
         selectionColor = readColor("selectionColor", new Color(230, 230, 230));
         cursorColor = readColor("cursorColor", Color.red);
         backgroundColor = readColor("backgroundColor", Color.white);
-        timingMarkerColor = readColor("timingMarkerColor", new Color(230, 230, 230));
+        timingMarkerColor = readColor("timingMarkerColor", new Color(200, 200, 200));
         markerColor = readColor("markerColor", Color.green);
         listSelectionBgColor = readColor("listSelectionBgColor", Color.blue);
         listSelectionFgColor = readColor("listSelectionFgColor", Color.white);

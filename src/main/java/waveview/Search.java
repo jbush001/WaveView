@@ -57,9 +57,8 @@ public class Search {
         long currentTime = startTimestamp;
         boolean currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
 
-        // If the start timestamp is already at a region that is true, scan first
-        // to find a place where the expression is false. We'll then scan again
-        // to where it is true.
+        // If the start timestamp is already at a region that is true, scan
+        // first to find a place where the expression is false.
         while (currentValue) {
             if (hint.forwardTimestamp == Long.MAX_VALUE)
                 return -1;  // End of trace
@@ -68,6 +67,7 @@ public class Search {
             currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
         }
 
+        // Scan to find where the expression is true
         while (!currentValue) {
             if (hint.forwardTimestamp == Long.MAX_VALUE)
                 return -1;  // End of trace
