@@ -51,5 +51,8 @@ public class MarkerTableModelTest {
 
         mtm.setValueAt("baz", 1, 2);
         assertEquals("baz", (String) mtm.getValueAt(1, 2));
+
+        // Column index past end, should check and return empty string.
+        assertEquals("", (String) mtm.getValueAt(1, 3));
     }
 }

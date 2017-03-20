@@ -77,6 +77,16 @@ public class NetTreeModelTest {
         assertEquals(27, model.getNetFromTreeObject(grandkid1));
     }
 
+    @Test
+    public void valueForPathChanged() {
+        NetTreeModel model = new NetTreeModel();
+        try {
+            model.valueForPathChanged(null, null);
+            fail("Didn't throw exception");
+        } catch (UnsupportedOperationException exc) {
+        }
+    }
+
     // If you call $dumpvars more than once in iverilog, it will
     // exit the root node and re-push it. Ensure this is handled properly.
     @Test

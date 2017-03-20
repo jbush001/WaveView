@@ -83,7 +83,7 @@ public class TraceDisplayModel {
     }
 
     public void makeNetVisible(int aboveIndex, int netId) {
-        fVisibleNets.add(aboveIndex, new NetViewModel(netId, null));
+        fVisibleNets.add(aboveIndex, new NetViewModel(netId));
         for (Listener listener : fTraceListeners) {
             listener.netsAdded(fVisibleNets.size() - 1,
                                fVisibleNets.size() - 1);
@@ -351,16 +351,12 @@ public class TraceDisplayModel {
     }
 
     private static class NetViewModel {
-        NetViewModel(int index, ValueFormatter formatter) {
+        NetViewModel(int index) {
             fIndex = index;
-            if (formatter == null)
-                fFormatter = new HexadecimalValueFormatter();
-            else
-                fFormatter = formatter;
         }
 
         private int fIndex;
-        private ValueFormatter fFormatter;
+        private ValueFormatter fFormatter = new HexadecimalValueFormatter();
     }
 
     private ArrayList<Listener> fTraceListeners = new ArrayList<Listener>();

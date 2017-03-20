@@ -37,8 +37,7 @@ public class EnumValueFormatter implements ValueFormatter {
                     fMappings.put(Integer.parseInt(tokens[0]), tokens[1]);
             }
         } finally {
-            if (br != null)
-                br.close();
+            br.close();
         }
     }
 
