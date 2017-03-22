@@ -145,11 +145,8 @@ public class TraceSettingsFile {
     }
 
     private String getSubTag(Element parent, String tagName) {
-        Text elem = (Text) parent.getElementsByTagName(tagName).item(0).getFirstChild();
-        if (elem == null)
-            return "";
-
-        return elem.getData();
+        return ((Text) parent.getElementsByTagName(tagName).item(0).getFirstChild())
+            .getData();
     }
 
     private void readNetSet(Element element) {

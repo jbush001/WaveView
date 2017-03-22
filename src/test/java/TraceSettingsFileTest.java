@@ -45,6 +45,7 @@ public class TraceSettingsFileTest {
         builder.exitScope();
         builder.newNet("net8", -1, 1);
         builder.exitScope();
+        builder.loadFinished();
 
         // Populate sourceDisplayModel
         sourceDisplayModel.makeNetVisible(1);
@@ -138,6 +139,7 @@ public class TraceSettingsFileTest {
         builder1.newNet("net2", -1, 1);
         builder1.newNet("net3", -1, 1);
         builder1.exitScope();
+        builder1.loadFinished();
         sourceDisplayModel.makeNetVisible(0);
         sourceDisplayModel.makeNetVisible(1);
         sourceDisplayModel.makeNetVisible(2);
@@ -151,6 +153,7 @@ public class TraceSettingsFileTest {
         builder2.newNet("net4", -1, 1);
         builder2.newNet("net3", -1, 1);
         builder2.exitScope();
+        builder2.loadFinished();
 
         File file = fTempFolder.newFile("test2.settings");
         (new TraceSettingsFile(file, sourceDataModel, sourceDisplayModel)).write();
@@ -159,6 +162,22 @@ public class TraceSettingsFileTest {
         assertEquals(2, destDisplayModel.getVisibleNetCount());
         assertEquals(0, destDisplayModel.getVisibleNet(0));
         assertEquals(2, destDisplayModel.getVisibleNet(1));
+    }
+
+    // If the formatter class name is unknown, fall back to binary
+    @Test
+    public void testBadFormatter() throws Exception {
+        File file = new File("src/test/resources/trace_settings/bad_formatter.traceconfig");
+        TraceDataModel dataModel = new TraceDataModel();
+        TraceBuilder builder = dataModel.startBuilding();
+        builder.enterScope("foo");
+        builder.newNet("bar", -1, 1);
+        builder.exitScope();
+        builder.loadFinished();
+
+        TraceDisplayModel displayModel = new TraceDisplayModel();
+        (new TraceSettingsFile(file, dataModel, displayModel)).read();
+        assertTrue(displayModel.getValueFormatter(0) instanceof BinaryValueFormatter);
     }
 
     // Test generating config file name for subdirectory
@@ -177,6 +196,4 @@ public class TraceSettingsFileTest {
             TraceSettingsFile.settingsFileName(new File(
             "trace.vcd")).toString());
     }
-
-
 }

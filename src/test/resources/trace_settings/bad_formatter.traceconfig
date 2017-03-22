@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+<scale>1.0</scale>
+<netsets>
+  <netset name="_default">
+    <net>
+      <name>foo.bar</name>
+      <format>waveview.AnInvalidClassThatDoesntExist</format>
+    </net>
+  </netset>
+</netsets><markers/>
+</configuration>
