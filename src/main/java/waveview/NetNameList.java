@@ -114,14 +114,12 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
 
         @Override
         public void addListDataListener(ListDataListener l) {
-            assert fListener == null;
-            fListener = l;
+            fListeners.add(l);
         }
 
         @Override
         public void removeListDataListener(ListDataListener l) {
-            assert fListener != null;
-            fListener = null;
+            fListeners.remove(l);
         }
 
         @Override
@@ -139,14 +137,18 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
 
         @Override
         public void netsAdded(int firstIndex, int lastIndex) {
-            fListener.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED,
-                firstIndex, lastIndex));
+            for (ListDataListener l : fListeners) {
+                l.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED,
+                    firstIndex, lastIndex));
+            }
         }
 
         @Override
         public void netsRemoved(int firstIndex, int lastIndex) {
-            fListener.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED,
-                firstIndex, lastIndex));
+            for (ListDataListener l : fListeners) {
+                l.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED,
+                    firstIndex, lastIndex));
+            }
         }
 
         @Override
@@ -158,7 +160,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
         @Override
         public void formatChanged(int index) {}
 
-        private ListDataListener fListener;
+        private ArrayList<ListDataListener> fListeners = new ArrayList<ListDataListener>();
     }
 
     /// Handles lists of signals dropped onto this view
