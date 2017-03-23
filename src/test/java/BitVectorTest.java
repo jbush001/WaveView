@@ -201,10 +201,10 @@ public class BitVectorTest {
         assertEquals(1, bv3.compare(bv2));
         assertEquals(0, bv3.compare(bv3));
         assertEquals(-1, bv3.compare(bv4));
-        assertEquals(1, bv3.compare(bv1));
-        assertEquals(1, bv3.compare(bv2));
-        assertEquals(0, bv3.compare(bv3));
-        assertEquals(-1, bv3.compare(bv4));
+        assertEquals(1, bv4.compare(bv1));
+        assertEquals(1, bv4.compare(bv2));
+        assertEquals(1, bv4.compare(bv3));
+        assertEquals(0, bv4.compare(bv4));
     }
 
     @Test
