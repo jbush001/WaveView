@@ -50,10 +50,8 @@ public class RecentFiles {
     }
 
     public void unpack(String packed) {
-        for (String path : packed.split(";")) {
-            if (path.length() > 0)
-                fFiles.add(path);
-        }
+        for (String path : packed.split(";"))
+            fFiles.add(path);
     }
 
     public ArrayList<String> getList() {
