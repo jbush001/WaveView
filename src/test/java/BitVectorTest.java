@@ -114,32 +114,43 @@ public class BitVectorTest {
     public void testNumberFormatException() {
         // Digits other than 0/1 in binary
         try {
-            BitVector bv = new BitVector("12345", 2);
+            BitVector bv = new BitVector("0110102", 2);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
+        //
         // Invalid hex digits (I picked the invalid characters ASCII codes
         // to hit various conditions in the chain of if statements in
         // parseHex).
+        //
         try {
-            BitVector bv = new BitVector("ABCDEFG*", 16);
+            // / is < '0'
+            BitVector bv = new BitVector("ABCDEFG/", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         try {
-            BitVector bv = new BitVector("ABCDEFG@", 16);
+            // : is > '9' and < 'A'
+            BitVector bv = new BitVector("ABCDEFG:", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         try {
-            BitVector bv = new BitVector("ABCDEFGH", 16);
+            // 'G' is > 'F' and < 'a'
+            BitVector bv = new BitVector("ABCDEFG", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
+        try {
+            // '~' is > 'f'
+            BitVector bv = new BitVector("ABCDEFG~", 16);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+        }
 
         // Hex digits in decimal format
         try {
