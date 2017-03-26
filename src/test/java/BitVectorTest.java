@@ -193,18 +193,33 @@ public class BitVectorTest {
         assertEquals(-1, bv1.compare(bv2));
         assertEquals(-1, bv1.compare(bv3));
         assertEquals(-1, bv1.compare(bv4));
+
         assertEquals(1, bv2.compare(bv1));
         assertEquals(0, bv2.compare(bv2));
         assertEquals(-1, bv2.compare(bv3));
         assertEquals(-1, bv2.compare(bv4));
+
         assertEquals(1, bv3.compare(bv1));
         assertEquals(1, bv3.compare(bv2));
         assertEquals(0, bv3.compare(bv3));
         assertEquals(-1, bv3.compare(bv4));
+
         assertEquals(1, bv4.compare(bv1));
         assertEquals(1, bv4.compare(bv2));
         assertEquals(1, bv4.compare(bv3));
         assertEquals(0, bv4.compare(bv4));
+
+        // Ensure x and z values are ignored
+        BitVector bv6 = new BitVector("x0z10", 2);
+        BitVector bv7 = new BitVector("10110", 2);
+        BitVector bv8 = new BitVector("00010", 2);
+        BitVector bv9 = new BitVector("01010", 2);
+        assertEquals(0, bv6.compare(bv7));
+        assertEquals(0, bv7.compare(bv6));
+        assertEquals(0, bv6.compare(bv8));
+        assertEquals(0, bv8.compare(bv6));
+        assertEquals(-1, bv6.compare(bv9));
+        assertEquals(1, bv9.compare(bv6));
     }
 
     @Test
