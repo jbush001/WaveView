@@ -32,11 +32,11 @@ public class BitVectorTest {
         assertEquals(512, (new BitVector("200", 16)).intValue());
         assertEquals(513, (new BitVector("201", 16)).intValue());
 
-        BitVector bv = new BitVector("123456789abcdefABCDEF", 16);
+        BitVector bv = new BitVector("1234567890abcdefABCDEF", 16);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
-        assertEquals(84, bv.getWidth());
-        assertEquals("123456789ABCDEFABCDEF", bv.toString(16));
+        assertEquals(88, bv.getWidth());
+        assertEquals("1234567890ABCDEFABCDEF", bv.toString(16));
     }
 
     @Test
@@ -119,12 +119,27 @@ public class BitVectorTest {
         } catch (NumberFormatException exc) {
         }
 
-        // Invalid hex digit 'H'
+        // Invalid hex digits (I picked the invalid characters ASCII codes
+        // to hit various conditions in the chain of if statements in
+        // parseHex).
+        try {
+            BitVector bv = new BitVector("ABCDEFG*", 16);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+        }
+
+        try {
+            BitVector bv = new BitVector("ABCDEFG@", 16);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+        }
+
         try {
             BitVector bv = new BitVector("ABCDEFGH", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
+
 
         // Hex digits in decimal format
         try {
@@ -188,26 +203,37 @@ public class BitVectorTest {
         BitVector bv2 = new BitVector("01001", 2);  // Has leading zeros
         BitVector bv3 = new BitVector("10100", 2);
         BitVector bv4 = new BitVector("10101", 2);  // Same length as last, trailing 1
+        BitVector bv5 = new BitVector("000000", 2);  // Wider, but zeroes
 
         assertEquals(0, bv1.compare(bv1));
         assertEquals(-1, bv1.compare(bv2));
         assertEquals(-1, bv1.compare(bv3));
         assertEquals(-1, bv1.compare(bv4));
+        assertEquals(1, bv1.compare(bv5));
 
         assertEquals(1, bv2.compare(bv1));
         assertEquals(0, bv2.compare(bv2));
         assertEquals(-1, bv2.compare(bv3));
         assertEquals(-1, bv2.compare(bv4));
+        assertEquals(1, bv2.compare(bv5));
 
         assertEquals(1, bv3.compare(bv1));
         assertEquals(1, bv3.compare(bv2));
         assertEquals(0, bv3.compare(bv3));
         assertEquals(-1, bv3.compare(bv4));
+        assertEquals(1, bv3.compare(bv5));
 
         assertEquals(1, bv4.compare(bv1));
         assertEquals(1, bv4.compare(bv2));
         assertEquals(1, bv4.compare(bv3));
         assertEquals(0, bv4.compare(bv4));
+        assertEquals(1, bv4.compare(bv5));
+
+        assertEquals(-1, bv5.compare(bv1));
+        assertEquals(-1, bv5.compare(bv2));
+        assertEquals(-1, bv5.compare(bv3));
+        assertEquals(-1, bv5.compare(bv4));
+        assertEquals(0, bv5.compare(bv5));
 
         // Ensure x and z values are ignored
         BitVector bv6 = new BitVector("x0z10", 2);
@@ -263,6 +289,13 @@ public class BitVectorTest {
 
         bv = new BitVector();
         bv.parseString("17", 16);
+
+        // parse a vector of the same size. Should re-use buffer and
+        // not reallocate.
+        bv = new BitVector(8);
+        bv.parseString("10100011", 2);
+        bv.parseString("ff", 16);
+        bv.parseString("17", 10);
     }
 
     @Test
