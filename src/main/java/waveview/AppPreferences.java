@@ -26,13 +26,15 @@ import java.io.*;
 ///
 
 class AppPreferences {
-    private static final int MAX_RECENT_FILES = 10;
-
     static AppPreferences getInstance() {
         if (fInstance == null)
             fInstance = new AppPreferences();
 
         return fInstance;
+    }
+
+    private AppPreferences() {
+        readColors();
     }
 
     Color traceColor;
@@ -54,33 +56,25 @@ class AppPreferences {
         return new File(fPrefs.get("initialTraceDirectory", ""));
     }
 
-    void addFileToRecents(String path) {
-        // check if this is already in the recent files list
-        for (String recentFile : fRecentFiles) {
-            if (recentFile.equals(path))
-                return;    // Skip
-        }
-
-        // Remove oldest file from list if necessary
-        if (fRecentFiles.size() >= MAX_RECENT_FILES)
-            fRecentFiles.remove(0);
-
-        fRecentFiles.add(path);
-
-        // Write out to preferences file
-        StringBuffer recentList = new StringBuffer();
-        for (String recentFile : fRecentFiles) {
-            if (recentList.length() > 0)
-                recentList.append(';');
-
-            recentList.append(recentFile);
-        }
-
-        fPrefs.put("recentFiles", recentList.toString());
+    void setRecentList(String files) {
+        fPrefs.put("recentFiles", files);
     }
 
-    ArrayList<String> getRecentFileList() {
-        return fRecentFiles;
+    String getRecentList() {
+        return fPrefs.get("recentFiles", "");
+    }
+
+    void readColors() {
+        traceColor = readColor("traceColor", Color.black);
+        conflictColor = readColor("conflictColor", new Color(255, 200, 200));
+        selectionColor = readColor("selectionColor", new Color(230, 230, 230));
+        cursorColor = readColor("cursorColor", Color.red);
+        backgroundColor = readColor("backgroundColor", Color.white);
+        timingMarkerColor = readColor("timingMarkerColor", new Color(200, 200, 200));
+        markerColor = readColor("markerColor", Color.green);
+        listSelectionBgColor = readColor("listSelectionBgColor", Color.blue);
+        listSelectionFgColor = readColor("listSelectionFgColor", Color.white);
+        valueColor = readColor("valueColor", Color.blue);
     }
 
     void writeColors() {
@@ -94,30 +88,6 @@ class AppPreferences {
         writeColor("listSelectionBgColor", listSelectionBgColor);
         writeColor("listSelectionFgColor", listSelectionFgColor);
         writeColor("valueColor", valueColor);
-    }
-
-    private AppPreferences() {
-        readPreferences();
-    }
-
-    void readPreferences() {
-        String recentList = fPrefs.get("recentFiles", "");
-        String[] paths = recentList.split(";");
-        for (String path : paths) {
-            if (path.length() > 0)
-                fRecentFiles.add(path);
-        }
-
-        traceColor = readColor("traceColor", Color.black);
-        conflictColor = readColor("conflictColor", new Color(255, 200, 200));
-        selectionColor = readColor("selectionColor", new Color(230, 230, 230));
-        cursorColor = readColor("cursorColor", Color.red);
-        backgroundColor = readColor("backgroundColor", Color.white);
-        timingMarkerColor = readColor("timingMarkerColor", new Color(200, 200, 200));
-        markerColor = readColor("markerColor", Color.green);
-        listSelectionBgColor = readColor("listSelectionBgColor", Color.blue);
-        listSelectionFgColor = readColor("listSelectionFgColor", Color.white);
-        valueColor = readColor("valueColor", Color.blue);
     }
 
     private Color readColor(String name, Color def) {
@@ -136,5 +106,4 @@ class AppPreferences {
 
     private Preferences fPrefs = Preferences.userNodeForPackage(MainWindow.class);
     private static AppPreferences fInstance;
-    private ArrayList<String> fRecentFiles = new ArrayList<String>();
 }

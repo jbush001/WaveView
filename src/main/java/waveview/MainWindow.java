@@ -70,6 +70,8 @@ public class MainWindow extends JPanel implements ActionListener {
         fTracePanel = new TracePanel(fTraceDisplayModel, fTraceDataModel, this);
         add(fTracePanel, BorderLayout.CENTER);
 
+        fRecentFiles.unpack(AppPreferences.getInstance().getRecentList());
+
         setPreferredSize(new Dimension(900,600));
     }
 
@@ -236,7 +238,8 @@ public class MainWindow extends JPanel implements ActionListener {
                 fFrame.setTitle("Waveform Viewer [" + fFile.getName() + "]");
 
                 try {
-                    AppPreferences.getInstance().addFileToRecents(fFile.getCanonicalPath());
+                    fRecentFiles.add(fFile.getCanonicalPath());
+                    AppPreferences.getInstance().setRecentList(fRecentFiles.pack());
 
                     File settingsFile = TraceSettingsFile.settingsFileName(fFile);
                     fTraceSettingsFile = new TraceSettingsFile(settingsFile,
@@ -377,7 +380,7 @@ public class MainWindow extends JPanel implements ActionListener {
 
     private void buildRecentFilesMenu() {
         fRecentFilesMenu.removeAll();
-        for (String path : AppPreferences.getInstance().getRecentFileList()) {
+        for (String path : fRecentFiles.getList()) {
             JMenuItem item = new JMenuItem(path);
             item.setActionCommand("open " + path);
             item.addActionListener(this);
@@ -510,6 +513,7 @@ public class MainWindow extends JPanel implements ActionListener {
     private TraceSettingsFile fTraceSettingsFile;
     private File fCurrentTraceFile;
     private NetSearchPanel fNetSearchPane;
+    private RecentFiles fRecentFiles = new RecentFiles();
 
     private static void createAndShowGUI(String[] args) {
         final MainWindow contentPane = new MainWindow();
