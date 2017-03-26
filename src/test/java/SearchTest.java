@@ -787,7 +787,7 @@ public class SearchTest {
             (new Search(traceDataModel, "m.a or m.b or m.c or m.d")).toString());
     }
 
-    // Basically tests that parens are treated as part of an indeitifer.
+    // Tests that parens are treated as part of an identifier.
     // When a module is generated, it has the instance number: mod1.core_gen(0).mod2
     @Test
     public void testGenerateInstance() throws Exception {
