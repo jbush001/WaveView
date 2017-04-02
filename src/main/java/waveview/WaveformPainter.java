@@ -23,7 +23,7 @@ import java.awt.*;
 /// This is subclassed for single and multi-bit nets.
 ///
 
-public interface WaveformPainter {
+interface WaveformPainter {
     /// @param g Graphics context to draw onto
     /// @param model Waveform information will be pulled from this model
     /// @param netId Identifier of net to paint
