@@ -23,7 +23,7 @@ import java.util.*;
 /// Delegate that draws the waveform for a single net that has only one
 /// bit in it.
 ///
-class SingleBitPainter implements WaveformPainter {
+public class SingleBitPainter implements WaveformPainter {
     @Override
     public void paint(Graphics g, TraceDataModel model, int netId,
                       int topOffset, Rectangle visibleRect, double horizontalScale,
