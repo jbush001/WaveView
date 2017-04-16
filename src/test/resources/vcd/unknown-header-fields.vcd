@@ -14,5 +14,8 @@ $scope module mod1 $end
 $var wire 1 ! clk $end
 $upscope $end
 $enddefinitions $end
+$comment
+All initial values are dumped below at time 0 sec = 0 timescale units.
+$end
 #0
 1!

@@ -115,13 +115,13 @@ public class VCDLoaderTest {
             fEventList.add(event);
         }
 
-        void expectEnterModule(String name) {
+        void expectEnterScope(String name) {
             Event event = new Event(EXPECT_ENTER);
             event.fName = name;
             fEventList.add(event);
         }
 
-        void expectExitModule() {
+        void expectExitScope() {
             fEventList.add(new Event(EXPECT_EXIT));
         }
 
@@ -190,12 +190,12 @@ public class VCDLoaderTest {
             fVCDContents.append("$scope module ");
             fVCDContents.append(name);
             fVCDContents.append(" $end\n");
-            fTraceBuilder.expectEnterModule(name);
+            fTraceBuilder.expectEnterScope(name);
         }
 
         void exitScope() {
             fVCDContents.append("$upscope $end\n");
-            fTraceBuilder.expectExitModule();
+            fTraceBuilder.expectExitScope();
         }
 
         int defineNet(String name, int cloneId, int width) {
@@ -365,6 +365,17 @@ public class VCDLoaderTest {
             builder, null);
     }
 
+    // Check that it handles a space between the number and unit in
+    // the timescale definition.
+    @Test
+    public void testTimescaleSpace() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-12);
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("timescale-space.vcd"),
+            builder, null);
+    }
+
     @Test
     public void testUnknownTimescale() throws Exception {
         try {
@@ -384,7 +395,7 @@ public class VCDLoaderTest {
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
-            assertEquals("line 2: unknown timescale value 1",
+            assertEquals("line 3: unknown timescale value $end",
                          exc.getMessage());
         }
     }
@@ -407,9 +418,9 @@ public class VCDLoaderTest {
     public void testUnknownHeaderFields() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-6);
-        builder.expectEnterModule("mod1");
+        builder.expectEnterScope("mod1");
         builder.expectNewNet("clk", -1, 1);
-        builder.expectExitModule();
+        builder.expectExitScope();
         builder.expectAppendTransition(0, 0, "1");
         builder.expectLoadFinished();
 
@@ -423,9 +434,9 @@ public class VCDLoaderTest {
     public void testTimestampOutOfOrder() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-9);
-        builder.expectEnterModule("mod1");
+        builder.expectEnterScope("mod1");
         builder.expectNewNet("foo", -1, 1);
-        builder.expectExitModule();
+        builder.expectExitScope();
         builder.expectAppendTransition(0, 0, "1");
         builder.expectAppendTransition(0, 5, "0");
         builder.expectAppendTransition(0, 5, "1");
@@ -446,11 +457,11 @@ public class VCDLoaderTest {
     public void testMultibit() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-9);
-        builder.expectEnterModule("mod1");
+        builder.expectEnterScope("mod1");
         builder.expectNewNet("addr", -1, 16);
         builder.expectNewNet("data", -1, 3);
         builder.expectNewNet("enable", -1, 1);
-        builder.expectExitModule();
+        builder.expectExitScope();
         builder.expectAppendTransition(0, 0, "1010111000101011");
         builder.expectAppendTransition(1, 0, "011");
         builder.expectAppendTransition(2, 0, "z");
@@ -471,9 +482,9 @@ public class VCDLoaderTest {
     public void testPadding() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-9);
-        builder.expectEnterModule("mod1");
+        builder.expectEnterScope("mod1");
         builder.expectNewNet("value", -1, 16);
-        builder.expectExitModule();
+        builder.expectExitScope();
         builder.expectAppendTransition(0, 0, "zzzzzzzzzzzx1010");
         builder.expectAppendTransition(0, 1, "xxxxxxxxxxxz1010");
         builder.expectAppendTransition(0, 2, "0000000000001101");
@@ -489,11 +500,11 @@ public class VCDLoaderTest {
     public void testDumpvars() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-9);
-        builder.expectEnterModule("mod1");
+        builder.expectEnterScope("mod1");
         builder.expectNewNet("addr", -1, 16);
         builder.expectNewNet("data", -1, 3);
         builder.expectNewNet("enable", -1, 1);
-        builder.expectExitModule();
+        builder.expectExitScope();
         builder.expectAppendTransition(0, 0, "1010111000101011");
         builder.expectAppendTransition(1, 0, "011");
         builder.expectAppendTransition(2, 0, "z");
@@ -612,11 +623,11 @@ public class VCDLoaderTest {
     @Test
     public void testTraceAlias() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
-        builder.expectEnterModule("mod1");
+        builder.expectEnterScope("mod1");
         builder.expectNewNet("foo", -1, 1);
         builder.expectNewNet("source", -1, 1);
         builder.expectNewNet("alias", 1, 1);
-        builder.expectExitModule();
+        builder.expectExitScope();
         builder.expectAppendTransition(1, 0, "1");
         builder.expectLoadFinished();
 
@@ -730,5 +741,21 @@ public class VCDLoaderTest {
         } catch (TraceLoader.LoadException exc) {
             assertEquals("load cancelled", exc.getMessage());
         }
+    }
+
+    // File produced by Accellera SystemC
+    @Test
+    public void testAccellera() throws Exception {
+        ExpectTraceBuilder builder = new ExpectTraceBuilder();
+        builder.expectTimescale(-12);
+        builder.expectEnterScope("SystemC");
+        builder.expectNewNet("int_val", -1, 32);
+        builder.expectNewNet("float_val", -1, 1);
+        builder.expectNewNet("clk", -1, 1);
+        builder.expectNewNet("rstn", -1, 1);
+        builder.expectExitScope();
+        builder.expectLoadFinished();
+        (new VCDLoader()).load(testFile("accellera.vcd"),
+            builder, null);
     }
 }

@@ -42,11 +42,15 @@ public class VCDLoader implements TraceLoader {
         fTokenizer.whitespaceChars('\t', '\t');
         fTraceBuilder = builder;
 
-        while (parseDefinition())
-            ;
+        while (true) {
+            if (!nextToken(false))
+                break;
 
-        while (parseTransition())
-            ;
+            if (getTokenString().charAt(0) == '$')
+                parseDefinition();
+            else
+                parseTransition();
+        }
 
         builder.loadFinished();
 
@@ -129,13 +133,23 @@ public class VCDLoader implements TraceLoader {
     /// time_unit ::= s | ms | us | ns | ps | fs
     private void parseTimescale() throws LoadException, IOException {
         nextToken(true);
-
         String s = getTokenString();
+
+        // Check if the unit is part of the same token, e.g. 1ps:
         int unitStart = 0;
-        while (unitStart < s.length() && Character.isDigit(s.charAt(unitStart)))
+        while (unitStart < s.length() && !Character.isAlphabetic(s.charAt(unitStart)))
             unitStart++;
 
-        String unit = s.substring(unitStart);
+        String unit;
+        if (unitStart < s.length()) {
+            // Found unit inside token, split out
+            unit = s.substring(unitStart);
+        } else {
+            // Unit is next token (there's a space between number and unit)
+            nextToken(true);
+            unit = getTokenString();
+        }
+
         int order = 1;
         if (unit.equals("fs"))
             order = -15;
@@ -170,8 +184,7 @@ public class VCDLoader implements TraceLoader {
 
     /// @returns true if there are more definitions, false if it has hit
     /// the end of the definitions section
-    private boolean parseDefinition() throws LoadException, IOException {
-        nextToken(true);
+    private void parseDefinition() throws LoadException, IOException {
         if (getTokenString().equals("$scope"))
             parseScope();
         else if (getTokenString().equals("$var"))
@@ -180,26 +193,22 @@ public class VCDLoader implements TraceLoader {
             parseUpscope();
         else if (getTokenString().equals("$timescale"))
             parseTimescale();
-        else if (getTokenString().equals("$enddefinitions")) {
+        else if (getTokenString().equals("$enddefinitions"))
             match("$end");
-            return false;
-        } else {
-            // Ignore this defintion
+        else if (getTokenString().equals("$dumpvars") || getTokenString().equals("$end"))
+            ; // ignore directive, but not what comes in-between
+        else {
+            // Ignore everything inside this definition.
             do {
                 nextToken(true);
             } while (!getTokenString().equals("$end"));
         }
-
-        return true;
     }
 
-    private boolean parseTransition() throws LoadException, IOException {
+    private void parseTransition() throws LoadException, IOException {
         fTotalTransitions++;
-
-        if (!nextToken(false))
-            return false;
-
-        if (getTokenString().charAt(0) == '#') {
+        char leadingVal = getTokenString().charAt(0);
+        if (leadingVal == '#') {
             // If the line begins with a #, this is a timestamp.
             long nextTimestamp = Long.parseLong(getTokenString().substring(1));
             if (nextTimestamp >= fCurrentTime)
@@ -207,12 +216,8 @@ public class VCDLoader implements TraceLoader {
             else
                 System.out.println("warning: timestamp out of order line " + fTokenizer.lineno());
         } else {
-            if (getTokenString().equals("$dumpvars") || getTokenString().equals("$end"))
-                return true;
-
             String value;
             String id;
-            char leadingVal = getTokenString().charAt(0);
 
             // @todo Does not support real types.
             switch (leadingVal) {
@@ -304,8 +309,6 @@ public class VCDLoader implements TraceLoader {
 
             fTraceBuilder.appendTransition(net.fBuilderID, fCurrentTime, decodedValues);
         }
-
-        return true;
     }
 
     private void match(String value) throws LoadException, IOException {
