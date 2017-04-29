@@ -18,7 +18,6 @@ import waveview.*;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
-import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 import java.io.*;
 import java.util.Vector;

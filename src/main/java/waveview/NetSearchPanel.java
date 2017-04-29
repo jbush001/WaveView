@@ -82,7 +82,6 @@ class NetSearchPanel extends JPanel {
         super(new BorderLayout());
         setPreferredSize(new Dimension(275, 500));
 
-        fTraceDisplayModel = displayModel;
         fTraceDataModel = dataModel;
 
         JTabbedPane tabView = new JTabbedPane();
@@ -149,7 +148,6 @@ class NetSearchPanel extends JPanel {
     }
 
     private JTree fTree;
-    private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
     private ImageIcon fNetIcon;
     private ImageIcon fModuleIcon;

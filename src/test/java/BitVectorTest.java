@@ -114,7 +114,7 @@ public class BitVectorTest {
     public void testNumberFormatException() {
         // Digits other than 0/1 in binary
         try {
-            BitVector bv = new BitVector("0110102", 2);
+            new BitVector("0110102", 2);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
@@ -126,56 +126,56 @@ public class BitVectorTest {
         //
         try {
             // / is < '0'
-            BitVector bv = new BitVector("ABCDEFG/", 16);
+            new BitVector("ABCDEFG/", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         try {
             // : is > '9' and < 'A'
-            BitVector bv = new BitVector("ABCDEFG:", 16);
+            new BitVector("ABCDEFG:", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         try {
             // 'G' is > 'F' and < 'a'
-            BitVector bv = new BitVector("ABCDEFG", 16);
+            new BitVector("ABCDEFG", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         try {
             // '~' is > 'f'
-            BitVector bv = new BitVector("ABCDEFG~", 16);
+            new BitVector("ABCDEFG~", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         // Hex digits in decimal format
         try {
-            BitVector bv = new BitVector("1234a", 10);
+            new BitVector("1234a", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         // z not legal in decimal format
         try {
-            BitVector bv = new BitVector("z", 10);
+            new BitVector("z", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         // x not legal in decimal format
         try {
-            BitVector bv = new BitVector("x", 10);
+            new BitVector("x", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }
 
         // Bad radix
         try {
-            BitVector bv = new BitVector("1", 12);
+            new BitVector("1", 12);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
         }

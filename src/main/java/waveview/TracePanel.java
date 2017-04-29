@@ -22,32 +22,26 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import javax.swing.event.*;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.io.File;
 
 ///
 /// Container for the timescale view, net names, and waveforms.
 ///
 class TracePanel extends JPanel {
-    TracePanel(TraceDisplayModel displayModel, TraceDataModel dataModel,
-    MainWindow waveApp) {
+    TracePanel(TraceDisplayModel displayModel, TraceDataModel dataModel) {
         super(new BorderLayout());
 
-        fMainWindow = waveApp;
         fTraceDisplayModel = displayModel;
-        fTraceDataModel = dataModel;
         fWaveformPanel = new WaveformPanel(displayModel, dataModel);
         fTimescalePanel = new TimescalePanel(displayModel, dataModel);
-        fScrollPane = new JScrollPane(fWaveformPanel);
-        fScrollPane.setColumnHeaderView(fTimescalePanel);
-        fScrollPane.getVerticalScrollBar().setUnitIncrement(DrawMetrics.WAVEFORM_HEIGHT);
-        fScrollPane.getHorizontalScrollBar().setUnitIncrement(DrawMetrics.MIN_MINOR_TICK_H_SPACE);
+        JScrollPane scrollPane = new JScrollPane(fWaveformPanel);
+        scrollPane.setColumnHeaderView(fTimescalePanel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(DrawMetrics.WAVEFORM_HEIGHT);
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(DrawMetrics.MIN_MINOR_TICK_H_SPACE);
 
         // Always keep the horizontal scroll bar. In 99% of cases, we need it,
         // and it simplifies the net name layout if we don't need to worry about
         // the wave view changing size.
-        fScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
             fNetNameList = new NetNameList(displayModel, dataModel);
 
         JViewport netNameViewport = new JViewport();
@@ -62,22 +56,22 @@ class TracePanel extends JPanel {
         netNameContainer.add(Box.createVerticalStrut(fTimescalePanel.getPreferredSize().height),
             BorderLayout.NORTH);
         netNameContainer.add(netNameBorder, BorderLayout.CENTER);
-        netNameContainer.add(Box.createVerticalStrut(fScrollPane.getHorizontalScrollBar()
+        netNameContainer.add(Box.createVerticalStrut(scrollPane.getHorizontalScrollBar()
             .getPreferredSize().height), BorderLayout.SOUTH);
 
         // To allow resizing the net name view,  put it in the left half of a split pane
         // rather than setting it as the scroll pane's row header. Add a listener for
         // the vertical scrollbar that also controls the net name view.
-        fSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, netNameContainer, fScrollPane);
+        fSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, netNameContainer, scrollPane);
         add(fSplitPane, BorderLayout.CENTER);
-        fScrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent ae) {
                 netNameViewport.setViewPosition(new Point(0, ae.getValue()));
             }
         });
 
-        fScrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+        scrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
             @Override
             public void adjustmentValueChanged(AdjustmentEvent ae) {
                 // Need to repaint when scrolling because values on partially visible
@@ -141,9 +135,6 @@ class TracePanel extends JPanel {
     private JSplitPane fSplitPane;
     private WaveformPanel fWaveformPanel;
     private NetNameList fNetNameList;
-    private JScrollPane fScrollPane;
     private TimescalePanel fTimescalePanel;
     private TraceDisplayModel fTraceDisplayModel;
-    private TraceDataModel fTraceDataModel;
-    private MainWindow fMainWindow;
 }

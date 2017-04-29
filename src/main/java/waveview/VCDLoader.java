@@ -42,10 +42,7 @@ public class VCDLoader implements TraceLoader {
         fTokenizer.whitespaceChars('\t', '\t');
         fTraceBuilder = builder;
 
-        while (true) {
-            if (!nextToken(false))
-                break;
-
+        while (nextToken(false)) {
             if (getTokenString().charAt(0) == '$')
                 parseDefinition();
             else

@@ -67,7 +67,7 @@ public class MainWindow extends JPanel implements ActionListener {
 
         add(toolBar, BorderLayout.PAGE_START);
 
-        fTracePanel = new TracePanel(fTraceDisplayModel, fTraceDataModel, this);
+        fTracePanel = new TracePanel(fTraceDisplayModel, fTraceDataModel);
         add(fTracePanel, BorderLayout.CENTER);
 
         fRecentFiles.unpack(AppPreferences.getInstance().getRecentList());

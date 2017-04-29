@@ -122,7 +122,6 @@ class FindPanel extends JPanel implements ActionListener {
     }
 
     private JTextArea fTextArea;
-    private JScrollPane fScrollPane;
     private MainWindow fMainWindow;
     private boolean fNeedsSearchUpdate = true;
     private transient Highlighter fHighlighter;

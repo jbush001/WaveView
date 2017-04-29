@@ -17,7 +17,6 @@
 package waveview;
 
 import java.math.BigInteger;
-import java.lang.*;
 
 ///
 /// Array of arbitrary lengthed four-valued logic values

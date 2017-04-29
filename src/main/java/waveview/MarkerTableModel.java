@@ -55,9 +55,9 @@ public class MarkerTableModel extends AbstractTableModel {
             return Long.toString(fTraceDisplayModel.getTimestampForMarker(row));
         case 2:
             return fTraceDisplayModel.getDescriptionForMarker(row);
+        default:
+            return "";
         }
-
-        return "";
     }
 
     @Override

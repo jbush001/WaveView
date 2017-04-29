@@ -235,8 +235,6 @@ class WaveformPanel extends JPanel implements MouseListener,
 
         fTraceDisplayModel.setCursorPosition(timestamp);
 
-        fOldCursor = e.getX();
-
         /// @bug Be sure to do this after setting the position, otherwise the view will jump back to the
         /// old cursor position first and invoke the auto-scroll-to logic.  This is pretty clunky, and
         /// should probably be rethought.
@@ -252,7 +250,6 @@ class WaveformPanel extends JPanel implements MouseListener,
     public void mouseDragged(MouseEvent e) {
         long timestamp = xCoordinateToTimestamp(e.getX());
         fTraceDisplayModel.setCursorPosition(timestamp);
-        fOldCursor = e.getX();
 
         // Drag scrolling
         Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
@@ -271,12 +268,10 @@ class WaveformPanel extends JPanel implements MouseListener,
     }
 
     private float DOT_DESCRIPTION[] = { 2.0f, 4.0f };
-    private float DASH_DESCRIPTION[] = { 10.0f };
     private transient Stroke DOTTED_STROKE = new BasicStroke(1, 0, 0, 10, DOT_DESCRIPTION, 0);
     private transient Stroke SOLID_STROKE = new BasicStroke(1);
     private transient SingleBitPainter fSingleBitPainter = new SingleBitPainter();
     private transient MultiBitPainter fMultiBitPainter = new MultiBitPainter();
     private transient TraceDisplayModel fTraceDisplayModel;
     private transient TraceDataModel fTraceDataModel;
-    private int fOldCursor;
 }
