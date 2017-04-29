@@ -27,8 +27,6 @@ public class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<
         long getKey();
     }
 
-    public SortedArrayList() {}
-
     @Override
     public boolean add(T value) {
         long key = ((Keyed) value).getKey();

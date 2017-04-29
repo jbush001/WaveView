@@ -52,7 +52,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
 
         // When the cursor moves, draw the current time in the timescale
         // for a little while, then hide it when the timer expires.
-        if (fTraceDisplayModel.getAdjustingCursor())
+        if (fTraceDisplayModel.isAdjustingCursor())
             fShowTimestamp = true;
         else
             fTimestampDisplayTimer.start();

@@ -92,7 +92,7 @@ public class SortedArrayListTest {
         assertEquals(130, kei.next().getKey());
         assertTrue(kei.hasNext());
         assertEquals(140, kei.next().getKey());
-        assertTrue(!kei.hasNext());
+        assertFalse(kei.hasNext());
         try {
             kei.next();
             fail("didn't throw exception");

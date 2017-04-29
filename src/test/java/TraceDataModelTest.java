@@ -56,7 +56,7 @@ public class TraceDataModelTest {
         assertEquals("net2", kid1.toString());
         assertTrue(netTree.isLeaf(kid1));
         assertEquals("mod2", kid2.toString());
-        assertTrue(!netTree.isLeaf(kid2));
+        assertFalse(netTree.isLeaf(kid2));
         assertEquals("net3", grandkid0.toString());
         assertTrue(netTree.isLeaf(grandkid0));
 

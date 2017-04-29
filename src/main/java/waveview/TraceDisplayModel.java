@@ -205,7 +205,7 @@ public class TraceDisplayModel {
         setCursorPosition(fCursorPosition);
     }
 
-    public boolean getAdjustingCursor() {
+    public boolean isAdjustingCursor() {
         return fAdjustingCursor;
     }
 

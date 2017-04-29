@@ -287,19 +287,19 @@ public class BitVector {
 
         for (int index = getWidth() - 1; index >= 0; index--) {
             switch (getBit(index)) {
-            case VALUE_0:
-                result.append('0');
-                break;
-            case VALUE_1:
-                result.append('1');
-                break;
-            case VALUE_Z:
-                result.append('z');
-                break;
-            case VALUE_X:
-            default:
-                result.append('x');
-                break;
+                case VALUE_0:
+                    result.append('0');
+                    break;
+                case VALUE_1:
+                    result.append('1');
+                    break;
+                case VALUE_Z:
+                    result.append('z');
+                    break;
+                case VALUE_X:
+                default:
+                    result.append('x');
+                    break;
             }
         }
 

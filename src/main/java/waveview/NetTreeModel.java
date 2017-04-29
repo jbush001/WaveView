@@ -27,8 +27,6 @@ import javax.swing.tree.*;
 /// are modules.
 ///
 public class NetTreeModel implements TreeModel {
-    public NetTreeModel() {}
-
     public void clear() {
         fRoot = null;
     }

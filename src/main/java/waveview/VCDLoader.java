@@ -193,7 +193,7 @@ public class VCDLoader implements TraceLoader {
         else if (getTokenString().equals("$enddefinitions"))
             match("$end");
         else if (getTokenString().equals("$dumpvars") || getTokenString().equals("$end"))
-            ; // ignore directive, but not what comes in-between
+            // ignore directive, but not what comes in-between
         else {
             // Ignore everything inside this definition.
             do {
