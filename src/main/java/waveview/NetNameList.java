@@ -214,7 +214,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
             return true;
         }
 
-        private boolean fIsLocalDrop = false;
+        private boolean fIsLocalDrop;
         private int[] fLocalIndices;
     }
 

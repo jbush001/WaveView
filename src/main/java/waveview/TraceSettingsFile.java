@@ -23,6 +23,7 @@ import java.io.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.*;
 import javax.xml.transform.stream.*;
+import org.xml.sax.SAXException;
 
 ///
 /// Load/Save TraceDisplayModel state for a trace.
@@ -52,7 +53,7 @@ public class TraceSettingsFile {
         fDisplayModel = displayModel;
     }
 
-    public void write() throws Exception {
+    public void write() throws ParserConfigurationException, TransformerException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.newDocument();
 
@@ -192,7 +193,7 @@ public class TraceSettingsFile {
         }
     }
 
-    public void read() throws Exception {
+    public void read() throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(fFile);
 

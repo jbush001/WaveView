@@ -21,16 +21,16 @@ import org.junit.*;
 public class BitVectorTest {
     @Test
     public void testParseHex() {
-        assertEquals(0, (new BitVector("0", 16)).intValue());
-        assertEquals(1, (new BitVector("1", 16)).intValue());
-        assertEquals(2, (new BitVector("2", 16)).intValue());
-        assertEquals(12, (new BitVector("c", 16)).intValue());
-        assertEquals(12, (new BitVector("C", 16)).intValue());
-        assertEquals(16, (new BitVector("10", 16)).intValue());
-        assertEquals(17, (new BitVector("11", 16)).intValue());
-        assertEquals(432, (new BitVector("1B0", 16)).intValue());
-        assertEquals(512, (new BitVector("200", 16)).intValue());
-        assertEquals(513, (new BitVector("201", 16)).intValue());
+        assertEquals(0, new BitVector("0", 16).intValue());
+        assertEquals(1, new BitVector("1", 16).intValue());
+        assertEquals(2, new BitVector("2", 16).intValue());
+        assertEquals(12, new BitVector("c", 16).intValue());
+        assertEquals(12, new BitVector("C", 16).intValue());
+        assertEquals(16, new BitVector("10", 16).intValue());
+        assertEquals(17, new BitVector("11", 16).intValue());
+        assertEquals(432, new BitVector("1B0", 16).intValue());
+        assertEquals(512, new BitVector("200", 16).intValue());
+        assertEquals(513, new BitVector("201", 16).intValue());
 
         BitVector bv = new BitVector("1234567890abcdefABCDEF", 16);
         assertFalse(bv.isZ());

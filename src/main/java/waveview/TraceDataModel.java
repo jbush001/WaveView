@@ -171,10 +171,10 @@ public class TraceDataModel {
             fullName.append(shortName);
 
             NetDataModel net;
-            if (cloneId != -1)
-                net = new NetDataModel(shortName, fullName.toString(), fAllNets.get(cloneId));
-            else
+            if (cloneId == -1)
                 net = new NetDataModel(shortName, fullName.toString(), width);
+            else
+                net = new NetDataModel(shortName, fullName.toString(), fAllNets.get(cloneId));
 
             fAllNets.add(net);
             int thisNetIndex = fAllNets.size() - 1;

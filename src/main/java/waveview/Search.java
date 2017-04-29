@@ -109,7 +109,7 @@ public class Search {
         return currentTime;
     }
 
-    static public class ParseException extends Exception {
+    public static class ParseException extends Exception {
         ParseException(String what, int start, int end) {
             super(what);
             fStartOffset = start;
@@ -133,7 +133,7 @@ public class Search {
         return fSearchExpression.toString();
     }
 
-    static private class Lexer {
+    private static class Lexer {
         static final int TOK_IDENTIFIER = 1000;
         static final int TOK_END = 1001;
         static final int TOK_LITERAL = 1002;
@@ -194,14 +194,14 @@ public class Search {
             for (;;) {
                 int c;
 
-                if (fPushBackChar != -1) {
-                    c = fPushBackChar;
-                    fPushBackChar = -1;
-                } else {
+                if (fPushBackChar == -1) {
                     if (fLexerOffset == fSearchString.length())
                         c = -1;
                     else
                         c = fSearchString.charAt(fLexerOffset++);
+                } else {
+                    c = fPushBackChar;
+                    fPushBackChar = -1;
                 }
 
                 switch (state) {
@@ -449,7 +449,7 @@ public class Search {
         long backwardTimestamp;
     }
 
-    private static abstract class ExpressionNode {
+    private abstract static class ExpressionNode {
         /// Determine if this subexpression is true at the passed timestamp.
         /// @param timestamp Timestamp and which to evaluate.  If timestamp
         ///  is at a transition, the value after the transition will be used
@@ -484,8 +484,8 @@ public class Search {
             return compareResults(leftResult, rightResult);
         }
 
-        abstract protected boolean compareResults(boolean value1, boolean value2);
-        abstract protected long nextHint(boolean leftResult, boolean rightResult,
+        protected abstract boolean compareResults(boolean value1, boolean value2);
+        protected abstract long nextHint(boolean leftResult, boolean rightResult,
             long nextLeftTimestamp, long nextRightTimestamp, boolean searchBackward);
 
         protected ExpressionNode fLeftChild;
@@ -590,7 +590,7 @@ public class Search {
         }
     }
 
-    private static abstract class ValueNode {
+    private abstract static class ValueNode {
         abstract BitVector evaluate(TraceDataModel model, long timestamp,
             SearchHint outHint);
     }
@@ -651,7 +651,7 @@ public class Search {
         BitVector fValue;
     }
 
-    private static abstract class ComparisonExpressionNode extends ExpressionNode {
+    private abstract static class ComparisonExpressionNode extends ExpressionNode {
         protected ComparisonExpressionNode(ValueNode left, ValueNode right) {
             fLeftNode = left;
             fRightNode = right;
@@ -669,7 +669,7 @@ public class Search {
             return result;
         }
 
-        abstract protected boolean doCompare(BitVector value1, BitVector value2);
+        protected abstract boolean doCompare(BitVector value1, BitVector value2);
 
         protected ValueNode fLeftNode;
         protected ValueNode fRightNode;

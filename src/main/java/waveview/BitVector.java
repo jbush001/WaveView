@@ -42,14 +42,14 @@ public class BitVector {
     }
 
     public void assign(BitVector from) {
-        if (from.fValues != null) {
+        if (from.fValues == null)
+            fValues = null;
+        else {
             if (fValues == null || fValues.length != from.fValues.length)
                 fValues = new byte[from.fValues.length];
 
             System.arraycopy(from.fValues, 0, fValues, 0, from.fValues.length);
         }
-        else
-            fValues = null;
     }
 
     /// @param index bit number, where 0 is least significant
@@ -239,8 +239,8 @@ public class BitVector {
             fValues = new byte[totalBits];
 
         for (int i = 0; i < totalBits; i++) {
-            fValues[i] = (bytes[bytes.length - (i / 8) - 1] & (1 << (i % 8))) != 0
-                         ? VALUE_1: VALUE_0;
+            fValues[i] = (bytes[bytes.length - (i / 8) - 1] & (1 << (i % 8))) == 0
+                         ? VALUE_0 : VALUE_1;
         }
     }
 
@@ -255,19 +255,19 @@ public class BitVector {
                 int digitVal = c - '0';
                 for (int offset = 0; offset < 4; offset++) {
                     fValues[(index + 1) * 4 - offset - 1] =
-                        (digitVal & (8 >> offset)) != 0 ? VALUE_1 : VALUE_0;
+                        (digitVal & (8 >> offset)) == 0 ? VALUE_0 : VALUE_1;
                 }
             } else if (c >= 'a' && c <= 'f') {
                 int digitVal = c - 'a' + 10;
                 for (int offset = 0; offset < 4; offset++) {
                     fValues[(index + 1) * 4 - offset - 1] =
-                        (digitVal & (8 >> offset)) != 0 ? VALUE_1 : VALUE_0;
+                        (digitVal & (8 >> offset)) == 0 ? VALUE_0 : VALUE_1;
                 }
             } else if (c >= 'A' && c <= 'F') {
                 int digitVal = c - 'A' + 10;
                 for (int offset = 0; offset < 4; offset++) {
                     fValues[(index + 1) * 4 - offset - 1] =
-                        (digitVal & (8 >> offset)) != 0 ? VALUE_1 : VALUE_0;
+                        (digitVal & (8 >> offset)) == 0 ? VALUE_0 : VALUE_1;
                 }
             } else if (c == 'X' || c == 'x') {
                 for (int offset = 0; offset < 4; offset++)
@@ -326,15 +326,15 @@ public class BitVector {
         for (int i = count - 1; i >= 0; i--) {
             value <<= 1;
             switch (getBit(i + offset)) {
-            case VALUE_0:
-                break;
-            case VALUE_1:
-                value |= 1;
-                break;
-            case VALUE_X:
-                return 'X';
-            case VALUE_Z:    // @bug should only be Z if all bits are Z
-                return 'Z';
+                case VALUE_0:
+                    break;
+                case VALUE_1:
+                    value |= 1;
+                    break;
+                case VALUE_X:
+                    return 'X';
+                case VALUE_Z:    // @bug should only be Z if all bits are Z
+                    return 'Z';
             }
         }
 

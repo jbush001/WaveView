@@ -296,7 +296,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-15);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-fs.vcd"),
+        new VCDLoader().load(testFile("timescale-fs.vcd"),
             builder, null);
     }
 
@@ -305,7 +305,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-12);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-ps.vcd"),
+        new VCDLoader().load(testFile("timescale-ps.vcd"),
             builder, null);
     }
 
@@ -314,7 +314,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-9);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-ns.vcd"),
+        new VCDLoader().load(testFile("timescale-ns.vcd"),
             builder, null);
     }
 
@@ -323,7 +323,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-6);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-us.vcd"),
+        new VCDLoader().load(testFile("timescale-us.vcd"),
             builder, null);
     }
 
@@ -332,7 +332,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-3);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-ms.vcd"),
+        new VCDLoader().load(testFile("timescale-ms.vcd"),
             builder, null);
     }
 
@@ -341,7 +341,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(0);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-s.vcd"),
+        new VCDLoader().load(testFile("timescale-s.vcd"),
             builder, null);
     }
 
@@ -351,7 +351,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-5);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-10us.vcd"),
+        new VCDLoader().load(testFile("timescale-10us.vcd"),
             builder, null);
     }
 
@@ -360,7 +360,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-4);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-100us.vcd"),
+        new VCDLoader().load(testFile("timescale-100us.vcd"),
             builder, null);
     }
 
@@ -371,14 +371,14 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-12);
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("timescale-space.vcd"),
+        new VCDLoader().load(testFile("timescale-space.vcd"),
             builder, null);
     }
 
     @Test
     public void testUnknownTimescale() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("unknown-timescale.vcd"),
+            new VCDLoader().load(testFile("unknown-timescale.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -390,7 +390,7 @@ public class VCDLoaderTest {
     @Test
     public void testTimescaleMissingUnit() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("timescale-missing-unit.vcd"),
+            new VCDLoader().load(testFile("timescale-missing-unit.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -403,7 +403,7 @@ public class VCDLoaderTest {
     public void testTimescaleBadValue() throws Exception {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         try {
-            (new VCDLoader()).load(testFile("timescale-bad-value.vcd"),
+            new VCDLoader().load(testFile("timescale-bad-value.vcd"),
                 builder, null);
             fail("didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -423,7 +423,7 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(0, 0, "1");
         builder.expectLoadFinished();
 
-        (new VCDLoader()).load(testFile("unknown-header-fields.vcd"),
+        new VCDLoader().load(testFile("unknown-header-fields.vcd"),
             builder, null);
     }
 
@@ -442,7 +442,7 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(0, 6, "0");
         builder.expectLoadFinished();
 
-        (new VCDLoader()).load(testFile("timestamp-out-of-order.vcd"), builder,
+        new VCDLoader().load(testFile("timestamp-out-of-order.vcd"), builder,
             null);
     }
 
@@ -473,7 +473,7 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(1, 15, "xxx");
         builder.expectLoadFinished();
 
-        (new VCDLoader()).load(testFile("multibit.vcd"), builder,
+        new VCDLoader().load(testFile("multibit.vcd"), builder,
             null);
     }
 
@@ -490,7 +490,7 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(0, 3, "0000000000000010");
         builder.expectLoadFinished();
 
-        (new VCDLoader()).load(testFile("padding.vcd"), builder,
+        new VCDLoader().load(testFile("padding.vcd"), builder,
             null);
     }
 
@@ -511,14 +511,14 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(1, 5, "100");
         builder.expectAppendTransition(2, 5, "x");
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("dumpvars.vcd"), builder,
+        new VCDLoader().load(testFile("dumpvars.vcd"), builder,
             null);
     }
 
     @Test
     public void testUnknownNetId() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("unknown-net-id.vcd"),
+            new VCDLoader().load(testFile("unknown-net-id.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -529,7 +529,7 @@ public class VCDLoaderTest {
     @Test
     public void testInvalidValueType() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("bad-transition-type.vcd"),
+            new VCDLoader().load(testFile("bad-transition-type.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -540,7 +540,7 @@ public class VCDLoaderTest {
     @Test
     public void testInvalidScope() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("scope-parse-error.vcd"),
+            new VCDLoader().load(testFile("scope-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -552,7 +552,7 @@ public class VCDLoaderTest {
     @Test
     public void testInvalidUpscope() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("upscope-parse-error.vcd"),
+            new VCDLoader().load(testFile("upscope-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -564,7 +564,7 @@ public class VCDLoaderTest {
     @Test
     public void testVarParseError() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("var-parse-error.vcd"),
+            new VCDLoader().load(testFile("var-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -576,7 +576,7 @@ public class VCDLoaderTest {
     @Test
     public void testTimescaleParseError() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("timescale-parse-error.vcd"),
+            new VCDLoader().load(testFile("timescale-parse-error.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -588,7 +588,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidLogicValue() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("invalid-logic-value.vcd"),
+            new VCDLoader().load(testFile("invalid-logic-value.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -599,7 +599,7 @@ public class VCDLoaderTest {
     @Test
     public void testTruncatedFile() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("truncated.vcd"),
+            new VCDLoader().load(testFile("truncated.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -611,7 +611,7 @@ public class VCDLoaderTest {
     @Test
     public void testRealValueType() throws Exception {
         try {
-            (new VCDLoader()).load(testFile("real-value.vcd"),
+            new VCDLoader().load(testFile("real-value.vcd"),
                 new DummyTraceBuilder(), null);
             fail("Didn't throw exception");
         } catch (TraceLoader.LoadException exc) {
@@ -630,7 +630,7 @@ public class VCDLoaderTest {
         builder.expectAppendTransition(1, 0, "1");
         builder.expectLoadFinished();
 
-        (new VCDLoader()).load(testFile("trace-alias.vcd"),
+        new VCDLoader().load(testFile("trace-alias.vcd"),
             builder, null);
     }
 
@@ -754,7 +754,7 @@ public class VCDLoaderTest {
         builder.expectNewNet("rstn", -1, 1);
         builder.expectExitScope();
         builder.expectLoadFinished();
-        (new VCDLoader()).load(testFile("accellera.vcd"),
+        new VCDLoader().load(testFile("accellera.vcd"),
             builder, null);
     }
 }

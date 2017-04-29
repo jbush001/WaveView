@@ -219,10 +219,7 @@ public class MainWindow extends JPanel implements ActionListener {
         @Override
         protected void done() {
             fProgressMonitor.close();
-            if (fErrorMessage != null) {
-                JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
-                                              + fErrorMessage);
-            } else {
+            if (fErrorMessage == null) {
                 fCurrentSearch = null;
 
                 // XXX hack
@@ -266,6 +263,9 @@ public class MainWindow extends JPanel implements ActionListener {
                 }
 
                 fCurrentTraceFile = fFile;
+            } else {
+                JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
+                                              + fErrorMessage);
             }
         }
 
