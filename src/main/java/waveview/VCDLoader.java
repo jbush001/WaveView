@@ -192,9 +192,9 @@ public class VCDLoader implements TraceLoader {
             parseTimescale();
         else if (getTokenString().equals("$enddefinitions"))
             match("$end");
-        else if (getTokenString().equals("$dumpvars") || getTokenString().equals("$end"))
+        else if (getTokenString().equals("$dumpvars") || getTokenString().equals("$end")) {
             // ignore directive, but not what comes in-between
-        else {
+        } else {
             // Ignore everything inside this definition.
             do {
                 nextToken(true);
