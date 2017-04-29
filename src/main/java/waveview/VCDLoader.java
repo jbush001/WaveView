@@ -265,27 +265,27 @@ public class VCDLoader implements TraceLoader {
             int bitValue = BitVector.VALUE_0;
             while (outBit < bitsToCopy) {
                 switch (value.charAt(valueLength - outBit - 1)) {
-                case 'z':
-                case 'Z':
-                    bitValue = BitVector.VALUE_Z;
-                    break;
+                    case 'z':
+                    case 'Z':
+                        bitValue = BitVector.VALUE_Z;
+                        break;
 
-                case 'x':
-                case 'X':
-                    bitValue = BitVector.VALUE_X;
-                    break;
+                    case 'x':
+                    case 'X':
+                        bitValue = BitVector.VALUE_X;
+                        break;
 
-                case '1':
-                    bitValue = BitVector.VALUE_1;
-                    break;
+                    case '1':
+                        bitValue = BitVector.VALUE_1;
+                        break;
 
-                case '0':
-                    bitValue = BitVector.VALUE_0;
-                    break;
+                    case '0':
+                        bitValue = BitVector.VALUE_0;
+                        break;
 
-                default:
-                    throw new LoadException("line " + fTokenizer.lineno()
-                        + ": invalid logic value");
+                    default:
+                        throw new LoadException("line " + fTokenizer.lineno()
+                            + ": invalid logic value");
                 }
 
                 decodedValues.setBit(outBit++, bitValue);

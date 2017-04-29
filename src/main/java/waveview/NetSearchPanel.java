@@ -78,7 +78,7 @@ class NetSearchPanel extends JPanel {
         }
     }
 
-    NetSearchPanel(TraceDisplayModel displayModel, TraceDataModel dataModel) {
+    NetSearchPanel(TraceDataModel dataModel) {
         super(new BorderLayout());
         setPreferredSize(new Dimension(275, 500));
 

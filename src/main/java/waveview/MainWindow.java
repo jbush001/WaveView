@@ -92,7 +92,7 @@ public class MainWindow extends JPanel implements ActionListener {
             if (fNetSearchPane == null) {
                 /// @bug This is a hack.  It makes sure the search
                 /// panel is created after the file is loaded.
-                fNetSearchPane = new NetSearchPanel(fTraceDisplayModel, fTraceDataModel);
+                fNetSearchPane = new NetSearchPanel(fTraceDataModel);
                 add(fNetSearchPane, BorderLayout.WEST);
 
                 /// @bug Bigger hack: for some reason it doesn't show up

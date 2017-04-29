@@ -205,114 +205,114 @@ public class Search {
                 }
 
                 switch (state) {
-                case SCAN_INIT:
-                    fTokenStart = fLexerOffset - 1;
-                    if (c == -1)
-                        return TOK_END;
-                    else if (c == '\'')
-                        state = State.SCAN_LITERAL_TYPE;
-                    else if (isAlpha(c)) {
-                        fPushBackChar = c;
-                        state = State.SCAN_IDENTIFIER;
-                    } else if (isNum(c)) {
-                        fPushBackChar = c;
-                        state = State.SCAN_DECIMAL;
-                    } else if (c == '>')
-                        state = State.SCAN_GREATER;
-                    else if (c == '<')
-                        state = State.SCAN_LESS;
-                    else if (!isSpace(c))
-                        return c;
+                    case SCAN_INIT:
+                        fTokenStart = fLexerOffset - 1;
+                        if (c == -1)
+                            return TOK_END;
+                        else if (c == '\'')
+                            state = State.SCAN_LITERAL_TYPE;
+                        else if (isAlpha(c)) {
+                            fPushBackChar = c;
+                            state = State.SCAN_IDENTIFIER;
+                        } else if (isNum(c)) {
+                            fPushBackChar = c;
+                            state = State.SCAN_DECIMAL;
+                        } else if (c == '>')
+                            state = State.SCAN_GREATER;
+                        else if (c == '<')
+                            state = State.SCAN_LESS;
+                        else if (!isSpace(c))
+                            return c;
 
-                    break;
+                        break;
 
-                case SCAN_GREATER:
-                    if (c == '<')
-                        return TOK_NOT_EQUAL;
-                    else if (c == '=')
-                        return TOK_GREATER_EQUAL;
-                    else {
-                        fPushBackChar = c;
-                        return TOK_GREATER;
-                    }
+                    case SCAN_GREATER:
+                        if (c == '<')
+                            return TOK_NOT_EQUAL;
+                        else if (c == '=')
+                            return TOK_GREATER_EQUAL;
+                        else {
+                            fPushBackChar = c;
+                            return TOK_GREATER;
+                        }
 
-                case SCAN_LESS:
-                    if (c == '>')
-                        return TOK_NOT_EQUAL;
-                    else if (c == '=')
-                        return TOK_LESS_EQUAL;
-                    else {
-                        fPushBackChar = c;
-                        return TOK_LESS_THAN;
-                    }
+                    case SCAN_LESS:
+                        if (c == '>')
+                            return TOK_NOT_EQUAL;
+                        else if (c == '=')
+                            return TOK_LESS_EQUAL;
+                        else {
+                            fPushBackChar = c;
+                            return TOK_LESS_THAN;
+                        }
 
-                case SCAN_IDENTIFIER:
-                    if (isAlphaNum(c) || c == '_' || c == '.')
+                    case SCAN_IDENTIFIER:
+                        if (isAlphaNum(c) || c == '_' || c == '.')
+                            fCurrentTokenValue.append((char) c);
+                        else if (c == '(') {    // Start generate index
+                            fCurrentTokenValue.append((char) c);
+                            state = State.SCAN_GEN_NUM;
+                        }
+                        else {
+                            fPushBackChar = c;
+                            return TOK_IDENTIFIER;
+                        }
+
+                        break;
+
+                    case SCAN_GEN_NUM:
                         fCurrentTokenValue.append((char) c);
-                    else if (c == '(') {    // Start generate index
-                        fCurrentTokenValue.append((char) c);
-                        state = State.SCAN_GEN_NUM;
-                    }
-                    else {
-                        fPushBackChar = c;
-                        return TOK_IDENTIFIER;
-                    }
+                        if (c == ')')
+                            state = State.SCAN_IDENTIFIER;
 
-                    break;
-
-                case SCAN_GEN_NUM:
-                    fCurrentTokenValue.append((char) c);
-                    if (c == ')')
-                        state = State.SCAN_IDENTIFIER;
-
-                    break;
+                        break;
 
 
-                case SCAN_LITERAL_TYPE:
-                    if (c == 'b')
-                        state = State.SCAN_BINARY;
-                    else if (c == 'h')
-                        state = State.SCAN_HEXADECIMAL;
-                    else if (c == 'd')
-                        state = State.SCAN_DECIMAL;
-                    else
-                        throw new ParseException("unknown type " + (char) c, getTokenStart(),
-                            getTokenEnd());
+                    case SCAN_LITERAL_TYPE:
+                        if (c == 'b')
+                            state = State.SCAN_BINARY;
+                        else if (c == 'h')
+                            state = State.SCAN_HEXADECIMAL;
+                        else if (c == 'd')
+                            state = State.SCAN_DECIMAL;
+                        else
+                            throw new ParseException("unknown type " + (char) c, getTokenStart(),
+                                getTokenEnd());
 
-                    break;
+                        break;
 
-                case SCAN_BINARY:
-                    if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
-                        fCurrentTokenValue.append((char) c);
-                    else {
-                        fLiteralValue = new BitVector(getTokenString(), 2);
-                        fPushBackChar = c;
-                        return TOK_LITERAL;
-                    }
+                    case SCAN_BINARY:
+                        if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
+                            fCurrentTokenValue.append((char) c);
+                        else {
+                            fLiteralValue = new BitVector(getTokenString(), 2);
+                            fPushBackChar = c;
+                            return TOK_LITERAL;
+                        }
 
-                    break;
+                        break;
 
-                case SCAN_DECIMAL:
-                    if (c >= '0' && c <= '9')
-                        fCurrentTokenValue.append((char) c);
-                    else {
-                        fLiteralValue = new BitVector(getTokenString(), 10);
-                        fPushBackChar = c;
-                        return TOK_LITERAL;
-                    }
+                    case SCAN_DECIMAL:
+                        if (c >= '0' && c <= '9')
+                            fCurrentTokenValue.append((char) c);
+                        else {
+                            fLiteralValue = new BitVector(getTokenString(), 10);
+                            fPushBackChar = c;
+                            return TOK_LITERAL;
+                        }
 
-                    break;
+                        break;
 
-                case SCAN_HEXADECIMAL:
-                    if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
-                        fCurrentTokenValue.append((char) c);
-                    else {
-                        fLiteralValue = new BitVector(getTokenString(), 16);
-                        fPushBackChar = c;
-                        return TOK_LITERAL;
-                    }
+                    case SCAN_HEXADECIMAL:
+                        if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
+                            fCurrentTokenValue.append((char) c);
+                        else {
+                            fLiteralValue = new BitVector(getTokenString(), 16);
+                            fPushBackChar = c;
+                            return TOK_LITERAL;
+                        }
 
-                    break;
+                        break;
                 }
             }
         }
@@ -409,22 +409,22 @@ public class Search {
         ValueNode left = parseValue();
         lookahead = fLexer.nextToken();
         switch (lookahead) {
-        case Lexer.TOK_GREATER:
-            return new GreaterThanExpressionNode(left, parseValue());
-        case Lexer.TOK_GREATER_EQUAL:
-            return new GreaterEqualExpressionNode(left, parseValue());
-        case Lexer.TOK_LESS_THAN:
-            return new LessThanExpressionNode(left, parseValue());
-        case Lexer.TOK_LESS_EQUAL:
-            return new LessEqualExpressionNode(left, parseValue());
-        case Lexer.TOK_NOT_EQUAL:
-            return new NotEqualExpressionNode(left, parseValue());
-        case '=':
-            return new EqualExpressionNode(left, parseValue());
-        default:
-            // If there's not an operator, treat as != 0
-            fLexer.pushBackToken(lookahead);
-            return new NotEqualExpressionNode(left, new ConstValueNode(ZERO_VEC));
+            case Lexer.TOK_GREATER:
+                return new GreaterThanExpressionNode(left, parseValue());
+            case Lexer.TOK_GREATER_EQUAL:
+                return new GreaterEqualExpressionNode(left, parseValue());
+            case Lexer.TOK_LESS_THAN:
+                return new LessThanExpressionNode(left, parseValue());
+            case Lexer.TOK_LESS_EQUAL:
+                return new LessEqualExpressionNode(left, parseValue());
+            case Lexer.TOK_NOT_EQUAL:
+                return new NotEqualExpressionNode(left, parseValue());
+            case '=':
+                return new EqualExpressionNode(left, parseValue());
+            default:
+                // If there's not an operator, treat as != 0
+                fLexer.pushBackToken(lookahead);
+                return new NotEqualExpressionNode(left, new ConstValueNode(ZERO_VEC));
         }
     }
 

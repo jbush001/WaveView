@@ -79,29 +79,29 @@ class SingleBitPainter implements WaveformPainter {
             return;
 
         switch (value) {
-        case BitVector.VALUE_1:
-            g.drawLine(left, top, right, top);
-            break;
+            case BitVector.VALUE_1:
+                g.drawLine(left, top, right, top);
+                break;
 
-        case BitVector.VALUE_0:
-            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right,
-                top + DrawMetrics.WAVEFORM_HEIGHT);
-            break;
+            case BitVector.VALUE_0:
+                g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right,
+                    top + DrawMetrics.WAVEFORM_HEIGHT);
+                break;
 
-        case BitVector.VALUE_Z:
-            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top
-                + DrawMetrics.WAVEFORM_HEIGHT / 2);
-            break;
+            case BitVector.VALUE_Z:
+                g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top
+                    + DrawMetrics.WAVEFORM_HEIGHT / 2);
+                break;
 
-        default:
-        case BitVector.VALUE_X:
-            g.setColor(AppPreferences.getInstance().conflictColor);
-            g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
-            g.setColor(AppPreferences.getInstance().traceColor);
-            g.drawLine(left, top, right, top);
-            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top
-                + DrawMetrics.WAVEFORM_HEIGHT);
-            break;
+            default:
+            case BitVector.VALUE_X:
+                g.setColor(AppPreferences.getInstance().conflictColor);
+                g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
+                g.setColor(AppPreferences.getInstance().traceColor);
+                g.drawLine(left, top, right, top);
+                g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top
+                    + DrawMetrics.WAVEFORM_HEIGHT);
+                break;
         }
     }
 }

@@ -102,20 +102,20 @@ public class BitVector {
     /// @param radix May be 2, 10, or 16
     public void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
-        case 2:
-            parseBinaryValue(string);
-            break;
+            case 2:
+                parseBinaryValue(string);
+                break;
 
-        case 10:
-            parseDecimalValue(string);
-            break;
+            case 10:
+                parseDecimalValue(string);
+                break;
 
-        case 16:
-            parseHexadecimalValue(string);
-            break;
+            case 16:
+                parseHexadecimalValue(string);
+                break;
 
-        default:
-            throw new NumberFormatException("bad radix passed to parseString");
+            default:
+                throw new NumberFormatException("bad radix passed to parseString");
         }
     }
 
@@ -144,24 +144,24 @@ public class BitVector {
         // Compare remaining digits
         while (index >= 0) {
             switch (other.fValues[index]) {
-            case VALUE_0:
-                if (fValues[index] == VALUE_1)
-                    return 1;
+                case VALUE_0:
+                    if (fValues[index] == VALUE_1)
+                        return 1;
 
-                // If my value is Z or X, ignore
-                break;
+                    // If my value is Z or X, ignore
+                    break;
 
-            case VALUE_1:
-                if (fValues[index] == VALUE_0)
-                    return -1;
+                case VALUE_1:
+                    if (fValues[index] == VALUE_0)
+                        return -1;
 
-                // If my value is Z or X, ignore
-                break;
+                    // If my value is Z or X, ignore
+                    break;
 
-            case VALUE_X:
-            case VALUE_Z:
-                // Ignore...
-                break;
+                case VALUE_X:
+                case VALUE_Z:
+                    // Ignore...
+                    break;
             }
 
             index--;
@@ -191,17 +191,17 @@ public class BitVector {
             return "0";
 
         switch (radix) {
-        case 2:
-            return toBinaryString();
+            case 2:
+                return toBinaryString();
 
-        case 10:
-            return toDecimalString();
+            case 10:
+                return toDecimalString();
 
-        case 16:
-            return toHexString();
+            case 16:
+                return toHexString();
 
-        default:
-            throw new NumberFormatException("bad radix");
+            default:
+                throw new NumberFormatException("bad radix");
         }
     }
 
