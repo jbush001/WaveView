@@ -510,8 +510,8 @@ public class TraceDisplayModelTest {
     public void testAdjustingCursor() {
         TraceDisplayModel tdm = new TraceDisplayModel();
         tdm.setAdjustingCursor(true);
-        assertTrue(tdm.getAdjustingCursor());
+        assertTrue(tdm.isAdjustingCursor());
         tdm.setAdjustingCursor(false);
-        assertFalse(tdm.getAdjustingCursor());
+        assertFalse(tdm.isAdjustingCursor());
     }
 }

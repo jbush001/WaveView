@@ -20,6 +20,7 @@ import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
 import java.nio.charset.StandardCharsets;
 import java.io.*;
+import java.util.ArrayList;
 
 public class VCDLoaderTest {
     @Rule
@@ -52,7 +53,7 @@ public class VCDLoaderTest {
         public void setTimescale(int order) {
             System.out.println("setTimescale " + order);
 
-            Event event = fEventList.elementAt(fCurrentEvent++);
+            Event event = fEventList.get(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_TIMESCALE);
             assertEquals(event.fTimestamp, (long) order);
         }
@@ -61,7 +62,7 @@ public class VCDLoaderTest {
         public void enterScope(String name) {
             System.out.println("enterScope " + name);
 
-            Event event = fEventList.elementAt(fCurrentEvent++);
+            Event event = fEventList.get(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_ENTER);
         }
 
@@ -69,7 +70,7 @@ public class VCDLoaderTest {
         public void exitScope() {
             System.out.println("exitScope");
 
-            Event event = fEventList.elementAt(fCurrentEvent++);
+            Event event = fEventList.get(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_EXIT);
         }
 
@@ -77,7 +78,7 @@ public class VCDLoaderTest {
         public int newNet(String shortName, int cloneId, int width) {
             System.out.println("newNet " + shortName + " " + cloneId + " " + width);
 
-            Event event = fEventList.elementAt(fCurrentEvent++);
+            Event event = fEventList.get(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_NET);
             assertEquals(event.fName, shortName);
             assertEquals(event.fId, cloneId);
@@ -90,7 +91,7 @@ public class VCDLoaderTest {
         public void appendTransition(int id, long timestamp, BitVector values) {
             System.out.println("appendTransition " + id + " " + timestamp + " " + values.toString(2));
 
-            Event event = fEventList.elementAt(fCurrentEvent++);
+            Event event = fEventList.get(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_TRANSITION);
             assertEquals(event.fTimestamp, timestamp);
 
@@ -103,7 +104,7 @@ public class VCDLoaderTest {
         public void loadFinished() {
             System.out.println("loadFinished");
 
-            Event event = fEventList.elementAt(fCurrentEvent++);
+            Event event = fEventList.get(fCurrentEvent++);
             assertEquals(event.fType, EXPECT_FINISHED);
         }
 
@@ -237,7 +238,7 @@ public class VCDLoaderTest {
                 fVCDContents.append('\n');
             }
 
-            if (fNetIsMultiBit.elementAt(netId)) {
+            if (fNetIsMultiBit.get(netId)) {
                 fVCDContents.append('b');
                 fVCDContents.append(bitString);
                 fVCDContents.append(' ');
