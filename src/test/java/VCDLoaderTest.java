@@ -20,7 +20,6 @@ import org.junit.rules.TemporaryFolder;
 import static org.junit.Assert.*;
 import java.nio.charset.StandardCharsets;
 import java.io.*;
-import java.util.Vector;
 
 public class VCDLoaderTest {
     @Rule
@@ -144,7 +143,7 @@ public class VCDLoaderTest {
             fEventList.add(new Event(EXPECT_FINISHED));
         }
 
-        private Vector<Event> fEventList = new Vector<Event>();
+        private ArrayList<Event> fEventList = new ArrayList<>();
         private int fCurrentEvent;
         private int fNextNetId;
     }
@@ -268,7 +267,7 @@ public class VCDLoaderTest {
             return fTraceBuilder;
         }
 
-        Vector<Boolean> fNetIsMultiBit = new Vector<Boolean>();
+        ArrayList<Boolean> fNetIsMultiBit = new ArrayList<>();
         ExpectTraceBuilder fTraceBuilder = new ExpectTraceBuilder();
         StringBuffer fVCDContents = new StringBuffer();
         long fLastTimestamp = -1;
