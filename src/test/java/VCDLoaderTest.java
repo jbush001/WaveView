@@ -638,8 +638,8 @@ public class VCDLoaderTest {
     @Test
     public void testMixed() throws Exception {
         TestBuilder builder = new TestBuilder();
-        builder.addString("$date\n	Mon Aug 15 22:28:13 2016\n$end\n");
-        builder.addString("$version\n	Icarus Verilog\n$end\n");
+        builder.addString("$date\n\tMon Aug 15 22:28:13 2016\n$end\n");
+        builder.addString("$version\n\tIcarus Verilog\n$end\n");
         builder.setTimescale("1us", -6);
         builder.enterScope("mod1");
         builder.defineNet("clk", -1, 1);

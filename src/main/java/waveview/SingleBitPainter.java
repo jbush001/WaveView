@@ -93,8 +93,8 @@ class SingleBitPainter implements WaveformPainter {
                     + DrawMetrics.WAVEFORM_HEIGHT / 2);
                 break;
 
-            default:
             case BitVector.VALUE_X:
+            default:
                 g.setColor(AppPreferences.getInstance().conflictColor);
                 g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
                 g.setColor(AppPreferences.getInstance().traceColor);

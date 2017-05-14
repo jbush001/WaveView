@@ -462,7 +462,7 @@ public class Search {
         abstract boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint);
     }
 
-    private static abstract class BooleanExpressionNode extends ExpressionNode {
+    private abstract static class BooleanExpressionNode extends ExpressionNode {
         BooleanExpressionNode(ExpressionNode left, ExpressionNode right) {
             fLeftChild = left;
             fRightChild = right;

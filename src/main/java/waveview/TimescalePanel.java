@@ -18,7 +18,6 @@ package waveview;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.awt.event.*;
 
 ///
@@ -214,5 +213,5 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
     private String fUnit = "s";
     private TraceDisplayModel fTraceDisplayModel;
     private TraceDataModel fTraceDataModel;
-    private javax.swing.Timer fTimestampDisplayTimer = new javax.swing.Timer(TIMESTAMP_DISAPPEAR_INTERVAL, this);
+    private Timer fTimestampDisplayTimer = new Timer(TIMESTAMP_DISAPPEAR_INTERVAL, this);
 }
