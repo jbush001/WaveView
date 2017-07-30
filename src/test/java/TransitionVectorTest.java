@@ -87,9 +87,6 @@ public class TransitionVectorTest {
         vec.appendTransition(110, new BitVector("00000010", 2));
         vec.appendTransition(111, new BitVector("00001000", 2));
 
-        // Note: previously there was a bug where calling current() would
-        // iterate to the next value. We call current here multiple times
-        // to confirm that works correctly now.
         Iterator<Transition> ti = vec.findTransition(99);
         assertTrue(ti.hasNext());
         Transition t = ti.next();
@@ -111,12 +108,14 @@ public class TransitionVectorTest {
             ti.next();
             fail("next didn't throw exception");
         } catch (NoSuchElementException exc) {
+            // Should arrive here on success
         }
 
         try {
             ti.remove();
             fail("remove didn't throw exception");
         } catch (UnsupportedOperationException exc) {
+            // Should arrive here on success
         }
     }
 
