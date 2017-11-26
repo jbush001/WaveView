@@ -316,11 +316,13 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
             clearSelection();
         } else {
             if (e.getActionCommand().equals("Enum")) {
-                JFileChooser chooser = new JFileChooser();
+                JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialEnumDirectory());
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 chooser.setMultiSelectionEnabled(false);
                 int returnValue = chooser.showOpenDialog(this);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    AppPreferences.getInstance().setInitialEnumDirectory(
+                        chooser.getSelectedFile().getParentFile());
                     try {
                         EnumValueFormatter formatter = new EnumValueFormatter();
                         formatter.loadFromFile(chooser.getSelectedFile());

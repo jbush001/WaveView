@@ -109,7 +109,8 @@ public class MainWindow extends JPanel implements ActionListener {
             chooser.setMultiSelectionEnabled(false);
             int returnValue = chooser.showOpenDialog(this);
             if (returnValue == JFileChooser.APPROVE_OPTION) {
-                AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
+                AppPreferences.getInstance().setInitialTraceDirectory(
+                    chooser.getSelectedFile().getParentFile());
                 loadTraceFile(chooser.getSelectedFile());
             }
         } else if (cmd.equals("reloadtrace"))

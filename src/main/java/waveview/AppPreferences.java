@@ -48,12 +48,24 @@ class AppPreferences {
     Color listSelectionFgColor;
     Color valueColor;
 
+    // The initial trace directory is the one the file chooser will open by
+    // default when opened when the user tries to open a trace.
     void setInitialTraceDirectory(File file) {
         fPrefs.put("initialTraceDirectory", file.toString());
     }
 
     File getInitialTraceDirectory() {
         return new File(fPrefs.get("initialTraceDirectory", ""));
+    }
+
+    // The initial enum directory is the one the file chooser will open by
+    // default when the user attempts to open an enum mapping file
+    void setInitialEnumDirectory(File file) {
+        fPrefs.put("initialEnumDirectory", file.toString());
+    }
+
+    File getInitialEnumDirectory() {
+        return new File(fPrefs.get("initialEnumDirectory", ""));
     }
 
     void setRecentList(String files) {
