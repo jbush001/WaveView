@@ -398,4 +398,4 @@ public class VCDLoader implements TraceLoader {
     private long fLastProgressUpdate;
     private long fFileLength;
     private long fUpdateInterval;
-};
+}

@@ -369,6 +369,6 @@ public class TraceDisplayModel {
     private SortedArrayList<Marker> fMarkers = new SortedArrayList<Marker>();
     private int fNextMarkerId = 1;
     private long fMinorTickInterval;
-};
+}
 
 
