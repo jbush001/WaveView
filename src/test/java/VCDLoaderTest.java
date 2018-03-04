@@ -223,7 +223,7 @@ public class VCDLoaderTest {
         }
 
         void appendTransition(int netId, long timestamp, int value) {
-            StringBuffer tmp = new StringBuffer();
+            StringBuilder tmp = new StringBuilder();
             for (int i = 0; i < 32; i++)
                 tmp.append((value & (0x80000000 >> i)) != 0 ? '1' : '0');
 
@@ -270,7 +270,7 @@ public class VCDLoaderTest {
 
         ArrayList<Boolean> fNetIsMultiBit = new ArrayList<>();
         ExpectTraceBuilder fTraceBuilder = new ExpectTraceBuilder();
-        StringBuffer fVCDContents = new StringBuffer();
+        StringBuilder fVCDContents = new StringBuilder();
         long fLastTimestamp = -1;
     }
 
@@ -651,7 +651,7 @@ public class VCDLoaderTest {
         builder.exitScope();
         builder.endDefinitions();
         for (int i = 0; i < 10000; i++) {
-            long time = i * 5;
+            long time = (long) i * 5;
 
             if (i % 2 == 0)
                 builder.appendTransition(0, time, "0");

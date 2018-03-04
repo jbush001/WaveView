@@ -159,7 +159,7 @@ public class TraceDataModel {
         @Override
         public int newNet(String shortName, int cloneId, int width) {
             // Build full path
-            StringBuffer fullName = new StringBuffer();
+            StringBuilder fullName = new StringBuilder();
             for (String scope : fScopeStack) {
                 if (fullName.length() != 0)
                     fullName.append('.');

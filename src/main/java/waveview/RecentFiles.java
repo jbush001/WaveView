@@ -38,7 +38,7 @@ public class RecentFiles {
     }
 
     public String pack() {
-        StringBuffer packed = new StringBuffer();
+        StringBuilder packed = new StringBuilder();
         for (String file : fFiles) {
             if (packed.length() > 0)
                 packed.append(';');

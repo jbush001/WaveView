@@ -283,7 +283,7 @@ public class BitVector {
     }
 
     private String toBinaryString() {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         for (int index = getWidth() - 1; index >= 0; index--) {
             switch (getBit(index)) {
@@ -343,7 +343,7 @@ public class BitVector {
 
     private String toHexString() {
         int lowBit = getWidth();
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
 
         // Partial first digit
         int partial = getWidth() % 4;

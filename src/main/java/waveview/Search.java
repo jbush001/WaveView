@@ -341,7 +341,7 @@ public class Search {
         }
 
         private int fLexerOffset;
-        private StringBuffer fCurrentTokenValue = new StringBuffer();
+        private StringBuilder fCurrentTokenValue = new StringBuilder();
         private int fPushBackChar = -1;
         private int fPushBackToken = -1;
         private int fTokenStart;

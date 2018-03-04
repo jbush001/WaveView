@@ -285,7 +285,7 @@ public class MainWindow extends JPanel implements ActionListener {
     private void showFindDialog() {
         // The initial search string is formed by the selected nets and
         // their values at the cursor position.
-        StringBuffer initialSearch = new StringBuffer();
+        StringBuilder initialSearch = new StringBuilder();
         boolean first = true;
         long cursorPosition = fTraceDisplayModel.getCursorPosition();
 

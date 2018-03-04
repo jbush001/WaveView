@@ -39,7 +39,7 @@ class NetSearchPanel extends JPanel {
             return MOVE;
         }
 
-        private void buildNetListRecursive(Object node, StringBuffer indexList) {
+        private void buildNetListRecursive(Object node, StringBuilder indexList) {
             if (fTree.getModel().isLeaf(node)) {
                 indexList.append(fTraceDataModel.getFullNetName(fTraceDataModel
                     .getNetFromTreeObject(node)));
@@ -53,7 +53,7 @@ class NetSearchPanel extends JPanel {
 
         @Override
         public Transferable createTransferable(JComponent component) {
-            StringBuffer indexList = new StringBuffer();
+            StringBuilder indexList = new StringBuilder();
             for (TreePath selectedPath : fTree.getSelectionPaths()) {
                 buildNetListRecursive(selectedPath.getLastPathComponent(),
                                       indexList);
