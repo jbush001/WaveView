@@ -308,14 +308,16 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
     @Override
     public void actionPerformed(ActionEvent e) {
         int[] indices = getSelectedIndices();
+        ValueFormatter formatter = null;
 
-        if (e.getActionCommand().equals("Remove Net")) {
-            for (int i = indices.length - 1; i >= 0; i--)
-                fTraceDisplayModel.removeNet(indices[i]);
+        switch (e.getActionCommand()) {
+            case "Remove Net":
+                for (int i = indices.length - 1; i >= 0; i--)
+                    fTraceDisplayModel.removeNet(indices[i]);
 
-            clearSelection();
-        } else {
-            if (e.getActionCommand().equals("Enum")) {
+                clearSelection();
+                break;
+            case "Enum":
                 JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialEnumDirectory());
                 chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 chooser.setMultiSelectionEnabled(false);
@@ -324,29 +326,33 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
                     AppPreferences.getInstance().setInitialEnumDirectory(
                         chooser.getSelectedFile().getParentFile());
                     try {
-                        EnumValueFormatter formatter = new EnumValueFormatter();
-                        formatter.loadFromFile(chooser.getSelectedFile());
-                        fTraceDisplayModel.setValueFormatter(indices[0], formatter);
+                        formatter = new EnumValueFormatter();
+                        ((EnumValueFormatter)formatter).loadFromFile(chooser.getSelectedFile());
                     } catch (Exception exc) {
                         JOptionPane.showMessageDialog(this, "Error opening enum mapping file");
+                        formatter = null;
                     }
                 }
-            } else {
-                ValueFormatter formatter = null;
-                if (e.getActionCommand().equals("Hex"))
-                    formatter = new HexadecimalValueFormatter();
-                else if (e.getActionCommand().equals("Binary"))
-                    formatter = new BinaryValueFormatter();
-                else if (e.getActionCommand().equals("Decimal"))
-                    formatter = new DecimalValueFormatter();
-                else if (e.getActionCommand().equals("ASCII"))
-                    formatter = new ASCIIValueFormatter();
+                break;
+            case "Hex":
+                formatter = new HexadecimalValueFormatter();
+                break;
+            case "Binary":
+                formatter = new BinaryValueFormatter();
+                break;
+            case "Decimal":
+                formatter = new DecimalValueFormatter();
+                break;
+            case "ASCII":
+                formatter = new ASCIIValueFormatter();
+                break;
+            default:
+                System.out.println("NetNameList: unknown action " + e.getActionCommand());
+        }
 
-                if (formatter != null) {
-                    for (int i = 0; i < indices.length; i++)
-                        fTraceDisplayModel.setValueFormatter(indices[i], formatter);
-                }
-            }
+        if (formatter != null) {
+            for (int i = 0; i < indices.length; i++)
+                fTraceDisplayModel.setValueFormatter(indices[i], formatter);
         }
     }
 

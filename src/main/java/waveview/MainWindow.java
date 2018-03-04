@@ -82,93 +82,119 @@ public class MainWindow extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
-        if (cmd.equals("zoomin"))
-            fTracePanel.zoomIn();
-        else if (cmd.equals("zoomout"))
-            fTracePanel.zoomOut();
-        else if (cmd.equals("zoomselection"))
-            fTracePanel.zoomToSelection();
-        else if (cmd.equals("addnet")) {
-            if (fNetSearchPane == null) {
-                /// @bug This is a hack.  It makes sure the search
-                /// panel is created after the file is loaded.
-                fNetSearchPane = new NetSearchPanel(fTraceDataModel);
-                add(fNetSearchPane, BorderLayout.WEST);
+        switch (cmd) {
+            case "zoomin":
+                fTracePanel.zoomIn();
+                break;
+            case "zoomout":
+                fTracePanel.zoomOut();
+                break;
+            case "zoomselection":
+                fTracePanel.zoomToSelection();
+                break;
+            case "addnet":
+                if (fNetSearchPane == null) {
+                    /// @bug This is a hack.  It makes sure the search
+                    /// panel is created after the file is loaded.
+                    fNetSearchPane = new NetSearchPanel(fTraceDataModel);
+                    add(fNetSearchPane, BorderLayout.WEST);
 
-                /// @bug Bigger hack: for some reason it doesn't show up
-                /// unless I do this.
-                fNetSearchPane.setVisible(false);
-                fNetSearchPane.setVisible(true);
-            } else {
-                // Hide or show the search panel
-                fNetSearchPane.setVisible(!fNetSearchPane.isVisible());
+                    /// @bug Bigger hack: for some reason it doesn't show up
+                    /// unless I do this.
+                    fNetSearchPane.setVisible(false);
+                    fNetSearchPane.setVisible(true);
+                } else {
+                    // Hide or show the search panel
+                    fNetSearchPane.setVisible(!fNetSearchPane.isVisible());
+                }
+
+                break;
+            case "opentrace":
+                JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialTraceDirectory());
+                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                chooser.setMultiSelectionEnabled(false);
+                int returnValue = chooser.showOpenDialog(this);
+                if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    AppPreferences.getInstance().setInitialTraceDirectory(
+                        chooser.getSelectedFile().getParentFile());
+                    loadTraceFile(chooser.getSelectedFile());
+                }
+
+                break;
+            case "reloadtrace":
+                loadTraceFile(fCurrentTraceFile);
+                break;
+            case "quit":
+                fFrame.dispose();
+                break;
+            case "removeAllMarkers":
+                fTraceDisplayModel.removeAllMarkers();
+                break;
+            case "removeAllNets":
+                fTraceDisplayModel.removeAllNets();
+                break;
+            case "insertMarker":
+                String description = (String) JOptionPane.showInputDialog(
+                     fFrame, "Description for this marker", "New Marker",
+                     JOptionPane.PLAIN_MESSAGE, null, null, null);
+                if (description != null)
+                    fTraceDisplayModel.addMarker(description, fTraceDisplayModel.getCursorPosition());
+
+                break;
+            case "showmarkerlist":
+                JDialog markersWindow = new JDialog(fFrame, "Markers", true);
+                markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                MarkerListPanel contentPane = new MarkerListPanel(fTraceDisplayModel);
+                contentPane.setOpaque(true);
+                markersWindow.setPreferredSize(new Dimension(400, 300));
+                markersWindow.setContentPane(contentPane);
+                markersWindow.pack();
+                markersWindow.setLocationRelativeTo(this);
+                markersWindow.setVisible(true);
+                break;
+            case "nextMarker":
+                fTraceDisplayModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+                break;
+            case "prevMarker":
+                fTraceDisplayModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+                break;
+            case "removeMarker":
+                fTraceDisplayModel.removeMarkerAtTime(fTraceDisplayModel.getCursorPosition());
+                break;
+            case "findbyvalue":
+                showFindDialog();
+                break;
+            case "findnext":
+                findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+                break;
+            case "findprev":
+                findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+                break;
+            case "saveNetSet":
+                String name = (String) JOptionPane.showInputDialog(
+                    fFrame, "Net Set Name", "Save Net Set",
+                    JOptionPane.PLAIN_MESSAGE, null, null, null);
+                if (!name.equals("")) {
+                    fTraceDisplayModel.saveNetSet(name);
+                    buildNetMenu();
+                }
+
+                break;
+            case "prefs":
+                JDialog prefsWindow = new PreferenceWindow(fFrame);
+                prefsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                prefsWindow.setLocationRelativeTo(this);
+                prefsWindow.setVisible(true);
+                break;
+            default:
+                if (cmd.length() > 7  && cmd.substring(0, 7).equals("netSet_")) {
+                    int index = Integer.parseInt(cmd.substring(7));
+                    fTraceDisplayModel.selectNetSet(index);
+                } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
+                    // Load from recents menu
+                    loadTraceFile(cmd.substring(5));
+                }
             }
-        } else if (cmd.equals("opentrace")) {
-            JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialTraceDirectory());
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-            chooser.setMultiSelectionEnabled(false);
-            int returnValue = chooser.showOpenDialog(this);
-            if (returnValue == JFileChooser.APPROVE_OPTION) {
-                AppPreferences.getInstance().setInitialTraceDirectory(
-                    chooser.getSelectedFile().getParentFile());
-                loadTraceFile(chooser.getSelectedFile());
-            }
-        } else if (cmd.equals("reloadtrace"))
-            loadTraceFile(fCurrentTraceFile);
-        else if (cmd.equals("quit"))
-            fFrame.dispose();
-        else if (cmd.equals("removeAllMarkers"))
-            fTraceDisplayModel.removeAllMarkers();
-        else if (cmd.equals("removeAllNets"))
-            fTraceDisplayModel.removeAllNets();
-        else if (cmd.equals("insertMarker")) {
-            String description = (String) JOptionPane.showInputDialog(
-                 fFrame, "Description for this marker", "New Marker",
-                 JOptionPane.PLAIN_MESSAGE, null, null, null);
-            if (description != null)
-                fTraceDisplayModel.addMarker(description, fTraceDisplayModel.getCursorPosition());
-        } else if (cmd.equals("showmarkerlist")) {
-            JDialog markersWindow = new JDialog(fFrame, "Markers", true);
-            markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            MarkerListPanel contentPane = new MarkerListPanel(fTraceDisplayModel);
-            contentPane.setOpaque(true);
-            markersWindow.setPreferredSize(new Dimension(400, 300));
-            markersWindow.setContentPane(contentPane);
-            markersWindow.pack();
-            markersWindow.setLocationRelativeTo(this);
-            markersWindow.setVisible(true);
-        } else if (cmd.equals("nextMarker"))
-            fTraceDisplayModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-        else if (cmd.equals("prevMarker"))
-            fTraceDisplayModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-        else if (cmd.equals("removeMarker"))
-            fTraceDisplayModel.removeMarkerAtTime(fTraceDisplayModel.getCursorPosition());
-        else if (cmd.equals("findbyvalue"))
-            showFindDialog();
-        else if (cmd.equals("findnext"))
-            findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-        else if (cmd.equals("findprev"))
-            findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-        else if (cmd.equals("saveNetSet")) {
-            String name = (String) JOptionPane.showInputDialog(
-                fFrame, "Net Set Name", "Save Net Set",
-                JOptionPane.PLAIN_MESSAGE, null, null, null);
-            if (!name.equals("")) {
-                fTraceDisplayModel.saveNetSet(name);
-                buildNetMenu();
-            }
-        } else if (cmd.length() > 7  && cmd.substring(0, 7).equals("netSet_")) {
-            int index = Integer.parseInt(cmd.substring(7));
-            fTraceDisplayModel.selectNetSet(index);
-        } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
-            // Load from recents menu
-            loadTraceFile(cmd.substring(5));
-        } else if (cmd.equals("prefs")) {
-            JDialog prefsWindow = new PreferenceWindow(fFrame);
-            prefsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            prefsWindow.setLocationRelativeTo(this);
-            prefsWindow.setVisible(true);
-        }
     }
 
     public void loadTraceFile(String path) {

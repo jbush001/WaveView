@@ -134,13 +134,13 @@ public class TraceDataModel {
         @Override
         public void enterScope(String name) {
             fNetTree.enterScope(name);
-            fScopeStack.push(name);
+            fScopeStack.addLast(name);
         }
 
         @Override
         public void exitScope() {
             fNetTree.leaveScope();
-            fScopeStack.pop();
+            fScopeStack.removeLast();
         }
 
         @Override
@@ -183,7 +183,7 @@ public class TraceDataModel {
             return thisNetIndex;
         }
 
-        private Stack<String> fScopeStack = new Stack<String>();
+        private Deque<String> fScopeStack = new ArrayDeque<String>();
     }
 
     private long fMaxTimestamp;

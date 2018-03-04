@@ -148,21 +148,28 @@ public class VCDLoader implements TraceLoader {
         }
 
         int order = 1;
-        if (unit.equals("fs"))
-            order = -15;
-        else if (unit.equals("ps"))
-            order = -12;
-        else if (unit.equals("ns"))
-            order = -9;
-        else if (unit.equals("us"))
-            order = -6;
-        else if (unit.equals("ms"))
-            order = -3;
-        else if (unit.equals("s"))
-            order = 0;
-        else {
-            throw new LoadException("line " + fTokenizer.lineno()
-                + ": unknown timescale value " + getTokenString());
+        switch (unit) {
+            case "fs":
+                order = -15;
+                break;
+            case "ps":
+                order = -12;
+                break;
+            case "ns":
+                order = -9;
+                break;
+            case "us":
+                order = -6;
+                break;
+            case "ms":
+                order = -3;
+                break;
+            case "s":
+                order = 0;
+                break;
+            default:
+                throw new LoadException("line " + fTokenizer.lineno()
+                    + ": unknown timescale value " + getTokenString());
         }
 
         int timeNumber = Integer.parseInt(s.substring(0, unitStart));
@@ -182,23 +189,32 @@ public class VCDLoader implements TraceLoader {
     /// @returns true if there are more definitions, false if it has hit
     /// the end of the definitions section
     private void parseDefinition() throws LoadException, IOException {
-        if (getTokenString().equals("$scope"))
-            parseScope();
-        else if (getTokenString().equals("$var"))
-            parseVar();
-        else if (getTokenString().equals("$upscope"))
-            parseUpscope();
-        else if (getTokenString().equals("$timescale"))
-            parseTimescale();
-        else if (getTokenString().equals("$enddefinitions"))
-            match("$end");
-        else if (getTokenString().equals("$dumpvars") || getTokenString().equals("$end")) {
-            // ignore directive, but not what comes in-between
-        } else {
-            // Ignore everything inside this definition.
-            do {
-                nextToken(true);
-            } while (!getTokenString().equals("$end"));
+        switch (getTokenString()) {
+            case "$scope":
+                parseScope();
+                break;
+            case "$var":
+                parseVar();
+                break;
+            case "$upscope":
+                parseUpscope();
+                break;
+            case "$timescale":
+                parseTimescale();
+                break;
+            case "$enddefinitions":
+                match("$end");
+                break;
+            case "$dumpvars":
+            case "$end":
+                // ignore directive, but not what comes in-between
+                break;
+            default:
+                // Ignore everything inside this definition.
+                do {
+                    nextToken(true);
+                } while (!getTokenString().equals("$end"));
+                break;
         }
     }
 
@@ -230,7 +246,6 @@ public class VCDLoader implements TraceLoader {
                     value = getTokenString().substring(0, 1);
                     id = getTokenString().substring(1);
                     break;
-
                 case 'b':
                     // Multi bit value
                     // 18.2.1 vector_value_change ::= b binary_number identification_code
@@ -238,12 +253,10 @@ public class VCDLoader implements TraceLoader {
                     nextToken(true);
                     id = getTokenString();
                     break;
-
                 case 'r':
                 case 'R':
                     throw new LoadException("line " + fTokenizer.lineno()
                         + ": real values are not supported");
-
                 default:
                     throw new LoadException("line " + fTokenizer.lineno()
                         + ": invalid value type '" + leadingVal + "'");
@@ -269,20 +282,16 @@ public class VCDLoader implements TraceLoader {
                     case 'Z':
                         bitValue = BitVector.VALUE_Z;
                         break;
-
                     case 'x':
                     case 'X':
                         bitValue = BitVector.VALUE_X;
                         break;
-
                     case '1':
                         bitValue = BitVector.VALUE_1;
                         break;
-
                     case '0':
                         bitValue = BitVector.VALUE_0;
                         break;
-
                     default:
                         throw new LoadException("line " + fTokenizer.lineno()
                             + ": invalid logic value");

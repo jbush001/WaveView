@@ -32,10 +32,10 @@ public class NetTreeModel implements TreeModel {
     }
 
     public void enterScope(String name) {
-        if (fNodeStack.empty() && fRoot != null) {
+        if (fNodeStack.isEmpty() && fRoot != null) {
             // If you call $dumpvars more than once with iverilog, it will pop the root
             // node off and re-push it.  Handle this case here.
-            fNodeStack.push(fRoot);
+            fNodeStack.addLast(fRoot);
             return;
         }
 
@@ -43,17 +43,17 @@ public class NetTreeModel implements TreeModel {
         if (fRoot == null)
             fRoot = node;
         else
-            fNodeStack.peek().fChildren.add(node);
+            fNodeStack.peekLast().fChildren.add(node);
 
-        fNodeStack.push(node);
+        fNodeStack.addLast(node);
     }
 
     public void leaveScope() {
-        fNodeStack.pop();
+        fNodeStack.removeLast();
     }
 
     public void addNet(String name, int netId) {
-        fNodeStack.peek().fChildren.add(new Node(name, netId));
+        fNodeStack.peekLast().fChildren.add(new Node(name, netId));
     }
 
     public int getNetFromTreeObject(Object o) {
@@ -130,5 +130,5 @@ public class NetTreeModel implements TreeModel {
     };
 
     private Node fRoot;
-    private Stack<Node> fNodeStack = new Stack<Node>();
+    private Deque<Node> fNodeStack = new ArrayDeque<Node>();
 }
