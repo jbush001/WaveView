@@ -209,9 +209,8 @@ public class MainWindow extends JPanel implements ActionListener {
 
         @Override
         public Void doInBackground() {
-            try {
-                /// @todo Determine the loader type dynamically
-                TraceLoader loader = new VCDLoader();
+            /// @todo Determine the loader type dynamically
+            try (TraceLoader loader = new VCDLoader()) {
                 fNewModel = new TraceDataModel();
                 TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
                     @Override

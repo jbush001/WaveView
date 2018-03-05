@@ -55,6 +55,11 @@ public class VCDLoader implements TraceLoader {
         System.out.println(Integer.toString(fNetMap.size()) + " total nets");
     }
 
+    @Override
+    public void close() throws IOException {
+        fProgressStream.close();
+    }
+
     private static class Net {
         Net(int builderID, int width) {
             fBuilderID = builderID;
@@ -360,6 +365,11 @@ public class VCDLoader implements TraceLoader {
     private static class ProgressInputStream extends InputStream {
         ProgressInputStream(InputStream wrapped) {
             fWrapped = wrapped;
+        }
+
+        @Override
+        public void close() throws IOException {
+            fWrapped.close();
         }
 
         @Override

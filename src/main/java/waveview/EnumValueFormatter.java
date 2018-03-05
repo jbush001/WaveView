@@ -27,17 +27,14 @@ import java.io.*;
 public class EnumValueFormatter implements ValueFormatter {
     public void loadFromFile(File file) throws IOException {
         fFile = file;
-
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"));
-        try {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+            new FileInputStream(file), "UTF8"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String [] tokens = line.split(" ");
                 if (tokens.length >= 2)
                     fMappings.put(Integer.parseInt(tokens[0]), tokens[1]);
             }
-        } finally {
-            br.close();
         }
     }
 
