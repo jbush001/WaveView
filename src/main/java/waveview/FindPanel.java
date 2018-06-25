@@ -111,13 +111,17 @@ class FindPanel extends JPanel implements ActionListener {
     /// Handle button presses
     @Override
     public void actionPerformed(ActionEvent e) {
-        String cmd = e.getActionCommand();
-        if (cmd.equals("Prev")) {
-            checkUpdateSearch();
-            fMainWindow.findPrev(false);
-        } else if (cmd.equals("Next")) {
-            checkUpdateSearch();
-            fMainWindow.findNext(false);
+        checkUpdateSearch();
+        switch (e.getActionCommand()) {
+            case "Prev":
+                fMainWindow.findPrev(false);
+                break;
+            case "Next":
+                fMainWindow.findNext(false);
+                break;
+            default:
+                System.out.println("FindPanel: unknown action "
+                    + e.getActionCommand());
         }
     }
 

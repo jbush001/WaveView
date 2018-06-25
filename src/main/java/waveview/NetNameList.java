@@ -348,6 +348,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener,
                 break;
             default:
                 System.out.println("NetNameList: unknown action " + e.getActionCommand());
+                break;
         }
 
         if (formatter != null) {
