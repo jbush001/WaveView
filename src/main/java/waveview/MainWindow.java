@@ -339,15 +339,26 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     private void loadTraceFile(File file) {
-        saveConfig();
+        saveTraceSettings();
         ProgressMonitor monitor = new ProgressMonitor(MainWindow.this, "Loading...", "", 0, 100);
         (new TraceLoadWorker(file, monitor)).execute();
     }
 
     private void showFindDialog() {
-        // The initial search string is formed by the selected nets and
-        // their values at the cursor position.
-        StringBuilder initialSearch = new StringBuilder();
+        String initialSearch = generateSearchFromSelection();
+        FindPanel findPanel = new FindPanel(this, initialSearch);
+        JDialog findFrame = new JDialog(this.frame, "Find", true);
+        findFrame.getContentPane().add(findPanel);
+        findFrame.setSize(new Dimension(450, 150));
+        findFrame.setResizable(false);
+        findFrame.setLocationRelativeTo(this);
+        findFrame.setVisible(true);
+    }
+
+    /// The initial search string is formed by the selected nets and
+    /// their values at the cursor position.
+    private String generateSearchFromSelection() {
+        StringBuilder searchExpr = new StringBuilder();
         boolean first = true;
         long cursorPosition = traceDisplayModel.getCursorPosition();
 
@@ -356,23 +367,17 @@ public class MainWindow extends JPanel implements ActionListener {
             if (first) {
                 first = false;
             } else {
-                initialSearch.append(" and ");
+                searchExpr.append(" and ");
             }
 
-            initialSearch.append(traceDataModel.getFullNetName(netId));
+            searchExpr.append(traceDataModel.getFullNetName(netId));
             Transition t = traceDataModel.findTransition(netId, cursorPosition).next();
 
-            initialSearch.append(" = 'h");
-            initialSearch.append(t.toString(16));
+            searchExpr.append(" = 'h");
+            searchExpr.append(t.toString(16));
         }
 
-        FindPanel findPanel = new FindPanel(this, initialSearch.toString());
-        JDialog findFrame = new JDialog(this.frame, "Find", true);
-        findFrame.getContentPane().add(findPanel);
-        findFrame.setSize(new Dimension(450, 150));
-        findFrame.setResizable(false);
-        findFrame.setLocationRelativeTo(this);
-        findFrame.setVisible(true);
+        return searchExpr.toString();
     }
 
     void setSearch(String searchString) throws Search.ParseException {
@@ -405,7 +410,7 @@ public class MainWindow extends JPanel implements ActionListener {
         }
     }
 
-    private void saveConfig() {
+    private void saveTraceSettings() {
         try {
             if (traceSettingsFile != null)
                 traceSettingsFile.write();
@@ -525,7 +530,7 @@ public class MainWindow extends JPanel implements ActionListener {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                contentPane.saveConfig();
+                contentPane.saveTraceSettings();
             }
         });
 

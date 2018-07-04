@@ -35,10 +35,10 @@ import javax.swing.text.Highlighter;
 
 class FindPanel extends JPanel implements ActionListener {
     private final MainWindow mainWindow;
-    private final transient Highlighter highlighter;
+    private final transient Highlighter errorHighlighter;
     private final transient Highlighter.HighlightPainter highlightPainter;
-    private final JTextArea textArea;
-    private boolean needsSearchUpdate = true;
+    private final JTextArea searchExprTextArea;
+    private boolean needToParseSearch = true;
 
     FindPanel(MainWindow mainWindow, String initialSearch) {
         this.mainWindow = mainWindow;
@@ -46,27 +46,27 @@ class FindPanel extends JPanel implements ActionListener {
         setLayout(new BorderLayout());
 
         JLabel findLabel = new JLabel("Find:");
-        textArea = new JTextArea(5, 30);
-        textArea.setLineWrap(true);
-        textArea.setText(initialSearch);
-        textArea.getDocument().addDocumentListener(new DocumentListener() {
+        searchExprTextArea = new JTextArea(5, 30);
+        searchExprTextArea.setLineWrap(true);
+        searchExprTextArea.setText(initialSearch);
+        searchExprTextArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void changedUpdate(DocumentEvent e) {
-                invalidateText();
+                invalidateSearch();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                invalidateText();
+                invalidateSearch();
             }
 
             @Override
             public void insertUpdate(DocumentEvent e) {
-                invalidateText();
+                invalidateSearch();
             }
         });
 
-        highlighter = textArea.getHighlighter();
+        errorHighlighter = searchExprTextArea.getHighlighter();
         highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
 
         JButton prevButton = new JButton("Prev");
@@ -77,7 +77,7 @@ class FindPanel extends JPanel implements ActionListener {
         JPanel findContainer = new JPanel();
         findContainer.setLayout(new FlowLayout(FlowLayout.LEFT));
         findContainer.add(findLabel);
-        findContainer.add(new JScrollPane(textArea));
+        findContainer.add(new JScrollPane(searchExprTextArea));
         add(findContainer, BorderLayout.CENTER);
 
         JPanel buttonContainer = new JPanel();
@@ -88,27 +88,27 @@ class FindPanel extends JPanel implements ActionListener {
     }
 
     /// Called when the user changes the search string.
-    void invalidateText() {
+    void invalidateSearch() {
         // The next time the user hits next/prev, need to regenerate the Search.
-        needsSearchUpdate = true;
+        needToParseSearch = true;
 
         // When the user begins editing, remove the error highlights
         // so they don't leave boogers all over the place.
-        highlighter.removeAllHighlights();
+        errorHighlighter.removeAllHighlights();
     }
 
     /// If the user changed the search string, try to parse it and generate
     /// a new Search object. If the search string is invalid, highlight the
     /// incorrect portion and pop up an error message.
-    private void checkUpdateSearch() {
-        if (needsSearchUpdate) {
+    private void parseSearchIfNeeded() {
+        if (needToParseSearch) {
             try {
-                mainWindow.setSearch(textArea.getText());
+                mainWindow.setSearch(searchExprTextArea.getText());
             } catch (Search.ParseException exc) {
                 // Highlight error
-                highlighter.removeAllHighlights();
+                errorHighlighter.removeAllHighlights();
                 try {
-                    highlighter.addHighlight(exc.getStartOffset(), exc.getEndOffset() + 1, highlightPainter);
+                    errorHighlighter.addHighlight(exc.getStartOffset(), exc.getEndOffset() + 1, highlightPainter);
                 } catch (BadLocationException ble) {
                     System.out.println("execption " + ble);
                 }
@@ -118,14 +118,14 @@ class FindPanel extends JPanel implements ActionListener {
                         JOptionPane.ERROR_MESSAGE);
             }
 
-            needsSearchUpdate = false;
+            needToParseSearch = false;
         }
     }
 
     /// Handle button presses
     @Override
     public void actionPerformed(ActionEvent e) {
-        checkUpdateSearch();
+        parseSearchIfNeeded();
         switch (e.getActionCommand()) {
         case "Prev":
             mainWindow.findPrev(false);
