@@ -27,7 +27,7 @@ import java.awt.FontMetrics;
 
 class ColorButton extends JPanel {
     private Color color;
-    private String label;
+    private final String label;
 
     ColorButton(String label, Color initialColor) {
         setPreferredSize(new Dimension(180, DrawMetrics.COLOR_BUTTON_HEIGHT));

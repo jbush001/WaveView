@@ -48,25 +48,27 @@ public class VCDLoader implements TraceLoader {
         this.progressListener = progressListener;
         this.traceBuilder = traceBuilder;
 
-        progressStream = new ProgressInputStream(new FileInputStream(file));
-        tokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(progressStream, "UTF8")));
-        fileLength = file.length();
-        updateInterval = fileLength / 100;
-        tokenizer.resetSyntax();
-        tokenizer.wordChars(33, 126);
-        tokenizer.whitespaceChars('\r', '\r');
-        tokenizer.whitespaceChars('\n', '\n');
-        tokenizer.whitespaceChars(' ', ' ');
-        tokenizer.whitespaceChars('\t', '\t');
+        try (FileInputStream inputStream = new FileInputStream(file))  {
+            progressStream = new ProgressInputStream(inputStream);
+            tokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(progressStream, "UTF8")));
+            fileLength = file.length();
+            updateInterval = fileLength / 100;
+            tokenizer.resetSyntax();
+            tokenizer.wordChars(33, 126);
+            tokenizer.whitespaceChars('\r', '\r');
+            tokenizer.whitespaceChars('\n', '\n');
+            tokenizer.whitespaceChars(' ', ' ');
+            tokenizer.whitespaceChars('\t', '\t');
 
-        while (nextToken(false)) {
-            if (getTokenString().charAt(0) == '$')
-                parseDefinition();
-            else
-                parseTransition();
+            while (nextToken(false)) {
+                if (getTokenString().charAt(0) == '$')
+                    parseDefinition();
+                else
+                    parseTransition();
+            }
+
+            traceBuilder.loadFinished();
         }
-
-        traceBuilder.loadFinished();
 
         System.out.println("parsed " + totalTransitions + " total transitions");
         System.out.println(Integer.toString(netMap.size()) + " total nets");
@@ -78,8 +80,8 @@ public class VCDLoader implements TraceLoader {
     }
 
     private static class Net {
-        int builderId; /// ID given to this net by the builder
-        int width;
+        final int builderId; /// ID given to this net by the builder
+        final int width;
 
         Net(int builderId, int width) {
             this.builderId = builderId;

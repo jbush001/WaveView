@@ -16,18 +16,17 @@
 
 package waveview;
 
-import java.util.prefs.*;
-import java.util.*;
-import java.awt.*;
-import java.io.*;
+import java.awt.Color;
+import java.io.File;
+import java.util.prefs.Preferences;
 
 ///
 /// Global application preferences
 ///
 
 class AppPreferences {
-    private Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
     private static AppPreferences instance;
+    private final Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
 
     Color traceColor;
     Color conflictColor;

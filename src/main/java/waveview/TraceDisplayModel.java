@@ -171,7 +171,7 @@ public class TraceDisplayModel {
     public void selectNetSet(int index) {
         int oldSize = visibleNets.size();
 
-        visibleNets = new ArrayList<NetViewModel>(netSets.get(index).visibleNets);
+        visibleNets = new ArrayList<>(netSets.get(index).visibleNets);
 
         // @todo There is probably a more efficient way to do this
         for (Listener listener : traceListeners) {
@@ -363,12 +363,12 @@ public class TraceDisplayModel {
     }
 
     private static class NetSet {
-        ArrayList<NetViewModel> visibleNets;
-        private String name;
+        final ArrayList<NetViewModel> visibleNets;
+        private final String name;
 
         NetSet(String name, ArrayList<NetViewModel> visibleNets) {
             this.name = name;
-            this.visibleNets = new ArrayList<NetViewModel>(visibleNets);
+            this.visibleNets = new ArrayList<>(visibleNets);
         }
     }
 

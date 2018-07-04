@@ -1,3 +1,4 @@
+
 //
 // Copyright 2016 Jeff Bush
 //
@@ -14,25 +15,31 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import org.junit.*;
-import static org.junit.Assert.*;
-import javax.swing.event.ListDataListener;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
+import org.junit.Test;
+import waveview.NetSearchListModelAdapter;
+import waveview.TraceBuilder;
+import waveview.TraceDataModel;
 
 public class NetSearchListModelAdapterTest {
 
     static class TestListDataListener implements ListDataListener {
+        boolean gotEvent;
+        int eventSize;
+
         TestListDataListener() {
         }
 
         @Override
         public void contentsChanged(ListDataEvent evt) {
-            fGotEvent = true;
+            gotEvent = true;
             assertEquals(0, evt.getIndex0());
-            fEventSize = evt.getIndex1();
+            eventSize = evt.getIndex1();
         }
-
 
         @Override
         public void intervalAdded(ListDataEvent evt) {
@@ -45,18 +52,14 @@ public class NetSearchListModelAdapterTest {
         }
 
         void checkEvent(int size) {
-            assertTrue(fGotEvent);
-            assertEquals(size, fEventSize);
-            fGotEvent = false;  // Reset for next check
+            assertTrue(gotEvent);
+            assertEquals(size, eventSize);
+            gotEvent = false; // Reset for next check
         }
-
-        boolean fGotEvent;
-        int fEventSize;
     }
 
     @Test
-    public void testFilter()
-    {
+    public void testFilter() {
         // Build a dummy trace data model
         TraceDataModel model = new TraceDataModel();
         TraceBuilder builder = model.startBuilding();

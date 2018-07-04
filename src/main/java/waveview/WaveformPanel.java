@@ -39,8 +39,8 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
     private static final Stroke SOLID_STROKE = new BasicStroke(1);
     private final SingleBitPainter singleBitPainter = new SingleBitPainter();
     private final MultiBitPainter multiBitPainter = new MultiBitPainter();
-    private TraceDisplayModel traceDisplayModel;
-    private TraceDataModel traceDataModel;
+    private final TraceDisplayModel traceDisplayModel;
+    private final TraceDataModel traceDataModel;
 
     WaveformPanel(TraceDisplayModel traceDisplayModel, TraceDataModel traceDataModel) {
         this.traceDisplayModel = traceDisplayModel;

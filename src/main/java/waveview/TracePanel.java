@@ -33,9 +33,9 @@ import javax.swing.JViewport;
 /// Container for the timescale view, net names, and waveforms.
 ///
 class TracePanel extends JPanel {
-    private WaveformPanel waveformPanel;
-    private NetNameList netNameList;
-    private TraceDisplayModel traceDisplayModel;
+    private final WaveformPanel waveformPanel;
+    private final NetNameList netNameList;
+    private final TraceDisplayModel traceDisplayModel;
 
     TracePanel(TraceDisplayModel traceDisplayModel, TraceDataModel traceDataModel) {
         super(new BorderLayout());

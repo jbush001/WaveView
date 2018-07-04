@@ -38,9 +38,9 @@ import org.xml.sax.SAXException;
 ///
 
 public class TraceSettingsFile {
-    private File settingsFile;
-    private TraceDataModel traceDataModel;
-    private TraceDisplayModel traceDisplayModel;
+    private final File settingsFile;
+    private final TraceDataModel traceDataModel;
+    private final TraceDisplayModel traceDisplayModel;
 
     /// @param file Name of a trace file
     /// @returns configuration file for this (a .dotfile in the same
@@ -177,17 +177,18 @@ public class TraceSettingsFile {
             //
             try {
                 Class<?> c = Class.forName(formatStr);
-                formatter = (ValueFormatter) c.getConstructor().newInstance();
                 if (formatStr.equals("waveview.EnumValueFormatter")) {
                     String pathStr = ((Text) formatTag.getElementsByTagName("path").item(0).getFirstChild()).getData();
-                    ((EnumValueFormatter) formatter).loadFromFile(new File(pathStr));
+                    formatter = (ValueFormatter) c.getConstructor(File.class).newInstance(new File(pathStr));
+                } else {
+                    formatter = (ValueFormatter) c.getConstructor().newInstance();
                 }
             } catch (RuntimeException exc) {
                 throw exc;
             } catch (Exception exc) {
                 // Can be: LinkageError, ExceptionInInitializerError, ClassNotFoundException,
                 // InstantiationException. Fall back to a binary value formatter.
-                System.out.println("unable to find class" + formatStr);
+                System.out.println("unable to instantiate value formatter " + formatStr + ": " + exc);
                 formatter = new BinaryValueFormatter();
             }
 

@@ -31,10 +31,9 @@ import javax.swing.JTable;
 /// @todo Add a way to remove entries from this list
 ///
 class MarkerListPanel extends JPanel implements ActionListener, TraceDisplayModel.Listener {
-
-    private TraceDisplayModel traceDisplayModel;
-    private MarkerTableModel tableModel;
-    private JTable table;
+    private final TraceDisplayModel traceDisplayModel;
+    private final MarkerTableModel tableModel;
+    private final JTable table;
 
     MarkerListPanel(TraceDisplayModel traceDisplayModel) {
         setLayout(new GridLayout(1, 1));

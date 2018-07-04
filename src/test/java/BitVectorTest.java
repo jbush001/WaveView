@@ -1,3 +1,4 @@
+
 //
 // Copyright 2016 Jeff Bush
 //
@@ -14,9 +15,12 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+import waveview.BitVector;
 
 public class BitVectorTest {
     @Test
@@ -210,11 +214,11 @@ public class BitVectorTest {
 
     @Test
     public void testCompare() {
-        BitVector bv1 = new BitVector("1", 2);      // Shorter than others
-        BitVector bv2 = new BitVector("01001", 2);  // Has leading zeros
+        BitVector bv1 = new BitVector("1", 2); // Shorter than others
+        BitVector bv2 = new BitVector("01001", 2); // Has leading zeros
         BitVector bv3 = new BitVector("10100", 2);
-        BitVector bv4 = new BitVector("10101", 2);  // Same length as last, trailing 1
-        BitVector bv5 = new BitVector("000000", 2);  // Wider, but zeroes
+        BitVector bv4 = new BitVector("10101", 2); // Same length as last, trailing 1
+        BitVector bv5 = new BitVector("000000", 2); // Wider, but zeroes
 
         assertEquals(0, bv1.compare(bv1));
         assertEquals(-1, bv1.compare(bv2));

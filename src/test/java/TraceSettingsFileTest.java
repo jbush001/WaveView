@@ -1,3 +1,4 @@
+
 //
 // Copyright 2016 Jeff Bush
 //
@@ -14,15 +15,25 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
-import org.junit.rules.TemporaryFolder;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.File;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import waveview.BinaryValueFormatter;
+import waveview.BitVector;
+import waveview.DecimalValueFormatter;
+import waveview.EnumValueFormatter;
+import waveview.HexadecimalValueFormatter;
+import waveview.TraceBuilder;
+import waveview.TraceDataModel;
+import waveview.TraceDisplayModel;
+import waveview.TraceSettingsFile;
 
 public class TraceSettingsFileTest {
     @Rule
-    public TemporaryFolder fTempFolder = new TemporaryFolder();
+    public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
     public void testLoad() throws Exception {
@@ -65,8 +76,8 @@ public class TraceSettingsFileTest {
         sourceDisplayModel.setValueFormatter(0, new BinaryValueFormatter());
         sourceDisplayModel.setValueFormatter(1, new DecimalValueFormatter());
         sourceDisplayModel.setValueFormatter(2, new HexadecimalValueFormatter());
-        EnumValueFormatter enumFormatter = new EnumValueFormatter();
-        enumFormatter.loadFromFile(new File("src/test/resources/enum_mapping/test1.txt"));
+        EnumValueFormatter enumFormatter = new EnumValueFormatter(
+                new File("src/test/resources/enum_mapping/test1.txt"));
         sourceDisplayModel.setValueFormatter(3, enumFormatter);
 
         sourceDisplayModel.addMarker("marker1", 1234);
@@ -127,7 +138,7 @@ public class TraceSettingsFileTest {
     // gracefully. Specifically if a visible net is no longer in
     // the data model after it is reloaded
     // @todo Does not test when markers are put in past the end time.
-    //  (not currently implemented in loader)
+    // (not currently implemented in loader)
     @Test
     public void testDataModelChanged() throws Exception {
         TraceDataModel sourceDataModel = new TraceDataModel();
@@ -183,16 +194,13 @@ public class TraceSettingsFileTest {
     @Test
     public void testConfigFileName1() throws Exception {
         assertEquals("foo/bar/.trace.vcd.traceconfig",
-            TraceSettingsFile.settingsFileName(new File(
-            "foo/bar/trace.vcd")).toString());
+                TraceSettingsFile.settingsFileName(new File("foo/bar/trace.vcd")).toString());
     }
 
     /// Regression test. In this case, the full path isn't passed.
     /// It was putting 'null' inside the filename.
     @Test
     public void testConfigFileName2() throws Exception {
-        assertEquals(".trace.vcd.traceconfig",
-            TraceSettingsFile.settingsFileName(new File(
-            "trace.vcd")).toString());
+        assertEquals(".trace.vcd.traceconfig", TraceSettingsFile.settingsFileName(new File("trace.vcd")).toString());
     }
 }

@@ -14,9 +14,12 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+import waveview.NetTreeModel;
 
 public class NetTreeModelTest {
     @Test

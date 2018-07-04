@@ -14,9 +14,15 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import org.junit.Test;
+import waveview.BitVector;
+import waveview.Search;
+import waveview.TraceBuilder;
+import waveview.TraceDataModel;
 
 public class SearchTest {
     /// Utility function to create a sample trace with a clock signal
@@ -837,4 +843,3 @@ public class SearchTest {
         assertEquals(2, search.getPreviousMatch(5));
     }
 }
-

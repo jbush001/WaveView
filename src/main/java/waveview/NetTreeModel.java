@@ -111,20 +111,22 @@ public class NetTreeModel implements TreeModel {
     }
 
     static class Node {
-        private ArrayList<Node> children;
-        private String name;
-        private int net = -1;
+        private final String name;
+        private final int net;
+        private final ArrayList<Node> children;
 
         // Interior nodes only
         Node(String name) {
             this.name = name;
-            children = new ArrayList<Node>();
+            net = -1;
+            children = new ArrayList<>();
         }
 
         // Leaf nodes only
         Node(String name, int net) {
             this.name = name;
             this.net = net;
+            children = null;
         }
 
         @Override

@@ -1,3 +1,4 @@
+
 //
 // Copyright 2016 Jeff Bush
 //
@@ -14,11 +15,16 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
+import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
+import org.junit.Test;
+import waveview.ASCIIValueFormatter;
+import waveview.BinaryValueFormatter;
+import waveview.BitVector;
+import waveview.DecimalValueFormatter;
+import waveview.EnumValueFormatter;
+import waveview.HexadecimalValueFormatter;
 
 public class ValueFormatterTest {
     File getTestFile(String name) {
@@ -27,8 +33,7 @@ public class ValueFormatterTest {
 
     @Test
     public void testEnumValueFormatter() throws IOException {
-        EnumValueFormatter vf = new EnumValueFormatter();
-        vf.loadFromFile(getTestFile("test1.txt"));
+        EnumValueFormatter vf = new EnumValueFormatter(getTestFile("test1.txt"));
         assertEquals("STATE_INIT", vf.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", vf.format(new BitVector("2", 10)));
         assertEquals("STATE_WAIT", vf.format(new BitVector("3", 10)));

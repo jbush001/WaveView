@@ -14,28 +14,32 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
-import java.util.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import org.junit.Test;
+import waveview.SortedArrayList;
 
 public class SortedArrayListTest {
     static class KeyedElement implements SortedArrayList.Keyed {
-        public KeyedElement(long keyval) {
-            fKeyValue = keyval;
+        long keyValue;
+
+        public KeyedElement(long keyValue) {
+            this.keyValue = keyValue;
         }
 
         @Override
         public long getKey() {
-            return fKeyValue;
+            return keyValue;
         }
-
-        long fKeyValue;
     }
 
     @Test
     public void testAddLookup1() {
-        SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
+        SortedArrayList<KeyedElement> vec = new SortedArrayList<>();
 
         // Note: odd number of elements
         vec.add(new KeyedElement(100));
@@ -56,7 +60,7 @@ public class SortedArrayListTest {
 
     @Test
     public void testAddLookup2() {
-        SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
+        SortedArrayList<KeyedElement> vec = new SortedArrayList<>();
 
         // Note: even number of elements
         vec.add(new KeyedElement(100));
@@ -76,7 +80,7 @@ public class SortedArrayListTest {
 
     @Test
     public void testIterator() {
-        SortedArrayList<KeyedElement> vec = new SortedArrayList<KeyedElement>();
+        SortedArrayList<KeyedElement> vec = new SortedArrayList<>();
         vec.add(new KeyedElement(140));
         vec.add(new KeyedElement(100));
         vec.add(new KeyedElement(120));

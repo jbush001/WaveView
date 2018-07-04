@@ -48,9 +48,8 @@ import javax.swing.event.ListDataListener;
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
 class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, ActionListener {
-
-    private TraceDisplayModel traceDisplayModel;
-    private TraceDataModel traceDataModel;
+    private final TraceDisplayModel traceDisplayModel;
+    private final TraceDataModel traceDataModel;
     private JPopupMenu popupMenu;
 
     class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
@@ -130,13 +129,13 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         }
 
         @Override
-        public void addListDataListener(ListDataListener l) {
-            fListeners.add(l);
+        public void addListDataListener(ListDataListener listener) {
+            listeners.add(listener);
         }
 
         @Override
-        public void removeListDataListener(ListDataListener l) {
-            fListeners.remove(l);
+        public void removeListDataListener(ListDataListener listener) {
+            listeners.remove(listener);
         }
 
         @Override
@@ -155,14 +154,14 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
 
         @Override
         public void netsAdded(int firstIndex, int lastIndex) {
-            for (ListDataListener l : fListeners) {
+            for (ListDataListener l : listeners) {
                 l.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, firstIndex, lastIndex));
             }
         }
 
         @Override
         public void netsRemoved(int firstIndex, int lastIndex) {
-            for (ListDataListener l : fListeners) {
+            for (ListDataListener l : listeners) {
                 l.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, firstIndex, lastIndex));
             }
         }
@@ -179,7 +178,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         public void formatChanged(int index) {
         }
 
-        private ArrayList<ListDataListener> fListeners = new ArrayList<ListDataListener>();
+        private ArrayList<ListDataListener> listeners = new ArrayList<>();
     }
 
     /// Handles lists of signals dropped onto this view
@@ -380,8 +379,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         if (returnValue == JFileChooser.APPROVE_OPTION) {
             AppPreferences.getInstance().setInitialEnumDirectory(chooser.getSelectedFile().getParentFile());
             try {
-                formatter = new EnumValueFormatter();
-                ((EnumValueFormatter) formatter).loadFromFile(chooser.getSelectedFile());
+                formatter = new EnumValueFormatter(chooser.getSelectedFile());
             } catch (Exception exc) {
                 JOptionPane.showMessageDialog(this, "Error opening enum mapping file");
                 formatter = null;

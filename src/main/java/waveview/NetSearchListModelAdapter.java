@@ -32,8 +32,8 @@ import javax.swing.event.ListDataEvent;
 
 public class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     private ListDataListener listDataListener;
-    private final ArrayList<String> matches = new ArrayList<String>();
-    private TraceDataModel traceDataModel;
+    private final ArrayList<String> matches = new ArrayList<>();
+    private final TraceDataModel traceDataModel;
 
     public NetSearchListModelAdapter(TraceDataModel traceDataModel) {
         this.traceDataModel = traceDataModel;

@@ -1,3 +1,4 @@
+
 //
 // Copyright 2016 Jeff Bush
 //
@@ -14,10 +15,16 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
+import org.junit.Test;
+import waveview.BitVector;
+import waveview.NetTreeModel;
+import waveview.TraceBuilder;
+import waveview.TraceDataModel;
+import waveview.Transition;
 
 public class TraceDataModelTest {
     @Test
@@ -81,7 +88,7 @@ public class TraceDataModelTest {
         assertEquals(3, model.getNetWidth(1));
         assertEquals(2, model.getNetWidth(2));
 
-        Iterator<Transition> ati  = model.findTransition(net2, 12);
+        Iterator<Transition> ati = model.findTransition(net2, 12);
         Transition t = ati.next();
         assertEquals(10, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("100", 2)));
@@ -109,11 +116,11 @@ public class TraceDataModelTest {
         assertEquals(net1, model.getNetFromTreeObject(kid0));
         assertEquals(net2, model.getNetFromTreeObject(kid1));
 
-        Iterator<Transition> ati  = model.findTransition(net1, 0);
+        Iterator<Transition> ati = model.findTransition(net1, 0);
         assertEquals(17, ati.next().getTimestamp());
 
         // Same transition should be in this one (they share a TransitionVector)
-        ati  = model.findTransition(net2, 0);
+        ati = model.findTransition(net2, 0);
         assertEquals(17, ati.next().getTimestamp());
     }
 

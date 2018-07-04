@@ -39,10 +39,10 @@ import javax.swing.tree.TreePath;
 /// the visible net view to see them.
 ///
 class NetSearchPanel extends JPanel {
-    private JTree tree;
-    private TraceDataModel traceDataModel;
-    private ImageIcon netIcon;
-    private ImageIcon moduleIcon;
+    private final JTree tree;
+    private final TraceDataModel traceDataModel;
+    private final ImageIcon netIcon;
+    private final ImageIcon moduleIcon;
 
     /// Allow user to drag signals out of this view and drop in currently
     /// displayed nets
@@ -120,7 +120,7 @@ class NetSearchPanel extends JPanel {
         JTextField searchField = new JTextField();
         searchTab.add(searchField, BorderLayout.NORTH);
         NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(traceDataModel);
-        JList<String> netList = new JList<String>(adapter);
+        JList<String> netList = new JList<>(adapter);
         searchField.getDocument().addDocumentListener(adapter);
         netList.setDragEnabled(true);
         JScrollPane listScroller = new JScrollPane(netList);

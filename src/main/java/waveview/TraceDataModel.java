@@ -136,7 +136,7 @@ public class TraceDataModel {
     }
 
     private class ConcreteTraceBuilder implements TraceBuilder {
-        private Deque<String> scopeStack = new ArrayDeque<String>();
+        private final Deque<String> scopeStack = new ArrayDeque<>();
 
         @Override
         public void setTimescale(int timescale) {
@@ -158,8 +158,9 @@ public class TraceDataModel {
         @Override
         public void loadFinished() {
             maxTimestamp = 0;
-            for (NetDataModel model : allNets)
+            for (NetDataModel model : allNets) {
                 maxTimestamp = Math.max(maxTimestamp, model.getMaxTimestamp());
+            }
         }
 
         @Override
@@ -173,8 +174,9 @@ public class TraceDataModel {
             // Build full path
             StringBuilder fullName = new StringBuilder();
             for (String scope : scopeStack) {
-                if (fullName.length() != 0)
+                if (fullName.length() != 0) {
                     fullName.append('.');
+                }
 
                 fullName.append(scope);
             }

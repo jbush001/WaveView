@@ -42,9 +42,9 @@ import javax.swing.SwingWorker;
 
 /// @todo Add menu item to jump to specific timestamp
 public class MainWindow extends JPanel implements ActionListener {
-    private TracePanel tracePanel;
-    private TraceDisplayModel traceDisplayModel = new TraceDisplayModel();
-    private TraceDataModel traceDataModel = new TraceDataModel();
+    private final TracePanel tracePanel;
+    private final TraceDisplayModel traceDisplayModel = new TraceDisplayModel();
+    private final TraceDataModel traceDataModel = new TraceDataModel();
     private Search currentSearch;
     private JMenu netMenu;
     private JFrame frame;
@@ -239,8 +239,8 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     class TraceLoadWorker extends SwingWorker<Void, Void> {
-        private File file;
-        private ProgressMonitor progressMonitor;
+        private final File file;
+        private final ProgressMonitor progressMonitor;
         private TraceDataModel newModel;
         private String errorMessage;
 

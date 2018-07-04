@@ -30,12 +30,12 @@ import java.io.FileInputStream;
 ///
 
 public class EnumValueFormatter implements ValueFormatter {
-    private Map<Integer, String> mappings = new HashMap<Integer, String>();
-    private File mappingFile;
+    private final Map<Integer, String> mappings = new HashMap<>();
+    private final File mappingFile;
 
-    public void loadFromFile(File file) throws IOException {
-        mappingFile = file;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"))) {
+    public EnumValueFormatter(File mappingFile) throws IOException {
+        this.mappingFile = mappingFile;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(mappingFile), "UTF8"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.split(" ", 0);

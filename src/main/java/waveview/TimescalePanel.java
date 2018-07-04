@@ -35,8 +35,8 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
     private boolean showTimestamp;
     private long unitMagnitude = 1;
     private String unitName = "s";
-    private TraceDisplayModel traceDisplayModel;
-    private TraceDataModel traceDataModel;
+    private final TraceDisplayModel traceDisplayModel;
+    private final TraceDataModel traceDataModel;
     private final Timer timestampDisplayTimer = new Timer(TIMESTAMP_DISAPPEAR_INTERVAL, this);
 
     TimescalePanel(TraceDisplayModel traceDisplayModel, TraceDataModel traceDataModel) {

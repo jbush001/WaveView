@@ -29,16 +29,16 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 class PreferenceWindow extends JDialog {
-    private ColorButton traceColorButton;
-    private ColorButton conflictColorButton;
-    private ColorButton selectionColorButton;
-    private ColorButton cursorColorButton;
-    private ColorButton backgroundColorButton;
-    private ColorButton timingMarkerColorButton;
-    private ColorButton markerColorButton;
-    private ColorButton listSelectionBgColorButton;
-    private ColorButton listSelectionFgColorButton;
-    private ColorButton valueColorButton;
+    private final ColorButton traceColorButton;
+    private final ColorButton conflictColorButton;
+    private final ColorButton selectionColorButton;
+    private final ColorButton cursorColorButton;
+    private final ColorButton backgroundColorButton;
+    private final ColorButton timingMarkerColorButton;
+    private final ColorButton markerColorButton;
+    private final ColorButton listSelectionBgColorButton;
+    private final ColorButton listSelectionFgColorButton;
+    private final ColorButton valueColorButton;
 
     PreferenceWindow(JFrame parent) {
         super(parent, "Preferences", true);

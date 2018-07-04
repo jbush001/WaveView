@@ -1,3 +1,4 @@
+
 //
 // Copyright 2017 Jeff Bush
 //
@@ -14,10 +15,10 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
+import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
+import org.junit.Test;
+import waveview.RecentFiles;
 
 public class RecentFileTest {
 

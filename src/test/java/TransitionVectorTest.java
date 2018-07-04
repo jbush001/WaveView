@@ -1,3 +1,4 @@
+
 //
 // Copyright 2016 Jeff Bush
 //
@@ -14,11 +15,16 @@
 // limitations under the License.
 //
 
-import waveview.*;
-import static org.junit.Assert.*;
-import org.junit.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import org.junit.Test;
+import waveview.BitVector;
+import waveview.Transition;
+import waveview.TransitionVector;
 
 public class TransitionVectorTest {
     private void makeBitVectorFromInt(BitVector vec, int value) {

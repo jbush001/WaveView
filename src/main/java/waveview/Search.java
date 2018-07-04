@@ -28,8 +28,8 @@ import java.util.Iterator;
 ///
 public class Search {
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
-    private Lexer lexer;
-    private TraceDataModel traceDataModel;
+    private final Lexer lexer;
+    private final TraceDataModel traceDataModel;
     private ExpressionNode searchExpression;
 
     public Search(TraceDataModel traceModel, String searchString) throws ParseException {
@@ -165,7 +165,7 @@ public class Search {
         private int pushBackToken = -1;
         private int tokenStart;
         private BitVector literalValue;
-        private String searchString;
+        private final String searchString;
 
         Lexer(String searchString) {
             this.searchString = searchString;
@@ -468,13 +468,13 @@ public class Search {
     }
 
     private abstract static class BooleanExpressionNode extends ExpressionNode {
-        protected ExpressionNode leftChild;
-        protected ExpressionNode rightChild;
+        protected final ExpressionNode leftChild;
+        protected final ExpressionNode rightChild;
 
         // These are preallocated for efficiency and aren't used outside
         // the evaluate() call.
-        private SearchHint leftHint = new SearchHint();
-        private SearchHint rightHint = new SearchHint();
+        private final SearchHint leftHint = new SearchHint();
+        private final SearchHint rightHint = new SearchHint();
 
         BooleanExpressionNode(ExpressionNode leftChild, ExpressionNode rightChild) {
             this.leftChild = leftChild;
@@ -660,13 +660,13 @@ public class Search {
     }
 
     private abstract static class ComparisonExpressionNode extends ExpressionNode {
-        protected ValueNode leftNode;
-        protected ValueNode rightNode;
+        protected final ValueNode leftNode;
+        protected final ValueNode rightNode;
 
         // These are preallocated for efficiency and aren't used outside
         // the evaluate() call.
-        private SearchHint leftHint = new SearchHint();
-        private SearchHint rightHint = new SearchHint();
+        private final SearchHint leftHint = new SearchHint();
+        private final SearchHint rightHint = new SearchHint();
 
         protected ComparisonExpressionNode(ValueNode leftNode, ValueNode rightNode) {
             this.leftNode = leftNode;

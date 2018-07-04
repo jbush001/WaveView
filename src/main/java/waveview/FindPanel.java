@@ -34,11 +34,11 @@ import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 
 class FindPanel extends JPanel implements ActionListener {
-    private JTextArea textArea;
-    private MainWindow mainWindow;
+    private final MainWindow mainWindow;
+    private final transient Highlighter highlighter;
+    private final transient Highlighter.HighlightPainter highlightPainter;
+    private final JTextArea textArea;
     private boolean needsSearchUpdate = true;
-    private transient Highlighter highlighter;
-    private transient Highlighter.HighlightPainter highlightPainter;
 
     FindPanel(MainWindow mainWindow, String initialSearch) {
         this.mainWindow = mainWindow;

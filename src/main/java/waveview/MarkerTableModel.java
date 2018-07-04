@@ -25,7 +25,7 @@ import javax.swing.table.AbstractTableModel;
 public class MarkerTableModel extends AbstractTableModel {
     private static final int NUM_COLUMNS = 3;
     private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
-    private TraceDisplayModel traceDisplayModel;
+    private final TraceDisplayModel traceDisplayModel;
 
     public MarkerTableModel(TraceDisplayModel traceDisplayModel) {
         this.traceDisplayModel = traceDisplayModel;

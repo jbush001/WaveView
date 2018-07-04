@@ -16,7 +16,6 @@
 
 package waveview;
 
-import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -27,8 +26,8 @@ import java.util.Iterator;
 /// bit in it.
 ///
 class MultiBitPainter implements WaveformPainter {
-    private int[] polygonXPoints = new int[3];
-    private int[] polygonYPoints = new int[3];
+    private final int[] polygonXPoints = new int[3];
+    private final int[] polygonYPoints = new int[3];
 
     @Override
     public void paint(Graphics g, TraceDataModel model, int netId, int topOffset, Rectangle visibleRect,
