@@ -16,7 +16,7 @@
 
 package waveview;
 
-import java.util.*;
+import java.util.Iterator;
 
 ///
 /// The Search class allows searching for logic conditions using complex boolean expressions
@@ -27,10 +27,15 @@ import java.util.*;
 /// @todo Support partial multi-net matches
 ///
 public class Search {
+    private static final BitVector ZERO_VEC = new BitVector("0", 2);
+    private Lexer lexer;
+    private TraceDataModel traceDataModel;
+    private ExpressionNode searchExpression;
+
     public Search(TraceDataModel traceModel, String searchString) throws ParseException {
-        fTraceDataModel = traceModel;
-        fLexer = new Lexer(searchString);
-        fSearchExpression = parseExpression();
+        this.traceDataModel = traceModel;
+        lexer = new Lexer(searchString);
+        searchExpression = parseExpression();
         match(Lexer.TOK_END);
     }
 
@@ -38,41 +43,45 @@ public class Search {
     /// @returns true if this search string matches at the passed timestamp
     public boolean matches(long timestamp) {
         SearchHint hint = new SearchHint();
-        return fSearchExpression.evaluate(fTraceDataModel, timestamp, hint);
+        return searchExpression.evaluate(traceDataModel, timestamp, hint);
     }
 
     ///
-    /// Scan forward to find the next timestamp that matches this search's expression
+    /// Scan forward to find the next timestamp that matches this search's
+    /// expression
     /// If the startTimestamp is already a match, it will not be returned. This will
-    ///  instead scan to the next transition
-    /// @bug If startTimestamp is before the first event, and the first event matches,
-    ///      this will not return it.
+    /// instead scan to the next transition
+    /// @bug If startTimestamp is before the first event, and the first event
+    /// matches,
+    /// this will not return it.
     /// @returns
-    ///   -1 If there are no matches in the forward direction
-    ///      timestamp of the next forward match otherwise
+    /// -1 If there are no matches in the forward direction
+    /// timestamp of the next forward match otherwise
     ///
     public long getNextMatch(long startTimestamp) {
         SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
+        boolean currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
 
         // If the start timestamp is already at a region that is true, scan
         // first to find a place where the expression is false.
         while (currentValue) {
-            if (hint.forwardTimestamp == Long.MAX_VALUE)
-                return -1;  // End of trace
+            if (hint.forwardTimestamp == Long.MAX_VALUE) {
+                return -1; // End of trace
+            }
 
             currentTime = hint.forwardTimestamp;
-            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
         }
 
         // Scan to find where the expression is true
         while (!currentValue) {
-            if (hint.forwardTimestamp == Long.MAX_VALUE)
-                return -1;  // End of trace
+            if (hint.forwardTimestamp == Long.MAX_VALUE) {
+                return -1; // End of trace
+            }
 
             currentTime = hint.forwardTimestamp;
-            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
         }
 
         return currentTime;
@@ -83,54 +92,56 @@ public class Search {
     /// matches this search's expression If the startTimestamp is already
     /// in a match, it will jump to end of the previous region that matches.
     /// @returns
-    ///   -1 If there are no matches in the backward direction
-    ///      timestamp of the next backward match otherwise
+    /// -1 If there are no matches in the backward direction
+    /// timestamp of the next backward match otherwise
     ///
     public long getPreviousMatch(long startTimestamp) {
         SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
+        boolean currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
         while (currentValue) {
-            if (hint.backwardTimestamp == Long.MIN_VALUE)
-                return -1;  // End of trace
+            if (hint.backwardTimestamp == Long.MIN_VALUE) {
+                return -1; // End of trace
+            }
 
             currentTime = hint.backwardTimestamp;
-            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
         }
 
         while (!currentValue) {
-            if (hint.backwardTimestamp == Long.MIN_VALUE)
-                return -1;  // End of trace
+            if (hint.backwardTimestamp == Long.MIN_VALUE) {
+                return -1; // End of trace
+            }
 
             currentTime = hint.backwardTimestamp;
-            currentValue = fSearchExpression.evaluate(fTraceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
         }
 
         return currentTime;
     }
 
     public static class ParseException extends Exception {
-        ParseException(String what, int start, int end) {
+        private int startOffset;
+        private int endOffset;
+
+        ParseException(String what, int startOffset, int endOffset) {
             super(what);
-            fStartOffset = start;
-            fEndOffset = end;
+            this.startOffset = startOffset;
+            this.endOffset = endOffset;
         }
 
         public int getStartOffset() {
-            return fStartOffset;
+            return startOffset;
         }
 
         public int getEndOffset() {
-            return fEndOffset;
+            return endOffset;
         }
-
-        private int fStartOffset;
-        private int fEndOffset;
     }
 
     @Override
     public String toString() {
-        return fSearchExpression.toString();
+        return searchExpression.toString();
     }
 
     private static class Lexer {
@@ -144,19 +155,20 @@ public class Search {
         static final int TOK_NOT_EQUAL = 1007;
 
         private enum State {
-            SCAN_INIT,
-            SCAN_IDENTIFIER,
-            SCAN_LITERAL_TYPE,
-            SCAN_GEN_NUM,
-            SCAN_GREATER,
-            SCAN_LESS,
-            SCAN_BINARY,
-            SCAN_DECIMAL,
-            SCAN_HEXADECIMAL
+            SCAN_INIT, SCAN_IDENTIFIER, SCAN_LITERAL_TYPE, SCAN_GEN_NUM, SCAN_GREATER, SCAN_LESS, SCAN_BINARY,
+            SCAN_DECIMAL, SCAN_HEXADECIMAL
         }
 
+        private int lexerOffset;
+        private final StringBuilder currentTokenValue = new StringBuilder();
+        private int pushBackChar = -1;
+        private int pushBackToken = -1;
+        private int tokenStart;
+        private BitVector literalValue;
+        private String searchString;
+
         Lexer(String searchString) {
-            fSearchString = searchString;
+            this.searchString = searchString;
         }
 
         private static boolean isAlpha(int value) {
@@ -168,9 +180,7 @@ public class Search {
         }
 
         private static boolean isHexDigit(int value) {
-            return (value >= '0' && value <= '9')
-                   || (value >= 'a' && value <='f')
-                   || (value >= 'A' && value <= 'F');
+            return (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f') || (value >= 'A' && value <= 'F');
         }
 
         private static boolean isAlphaNum(int value) {
@@ -182,184 +192,177 @@ public class Search {
         }
 
         int nextToken() throws ParseException {
-            if (fPushBackToken != -1) {
-                int token = fPushBackToken;
-                fPushBackToken = -1;
+            if (pushBackToken != -1) {
+                int token = pushBackToken;
+                pushBackToken = -1;
                 return token;
             }
 
             State state = State.SCAN_INIT;
-            fCurrentTokenValue.setLength(0);
+            currentTokenValue.setLength(0);
 
             for (;;) {
                 int c;
 
-                if (fPushBackChar == -1) {
-                    if (fLexerOffset == fSearchString.length())
+                if (pushBackChar == -1) {
+                    if (lexerOffset == searchString.length()) {
                         c = -1;
-                    else
-                        c = fSearchString.charAt(fLexerOffset++);
+                    } else {
+                        c = searchString.charAt(lexerOffset++);
+                    }
                 } else {
-                    c = fPushBackChar;
-                    fPushBackChar = -1;
+                    c = pushBackChar;
+                    pushBackChar = -1;
                 }
 
                 switch (state) {
-                    case SCAN_INIT:
-                        fTokenStart = fLexerOffset - 1;
-                        if (c == -1)
-                            return TOK_END;
-                        else if (c == '\'')
-                            state = State.SCAN_LITERAL_TYPE;
-                        else if (isAlpha(c)) {
-                            fPushBackChar = c;
-                            state = State.SCAN_IDENTIFIER;
-                        } else if (isNum(c)) {
-                            fPushBackChar = c;
-                            state = State.SCAN_DECIMAL;
-                        } else if (c == '>')
-                            state = State.SCAN_GREATER;
-                        else if (c == '<')
-                            state = State.SCAN_LESS;
-                        else if (!isSpace(c))
-                            return c;
+                case SCAN_INIT:
+                    tokenStart = lexerOffset - 1;
+                    if (c == -1) {
+                        return TOK_END;
+                    } else if (c == '\'') {
+                        state = State.SCAN_LITERAL_TYPE;
+                    } else if (isAlpha(c)) {
+                        pushBackChar = c;
+                        state = State.SCAN_IDENTIFIER;
+                    } else if (isNum(c)) {
+                        pushBackChar = c;
+                        state = State.SCAN_DECIMAL;
+                    } else if (c == '>') {
+                        state = State.SCAN_GREATER;
+                    } else if (c == '<') {
+                        state = State.SCAN_LESS;
+                    } else if (!isSpace(c)) {
+                        return c;
+                    }
 
-                        break;
+                    break;
 
-                    case SCAN_GREATER:
-                        if (c == '<')
-                            return TOK_NOT_EQUAL;
-                        else if (c == '=')
-                            return TOK_GREATER_EQUAL;
-                        else {
-                            fPushBackChar = c;
-                            return TOK_GREATER;
-                        }
+                case SCAN_GREATER:
+                    if (c == '<') {
+                        return TOK_NOT_EQUAL;
+                    } else if (c == '=') {
+                        return TOK_GREATER_EQUAL;
+                    } else {
+                        pushBackChar = c;
+                        return TOK_GREATER;
+                    }
 
-                    case SCAN_LESS:
-                        if (c == '>')
-                            return TOK_NOT_EQUAL;
-                        else if (c == '=')
-                            return TOK_LESS_EQUAL;
-                        else {
-                            fPushBackChar = c;
-                            return TOK_LESS_THAN;
-                        }
+                case SCAN_LESS:
+                    if (c == '>') {
+                        return TOK_NOT_EQUAL;
+                    } else if (c == '=') {
+                        return TOK_LESS_EQUAL;
+                    } else {
+                        pushBackChar = c;
+                        return TOK_LESS_THAN;
+                    }
 
-                    case SCAN_IDENTIFIER:
-                        if (isAlphaNum(c) || c == '_' || c == '.')
-                            fCurrentTokenValue.append((char) c);
-                        else if (c == '(') {    // Start generate index
-                            fCurrentTokenValue.append((char) c);
-                            state = State.SCAN_GEN_NUM;
-                        }
-                        else {
-                            fPushBackChar = c;
-                            return TOK_IDENTIFIER;
-                        }
+                case SCAN_IDENTIFIER:
+                    if (isAlphaNum(c) || c == '_' || c == '.') {
+                        currentTokenValue.append((char) c);
+                    } else if (c == '(') { // Start generate index
+                        currentTokenValue.append((char) c);
+                        state = State.SCAN_GEN_NUM;
+                    } else {
+                        pushBackChar = c;
+                        return TOK_IDENTIFIER;
+                    }
 
-                        break;
+                    break;
 
-                    case SCAN_GEN_NUM:
-                        fCurrentTokenValue.append((char) c);
-                        if (c == ')')
-                            state = State.SCAN_IDENTIFIER;
+                case SCAN_GEN_NUM:
+                    currentTokenValue.append((char) c);
+                    if (c == ')') {
+                        state = State.SCAN_IDENTIFIER;
+                    }
 
-                        break;
+                    break;
 
+                case SCAN_LITERAL_TYPE:
+                    if (c == 'b') {
+                        state = State.SCAN_BINARY;
+                    } else if (c == 'h') {
+                        state = State.SCAN_HEXADECIMAL;
+                    } else if (c == 'd') {
+                        state = State.SCAN_DECIMAL;
+                    } else {
+                        throw new ParseException("unknown type " + (char) c, getTokenStart(), getTokenEnd());
+                    }
 
-                    case SCAN_LITERAL_TYPE:
-                        if (c == 'b')
-                            state = State.SCAN_BINARY;
-                        else if (c == 'h')
-                            state = State.SCAN_HEXADECIMAL;
-                        else if (c == 'd')
-                            state = State.SCAN_DECIMAL;
-                        else
-                            throw new ParseException("unknown type " + (char) c, getTokenStart(),
-                                getTokenEnd());
+                    break;
 
-                        break;
+                case SCAN_BINARY:
+                    if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z') {
+                        currentTokenValue.append((char) c);
+                    } else {
+                        literalValue = new BitVector(getTokenString(), 2);
+                        pushBackChar = c;
+                        return TOK_LITERAL;
+                    }
 
-                    case SCAN_BINARY:
-                        if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
-                            fCurrentTokenValue.append((char) c);
-                        else {
-                            fLiteralValue = new BitVector(getTokenString(), 2);
-                            fPushBackChar = c;
-                            return TOK_LITERAL;
-                        }
+                    break;
 
-                        break;
+                case SCAN_DECIMAL:
+                    if (c >= '0' && c <= '9') {
+                        currentTokenValue.append((char) c);
+                    } else {
+                        literalValue = new BitVector(getTokenString(), 10);
+                        pushBackChar = c;
+                        return TOK_LITERAL;
+                    }
 
-                    case SCAN_DECIMAL:
-                        if (c >= '0' && c <= '9')
-                            fCurrentTokenValue.append((char) c);
-                        else {
-                            fLiteralValue = new BitVector(getTokenString(), 10);
-                            fPushBackChar = c;
-                            return TOK_LITERAL;
-                        }
+                    break;
 
-                        break;
+                case SCAN_HEXADECIMAL:
+                    if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z') {
+                        currentTokenValue.append((char) c);
+                    } else {
+                        literalValue = new BitVector(getTokenString(), 16);
+                        pushBackChar = c;
+                        return TOK_LITERAL;
+                    }
 
-                    case SCAN_HEXADECIMAL:
-                        if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z')
-                            fCurrentTokenValue.append((char) c);
-                        else {
-                            fLiteralValue = new BitVector(getTokenString(), 16);
-                            fPushBackChar = c;
-                            return TOK_LITERAL;
-                        }
-
-                        break;
+                    break;
                 }
             }
         }
 
         void pushBackToken(int tok) {
-            fPushBackToken = tok;
+            pushBackToken = tok;
         }
 
         String getTokenString() {
-            return fCurrentTokenValue.toString();
+            return currentTokenValue.toString();
         }
 
         BitVector getLiteralValue() {
-            return fLiteralValue;
+            return literalValue;
         }
 
         int getTokenStart() {
-            return fTokenStart;
+            return tokenStart;
         }
 
         int getTokenEnd() {
-            if (fCurrentTokenValue.length() == 0)
-                return fTokenStart;
-            else
-                return fTokenStart + fCurrentTokenValue.length() - 1;
+            if (currentTokenValue.length() == 0) {
+                return tokenStart;
+            } else {
+                return tokenStart + currentTokenValue.length() - 1;
+            }
         }
-
-        private int fLexerOffset;
-        private StringBuilder fCurrentTokenValue = new StringBuilder();
-        private int fPushBackChar = -1;
-        private int fPushBackToken = -1;
-        private int fTokenStart;
-        private BitVector fLiteralValue;
-        private String fSearchString;
     }
 
     /// Read the next token and throw an exception if the type does
     /// not match the parameter.
     private void match(int tokenType) throws ParseException {
-        int got = fLexer.nextToken();
+        int got = lexer.nextToken();
         if (got != tokenType) {
-            if (got == Lexer.TOK_END)
-                throw new ParseException("unexpected end of string",
-                    fLexer.getTokenStart(), fLexer.getTokenEnd());
-            else
-                throw new ParseException("unexpected value",
-                    fLexer.getTokenStart(), fLexer.getTokenEnd());
+            if (got == Lexer.TOK_END) {
+                throw new ParseException("unexpected end of string", lexer.getTokenStart(), lexer.getTokenEnd());
+            } else {
+                throw new ParseException("unexpected value", lexer.getTokenStart(), lexer.getTokenEnd());
+            }
         }
     }
 
@@ -367,10 +370,9 @@ public class Search {
     /// the passed type. If not, push back the token and return false.
     /// @note this is case insensitive
     private boolean tryToMatch(String value) throws ParseException {
-        int lookahead = fLexer.nextToken();
-        if (lookahead != Lexer.TOK_IDENTIFIER
-            || !fLexer.getTokenString().equalsIgnoreCase(value)) {
-            fLexer.pushBackToken(lookahead);
+        int lookahead = lexer.nextToken();
+        if (lookahead != Lexer.TOK_IDENTIFIER || !lexer.getTokenString().equalsIgnoreCase(value)) {
+            lexer.pushBackToken(lookahead);
             return false;
         }
 
@@ -383,64 +385,67 @@ public class Search {
 
     private ExpressionNode parseOr() throws ParseException {
         ExpressionNode left = parseAnd();
-        while (tryToMatch("or"))
+        while (tryToMatch("or")) {
             left = new OrExpressionNode(left, parseAnd());
+        }
 
         return left;
     }
 
     private ExpressionNode parseAnd() throws ParseException {
         ExpressionNode left = parseCondition();
-        while (tryToMatch("and"))
+        while (tryToMatch("and")) {
             left = new AndExpressionNode(left, parseCondition());
+        }
 
         return left;
     }
 
     private ExpressionNode parseCondition() throws ParseException {
-        int lookahead = fLexer.nextToken();
+        int lookahead = lexer.nextToken();
         if (lookahead == '(') {
             ExpressionNode node = parseExpression();
             match(')');
             return node;
         }
 
-        fLexer.pushBackToken(lookahead);
+        lexer.pushBackToken(lookahead);
         ValueNode left = parseValue();
-        lookahead = fLexer.nextToken();
+        lookahead = lexer.nextToken();
         switch (lookahead) {
-            case Lexer.TOK_GREATER:
-                return new GreaterThanExpressionNode(left, parseValue());
-            case Lexer.TOK_GREATER_EQUAL:
-                return new GreaterEqualExpressionNode(left, parseValue());
-            case Lexer.TOK_LESS_THAN:
-                return new LessThanExpressionNode(left, parseValue());
-            case Lexer.TOK_LESS_EQUAL:
-                return new LessEqualExpressionNode(left, parseValue());
-            case Lexer.TOK_NOT_EQUAL:
-                return new NotEqualExpressionNode(left, parseValue());
-            case '=':
-                return new EqualExpressionNode(left, parseValue());
-            default:
-                // If there's not an operator, treat as != 0
-                fLexer.pushBackToken(lookahead);
-                return new NotEqualExpressionNode(left, new ConstValueNode(ZERO_VEC));
+        case Lexer.TOK_GREATER:
+            return new GreaterThanExpressionNode(left, parseValue());
+        case Lexer.TOK_GREATER_EQUAL:
+            return new GreaterEqualExpressionNode(left, parseValue());
+        case Lexer.TOK_LESS_THAN:
+            return new LessThanExpressionNode(left, parseValue());
+        case Lexer.TOK_LESS_EQUAL:
+            return new LessEqualExpressionNode(left, parseValue());
+        case Lexer.TOK_NOT_EQUAL:
+            return new NotEqualExpressionNode(left, parseValue());
+        case '=':
+            return new EqualExpressionNode(left, parseValue());
+        default:
+            // If there's not an operator, treat as != 0
+            lexer.pushBackToken(lookahead);
+            return new NotEqualExpressionNode(left, new ConstValueNode(ZERO_VEC));
         }
     }
 
     private ValueNode parseValue() throws ParseException {
-        int lookahead = fLexer.nextToken();
+        int lookahead = lexer.nextToken();
         if (lookahead == Lexer.TOK_IDENTIFIER) {
-            int netId = fTraceDataModel.findNet(fLexer.getTokenString());
-            if (netId < 0)
-                throw new ParseException("unknown net \"" + fLexer.getTokenString() + "\"",
-                    fLexer.getTokenStart(), fLexer.getTokenEnd());
+            int netId = traceDataModel.findNet(lexer.getTokenString());
+            if (netId < 0) {
+                throw new ParseException("unknown net \"" + lexer.getTokenString() + "\"", lexer.getTokenStart(),
+                        lexer.getTokenEnd());
+            }
 
-            return new NetValueNode(netId, fTraceDataModel.getNetWidth(netId));
+            return new NetValueNode(netId, traceDataModel.getNetWidth(netId));
         } else {
-            fLexer.pushBackToken(lookahead);
+            lexer.pushBackToken(lookahead);
             match(Lexer.TOK_LITERAL);
-            return new ConstValueNode(fLexer.getLiteralValue());
+            return new ConstValueNode(lexer.getLiteralValue());
         }
     }
 
@@ -451,50 +456,51 @@ public class Search {
 
     private abstract static class ExpressionNode {
         /// Determine if this subexpression is true at the passed timestamp.
-        /// @param timestamp Timestamp and which to evaluate.  If timestamp
-        ///  is at a transition, the value after the transition will be used
+        /// @param timestamp Timestamp and which to evaluate. If timestamp
+        /// is at a transition, the value after the transition will be used
         /// @param outHint Contains the next timestamp where the value of the
-        ///   expression may change. It is guaranteed that no transition will occur
-        ///   sooner than this value.
+        /// expression may change. It is guaranteed that no transition will occur
+        /// sooner than this value.
         /// @return
-        ///   - true if the value at the timestamp makes this expression true
-        ///   - false if the value at the timestamp makes this expression true
+        /// - true if the value at the timestamp makes this expression true
+        /// - false if the value at the timestamp makes this expression true
         abstract boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint);
     }
 
     private abstract static class BooleanExpressionNode extends ExpressionNode {
-        BooleanExpressionNode(ExpressionNode left, ExpressionNode right) {
-            fLeftChild = left;
-            fRightChild = right;
+        protected ExpressionNode leftChild;
+        protected ExpressionNode rightChild;
+
+        // These are preallocated for efficiency and aren't used outside
+        // the evaluate() call.
+        private SearchHint leftHint = new SearchHint();
+        private SearchHint rightHint = new SearchHint();
+
+        BooleanExpressionNode(ExpressionNode leftChild, ExpressionNode rightChild) {
+            this.leftChild = leftChild;
+            this.rightChild = rightChild;
         }
 
         @Override
         boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
-            boolean leftResult = fLeftChild.evaluate(model, timestamp, fLeftHint);
-            boolean rightResult = fRightChild.evaluate(model, timestamp, fRightHint);
+            boolean leftResult = leftChild.evaluate(model, timestamp, leftHint);
+            boolean rightResult = rightChild.evaluate(model, timestamp, rightHint);
 
             // Compute the hints, which are the soonest time this expression
             // *could* change value. Call the subclassed methods.
-            outHint.forwardTimestamp = nextHint(leftResult, rightResult,
-                fLeftHint.forwardTimestamp, fRightHint.forwardTimestamp, false);
-            outHint.backwardTimestamp = nextHint(leftResult, rightResult,
-                fLeftHint.backwardTimestamp, fRightHint.backwardTimestamp, true);
+            outHint.forwardTimestamp = nextHint(leftResult, rightResult, leftHint.forwardTimestamp,
+                    rightHint.forwardTimestamp, false);
+            outHint.backwardTimestamp = nextHint(leftResult, rightResult, leftHint.backwardTimestamp,
+                    rightHint.backwardTimestamp, true);
 
             // Return the result at this time
             return compareResults(leftResult, rightResult);
         }
 
         protected abstract boolean compareResults(boolean value1, boolean value2);
-        protected abstract long nextHint(boolean leftResult, boolean rightResult,
-            long nextLeftTimestamp, long nextRightTimestamp, boolean searchBackward);
 
-        protected ExpressionNode fLeftChild;
-        protected ExpressionNode fRightChild;
-
-        // These are preallocated for efficiency and aren't used outside
-        // the evaluate() call.
-        private SearchHint fLeftHint = new SearchHint();
-        private SearchHint fRightHint = new SearchHint();
+        protected abstract long nextHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
+                long nextRightTimestamp, boolean searchBackward);
     }
 
     private static class OrExpressionNode extends BooleanExpressionNode {
@@ -508,38 +514,39 @@ public class Search {
         }
 
         @Override
-        protected long nextHint(boolean leftResult, boolean rightResult,
-            long nextLeftTimestamp, long nextRightTimestamp, boolean searchBackward) {
+        protected long nextHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
+                long nextRightTimestamp, boolean searchBackward) {
 
             if (leftResult && rightResult) {
                 // Both expressions are true. The only way for this to become
                 // false is if both change to false.
-                if (searchBackward)
+                if (searchBackward) {
                     return Math.min(nextLeftTimestamp, nextRightTimestamp);
-                else
+                } else {
                     return Math.max(nextLeftTimestamp, nextRightTimestamp);
-            }
-            else if (leftResult) {
+                }
+            } else if (leftResult) {
                 // Currently true. It can only become false when left result
                 // becomes false.
                 return nextLeftTimestamp;
-            } else if (rightResult)  {
+            } else if (rightResult) {
                 // Currently true. It can only become false when right result
                 // becomes false.
                 return nextRightTimestamp;
             } else {
                 // Both expressions are false. May become true if either subexpression
                 // changes.
-                if (searchBackward)
+                if (searchBackward) {
                     return Math.max(nextLeftTimestamp, nextRightTimestamp);
-                else
+                } else {
                     return Math.min(nextLeftTimestamp, nextRightTimestamp);
+                }
             }
         }
 
         @Override
         public String toString() {
-            return "(or " + fLeftChild + " " + fRightChild + ")";
+            return "(or " + leftChild + " " + rightChild + ")";
         }
     }
 
@@ -554,130 +561,129 @@ public class Search {
         }
 
         @Override
-        protected long nextHint(boolean leftResult, boolean rightResult,
-            long nextLeftTimestamp, long nextRightTimestamp,
-            boolean searchBackward) {
+        protected long nextHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
+                long nextRightTimestamp, boolean searchBackward) {
 
             if (leftResult && rightResult) {
                 // Both expressions are true. Either expression changing
                 // could make it false.
-                if (searchBackward)
+                if (searchBackward) {
                     return Math.max(nextLeftTimestamp, nextRightTimestamp);
-                else
+                } else {
                     return Math.min(nextLeftTimestamp, nextRightTimestamp);
-            }
-            else if (leftResult) {
+                }
+            } else if (leftResult) {
                 // Currently false. It can only become true when right result
                 // becomes true.
                 return nextRightTimestamp;
-            } else if (rightResult)  {
+            } else if (rightResult) {
                 // Currently false. It can only become true when left result
                 // becomes true.
                 return nextLeftTimestamp;
             } else {
                 // Both expressions are false. Both must change before this
                 // may become true.
-                if (searchBackward)
+                if (searchBackward) {
                     return Math.min(nextLeftTimestamp, nextRightTimestamp);
-                else
+                } else {
                     return Math.max(nextLeftTimestamp, nextRightTimestamp);
+                }
             }
         }
 
         @Override
         public String toString() {
-            return "(and " + fLeftChild + " " + fRightChild + ")";
+            return "(and " + leftChild + " " + rightChild + ")";
         }
     }
 
     private abstract static class ValueNode {
-        abstract BitVector evaluate(TraceDataModel model, long timestamp,
-            SearchHint outHint);
+        abstract BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint);
     }
 
     private static class NetValueNode extends ValueNode {
+        private int netId;
+
+        // Preallocated for efficiency. This is returned by evaluate.
+        private BitVector value;
+
         NetValueNode(int netId, int width) {
-            fNetId = netId;
-            fValue = new BitVector(width);
+            this.netId = netId;
+            value = new BitVector(width);
         }
 
         @Override
         BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
-            Iterator<Transition> i = model.findTransition(fNetId, timestamp);
+            Iterator<Transition> i = model.findTransition(netId, timestamp);
             Transition t = i.next();
-            fValue.assign(t);
-            if (timestamp >= t.getTimestamp())
+            value.assign(t);
+            if (timestamp >= t.getTimestamp()) {
                 outHint.backwardTimestamp = t.getTimestamp() - 1;
-            else
+            } else {
                 outHint.backwardTimestamp = Long.MIN_VALUE;
+            }
 
             if (i.hasNext()) {
                 t = i.next();
                 outHint.forwardTimestamp = t.getTimestamp();
-            } else
+            } else {
                 outHint.forwardTimestamp = Long.MAX_VALUE;
+            }
 
-            return fValue;
+            return value;
         }
 
         @Override
         public String toString() {
-            return "net" + fNetId;
+            return "net" + netId;
         }
-
-        int fNetId;
-
-        // Preallocated for efficiency. This is returned by evaluate.
-        BitVector fValue = new BitVector();
     }
 
     private static class ConstValueNode extends ValueNode {
+        BitVector value;
+
         ConstValueNode(BitVector constValue) {
-            fValue = new BitVector(constValue);
+            value = new BitVector(constValue);
         }
 
         @Override
         BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
             outHint.backwardTimestamp = Long.MIN_VALUE;
             outHint.forwardTimestamp = Long.MAX_VALUE;
-            return fValue;
+            return value;
         }
 
         @Override
         public String toString() {
-            return fValue.toString();
+            return value.toString();
         }
-
-        BitVector fValue;
     }
 
     private abstract static class ComparisonExpressionNode extends ExpressionNode {
-        protected ComparisonExpressionNode(ValueNode left, ValueNode right) {
-            fLeftNode = left;
-            fRightNode = right;
+        protected ValueNode leftNode;
+        protected ValueNode rightNode;
+
+        // These are preallocated for efficiency and aren't used outside
+        // the evaluate() call.
+        private SearchHint leftHint = new SearchHint();
+        private SearchHint rightHint = new SearchHint();
+
+        protected ComparisonExpressionNode(ValueNode leftNode, ValueNode rightNode) {
+            this.leftNode = leftNode;
+            this.rightNode = rightNode;
         }
 
         @Override
         boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
-            BitVector leftValue = fLeftNode.evaluate(model, timestamp, fLeftHint);
-            BitVector rightValue = fRightNode.evaluate(model, timestamp, fRightHint);
+            BitVector leftValue = leftNode.evaluate(model, timestamp, leftHint);
+            BitVector rightValue = rightNode.evaluate(model, timestamp, rightHint);
             boolean result = doCompare(leftValue, rightValue);
-            outHint.backwardTimestamp = Math.max(fLeftHint.backwardTimestamp,
-                fRightHint.backwardTimestamp);
-            outHint.forwardTimestamp = Math.min(fLeftHint.forwardTimestamp,
-                fRightHint.forwardTimestamp);
+            outHint.backwardTimestamp = Math.max(leftHint.backwardTimestamp, rightHint.backwardTimestamp);
+            outHint.forwardTimestamp = Math.min(leftHint.forwardTimestamp, rightHint.forwardTimestamp);
             return result;
         }
 
         protected abstract boolean doCompare(BitVector value1, BitVector value2);
-
-        protected ValueNode fLeftNode;
-        protected ValueNode fRightNode;
-
-        // These are preallocated for efficiency and aren't used outside
-        // the evaluate() call.
-        private SearchHint fLeftHint = new SearchHint();
-        private SearchHint fRightHint = new SearchHint();
     }
 
     private static class EqualExpressionNode extends ComparisonExpressionNode {
@@ -692,7 +698,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(eq " + fLeftNode + " " + fRightNode + ")";
+            return "(eq " + leftNode + " " + rightNode + ")";
         }
     }
 
@@ -708,7 +714,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(ne " + fLeftNode + " " + fRightNode + ")";
+            return "(ne " + leftNode + " " + rightNode + ")";
         }
     }
 
@@ -724,7 +730,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(gt " + fLeftNode + " " + fRightNode + ")";
+            return "(gt " + leftNode + " " + rightNode + ")";
         }
     }
 
@@ -740,7 +746,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(ge " + fLeftNode + " " + fRightNode + ")";
+            return "(ge " + leftNode + " " + rightNode + ")";
         }
     }
 
@@ -756,7 +762,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(lt " + fLeftNode + " " + fRightNode + ")";
+            return "(lt " + leftNode + " " + rightNode + ")";
         }
     }
 
@@ -772,13 +778,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(le " + fLeftNode + " " + fRightNode + ")";
+            return "(le " + leftNode + " " + rightNode + ")";
         }
     }
-
-    private Lexer fLexer;
-    private TraceDataModel fTraceDataModel;
-    private ExpressionNode fSearchExpression;
-    private static final BitVector ZERO_VEC = new BitVector("0", 2);
 }
-

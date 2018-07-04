@@ -25,9 +25,10 @@ import javax.swing.table.AbstractTableModel;
 public class MarkerTableModel extends AbstractTableModel {
     private static final int NUM_COLUMNS = 3;
     private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
+    private TraceDisplayModel traceDisplayModel;
 
-    public MarkerTableModel(TraceDisplayModel model) {
-        fTraceDisplayModel = model;
+    public MarkerTableModel(TraceDisplayModel traceDisplayModel) {
+        this.traceDisplayModel = traceDisplayModel;
     }
 
     @Override
@@ -42,34 +43,31 @@ public class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return fTraceDisplayModel.getMarkerCount();
+        return traceDisplayModel.getMarkerCount();
     }
 
     @Override
     public Object getValueAt(int row, int col) {
         switch (col) {
-            case 0:
-                return Integer.toString(fTraceDisplayModel.getIdForMarker(row));
-            case 1:
-                // XXX add suffix with units here.
-                return Long.toString(fTraceDisplayModel.getTimestampForMarker(row));
-            case 2:
-                return fTraceDisplayModel.getDescriptionForMarker(row);
-            default:
-                return "";
+        case 0:
+            return Integer.toString(traceDisplayModel.getIdForMarker(row));
+        case 1:
+            // XXX add suffix with units here.
+            return Long.toString(traceDisplayModel.getTimestampForMarker(row));
+        case 2:
+            return traceDisplayModel.getDescriptionForMarker(row);
+        default:
+            return "";
         }
     }
 
     @Override
     public boolean isCellEditable(int row, int col) {
-        return col == 2;    // Can edit description
+        return col == 2; // Can edit description
     }
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        fTraceDisplayModel.setDescriptionForMarker(row, (String) value);
+        traceDisplayModel.setDescriptionForMarker(row, (String) value);
     }
-
-    private TraceDisplayModel fTraceDisplayModel;
 }
-

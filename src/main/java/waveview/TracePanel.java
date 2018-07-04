@@ -16,25 +16,34 @@
 
 package waveview;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JViewport;
 
 ///
 /// Container for the timescale view, net names, and waveforms.
 ///
 class TracePanel extends JPanel {
-    TracePanel(TraceDisplayModel displayModel, TraceDataModel dataModel) {
+    private WaveformPanel waveformPanel;
+    private NetNameList netNameList;
+    private TraceDisplayModel traceDisplayModel;
+
+    TracePanel(TraceDisplayModel traceDisplayModel, TraceDataModel traceDataModel) {
         super(new BorderLayout());
 
-        fTraceDisplayModel = displayModel;
-        fWaveformPanel = new WaveformPanel(displayModel, dataModel);
-        TimescalePanel timescalePanel = new TimescalePanel(displayModel,
-            dataModel);
-        JScrollPane scrollPane = new JScrollPane(fWaveformPanel);
+        this.traceDisplayModel = traceDisplayModel;
+        waveformPanel = new WaveformPanel(traceDisplayModel, traceDataModel);
+        TimescalePanel timescalePanel = new TimescalePanel(traceDisplayModel, traceDataModel);
+        JScrollPane scrollPane = new JScrollPane(waveformPanel);
         scrollPane.setColumnHeaderView(timescalePanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(DrawMetrics.WAVEFORM_HEIGHT);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(DrawMetrics.MIN_MINOR_TICK_H_SPACE);
@@ -43,10 +52,10 @@ class TracePanel extends JPanel {
         // and it simplifies the net name layout if we don't need to worry about
         // the wave view changing size.
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        fNetNameList = new NetNameList(displayModel, dataModel);
+        netNameList = new NetNameList(traceDisplayModel, traceDataModel);
 
         JViewport netNameViewport = new JViewport();
-        netNameViewport.setView(fNetNameList);
+        netNameViewport.setView(netNameList);
         JPanel netNameBorder = new JPanel(new BorderLayout());
         netNameBorder.setBorder(BorderFactory.createLineBorder(Color.black));
         netNameBorder.add(netNameViewport, BorderLayout.CENTER);
@@ -54,13 +63,12 @@ class TracePanel extends JPanel {
         // Need to make sure the net name view is the same size as the waveform view
         // so scrolling will work correctly (otherwise they will be out of sync).
         JPanel netNameContainer = new JPanel(new BorderLayout());
-        netNameContainer.add(Box.createVerticalStrut(timescalePanel.getPreferredSize().height),
-            BorderLayout.NORTH);
+        netNameContainer.add(Box.createVerticalStrut(timescalePanel.getPreferredSize().height), BorderLayout.NORTH);
         netNameContainer.add(netNameBorder, BorderLayout.CENTER);
-        netNameContainer.add(Box.createVerticalStrut(scrollPane.getHorizontalScrollBar()
-            .getPreferredSize().height), BorderLayout.SOUTH);
+        netNameContainer.add(Box.createVerticalStrut(scrollPane.getHorizontalScrollBar().getPreferredSize().height),
+                BorderLayout.SOUTH);
 
-        // To allow resizing the net name view,  put it in the left half of a split pane
+        // To allow resizing the net name view, put it in the left half of a split pane
         // rather than setting it as the scroll pane's row header. Add a listener for
         // the vertical scrollbar that also controls the net name view.
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, netNameContainer, scrollPane);
@@ -77,63 +85,59 @@ class TracePanel extends JPanel {
             public void adjustmentValueChanged(AdjustmentEvent ae) {
                 // Need to repaint when scrolling because values on partially visible
                 // nets will be centered.
-                fWaveformPanel.repaint();
+                waveformPanel.repaint();
             }
         });
     }
 
     void zoomIn() {
-        setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() * 1.25);
+        setScaleKeepCentered(traceDisplayModel.getHorizontalScale() * 1.25);
     }
 
     void zoomOut() {
-        setScaleKeepCentered(fTraceDisplayModel.getHorizontalScale() * 0.8);
+        setScaleKeepCentered(traceDisplayModel.getHorizontalScale() * 0.8);
     }
 
     void setScaleKeepCentered(double newScale) {
-        Rectangle oldVisibleRect = fWaveformPanel.getVisibleRect();
-        long centerTimestamp = (long)((oldVisibleRect.x + oldVisibleRect.width / 2)
-            / fTraceDisplayModel.getHorizontalScale());
+        Rectangle oldVisibleRect = waveformPanel.getVisibleRect();
+        long centerTimestamp = (long) ((oldVisibleRect.x + oldVisibleRect.width / 2)
+                / traceDisplayModel.getHorizontalScale());
 
-        fTraceDisplayModel.setHorizontalScale(newScale);
+        traceDisplayModel.setHorizontalScale(newScale);
 
         // Scroll to new center timestamp
-        int centerX = (int)(centerTimestamp * newScale);
-        Rectangle newVisibleRect = fWaveformPanel.getVisibleRect();
+        int centerX = (int) (centerTimestamp * newScale);
+        Rectangle newVisibleRect = waveformPanel.getVisibleRect();
         newVisibleRect.x = centerX - newVisibleRect.width / 2;
 
-        fWaveformPanel.scrollRectToVisible(newVisibleRect);
+        waveformPanel.scrollRectToVisible(newVisibleRect);
     }
 
     void zoomToSelection() {
         // Determine what the new size of the selection window should be.
-        double oldScale = fTraceDisplayModel.getHorizontalScale();
-        long selectionStartTimestamp = fTraceDisplayModel.getSelectionStart();
-        long cursorPositionTimestamp = fTraceDisplayModel.getCursorPosition();
+        double oldScale = traceDisplayModel.getHorizontalScale();
+        long selectionStartTimestamp = traceDisplayModel.getSelectionStart();
+        long cursorPositionTimestamp = traceDisplayModel.getCursorPosition();
         if (selectionStartTimestamp == cursorPositionTimestamp)
-            return;    // Will do bad things otherwise
+            return; // Will do bad things otherwise
 
         long lowTimestamp = Math.min(selectionStartTimestamp, cursorPositionTimestamp);
         long highTimestamp = Math.max(selectionStartTimestamp, cursorPositionTimestamp);
-        int left = (int)(lowTimestamp * oldScale);
-        int right = (int)(highTimestamp * oldScale);
+        int left = (int) (lowTimestamp * oldScale);
+        int right = (int) (highTimestamp * oldScale);
         int selectionWidth = right - left;
-        int windowWidth = fWaveformPanel.getVisibleRect().width;
+        int windowWidth = waveformPanel.getVisibleRect().width;
 
         double newScale = oldScale * ((double) windowWidth / selectionWidth);
-        fTraceDisplayModel.setHorizontalScale(newScale);
+        traceDisplayModel.setHorizontalScale(newScale);
 
-        Rectangle newRect = fWaveformPanel.getVisibleRect();
-        newRect.x = (int)(lowTimestamp * newScale);
-        newRect.width = (int)(highTimestamp * newScale) - newRect.x;
-        fWaveformPanel.scrollRectToVisible(newRect);
+        Rectangle newRect = waveformPanel.getVisibleRect();
+        newRect.x = (int) (lowTimestamp * newScale);
+        newRect.width = (int) (highTimestamp * newScale) - newRect.x;
+        waveformPanel.scrollRectToVisible(newRect);
     }
 
     int[] getSelectedNets() {
-        return fNetNameList.getSelectedIndices();
+        return netNameList.getSelectedIndices();
     }
-
-    private WaveformPanel fWaveformPanel;
-    private NetNameList fNetNameList;
-    private TraceDisplayModel fTraceDisplayModel;
 }

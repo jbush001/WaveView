@@ -16,12 +16,7 @@
 
 package waveview;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import java.util.ArrayList;
 
 ///
 /// TraceDisplayModel contains visible state for a waveform capture
@@ -29,12 +24,28 @@ import java.net.*;
 ///
 
 public class TraceDisplayModel {
+    private final ArrayList<Listener> traceListeners = new ArrayList<>();
+    private ArrayList<NetViewModel> visibleNets = new ArrayList<>();
+    private final ArrayList<NetSet> netSets = new ArrayList<>();
+    private long cursorPosition;
+    private long selectionStart;
+    private double horizontalScale; // Pixels per time units
+    private boolean adjustingCursor;
+    private final SortedArrayList<Marker> markers = new SortedArrayList<>();
+    private int nextMarkerId = 1;
+    private long minorTickInterval;
+
     public interface Listener {
         void cursorChanged(long oldTimestamp, long newTimestamp);
+
         void netsAdded(int firstIndex, int lastIndex);
+
         void netsRemoved(int firstIndex, int lastIndex);
+
         void scaleChanged(double newScale);
+
         void markerChanged(long timestamp);
+
         void formatChanged(int index);
     };
 
@@ -43,189 +54,196 @@ public class TraceDisplayModel {
     }
 
     public void clear() {
-        int oldSize = fVisibleNets.size();
+        int oldSize = visibleNets.size();
 
-        fVisibleNets.clear();
-        fMarkers.clear();
-        fNetSets.clear();
-        for (Listener listener : fTraceListeners)
+        visibleNets.clear();
+        markers.clear();
+        netSets.clear();
+        for (Listener listener : traceListeners) {
             listener.netsRemoved(0, oldSize);
+        }
     }
 
     public void addListener(Listener listener) {
-        fTraceListeners.add(listener);
+        traceListeners.add(listener);
     }
 
     // @param scale Pixels per time unit
     public void setHorizontalScale(double scale) {
-        fHorizontalScale = scale;
-        fMinorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(
-            DrawMetrics.MIN_MINOR_TICK_H_SPACE / scale)));
-        if (fMinorTickInterval <= 0)
-            fMinorTickInterval = 1;
+        horizontalScale = scale;
+        minorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(DrawMetrics.MIN_MINOR_TICK_H_SPACE / scale)));
+        if (minorTickInterval <= 0) {
+            minorTickInterval = 1;
+        }
 
-        for (Listener listener : fTraceListeners)
+        for (Listener listener : traceListeners) {
             listener.scaleChanged(scale);
+        }
     }
 
     // @returns Pixels per time unit
     public double getHorizontalScale() {
-        return fHorizontalScale;
+        return horizontalScale;
     }
 
     // @returns Duration between horizontal ticks, in time units
     public long getMinorTickInterval() {
-        return fMinorTickInterval;
+        return minorTickInterval;
     }
 
     public void makeNetVisible(int netId) {
-        makeNetVisible(fVisibleNets.size(), netId);
+        makeNetVisible(visibleNets.size(), netId);
     }
 
     public void makeNetVisible(int aboveIndex, int netId) {
-        fVisibleNets.add(aboveIndex, new NetViewModel(netId));
-        for (Listener listener : fTraceListeners) {
-            listener.netsAdded(fVisibleNets.size() - 1,
-                               fVisibleNets.size() - 1);
+        visibleNets.add(aboveIndex, new NetViewModel(netId));
+        for (Listener listener : traceListeners) {
+            listener.netsAdded(visibleNets.size() - 1, visibleNets.size() - 1);
         }
     }
 
     public void removeNet(int listIndex) {
-        fVisibleNets.remove(listIndex);
-        for (Listener listener : fTraceListeners)
+        visibleNets.remove(listIndex);
+        for (Listener listener : traceListeners) {
             listener.netsRemoved(listIndex, listIndex);
+        }
     }
 
     public void removeAllNets() {
-        int oldSize = fVisibleNets.size();
-        fVisibleNets.clear();
+        int oldSize = visibleNets.size();
+        visibleNets.clear();
         if (oldSize > 0) {
-            for (Listener listener : fTraceListeners)
+            for (Listener listener : traceListeners) {
                 listener.netsRemoved(0, oldSize - 1);
+            }
         }
     }
 
     public void moveNets(int[] fromIndices, int insertionPoint) {
         NetViewModel[] nets = new NetViewModel[fromIndices.length];
         for (int i = fromIndices.length - 1; i >= 0; i--) {
-            nets[i] = fVisibleNets.get(fromIndices[i]);
+            nets[i] = visibleNets.get(fromIndices[i]);
             removeNet(fromIndices[i]);
-            if (fromIndices[i] < insertionPoint)
+            if (fromIndices[i] < insertionPoint) {
                 insertionPoint--;
+            }
         }
 
-        // Add rows at the new location
-        for (NetViewModel net : nets)
-            fVisibleNets.add(insertionPoint++, net);
+        for (NetViewModel net : nets) {
+            visibleNets.add(insertionPoint++, net);
+        }
 
-        for (Listener listener : fTraceListeners) {
-            listener.netsAdded(insertionPoint - fromIndices.length,
-                               insertionPoint - 1);
+        for (Listener listener : traceListeners) {
+            listener.netsAdded(insertionPoint - fromIndices.length, insertionPoint - 1);
         }
     }
 
     public int getVisibleNetCount() {
-        return fVisibleNets.size();
+        return visibleNets.size();
     }
 
     /// Return mapping of visible order to internal index
     /// @param index Index of net in order displayed in net list
     /// @returns netID (as referenced in TraceDataModel)
     public int getVisibleNet(int index) {
-        return fVisibleNets.get(index).fIndex;
+        return visibleNets.get(index).index;
     }
 
     public void setValueFormatter(int listIndex, ValueFormatter formatter) {
-        fVisibleNets.get(listIndex).fFormatter = formatter;
-        for (Listener listener : fTraceListeners)
+        visibleNets.get(listIndex).formatter = formatter;
+        for (Listener listener : traceListeners) {
             listener.formatChanged(listIndex);
+        }
     }
 
     public ValueFormatter getValueFormatter(int listIndex) {
-        return fVisibleNets.get(listIndex).fFormatter;
+        return visibleNets.get(listIndex).formatter;
     }
 
     public int getNetSetCount() {
-        return fNetSets.size();
+        return netSets.size();
     }
 
     public String getNetSetName(int index) {
-        return fNetSets.get(index).fName;
+        return netSets.get(index).name;
     }
 
     public void selectNetSet(int index) {
-        int oldSize = fVisibleNets.size();
+        int oldSize = visibleNets.size();
 
-        fVisibleNets = new ArrayList<NetViewModel>(fNetSets.get(index).fVisibleNets);
+        visibleNets = new ArrayList<NetViewModel>(netSets.get(index).visibleNets);
 
         // @todo There is probably a more efficient way to do this
-        for (Listener listener : fTraceListeners) {
+        for (Listener listener : traceListeners) {
             listener.netsRemoved(0, oldSize);
-            listener.netsAdded(0, fVisibleNets.size() - 1);
+            listener.netsAdded(0, visibleNets.size() - 1);
         }
     }
 
     /// Saves the current view configuration as a named net set
     public void saveNetSet(String name) {
-        NetSet newNetSet = new NetSet(name, fVisibleNets);
+        NetSet newNetSet = new NetSet(name, visibleNets);
 
         // Determine if we should save over an existing net set...
         boolean found = false;
         for (int i = 0; i < getNetSetCount(); i++) {
             if (getNetSetName(i).equals(name)) {
-                fNetSets.set(i, newNetSet);
+                netSets.set(i, newNetSet);
                 found = true;
                 break;
             }
         }
 
         if (!found)
-            fNetSets.add(newNetSet);
+            netSets.add(newNetSet);
     }
 
     public long getCursorPosition() {
-        return fCursorPosition;
+        return cursorPosition;
     }
 
     public void setCursorPosition(long timestamp) {
-        long old = fCursorPosition;
-        fCursorPosition = timestamp;
-        for (Listener listener : fTraceListeners)
+        long old = cursorPosition;
+        cursorPosition = timestamp;
+        for (Listener listener : traceListeners) {
             listener.cursorChanged(old, timestamp);
+        }
     }
 
-    // This is used to display the timestamp at the top of the cursor when the user is dragging.
+    // This is used to display the timestamp at the top of the cursor when the user
+    // is dragging.
     public void setAdjustingCursor(boolean adjust) {
-        fAdjustingCursor = adjust;
+        adjustingCursor = adjust;
 
         /// @bug This is a hacky way to force everyone to update, but has odd
-        /// side effects if it is done in the wrong order.  There should most
+        /// side effects if it is done in the wrong order. There should most
         /// likely be another way to do this, like, for example, another event
         /// to notify clients that the cursor is in the adjusting state.
-        setCursorPosition(fCursorPosition);
+        setCursorPosition(cursorPosition);
     }
 
     public boolean isAdjustingCursor() {
-        return fAdjustingCursor;
+        return adjustingCursor;
     }
 
     public long getSelectionStart() {
-        return fSelectionStart;
+        return selectionStart;
     }
 
     public void setSelectionStart(long timestamp) {
-        fSelectionStart = timestamp;
+        selectionStart = timestamp;
     }
 
     public void removeAllMarkers() {
-        fMarkers.clear();
+        markers.clear();
         notifyMarkerChanged(-1);
-        fNextMarkerId = 1;
+        nextMarkerId = 1;
     }
 
     private void notifyMarkerChanged(long timestamp) {
-        for (Listener listener : fTraceListeners)
+        for (Listener listener : traceListeners) {
             listener.markerChanged(timestamp);
+        }
     }
 
     // XXX clients of this just call getCursorPosition and pass that
@@ -234,39 +252,41 @@ public class TraceDisplayModel {
     // we detect that somehow?
     public void addMarker(String description, long timestamp) {
         Marker marker = new Marker();
-        marker.fId = fNextMarkerId++;
-        marker.fDescription = description;
-        marker.fTimestamp = timestamp;
+        marker.id = nextMarkerId++;
+        marker.description = description;
+        marker.timestamp = timestamp;
 
-        fMarkers.add(marker);
+        markers.add(marker);
         notifyMarkerChanged(timestamp);
     }
 
     public int getMarkerAtTime(long timestamp) {
-        return fMarkers.findIndex(timestamp);
+        return markers.findIndex(timestamp);
     }
 
     /// @returns -1 if no marker was found near this timestamp. The index
-    ///    into the list of markers otherwise.
+    /// into the list of markers otherwise.
     private int findMarkerNear(long timestamp) {
-        if (fMarkers.size() == 0)
+        if (markers.size() == 0) {
             return -1;
+        }
 
         // Because it's hard to click exactly on the marker, allow removing
         // markers a few pixels to the right or left of the current cursor.
-        final long MARKER_REMOVE_SLACK = (long)(5.0 / getHorizontalScale());
+        final long MARKER_REMOVE_SLACK = (long) (5.0 / getHorizontalScale());
 
-        int index = fMarkers.findIndex(timestamp);
-        long targetTimestamp = fMarkers.get(index).fTimestamp;
+        int index = markers.findIndex(timestamp);
+        long targetTimestamp = markers.get(index).timestamp;
 
         // The lookup function sometimes rounds to the lower marker, so
         // check both the current marker and the next one.
-        if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK)
+        if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
             return index;
-        else if (index < fMarkers.size() - 1) {
-            targetTimestamp = fMarkers.get(index + 1).fTimestamp;
-            if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK)
+        } else if (index < markers.size() - 1) {
+            targetTimestamp = markers.get(index + 1).timestamp;
+            if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
                 return index + 1;
+            }
         }
 
         return -1;
@@ -275,34 +295,34 @@ public class TraceDisplayModel {
     public void removeMarkerAtTime(long timestamp) {
         int index = findMarkerNear(timestamp);
         if (index != -1) {
-            long actualTimestamp = fMarkers.get(index).fTimestamp;
-            fMarkers.remove(index);
+            long actualTimestamp = markers.get(index).timestamp;
+            markers.remove(index);
             notifyMarkerChanged(actualTimestamp);
         }
     }
 
     public String getDescriptionForMarker(int index) {
-        return fMarkers.get(index).fDescription;
+        return markers.get(index).description;
     }
 
     public void setDescriptionForMarker(int index, String description) {
-        fMarkers.get(index).fDescription = description;
+        markers.get(index).description = description;
     }
 
     public long getTimestampForMarker(int index) {
-        return fMarkers.get(index).fTimestamp;
+        return markers.get(index).timestamp;
     }
 
     public int getIdForMarker(int index) {
-        return fMarkers.get(index).fId;
+        return markers.get(index).id;
     }
 
     public int getMarkerCount() {
-        return fMarkers.size();
+        return markers.size();
     }
 
     public void prevMarker(boolean extendSelection) {
-        int id = getMarkerAtTime(getCursorPosition());    // Rounds back
+        int id = getMarkerAtTime(getCursorPosition()); // Rounds back
         long timestamp = getTimestampForMarker(id);
         if (timestamp >= getCursorPosition() && id > 0) {
             id--;
@@ -310,12 +330,13 @@ public class TraceDisplayModel {
         }
 
         setCursorPosition(timestamp);
-        if (!extendSelection)
+        if (!extendSelection) {
             setSelectionStart(timestamp);
+        }
     }
 
     public void nextMarker(boolean extendSelection) {
-        int id = getMarkerAtTime(getCursorPosition());    // Rounds back
+        int id = getMarkerAtTime(getCursorPosition()); // Rounds back
         if (id < getMarkerCount() - 1) {
             long timestamp = getTimestampForMarker(id);
             if (timestamp <= getCursorPosition()) {
@@ -324,51 +345,39 @@ public class TraceDisplayModel {
             }
 
             setCursorPosition(timestamp);
-            if (!extendSelection)
+            if (!extendSelection) {
                 setSelectionStart(timestamp);
+            }
         }
     }
 
     private static class Marker implements SortedArrayList.Keyed {
+        int id;
+        String description;
+        long timestamp;
+
         @Override
         public long getKey() {
-            return fTimestamp;
+            return timestamp;
         }
-
-        int fId;
-        String fDescription;
-        long fTimestamp;
     }
 
     private static class NetSet {
-        NetSet(String name, ArrayList<NetViewModel> visibleNets) {
-            fName = name;
-            fVisibleNets = new ArrayList<NetViewModel>(visibleNets);
-        }
+        ArrayList<NetViewModel> visibleNets;
+        private String name;
 
-        private String fName;
-        private ArrayList<NetViewModel> fVisibleNets;
+        NetSet(String name, ArrayList<NetViewModel> visibleNets) {
+            this.name = name;
+            this.visibleNets = new ArrayList<NetViewModel>(visibleNets);
+        }
     }
 
     private static class NetViewModel {
+        private int index;
+        private ValueFormatter formatter = new HexadecimalValueFormatter();
+
         NetViewModel(int index) {
-            fIndex = index;
+            this.index = index;
         }
-
-        private int fIndex;
-        private ValueFormatter fFormatter = new HexadecimalValueFormatter();
     }
-
-    private ArrayList<Listener> fTraceListeners = new ArrayList<Listener>();
-    private ArrayList<NetViewModel> fVisibleNets = new ArrayList<NetViewModel>();
-    private ArrayList<NetSet> fNetSets = new ArrayList<NetSet>();
-    private long fCursorPosition;
-    private long fSelectionStart;
-    private double fHorizontalScale; // Pixels per time units
-    private boolean fAdjustingCursor;
-    private SortedArrayList<Marker> fMarkers = new SortedArrayList<Marker>();
-    private int fNextMarkerId = 1;
-    private long fMinorTickInterval;
 }
-
-

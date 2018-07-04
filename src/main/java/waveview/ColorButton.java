@@ -16,11 +16,19 @@
 
 package waveview;
 
-import java.awt.*;
-import javax.swing.*;
-import java.awt.event.*;
+import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.JPanel;
+import javax.swing.JColorChooser;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.FontMetrics;
 
 class ColorButton extends JPanel {
+    private Color color;
+    private String label;
+
     ColorButton(String label, Color initialColor) {
         setPreferredSize(new Dimension(180, DrawMetrics.COLOR_BUTTON_HEIGHT));
         addMouseListener(new MouseAdapter() {
@@ -30,42 +38,38 @@ class ColorButton extends JPanel {
             }
         });
 
-        fLabel = label;
-        fColor = initialColor;
+        this.label = label;
+        color = initialColor;
     }
 
     Color getColor() {
-        return fColor;
+        return color;
     }
 
     private void showColorChooser() {
-        Color newColor = JColorChooser.showDialog(this, "Color", fColor);
-        if (newColor != null)
-            fColor = newColor;
+        Color newColor = JColorChooser.showDialog(this, "Color", color);
+        if (newColor != null) {
+            color = newColor;
+        }
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         FontMetrics metrics = g.getFontMetrics();
-        int fontBaseline = (DrawMetrics.COLOR_BUTTON_HEIGHT + metrics.getHeight()) / 2
-            - metrics.getDescent();
+        int fontBaseline = (DrawMetrics.COLOR_BUTTON_HEIGHT + metrics.getHeight()) / 2 - metrics.getDescent();
 
-        g.setColor(fColor);
+        g.setColor(color);
         g.fillRect(DrawMetrics.COLOR_BUTTON_INSET * 2, DrawMetrics.COLOR_BUTTON_INSET * 2,
-            DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
-            DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
+                DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
+                DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
 
         g.setColor(Color.black);
         g.drawRect(DrawMetrics.COLOR_BUTTON_INSET * 2, DrawMetrics.COLOR_BUTTON_INSET * 2,
-            DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
-            DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
+                DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
+                DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
         g.drawRect(DrawMetrics.COLOR_BUTTON_INSET, DrawMetrics.COLOR_BUTTON_INSET,
-            DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 2,
-            DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 2);
-        g.drawString(fLabel, DrawMetrics.COLOR_BUTTON_INSET + DrawMetrics.COLOR_BUTTON_WIDTH,
-            fontBaseline);
+                DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 2,
+                DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 2);
+        g.drawString(label, DrawMetrics.COLOR_BUTTON_INSET + DrawMetrics.COLOR_BUTTON_WIDTH, fontBaseline);
     }
-
-    private Color fColor;
-    private String fLabel;
 }

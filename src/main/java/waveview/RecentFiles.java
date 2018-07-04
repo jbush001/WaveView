@@ -20,28 +20,31 @@ import java.util.ArrayList;
 
 public class RecentFiles {
     private static final int MAX_FILES = 10;
+    private final ArrayList<String> files = new ArrayList<>();
 
     public void add(String path) {
-        int index = fFiles.indexOf(path);
+        int index = files.indexOf(path);
         if (index == -1) {
             // Need to add a new entry. Discard the oldest entry if
             // necessary
-            if (fFiles.size() == MAX_FILES)
-                fFiles.remove(MAX_FILES - 1);
+            if (files.size() == MAX_FILES) {
+                files.remove(MAX_FILES - 1);
+            }
         } else {
             // Existing entry. Remove from old location. It will be
             // added to the beginning of the list.
-            fFiles.remove(index);
+            files.remove(index);
         }
 
-        fFiles.add(0, path);
+        files.add(0, path);
     }
 
     public String pack() {
         StringBuilder packed = new StringBuilder();
-        for (String file : fFiles) {
-            if (packed.length() > 0)
+        for (String file : files) {
+            if (packed.length() > 0) {
                 packed.append(';');
+            }
 
             packed.append(file);
         }
@@ -50,13 +53,12 @@ public class RecentFiles {
     }
 
     public void unpack(String packed) {
-        for (String path : packed.split(";"))
-            fFiles.add(path);
+        for (String path : packed.split(";", 0)) {
+            files.add(path);
+        }
     }
 
     public ArrayList<String> getList() {
-        return fFiles;
+        return files;
     }
-
-    private ArrayList<String> fFiles = new ArrayList<>();
 }

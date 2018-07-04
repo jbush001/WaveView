@@ -16,63 +16,70 @@
 
 package waveview;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.text.*;
-import java.io.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /// @todo Add menu item to jump to specific timestamp
 public class MainWindow extends JPanel implements ActionListener {
+    private TracePanel tracePanel;
+    private TraceDisplayModel traceDisplayModel = new TraceDisplayModel();
+    private TraceDataModel traceDataModel = new TraceDataModel();
+    private Search currentSearch;
+    private JMenu netMenu;
+    private JFrame frame;
+    private JMenu recentFilesMenu;
+    private TraceSettingsFile traceSettingsFile;
+    private File currentTraceFile;
+    private NetSearchPanel netSearchPane;
+    private final RecentFiles recentFiles = new RecentFiles();
+
     public MainWindow() {
         super(new BorderLayout());
 
         JToolBar toolBar = new JToolBar();
-        JButton button = new JButton(loadResourceIcon("net-search.png"));
-        button.setActionCommand("addnet");
-        button.addActionListener(this);
-        button.setToolTipText("Add nets");
-        toolBar.add(button);
-
-        button = new JButton(loadResourceIcon("zoom-in.png"));
-        button.setActionCommand("zoomin");
-        button.addActionListener(this);
-        button.setToolTipText("Zoom In");
-        toolBar.add(button);
-
-        button = new JButton(loadResourceIcon("zoom-out.png"));
-        button.setActionCommand("zoomout");
-        button.addActionListener(this);
-        button.setToolTipText("Zoom Out");
-        toolBar.add(button);
-
-        button = new JButton(loadResourceIcon("zoom-selection.png"));
-        button.setActionCommand("zoomselection");
-        button.addActionListener(this);
-        button.setToolTipText("Zoom to selected region");
-        toolBar.add(button);
-
-        button = new JButton(loadResourceIcon("add-marker.png"));
-        button.setActionCommand("insertMarker");
-        button.addActionListener(this);
-        button.setToolTipText("Insert Marker");
-        toolBar.add(button);
-
-        button = new JButton(loadResourceIcon("remove-marker.png"));
-        button.setActionCommand("removeMarker");
-        button.addActionListener(this);
-        button.setToolTipText("Remove Marker");
-        toolBar.add(button);
-
         add(toolBar, BorderLayout.PAGE_START);
+        toolBar.add(createButton("net-search.png", "Add Nets", "addnet"));
+        toolBar.add(createButton("zoom-in.png", "Zoom In", "zoomin"));
+        toolBar.add(createButton("zoom-out.png", "Zoom Out", "zoomout"));
+        toolBar.add(createButton("zoom-selection.png", "Zoom to selected region", "zoomselection"));
+        toolBar.add(createButton("add-marker.png", "Insert Marker", "insertMarker"));
+        toolBar.add(createButton("remove-marker.png", "Remove Marker", "removeMarker"));
 
-        fTracePanel = new TracePanel(fTraceDisplayModel, fTraceDataModel);
-        add(fTracePanel, BorderLayout.CENTER);
+        tracePanel = new TracePanel(traceDisplayModel, traceDataModel);
+        add(tracePanel, BorderLayout.CENTER);
 
-        fRecentFiles.unpack(AppPreferences.getInstance().getRecentList());
+        recentFiles.unpack(AppPreferences.getInstance().getRecentList());
 
-        setPreferredSize(new Dimension(900,600));
+        setPreferredSize(new Dimension(900, 600));
+    }
+
+    private JButton createButton(String iconName, String toolTipText, String command) {
+        JButton button = new JButton(loadResourceIcon(iconName));
+        button.setActionCommand(command);
+        button.addActionListener(this);
+        button.setToolTipText(toolTipText);
+        return button;
     }
 
     private ImageIcon loadResourceIcon(String name) {
@@ -83,118 +90,148 @@ public class MainWindow extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         switch (cmd) {
-            case "zoomin":
-                fTracePanel.zoomIn();
-                break;
-            case "zoomout":
-                fTracePanel.zoomOut();
-                break;
-            case "zoomselection":
-                fTracePanel.zoomToSelection();
-                break;
-            case "addnet":
-                if (fNetSearchPane == null) {
-                    /// @bug This is a hack.  It makes sure the search
-                    /// panel is created after the file is loaded.
-                    fNetSearchPane = new NetSearchPanel(fTraceDataModel);
-                    add(fNetSearchPane, BorderLayout.WEST);
-
-                    /// @bug Bigger hack: for some reason it doesn't show up
-                    /// unless I do this.
-                    fNetSearchPane.setVisible(false);
-                    fNetSearchPane.setVisible(true);
-                } else {
-                    // Hide or show the search panel
-                    fNetSearchPane.setVisible(!fNetSearchPane.isVisible());
-                }
-
-                break;
-            case "opentrace":
-                JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialTraceDirectory());
-                chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                chooser.setMultiSelectionEnabled(false);
-                int returnValue = chooser.showOpenDialog(this);
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    AppPreferences.getInstance().setInitialTraceDirectory(
-                        chooser.getSelectedFile().getParentFile());
-                    loadTraceFile(chooser.getSelectedFile());
-                }
-
-                break;
-            case "reloadtrace":
-                loadTraceFile(fCurrentTraceFile);
-                break;
-            case "quit":
-                fFrame.dispose();
-                break;
-            case "removeAllMarkers":
-                fTraceDisplayModel.removeAllMarkers();
-                break;
-            case "removeAllNets":
-                fTraceDisplayModel.removeAllNets();
-                break;
-            case "insertMarker":
-                String description = (String) JOptionPane.showInputDialog(
-                     fFrame, "Description for this marker", "New Marker",
-                     JOptionPane.PLAIN_MESSAGE, null, null, null);
-                if (description != null)
-                    fTraceDisplayModel.addMarker(description, fTraceDisplayModel.getCursorPosition());
-
-                break;
-            case "showmarkerlist":
-                JDialog markersWindow = new JDialog(fFrame, "Markers", true);
-                markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                MarkerListPanel contentPane = new MarkerListPanel(fTraceDisplayModel);
-                contentPane.setOpaque(true);
-                markersWindow.setPreferredSize(new Dimension(400, 300));
-                markersWindow.setContentPane(contentPane);
-                markersWindow.pack();
-                markersWindow.setLocationRelativeTo(this);
-                markersWindow.setVisible(true);
-                break;
-            case "nextMarker":
-                fTraceDisplayModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-                break;
-            case "prevMarker":
-                fTraceDisplayModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-                break;
-            case "removeMarker":
-                fTraceDisplayModel.removeMarkerAtTime(fTraceDisplayModel.getCursorPosition());
-                break;
-            case "findbyvalue":
-                showFindDialog();
-                break;
-            case "findnext":
-                findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-                break;
-            case "findprev":
-                findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-                break;
-            case "saveNetSet":
-                String name = (String) JOptionPane.showInputDialog(
-                    fFrame, "Net Set Name", "Save Net Set",
-                    JOptionPane.PLAIN_MESSAGE, null, null, null);
-                if (!name.equals("")) {
-                    fTraceDisplayModel.saveNetSet(name);
-                    buildNetMenu();
-                }
-
-                break;
-            case "prefs":
-                JDialog prefsWindow = new PreferenceWindow(fFrame);
-                prefsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                prefsWindow.setLocationRelativeTo(this);
-                prefsWindow.setVisible(true);
-                break;
-            default:
-                if (cmd.length() > 7  && cmd.substring(0, 7).equals("netSet_")) {
-                    int index = Integer.parseInt(cmd.substring(7));
-                    fTraceDisplayModel.selectNetSet(index);
-                } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
-                    // Load from recents menu
-                    loadTraceFile(cmd.substring(5));
-                }
+        case "zoomin":
+            tracePanel.zoomIn();
+            break;
+        case "zoomout":
+            tracePanel.zoomOut();
+            break;
+        case "zoomselection":
+            tracePanel.zoomToSelection();
+            break;
+        case "addnet":
+            addNet();
+            break;
+        case "opentrace":
+            openTrace();
+            break;
+        case "reloadtrace":
+            loadTraceFile(currentTraceFile);
+            break;
+        case "quit":
+            frame.dispose();
+            break;
+        case "removeAllMarkers":
+            traceDisplayModel.removeAllMarkers();
+            break;
+        case "removeAllNets":
+            traceDisplayModel.removeAllNets();
+            break;
+        case "insertMarker":
+            insertMarker();
+            break;
+        case "showmarkerlist":
+            showMarkerList();
+            break;
+        case "nextMarker":
+            nextMarker(e);
+            break;
+        case "prevMarker":
+            prevMarker(e);
+            break;
+        case "removeMarker":
+            removeMarker();
+            break;
+        case "findbyvalue":
+            showFindDialog();
+            break;
+        case "findnext":
+            findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+            break;
+        case "findprev":
+            findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+            break;
+        case "saveNetSet":
+            saveNetSet();
+            break;
+        case "prefs":
+            showPrefs();
+            break;
+        default:
+            if (cmd.length() > 7 && cmd.substring(0, 7).equals("netSet_")) {
+                int index = Integer.parseInt(cmd.substring(7));
+                traceDisplayModel.selectNetSet(index);
+            } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
+                // Load from recents menu
+                loadTraceFile(cmd.substring(5));
             }
+        }
+    }
+
+    private void addNet() {
+        if (netSearchPane == null) {
+            /// @bug This is a hack. It makes sure the search
+            /// panel is created after the file is loaded.
+            netSearchPane = new NetSearchPanel(traceDataModel);
+            add(netSearchPane, BorderLayout.WEST);
+
+            /// @bug Bigger hack: for some reason it doesn't show up
+            /// unless I do this.
+            netSearchPane.setVisible(false);
+            netSearchPane.setVisible(true);
+        } else {
+            // Hide or show the search panel
+            netSearchPane.setVisible(!netSearchPane.isVisible());
+        }
+    }
+
+    private void insertMarker() {
+        String description = (String) JOptionPane.showInputDialog(frame, "Description for this marker", "New Marker",
+                JOptionPane.PLAIN_MESSAGE, null, null, null);
+        if (description != null) {
+            traceDisplayModel.addMarker(description, traceDisplayModel.getCursorPosition());
+        }
+    }
+
+    private void showMarkerList() {
+        JDialog markersWindow = new JDialog(frame, "Markers", true);
+        markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        MarkerListPanel contentPane = new MarkerListPanel(traceDisplayModel);
+        contentPane.setOpaque(true);
+        markersWindow.setPreferredSize(new Dimension(400, 300));
+        markersWindow.setContentPane(contentPane);
+        markersWindow.pack();
+        markersWindow.setLocationRelativeTo(this);
+        markersWindow.setVisible(true);
+    }
+
+    private void nextMarker(ActionEvent e) {
+        traceDisplayModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+    }
+
+    private void prevMarker(ActionEvent e) {
+        traceDisplayModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+    }
+
+    private void removeMarker() {
+        traceDisplayModel.removeMarkerAtTime(traceDisplayModel.getCursorPosition());
+    }
+
+    private void openTrace() {
+        JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialTraceDirectory());
+        chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        chooser.setMultiSelectionEnabled(false);
+        int returnValue = chooser.showOpenDialog(this);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
+            loadTraceFile(chooser.getSelectedFile());
+        }
+    }
+
+    private void saveNetSet() {
+        String name = (String) JOptionPane.showInputDialog(frame, "Net Set Name", "Save Net Set",
+                JOptionPane.PLAIN_MESSAGE, null, null, null);
+        if (!name.equals("")) {
+            traceDisplayModel.saveNetSet(name);
+            buildNetMenu();
+        }
+    }
+
+    private void showPrefs() {
+        JDialog prefsWindow = new PreferenceWindow(frame);
+        prefsWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        prefsWindow.setLocationRelativeTo(this);
+        prefsWindow.setVisible(true);
     }
 
     public void loadTraceFile(String path) {
@@ -202,28 +239,33 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     class TraceLoadWorker extends SwingWorker<Void, Void> {
+        private File file;
+        private ProgressMonitor progressMonitor;
+        private TraceDataModel newModel;
+        private String errorMessage;
+
         TraceLoadWorker(File file, ProgressMonitor monitor) {
-            fFile = file;
-            fProgressMonitor = monitor;
+            this.file = file;
+            progressMonitor = monitor;
         }
 
         @Override
         public Void doInBackground() {
             /// @todo Determine the loader type dynamically
             try (TraceLoader loader = new VCDLoader()) {
-                fNewModel = new TraceDataModel();
+                newModel = new TraceDataModel();
                 TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
                     @Override
                     public boolean updateProgress(final int percentRead) {
                         // Accessing the component from a different thread, technically
                         // a no no, but probably okay.
-                        if (fProgressMonitor.isCanceled())
+                        if (progressMonitor.isCanceled())
                             return false;
 
                         SwingUtilities.invokeLater(new Runnable() {
                             @Override
                             public void run() {
-                                fProgressMonitor.setProgress(percentRead);
+                                progressMonitor.setProgress(percentRead);
                             }
                         });
 
@@ -232,10 +274,10 @@ public class MainWindow extends JPanel implements ActionListener {
                 };
 
                 long startTime = System.currentTimeMillis();
-                loader.load(fFile, fNewModel.startBuilding(), progressListener);
+                loader.load(file, newModel.startBuilding(), progressListener);
                 System.out.println("Loaded in " + (System.currentTimeMillis() - startTime) + " ms");
             } catch (Exception exc) {
-                fErrorMessage = exc.getMessage();
+                errorMessage = exc.getMessage();
             }
 
             return null;
@@ -244,9 +286,9 @@ public class MainWindow extends JPanel implements ActionListener {
         // Executed on main thread
         @Override
         protected void done() {
-            fProgressMonitor.close();
-            if (fErrorMessage == null) {
-                fCurrentSearch = null;
+            progressMonitor.close();
+            if (errorMessage == null) {
+                currentSearch = null;
 
                 // XXX hack
                 // Because this is running a separate thread, and I don't want to add locking
@@ -255,22 +297,23 @@ public class MainWindow extends JPanel implements ActionListener {
                 // than try to update all pointers to the new model, I just copy data from
                 // the new object to the old one. Since I'm in the main window thread now,
                 // this is safe.
-                fTraceDataModel.copyFrom(fNewModel);
+                traceDataModel.copyFrom(newModel);
 
-                fTraceDisplayModel.clear();
-                fFrame.setTitle("Waveform Viewer [" + fFile.getName() + "]");
+                traceDisplayModel.clear();
+                frame.setTitle("Waveform Viewer [" + file.getName() + "]");
 
                 try {
-                    fRecentFiles.add(fFile.getCanonicalPath());
-                    AppPreferences.getInstance().setRecentList(fRecentFiles.pack());
+                    recentFiles.add(file.getCanonicalPath());
+                    AppPreferences.getInstance().setRecentList(recentFiles.pack());
 
-                    File settingsFile = TraceSettingsFile.settingsFileName(fFile);
-                    fTraceSettingsFile = new TraceSettingsFile(settingsFile,
-                            fTraceDataModel, fTraceDisplayModel);
-                    if (settingsFile.exists())
-                        fTraceSettingsFile.read();
+                    File settingsFile = TraceSettingsFile.settingsFileName(file);
+                    traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, traceDisplayModel);
+                    if (settingsFile.exists()) {
+                        traceSettingsFile.read();
+                    }
                 } catch (Exception exc) {
-                    exc.printStackTrace();
+                    System.out.println("caught exception while reading settings " + exc);
+                    // XXX Display an error dialog?
                 }
 
                 buildRecentFilesMenu();
@@ -279,26 +322,20 @@ public class MainWindow extends JPanel implements ActionListener {
                 // XXX hack
                 // The net search pane holds onto the old tree model, which has been
                 // replaced. Delete it so it will be re-created attached to the new one.
-                if (fNetSearchPane != null)
-                {
-                    if (fNetSearchPane.isVisible())
-                        fNetSearchPane.setVisible(false);
+                if (netSearchPane != null) {
+                    if (netSearchPane.isVisible()) {
+                        netSearchPane.setVisible(false);
+                    }
 
-                    remove(fNetSearchPane);
-                    fNetSearchPane = null;
+                    remove(netSearchPane);
+                    netSearchPane = null;
                 }
 
-                fCurrentTraceFile = fFile;
+                currentTraceFile = file;
             } else {
-                JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
-                                              + fErrorMessage);
+                JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: " + errorMessage);
             }
         }
-
-        private File fFile;
-        private ProgressMonitor fProgressMonitor;
-        private TraceDataModel fNewModel;
-        private String fErrorMessage;
     }
 
     private void loadTraceFile(File file) {
@@ -312,239 +349,176 @@ public class MainWindow extends JPanel implements ActionListener {
         // their values at the cursor position.
         StringBuilder initialSearch = new StringBuilder();
         boolean first = true;
-        long cursorPosition = fTraceDisplayModel.getCursorPosition();
+        long cursorPosition = traceDisplayModel.getCursorPosition();
 
-        for (int index : fTracePanel.getSelectedNets()) {
-            int netId = fTraceDisplayModel.getVisibleNet(index);
-            if (first)
+        for (int index : tracePanel.getSelectedNets()) {
+            int netId = traceDisplayModel.getVisibleNet(index);
+            if (first) {
                 first = false;
-            else
+            } else {
                 initialSearch.append(" and ");
+            }
 
-            initialSearch.append(fTraceDataModel.getFullNetName(netId));
-            Transition t = fTraceDataModel.findTransition(netId,
-                           cursorPosition).next();
+            initialSearch.append(traceDataModel.getFullNetName(netId));
+            Transition t = traceDataModel.findTransition(netId, cursorPosition).next();
 
             initialSearch.append(" = 'h");
             initialSearch.append(t.toString(16));
         }
 
         FindPanel findPanel = new FindPanel(this, initialSearch.toString());
-        JDialog frame = new JDialog(fFrame, "Find", true);
-        frame.getContentPane().add(findPanel);
-        frame.setSize(new Dimension(450, 150));
-        frame.setResizable(false);
-        frame.setLocationRelativeTo(this);
-        frame.setVisible(true);
+        JDialog findFrame = new JDialog(this.frame, "Find", true);
+        findFrame.getContentPane().add(findPanel);
+        findFrame.setSize(new Dimension(450, 150));
+        findFrame.setResizable(false);
+        findFrame.setLocationRelativeTo(this);
+        findFrame.setVisible(true);
     }
 
     void setSearch(String searchString) throws Search.ParseException {
-        fCurrentSearch = new Search(fTraceDataModel, searchString);
+        currentSearch = new Search(traceDataModel, searchString);
     }
 
     void findNext(boolean extendSelection) {
-        if (fCurrentSearch != null) {
-            long newTimestamp = fCurrentSearch.getNextMatch(fTraceDisplayModel.getCursorPosition());
+        if (currentSearch != null) {
+            long newTimestamp = currentSearch.getNextMatch(traceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                if (!extendSelection)
-                    fTraceDisplayModel.setSelectionStart(newTimestamp);
+                if (!extendSelection) {
+                    traceDisplayModel.setSelectionStart(newTimestamp);
+                }
 
-                fTraceDisplayModel.setCursorPosition(newTimestamp);
+                traceDisplayModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
     void findPrev(boolean extendSelection) {
-        if (fCurrentSearch != null) {
-            long newTimestamp = fCurrentSearch.getPreviousMatch(fTraceDisplayModel.getCursorPosition());
+        if (currentSearch != null) {
+            long newTimestamp = currentSearch.getPreviousMatch(traceDisplayModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                if (!extendSelection)
-                    fTraceDisplayModel.setSelectionStart(newTimestamp);
+                if (!extendSelection) {
+                    traceDisplayModel.setSelectionStart(newTimestamp);
+                }
 
-                fTraceDisplayModel.setCursorPosition(newTimestamp);
+                traceDisplayModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
     private void saveConfig() {
         try {
-            if (fTraceSettingsFile != null)
-                fTraceSettingsFile.write();
+            if (traceSettingsFile != null)
+                traceSettingsFile.write();
         } catch (Exception exc) {
-            exc.printStackTrace();
+            System.out.println("Error saving configuration file " + exc);
         }
     }
 
     private void buildNetMenu() {
-        fNetMenu.removeAll();
+        netMenu.removeAll();
 
         JMenuItem item = new JMenuItem("Add nets...");
         item.setActionCommand("addnet");
         item.addActionListener(this);
-        fNetMenu.add(item);
+        netMenu.add(item);
 
         item = new JMenuItem("Remove all nets");
         item.setActionCommand("removeAllNets");
         item.addActionListener(this);
-        fNetMenu.add(item);
+        netMenu.add(item);
 
         item = new JMenuItem("Save Net Set");
         item.setActionCommand("saveNetSet");
         item.addActionListener(this);
-        fNetMenu.add(item);
+        netMenu.add(item);
 
-        if (fTraceDisplayModel.getNetSetCount() > 0) {
-            fNetMenu.addSeparator();
-            for (int i = 0; i < fTraceDisplayModel.getNetSetCount(); i++) {
-                item = new JMenuItem(fTraceDisplayModel.getNetSetName(i));
+        if (traceDisplayModel.getNetSetCount() > 0) {
+            netMenu.addSeparator();
+            for (int i = 0; i < traceDisplayModel.getNetSetCount(); i++) {
+                item = new JMenuItem(traceDisplayModel.getNetSetName(i));
                 item.setActionCommand("netSet_" + i);
                 item.addActionListener(this);
-                fNetMenu.add(item);
+                netMenu.add(item);
             }
         }
     }
 
-    private void buildRecentFilesMenu() {
-        fRecentFilesMenu.removeAll();
-        for (String path : fRecentFiles.getList()) {
-            JMenuItem item = new JMenuItem(path);
-            item.setActionCommand("open " + path);
-            item.addActionListener(this);
-            fRecentFilesMenu.add(item);
-        }
-    }
-
     private void buildMenus() {
-        JMenuItem item;
         JMenuBar menuBar = new JMenuBar();
-        fFrame.setJMenuBar(menuBar);
+        frame.setJMenuBar(menuBar);
 
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
-        item = new JMenuItem("Open Trace...");
-        item.setActionCommand("opentrace");
-        item.addActionListener(this);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.META_DOWN_MASK));
-        fileMenu.add(item);
+        fileMenu.add(createMenuItem("Open Trace...", "opentrace",
+                KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.META_DOWN_MASK)));
 
-        fRecentFilesMenu = new JMenu("Open Recent");
-        fileMenu.add(fRecentFilesMenu);
+        recentFilesMenu = new JMenu("Open Recent");
+        fileMenu.add(recentFilesMenu);
         buildRecentFilesMenu();
 
-        item = new JMenuItem("Reload Trace");
-        item.setActionCommand("reloadtrace");
-        item.addActionListener(this);
-        fileMenu.add(item);
-
-        item = new JMenuItem("Preferences...");
-        item.setActionCommand("prefs");
-        item.addActionListener(this);
-        fileMenu.add(item);
-
-        item = new JMenuItem("Quit");
-        item.setActionCommand("quit");
-        item.addActionListener(this);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.META_DOWN_MASK));
-        fileMenu.add(item);
+        fileMenu.add(createMenuItem("Reload Trace", "reloadtrace", null));
+        fileMenu.add(createMenuItem("Preferences...", "prefs", null));
+        fileMenu.add(createMenuItem("Quit", "quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.META_DOWN_MASK)));
 
         JMenu editMenu = new JMenu("Edit");
         menuBar.add(editMenu);
-        item = new JMenuItem("Find...");
-        item.setActionCommand("findbyvalue");
-        item.addActionListener(this);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK));
-        editMenu.add(item);
-
-        item = new JMenuItem("Find next");
-        item.setActionCommand("findnext");
-        item.addActionListener(this);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK));
-        editMenu.add(item);
-
-        item = new JMenuItem("Find prev");
-        item.setActionCommand("findprev");
-        item.addActionListener(this);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK
-                            | KeyEvent.SHIFT_DOWN_MASK));
-        editMenu.add(item);
+        editMenu.add(createMenuItem("Find...", "findbyvalue", KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK)));
+        editMenu.add(createMenuItem("Find next", "findnext", KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK)));
+        editMenu.add(createMenuItem("Find prev", "findprev",
+                KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK)));
 
         // XXX go to timestamp
 
         JMenu viewMenu = new JMenu("View");
         menuBar.add(viewMenu);
-        item = new JMenuItem("Zoom In");
-        item.setActionCommand("zoomin");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, KeyEvent.META_DOWN_MASK));
-        item.addActionListener(this);
-        viewMenu.add(item);
+        viewMenu.add(createMenuItem("Zoom In", "zoomin", KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, KeyEvent.META_DOWN_MASK)));
+        viewMenu.add(createMenuItem("Zoom Out", "zoomout",
+                KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.META_DOWN_MASK)));
+        viewMenu.add(createMenuItem("Zoom To Selection", "zoomselection", null));
 
-        item = new JMenuItem("Zoom Out");
-        item.setActionCommand("zoomout");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.META_DOWN_MASK));
-        item.addActionListener(this);
-        viewMenu.add(item);
-
-        item = new JMenuItem("Zoom To Selection");
-        item.setActionCommand("zoomselection");
-        item.addActionListener(this);
-        viewMenu.add(item);
-
-        fNetMenu = new JMenu("Net");
-        menuBar.add(fNetMenu);
+        netMenu = new JMenu("Net");
+        menuBar.add(netMenu);
         buildNetMenu();
 
         JMenu markerMenu = new JMenu("Marker");
         menuBar.add(markerMenu);
-        item = new JMenuItem("Insert Marker...");
-        item.setActionCommand("insertMarker");
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.META_DOWN_MASK));
-        item.addActionListener(this);
-        markerMenu.add(item);
-
-        item = new JMenuItem("Next Marker");
-        item.setActionCommand("nextMarker");
-        item.addActionListener(this);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.META_DOWN_MASK));
-        markerMenu.add(item);
-
-        item = new JMenuItem("Prev Marker");
-        item.setActionCommand("prevMarker");
-        item.addActionListener(this);
-        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.META_DOWN_MASK));
-        markerMenu.add(item);
-
-        item = new JMenuItem("Remove Marker");
-        item.setActionCommand("removeMarker");
-        item.addActionListener(this);
-        markerMenu.add(item);
-
-        item = new JMenuItem("Remove all markers");
-        item.setActionCommand("removeAllMarkers");
-        item.addActionListener(this);
-        markerMenu.add(item);
-
-        item = new JMenuItem("Show marker list");
-        item.setActionCommand("showmarkerlist");
-        item.addActionListener(this);
-        markerMenu.add(item);
+        markerMenu.add(createMenuItem("Insert Marker...", "insertMarker",
+                KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.META_DOWN_MASK)));
+        markerMenu.add(createMenuItem("Next Marker", "nextMarker",
+                KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.META_DOWN_MASK)));
+        markerMenu.add(createMenuItem("Prev Marker", "prevMarker",
+                KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.META_DOWN_MASK)));
+        markerMenu.add(createMenuItem("Remove Marker", "removeMarker", null));
+        markerMenu.add(createMenuItem("Remove all markers", "removeAllMarkers", null));
+        markerMenu.add(createMenuItem("Show marker list", "showmarkerlist", null));
     }
 
-    private TracePanel fTracePanel;
-    private TraceDisplayModel fTraceDisplayModel = new TraceDisplayModel();
-    private TraceDataModel fTraceDataModel = new TraceDataModel();
-    private Search fCurrentSearch;
-    private JMenu fNetMenu;
-    private JFrame fFrame;
-    private JMenu fRecentFilesMenu;
-    private TraceSettingsFile fTraceSettingsFile;
-    private File fCurrentTraceFile;
-    private NetSearchPanel fNetSearchPane;
-    private RecentFiles fRecentFiles = new RecentFiles();
+    JMenuItem createMenuItem(String text, String actionCommand,
+            KeyStroke accelerator) {
+        JMenuItem item = new JMenuItem(text);
+        item.setActionCommand(actionCommand);
+        item.addActionListener(this);
+        if (accelerator != null) {
+            item.setAccelerator(accelerator);
+        }
+
+        return item;
+    }
+
+    private void buildRecentFilesMenu() {
+        recentFilesMenu.removeAll();
+        for (String path : recentFiles.getList()) {
+            JMenuItem item = new JMenuItem(path);
+            item.setActionCommand("open " + path);
+            item.addActionListener(this);
+            recentFilesMenu.add(item);
+        }
+    }
 
     private static void createAndShowGUI(String[] args) {
         final MainWindow contentPane = new MainWindow();
         JFrame frame = new JFrame("Waveform Viewer");
-        contentPane.fFrame = frame;
+        contentPane.frame = frame;
         contentPane.buildMenus();
 
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -560,8 +534,9 @@ public class MainWindow extends JPanel implements ActionListener {
         frame.pack();
         frame.setVisible(true);
 
-        if (args.length > 0)
+        if (args.length > 0) {
             contentPane.loadTraceFile(args[0]);
+        }
     }
 
     public static void main(String[] args) {
@@ -574,4 +549,3 @@ public class MainWindow extends JPanel implements ActionListener {
         });
     }
 }
-

@@ -23,13 +23,13 @@ package waveview;
 ///
 
 public class Transition extends BitVector {
+    private long timestamp;
+
     public long getTimestamp() {
-        return fTimestamp;
+        return timestamp;
     }
 
     void setTimestamp(long timestamp) {
-        fTimestamp = timestamp;
+        this.timestamp = timestamp;
     }
-
-    private long fTimestamp;
 }

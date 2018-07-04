@@ -16,9 +16,9 @@
 
 package waveview;
 
-import java.io.IOException;
-import java.io.File;
 import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
 
 //
 // Classes override this interface to create an object that can load traces
@@ -43,4 +43,3 @@ public interface TraceLoader extends Closeable {
     public void load(File file, TraceBuilder builder, ProgressListener listener)
         throws LoadException, IOException;
 }
-

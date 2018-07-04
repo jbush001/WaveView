@@ -16,20 +16,33 @@
 
 package waveview;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.tree.*;
-import javax.swing.event.*;
-import java.awt.datatransfer.*;
-import javax.swing.text.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JTree;
+import javax.swing.TransferHandler;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreePath;
 
 ///
 /// Displays searchable lists of all nets in a design. Can be dragged onto
 /// the visible net view to see them.
 ///
 class NetSearchPanel extends JPanel {
+    private JTree tree;
+    private TraceDataModel traceDataModel;
+    private ImageIcon netIcon;
+    private ImageIcon moduleIcon;
 
     /// Allow user to drag signals out of this view and drop in currently
     /// displayed nets
@@ -40,23 +53,22 @@ class NetSearchPanel extends JPanel {
         }
 
         private void buildNetListRecursive(Object node, StringBuilder indexList) {
-            if (fTree.getModel().isLeaf(node)) {
-                indexList.append(fTraceDataModel.getFullNetName(fTraceDataModel
-                    .getNetFromTreeObject(node)));
+            if (tree.getModel().isLeaf(node)) {
+                indexList.append(traceDataModel.getFullNetName(traceDataModel.getNetFromTreeObject(node)));
                 indexList.append('\n');
                 return;
             }
 
-            for (int i = 0; i < fTree.getModel().getChildCount(node); i++)
-                buildNetListRecursive(fTree.getModel().getChild(node, i), indexList);
+            for (int i = 0; i < tree.getModel().getChildCount(node); i++) {
+                buildNetListRecursive(tree.getModel().getChild(node, i), indexList);
+            }
         }
 
         @Override
         public Transferable createTransferable(JComponent component) {
             StringBuilder indexList = new StringBuilder();
-            for (TreePath selectedPath : fTree.getSelectionPaths()) {
-                buildNetListRecursive(selectedPath.getLastPathComponent(),
-                                      indexList);
+            for (TreePath selectedPath : tree.getSelectionPaths()) {
+                buildNetListRecursive(selectedPath.getLastPathComponent(), indexList);
             }
 
             return new StringSelection(indexList.toString());
@@ -78,11 +90,11 @@ class NetSearchPanel extends JPanel {
         }
     }
 
-    NetSearchPanel(TraceDataModel dataModel) {
+    NetSearchPanel(TraceDataModel traceDataModel) {
         super(new BorderLayout());
         setPreferredSize(new Dimension(275, 500));
 
-        fTraceDataModel = dataModel;
+        this.traceDataModel = traceDataModel;
 
         JTabbedPane tabView = new JTabbedPane();
         add(tabView);
@@ -91,15 +103,15 @@ class NetSearchPanel extends JPanel {
         JPanel treeTab = new JPanel();
         tabView.addTab("Tree", null, treeTab, "tree view");
         treeTab.setLayout(new BorderLayout());
-        fTree = new JTree(fTraceDataModel.getNetTree());
-        fTree.setCellRenderer(new NetTreeCellRenderer());
-        fTree.setDragEnabled(true);
-        fTree.setTransferHandler(new NetTreeTransferHandler());
-        JScrollPane scroller = new JScrollPane(fTree);
+        tree = new JTree(traceDataModel.getNetTree());
+        tree.setCellRenderer(new NetTreeCellRenderer());
+        tree.setDragEnabled(true);
+        tree.setTransferHandler(new NetTreeTransferHandler());
+        JScrollPane scroller = new JScrollPane(tree);
         treeTab.add(scroller, BorderLayout.CENTER);
 
-        fNetIcon = loadResourceIcon("tree-net.png");
-        fModuleIcon = loadResourceIcon("tree-module.png");
+        netIcon = loadResourceIcon("tree-net.png");
+        moduleIcon = loadResourceIcon("tree-module.png");
 
         // Set up net search view
         JPanel searchTab = new JPanel();
@@ -107,8 +119,7 @@ class NetSearchPanel extends JPanel {
         searchTab.setLayout(new BorderLayout());
         JTextField searchField = new JTextField();
         searchTab.add(searchField, BorderLayout.NORTH);
-        NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(
-            fTraceDataModel);
+        NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(traceDataModel);
         JList<String> netList = new JList<String>(adapter);
         searchField.getDocument().addDocumentListener(adapter);
         netList.setDragEnabled(true);
@@ -119,25 +130,16 @@ class NetSearchPanel extends JPanel {
 
     class NetTreeCellRenderer extends DefaultTreeCellRenderer {
         @Override
-        public Component getTreeCellRendererComponent(
-            JTree tree,
-            Object value,
-            boolean sel,
-            boolean expanded,
-            boolean leaf,
-            int row,
-            boolean hasFocus) {
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
+                boolean leaf, int row, boolean hasFocus) {
 
             NetTreeModel.Node node = (NetTreeModel.Node) value;
-            super.getTreeCellRendererComponent(
-                tree, value, sel,
-                expanded, leaf, row,
-                hasFocus);
+            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
             if (node.isLeaf())
-                setIcon(fNetIcon);
+                setIcon(netIcon);
             else
-                setIcon(fModuleIcon);
+                setIcon(moduleIcon);
 
             return this;
         }
@@ -146,9 +148,4 @@ class NetSearchPanel extends JPanel {
     private ImageIcon loadResourceIcon(String name) {
         return new ImageIcon(this.getClass().getClassLoader().getResource(name));
     }
-
-    private JTree fTree;
-    private TraceDataModel fTraceDataModel;
-    private ImageIcon fNetIcon;
-    private ImageIcon fModuleIcon;
 }

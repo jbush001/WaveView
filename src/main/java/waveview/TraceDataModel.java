@@ -16,7 +16,11 @@
 
 package waveview;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Iterator;
 
 ///
 /// Contains information about nets and transitions. View state is contained
@@ -24,50 +28,56 @@ import java.util.*;
 ///
 
 public class TraceDataModel {
+    private long maxTimestamp;
+    private HashMap<String, Integer> fullNameToNetMap = new HashMap<>();
+    private ArrayList<NetDataModel> allNets = new ArrayList<>();
+    private NetTreeModel netTree = new NetTreeModel();
+    private int timescale;
+
     public NetTreeModel getNetTree() {
-        return fNetTree;
+        return netTree;
     }
 
     /// A bit of a kludge. Used when loading a new model.
     public void copyFrom(TraceDataModel from) {
-        fMaxTimestamp = from.fMaxTimestamp;
-        fFullNameToNetMap = from.fFullNameToNetMap;
-        fAllNets = from.fAllNets;
-        fNetTree = from.fNetTree;
-        fTimescale = from.fTimescale;
+        maxTimestamp = from.maxTimestamp;
+        fullNameToNetMap = from.fullNameToNetMap;
+        allNets = from.allNets;
+        netTree = from.netTree;
+        timescale = from.timescale;
     }
 
     public TraceBuilder startBuilding() {
-        fAllNets.clear();
-        fFullNameToNetMap.clear();
-        fNetTree.clear();
+        allNets.clear();
+        fullNameToNetMap.clear();
+        netTree.clear();
 
         return new ConcreteTraceBuilder();
     }
 
     public Iterator<Transition> findTransition(int netId, long timestamp) {
-        return fAllNets.get(netId).findTransition(timestamp);
+        return allNets.get(netId).findTransition(timestamp);
     }
 
     public long getMaxTimestamp() {
-        return fMaxTimestamp;
+        return maxTimestamp;
     }
 
     public int getTimescale() {
-        return fTimescale;
+        return timescale;
     }
 
     public int getNetFromTreeObject(Object o) {
-        return fNetTree.getNetFromTreeObject(o);
+        return netTree.getNetFromTreeObject(o);
     }
 
     public int getTotalNetCount() {
-        return fAllNets.size();
+        return allNets.size();
     }
 
     /// Look up net by full path
     public int findNet(String name) {
-        Integer i = fFullNameToNetMap.get(name);
+        Integer i = fullNameToNetMap.get(name);
         if (i == null)
             return -1;
 
@@ -75,92 +85,94 @@ public class TraceDataModel {
     }
 
     public int getNetWidth(int index) {
-        return fAllNets.get(index).getWidth();
+        return allNets.get(index).getWidth();
     }
 
     public String getShortNetName(int index) {
-        return fAllNets.get(index).getShortName();
+        return allNets.get(index).getShortName();
     }
 
     public String getFullNetName(int index) {
-        return fAllNets.get(index).getFullName();
+        return allNets.get(index).getFullName();
     }
 
     private static class NetDataModel {
+        private TransitionVector transitionVector;
+        private String shortName;
+        private String fullName;
+
         NetDataModel(String shortName, String fullName, int width) {
-            fShortName = shortName;
-            fFullName = fullName;
-            fTransitionVector = new TransitionVector(width);
+            this.shortName = shortName;
+            this.fullName = fullName;
+            transitionVector = new TransitionVector(width);
         }
 
         // This NetDataModel shares its transition data with another one.
         NetDataModel(String shortName, String fullName, NetDataModel cloneFrom) {
-            fShortName = shortName;
-            fFullName = fullName;
-            fTransitionVector = cloneFrom.fTransitionVector;
+            this.shortName = shortName;
+            this.fullName = fullName;
+            this.transitionVector = cloneFrom.transitionVector;
         }
 
         String getFullName() {
-            return fFullName;
+            return fullName;
         }
 
         String getShortName() {
-            return fShortName;
+            return shortName;
         }
 
         Iterator<Transition> findTransition(long timestamp) {
-            return fTransitionVector.findTransition(timestamp);
+            return transitionVector.findTransition(timestamp);
         }
 
         long getMaxTimestamp() {
-            return fTransitionVector.getMaxTimestamp();
+            return transitionVector.getMaxTimestamp();
         }
 
         int getWidth() {
-            return fTransitionVector.getWidth();
+            return transitionVector.getWidth();
         }
-
-        private TransitionVector fTransitionVector;
-        private String fShortName;
-        private String fFullName;
     }
 
     private class ConcreteTraceBuilder implements TraceBuilder {
+        private Deque<String> scopeStack = new ArrayDeque<String>();
+
         @Override
-        public void setTimescale(int order) {
-            fTimescale = order;
+        public void setTimescale(int timescale) {
+            TraceDataModel.this.timescale = timescale;
         }
 
         @Override
         public void enterScope(String name) {
-            fNetTree.enterScope(name);
-            fScopeStack.addLast(name);
+            netTree.enterScope(name);
+            scopeStack.addLast(name);
         }
 
         @Override
         public void exitScope() {
-            fNetTree.leaveScope();
-            fScopeStack.removeLast();
+            netTree.leaveScope();
+            scopeStack.removeLast();
         }
 
         @Override
         public void loadFinished() {
-            fMaxTimestamp = 0;
-            for (NetDataModel model : fAllNets)
-                fMaxTimestamp = Math.max(fMaxTimestamp, model.getMaxTimestamp());
+            maxTimestamp = 0;
+            for (NetDataModel model : allNets)
+                maxTimestamp = Math.max(maxTimestamp, model.getMaxTimestamp());
         }
 
         @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
-            NetDataModel model = fAllNets.get(id);
-            model.fTransitionVector.appendTransition(timestamp, values);
+            NetDataModel model = allNets.get(id);
+            model.transitionVector.appendTransition(timestamp, values);
         }
 
         @Override
         public int newNet(String shortName, int cloneId, int width) {
             // Build full path
             StringBuilder fullName = new StringBuilder();
-            for (String scope : fScopeStack) {
+            for (String scope : scopeStack) {
                 if (fullName.length() != 0)
                     fullName.append('.');
 
@@ -174,21 +186,13 @@ public class TraceDataModel {
             if (cloneId == -1)
                 net = new NetDataModel(shortName, fullName.toString(), width);
             else
-                net = new NetDataModel(shortName, fullName.toString(), fAllNets.get(cloneId));
+                net = new NetDataModel(shortName, fullName.toString(), allNets.get(cloneId));
 
-            fAllNets.add(net);
-            int thisNetIndex = fAllNets.size() - 1;
-            fNetTree.addNet(shortName, thisNetIndex);
-            fFullNameToNetMap.put(fullName.toString(), thisNetIndex);
+            allNets.add(net);
+            int thisNetIndex = allNets.size() - 1;
+            netTree.addNet(shortName, thisNetIndex);
+            fullNameToNetMap.put(fullName.toString(), thisNetIndex);
             return thisNetIndex;
         }
-
-        private Deque<String> fScopeStack = new ArrayDeque<String>();
     }
-
-    private long fMaxTimestamp;
-    private HashMap<String, Integer> fFullNameToNetMap = new HashMap<String, Integer>();
-    private ArrayList<NetDataModel> fAllNets = new ArrayList<NetDataModel>();
-    private NetTreeModel fNetTree = new NetTreeModel();
-    private int fTimescale;
 }

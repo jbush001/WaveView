@@ -31,31 +31,39 @@ import javax.swing.event.ListDataEvent;
 ///
 
 public class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
-    public NetSearchListModelAdapter(TraceDataModel model) {
-        fTraceDataModel = model;
+    private ListDataListener listDataListener;
+    private final ArrayList<String> matches = new ArrayList<String>();
+    private TraceDataModel traceDataModel;
+
+    public NetSearchListModelAdapter(TraceDataModel traceDataModel) {
+        this.traceDataModel = traceDataModel;
         setPattern("");
     }
 
     /// @note this isn't a wildcard pattern, it's just a substring match.
-    ///   Investigate java.util.regex.Pattern for more complex matches
+    /// Investigate java.util.regex.Pattern for more complex matches
     /// @param pattern Only items that contain this pattern in some part of
-    ///    them will be displayed.
+    /// them will be displayed.
     public void setPattern(String pattern) {
         if (pattern.equals("")) {
-            fMatches.clear();
-            for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++)
-                fMatches.add(fTraceDataModel.getFullNetName(index));
+            matches.clear();
+            for (int index = 0; index < traceDataModel.getTotalNetCount(); index++) {
+                matches.add(traceDataModel.getFullNetName(index));
+            }
         } else {
-            fMatches.clear();
-            for (int index = 0; index < fTraceDataModel.getTotalNetCount(); index++) {
-                String name = fTraceDataModel.getFullNetName(index);
-                if (name.indexOf(pattern) != -1)
-                    fMatches.add(name);
+            matches.clear();
+            for (int index = 0; index < traceDataModel.getTotalNetCount(); index++) {
+                String name = traceDataModel.getFullNetName(index);
+                if (name.indexOf(pattern) != -1) {
+                    matches.add(name);
+                }
             }
         }
 
-        if (fListener != null)
-            fListener.contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, fMatches.size()));
+        if (listDataListener != null) {
+            listDataListener
+                    .contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size()));
+        }
     }
 
     private void filter(Document doc) {
@@ -79,33 +87,30 @@ public class NetSearchListModelAdapter implements ListModel<String>, DocumentLis
     }
 
     @Override
-    public void changedUpdate(DocumentEvent ev) {}
+    public void changedUpdate(DocumentEvent ev) {
+    }
 
     @Override
-    public void addListDataListener(ListDataListener l) {
-        assert fListener == null;
+    public void addListDataListener(ListDataListener listener) {
+        assert listDataListener == null;
 
-        fListener = l;
+        listDataListener = listener;
     }
 
     @Override
     public void removeListDataListener(ListDataListener l) {
-        assert fListener != null;
+        assert listDataListener != null;
 
-        fListener = null;
+        listDataListener = null;
     }
 
     @Override
     public String getElementAt(int index) {
-        return fMatches.get(index);
+        return matches.get(index);
     }
 
     @Override
     public int getSize() {
-        return fMatches.size();
+        return matches.size();
     }
-
-    private ListDataListener fListener;
-    private ArrayList<String> fMatches = new ArrayList<String>();
-    private TraceDataModel fTraceDataModel;
 }

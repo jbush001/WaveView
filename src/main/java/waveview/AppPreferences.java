@@ -26,16 +26,8 @@ import java.io.*;
 ///
 
 class AppPreferences {
-    static AppPreferences getInstance() {
-        if (fInstance == null)
-            fInstance = new AppPreferences();
-
-        return fInstance;
-    }
-
-    private AppPreferences() {
-        readColors();
-    }
+    private Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
+    private static AppPreferences instance;
 
     Color traceColor;
     Color conflictColor;
@@ -48,32 +40,44 @@ class AppPreferences {
     Color listSelectionFgColor;
     Color valueColor;
 
+    static AppPreferences getInstance() {
+        if (instance == null) {
+            instance = new AppPreferences();
+        }
+
+        return instance;
+    }
+
+    private AppPreferences() {
+        readColors();
+    }
+
     // The initial trace directory is the one the file chooser will open by
     // default when opened when the user tries to open a trace.
     void setInitialTraceDirectory(File file) {
-        fPrefs.put("initialTraceDirectory", file.toString());
+        prefs.put("initialTraceDirectory", file.toString());
     }
 
     File getInitialTraceDirectory() {
-        return new File(fPrefs.get("initialTraceDirectory", ""));
+        return new File(prefs.get("initialTraceDirectory", ""));
     }
 
     // The initial enum directory is the one the file chooser will open by
     // default when the user attempts to open an enum mapping file
     void setInitialEnumDirectory(File file) {
-        fPrefs.put("initialEnumDirectory", file.toString());
+        prefs.put("initialEnumDirectory", file.toString());
     }
 
     File getInitialEnumDirectory() {
-        return new File(fPrefs.get("initialEnumDirectory", ""));
+        return new File(prefs.get("initialEnumDirectory", ""));
     }
 
     void setRecentList(String files) {
-        fPrefs.put("recentFiles", files);
+        prefs.put("recentFiles", files);
     }
 
     String getRecentList() {
-        return fPrefs.get("recentFiles", "");
+        return prefs.get("recentFiles", "");
     }
 
     void readColors() {
@@ -103,19 +107,15 @@ class AppPreferences {
     }
 
     private Color readColor(String name, Color def) {
-        int components = fPrefs.getInt(name, -1);
+        int components = prefs.getInt(name, -1);
         if (components == -1)
             return def;
 
-        return new Color((components >> 16) & 0xff, (components >> 8) & 0xff,
-                         components & 0xff);
+        return new Color((components >> 16) & 0xff, (components >> 8) & 0xff, components & 0xff);
     }
 
     private void writeColor(String name, Color color) {
         int packed = color.getBlue() | (color.getGreen() << 8) | (color.getRed() << 16);
-        fPrefs.putInt(name, packed);
+        prefs.putInt(name, packed);
     }
-
-    private Preferences fPrefs = Preferences.userNodeForPackage(MainWindow.class);
-    private static AppPreferences fInstance;
 }

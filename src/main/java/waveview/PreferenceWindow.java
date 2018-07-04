@@ -16,16 +16,30 @@
 
 package waveview;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
-import javax.swing.tree.*;
-import javax.swing.event.*;
-import java.awt.datatransfer.*;
-import javax.swing.text.*;
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 class PreferenceWindow extends JDialog {
+    private ColorButton traceColorButton;
+    private ColorButton conflictColorButton;
+    private ColorButton selectionColorButton;
+    private ColorButton cursorColorButton;
+    private ColorButton backgroundColorButton;
+    private ColorButton timingMarkerColorButton;
+    private ColorButton markerColorButton;
+    private ColorButton listSelectionBgColorButton;
+    private ColorButton listSelectionFgColorButton;
+    private ColorButton valueColorButton;
+
     PreferenceWindow(JFrame parent) {
         super(parent, "Preferences", true);
 
@@ -37,28 +51,26 @@ class PreferenceWindow extends JDialog {
         JPanel bodyArea = new JPanel();
         bodyArea.setLayout(new GridLayout(10, 1));
         AppPreferences prefs = AppPreferences.getInstance();
-        fTraceColorButton = new ColorButton("Trace", prefs.traceColor);
-        bodyArea.add(fTraceColorButton);
-        fConflictColorButton = new ColorButton("Conflict", prefs.conflictColor);
-        bodyArea.add(fConflictColorButton);
-        fSelectionColorButton = new ColorButton("Selection", prefs.selectionColor);
-        bodyArea.add(fSelectionColorButton);
-        fCursorColorButton = new ColorButton("Cursor", prefs.cursorColor);
-        bodyArea.add(fCursorColorButton);
-        fBackgroundColorButton = new ColorButton("Background", prefs.backgroundColor);
-        bodyArea.add(fBackgroundColorButton);
-        fTimingMarkerColorButton = new ColorButton("Timing Mark", prefs.timingMarkerColor);
-        bodyArea.add(fTimingMarkerColorButton);
-        fMarkerColorButton = new ColorButton("Marker", prefs.markerColor);
-        bodyArea.add(fMarkerColorButton);
-        fListSelectionBgColorButton = new ColorButton("List Selection Background",
-                prefs.listSelectionBgColor);
-        bodyArea.add(fListSelectionBgColorButton);
-        fListSelectionFgColorButton = new ColorButton("List Selection Foreground",
-                prefs.listSelectionFgColor);
-        bodyArea.add(fListSelectionFgColorButton);
-        fValueColorButton = new ColorButton("Value", prefs.valueColor);
-        bodyArea.add(fValueColorButton);
+        traceColorButton = new ColorButton("Trace", prefs.traceColor);
+        bodyArea.add(traceColorButton);
+        conflictColorButton = new ColorButton("Conflict", prefs.conflictColor);
+        bodyArea.add(conflictColorButton);
+        selectionColorButton = new ColorButton("Selection", prefs.selectionColor);
+        bodyArea.add(selectionColorButton);
+        cursorColorButton = new ColorButton("Cursor", prefs.cursorColor);
+        bodyArea.add(cursorColorButton);
+        backgroundColorButton = new ColorButton("Background", prefs.backgroundColor);
+        bodyArea.add(backgroundColorButton);
+        timingMarkerColorButton = new ColorButton("Timing Mark", prefs.timingMarkerColor);
+        bodyArea.add(timingMarkerColorButton);
+        markerColorButton = new ColorButton("Marker", prefs.markerColor);
+        bodyArea.add(markerColorButton);
+        listSelectionBgColorButton = new ColorButton("List Selection Background", prefs.listSelectionBgColor);
+        bodyArea.add(listSelectionBgColorButton);
+        listSelectionFgColorButton = new ColorButton("List Selection Foreground", prefs.listSelectionFgColor);
+        bodyArea.add(listSelectionFgColorButton);
+        valueColorButton = new ColorButton("Value", prefs.valueColor);
+        bodyArea.add(valueColorButton);
         contentPane.add(bodyArea, BorderLayout.CENTER);
 
         Container okCancelContainer = new Container();
@@ -93,28 +105,17 @@ class PreferenceWindow extends JDialog {
 
     protected void ok() {
         AppPreferences prefs = AppPreferences.getInstance();
-        prefs.traceColor = fTraceColorButton.getColor();
-        prefs.conflictColor = fConflictColorButton.getColor();
-        prefs.selectionColor = fSelectionColorButton.getColor();
-        prefs.cursorColor = fCursorColorButton.getColor();
-        prefs.backgroundColor = fBackgroundColorButton.getColor();
-        prefs.timingMarkerColor = fTimingMarkerColorButton.getColor();
-        prefs.markerColor = fMarkerColorButton.getColor();
-        prefs.listSelectionBgColor = fListSelectionBgColorButton.getColor();
-        prefs.listSelectionFgColor = fListSelectionFgColorButton.getColor();
-        prefs.valueColor = fValueColorButton.getColor();
+        prefs.traceColor = traceColorButton.getColor();
+        prefs.conflictColor = conflictColorButton.getColor();
+        prefs.selectionColor = selectionColorButton.getColor();
+        prefs.cursorColor = cursorColorButton.getColor();
+        prefs.backgroundColor = backgroundColorButton.getColor();
+        prefs.timingMarkerColor = timingMarkerColorButton.getColor();
+        prefs.markerColor = markerColorButton.getColor();
+        prefs.listSelectionBgColor = listSelectionBgColorButton.getColor();
+        prefs.listSelectionFgColor = listSelectionFgColorButton.getColor();
+        prefs.valueColor = valueColorButton.getColor();
         prefs.writeColors();
         dispose();
     }
-
-    private ColorButton fTraceColorButton;
-    private ColorButton fConflictColorButton;
-    private ColorButton fSelectionColorButton;
-    private ColorButton fCursorColorButton;
-    private ColorButton fBackgroundColorButton;
-    private ColorButton fTimingMarkerColorButton;
-    private ColorButton fMarkerColorButton;
-    private ColorButton fListSelectionBgColorButton;
-    private ColorButton fListSelectionFgColorButton;
-    private ColorButton fValueColorButton;
 }

@@ -16,8 +16,13 @@
 
 package waveview;
 
-import java.util.*;
-import java.io.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.io.File;
+import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
 
 ///
 /// Converts a bitvector to one of a set of strings from an enumeration.
@@ -25,32 +30,32 @@ import java.io.*;
 ///
 
 public class EnumValueFormatter implements ValueFormatter {
+    private Map<Integer, String> mappings = new HashMap<Integer, String>();
+    private File mappingFile;
+
     public void loadFromFile(File file) throws IOException {
-        fFile = file;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-            new FileInputStream(file), "UTF8"))) {
+        mappingFile = file;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF8"))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String [] tokens = line.split(" ");
-                if (tokens.length >= 2)
-                    fMappings.put(Integer.parseInt(tokens[0]), tokens[1]);
+                String[] tokens = line.split(" ", 0);
+                if (tokens.length >= 2) {
+                    mappings.put(Integer.parseInt(tokens[0]), tokens[1]);
+                }
             }
         }
     }
 
     public File getFile() {
-        return fFile;
+        return mappingFile;
     }
 
     @Override
     public String format(BitVector bits) {
         int mapIndex = bits.intValue();
-        if (fMappings.containsKey(mapIndex))
-            return fMappings.get(mapIndex);
+        if (mappings.containsKey(mapIndex))
+            return mappings.get(mapIndex);
         else
             return "??? (" + mapIndex + ")";
     }
-
-    private HashMap<Integer, String> fMappings = new HashMap<Integer, String>();
-    private File fFile;
 }

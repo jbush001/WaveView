@@ -16,8 +16,9 @@
 
 package waveview;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.util.Iterator;
 
 ///
 /// Delegate that draws the waveform for a single net that has only one
@@ -25,20 +26,19 @@ import java.util.*;
 ///
 class SingleBitPainter implements WaveformPainter {
     @Override
-    public void paint(Graphics g, TraceDataModel model, int netId,
-                      int topOffset, Rectangle visibleRect, double horizontalScale,
-                      ValueFormatter formatter) {
+    public void paint(Graphics g, TraceDataModel model, int netId, int topOffset, Rectangle visibleRect,
+            double horizontalScale, ValueFormatter formatter) {
         g.setColor(AppPreferences.getInstance().traceColor);
 
         int lastValue = 0;
         int lastX = visibleRect.x + visibleRect.width;
-        long firstTimestamp = (long)(visibleRect.x / horizontalScale);
+        long firstTimestamp = (long) (visibleRect.x / horizontalScale);
         Iterator<Transition> i = model.findTransition(netId, firstTimestamp);
         while (true) {
             Transition transition = i.next();
 
             // Compute the boundaries of this segment
-            int x = (int)(transition.getTimestamp() * horizontalScale);
+            int x = (int) (transition.getTimestamp() * horizontalScale);
             int value = transition.getBit(0);
 
             drawSpan(g, lastValue, lastX, x, topOffset);
@@ -48,22 +48,25 @@ class SingleBitPainter implements WaveformPainter {
                 if (lastValue == BitVector.VALUE_Z && value != BitVector.VALUE_X) {
                     if (value == BitVector.VALUE_0) {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x,
-                            topOffset + DrawMetrics.WAVEFORM_HEIGHT);
-                    } else
+                                topOffset + DrawMetrics.WAVEFORM_HEIGHT);
+                    } else {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x, topOffset);
+                    }
                 } else if (value == BitVector.VALUE_Z && lastValue != BitVector.VALUE_X) {
                     if (lastValue == BitVector.VALUE_0) {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT, x,
-                            topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
-                    }
-                    else
+                                topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
+                    } else {
                         g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
-                } else
+                    }
+                } else {
                     g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT);
+                }
             }
 
-            if (x > visibleRect.x + visibleRect.width)
+            if (x > visibleRect.x + visibleRect.width) {
                 break;
+            }
 
             lastValue = value;
             lastX = x;
@@ -79,26 +82,23 @@ class SingleBitPainter implements WaveformPainter {
             return;
 
         switch (value) {
-            case BitVector.VALUE_1:
-                g.drawLine(left, top, right, top);
-                break;
-            case BitVector.VALUE_0:
-                g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right,
-                    top + DrawMetrics.WAVEFORM_HEIGHT);
-                break;
-            case BitVector.VALUE_Z:
-                g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top
-                    + DrawMetrics.WAVEFORM_HEIGHT / 2);
-                break;
-            case BitVector.VALUE_X:
-            default:
-                g.setColor(AppPreferences.getInstance().conflictColor);
-                g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
-                g.setColor(AppPreferences.getInstance().traceColor);
-                g.drawLine(left, top, right, top);
-                g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top
-                    + DrawMetrics.WAVEFORM_HEIGHT);
-                break;
+        case BitVector.VALUE_1:
+            g.drawLine(left, top, right, top);
+            break;
+        case BitVector.VALUE_0:
+            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top + DrawMetrics.WAVEFORM_HEIGHT);
+            break;
+        case BitVector.VALUE_Z:
+            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top + DrawMetrics.WAVEFORM_HEIGHT / 2);
+            break;
+        case BitVector.VALUE_X:
+        default:
+            g.setColor(AppPreferences.getInstance().conflictColor);
+            g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
+            g.setColor(AppPreferences.getInstance().traceColor);
+            g.drawLine(left, top, right, top);
+            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top + DrawMetrics.WAVEFORM_HEIGHT);
+            break;
         }
     }
 }

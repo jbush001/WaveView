@@ -16,7 +16,8 @@
 
 package waveview;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 ///
 /// An ordered series of value changes on a single net (which may have
@@ -30,22 +31,38 @@ import java.util.*;
 /// of the trace.  They are assumed to have the value of the first transition.
 ///
 public class TransitionVector {
+    // Number of bits for this net
+    private int width;
+
+    private long[] timestamps;
+
+    // Values are packed into this array. Each bit in the output requires two
+    // bits in this array (to represent four values: 0, 1, X, and Z). These
+    // are stored starting with the first bit as the LSB of each array word
+    // up to the MSB. The next bit is then stored in the next higher array
+    // entry. There is no padding between adjacent transitions.
+    private int[] packedValues;
+    private int transitionCount;
+    private int allocSize; // Used only while building
+
     public TransitionVector(int width) {
         assert width > 0;
-        fWidth = width;
+        this.width = width;
     }
 
-    /// @returns Iterator at transition. If there isn't a transition at this transition,
-    ///   returns the transition before it. If this is before the first transition, returns
-    ///   the first transition.
+    /// @returns Iterator at transition. If there isn't a transition at this
+    /// transition,
+    /// returns the transition before it. If this is before the first transition,
+    /// returns
+    /// the first transition.
     public Iterator<Transition> findTransition(long timestamp) {
         // Binary search
-        int low = 0;                      // Lowest possible index
-        int high = fTransitionCount - 1;  // Highest possible index
+        int low = 0; // Lowest possible index
+        int high = transitionCount - 1; // Highest possible index
 
         while (low <= high) {
             int mid = (low + high) >>> 1;
-            long midKey = fTimestamps[mid];
+            long midKey = timestamps[mid];
             if (timestamp < midKey)
                 high = mid - 1;
             else if (timestamp > midKey)
@@ -62,26 +79,32 @@ public class TransitionVector {
     }
 
     public long getMaxTimestamp() {
-        if (fTransitionCount == 0)
+        if (transitionCount == 0)
             return 0;
 
-        return fTimestamps[fTransitionCount - 1];
+        return timestamps[transitionCount - 1];
     }
 
     public int getWidth() {
-        return fWidth;
+        return width;
     }
 
     private class TransitionVectorIterator implements Iterator<Transition> {
+        private int index;
+
+        // Reuse the same Transition/BitVector so we don't have to keep
+        // reallocating.
+        private final Transition transition = new Transition();
+
         TransitionVectorIterator(int index) {
             assert index >= 0;
-            fNextIndex = index;
-            fTransition.setWidth(fWidth);
+            this.index = index;
+            transition.setWidth(width);
         }
 
         @Override
         public boolean hasNext() {
-            return fNextIndex < fTransitionCount;
+            return index < transitionCount;
         }
 
         /// @note the Transition returned from next will be clobbered
@@ -92,84 +115,80 @@ public class TransitionVector {
             if (!hasNext())
                 throw new NoSuchElementException();
 
-            int bitOffset = fNextIndex * fWidth * 2;
+            int bitOffset = index * width * 2;
             int wordOffset = bitOffset >> 5;
             bitOffset &= 31;
-            int currentWord = fValues[wordOffset] >> bitOffset;
+            int currentWord = packedValues[wordOffset] >> bitOffset;
 
             // Copy values out of packed array
-            for (int i = 0; i < fWidth; i++) {
-                fTransition.setBit(fWidth - i - 1, currentWord & 3);
+            for (int i = 0; i < width; i++) {
+                transition.setBit(width - i - 1, currentWord & 3);
                 bitOffset += 2;
                 if (bitOffset == 32) {
                     wordOffset++;
-                    currentWord = fValues[wordOffset];
+                    currentWord = packedValues[wordOffset];
                     bitOffset = 0;
-                } else
+                } else {
                     currentWord >>= 2;
+                }
             }
 
-            fTransition.setTimestamp(fTimestamps[fNextIndex]);
-            fNextIndex++;
+            transition.setTimestamp(timestamps[index]);
+            index++;
 
-            return fTransition;
+            return transition;
         }
 
         @Override
         public void remove() {
             throw new UnsupportedOperationException();
         }
-
-        private int fNextIndex;
-
-        // Reuse the same Transition/BitVector so we don't have to keep
-        // reallocating.
-        private Transition fTransition = new Transition();
     }
 
     /// Called while the waveform is being loaded.
     /// The timestamp must be after the last transition that was
     /// appended
-    public void appendTransition(long timestamp, BitVector values) {
-        if (fTransitionCount == fAllocSize) {
+    public void appendTransition(long timestamp, BitVector value) {
+        if (transitionCount == allocSize) {
             // Grow the array
-            if (fAllocSize < 128)
-                fAllocSize = 128;
-            else
-                fAllocSize *= 2;
-
-            long[] newTimestamps = new long[fAllocSize];
-            int[] newValues = new int[fAllocSize * fWidth / 16];
-
-            if (fTimestamps != null) {
-                System.arraycopy(fTimestamps, 0, newTimestamps,
-                                 0, fTransitionCount);
-                System.arraycopy(fValues, 0, newValues,
-                                 0, fTransitionCount * fWidth / 16);
+            if (allocSize < 128) {
+                allocSize = 128;
+            } else {
+                allocSize *= 2;
             }
 
-            fTimestamps = newTimestamps;
-            fValues = newValues;
+            long[] newTimestamps = new long[allocSize];
+            int[] newPackedValues = new int[allocSize * width / 16];
+
+            if (timestamps != null) {
+                System.arraycopy(timestamps, 0, newTimestamps, 0, transitionCount);
+                System.arraycopy(packedValues, 0, newPackedValues, 0, transitionCount * width / 16);
+            }
+
+            timestamps = newTimestamps;
+            packedValues = newPackedValues;
         }
 
-        if (fTransitionCount > 0)
-            assert timestamp >= fTimestamps[fTransitionCount - 1];
+        if (transitionCount > 0) {
+            assert timestamp >= timestamps[transitionCount - 1];
+        }
 
-        fTimestamps[fTransitionCount] = timestamp;
+        timestamps[transitionCount] = timestamp;
 
-        int bitIndex = fTransitionCount * fWidth;
+        int bitIndex = transitionCount * width;
 
         // If the passed value is smaller than the vector width, pad with zeroes
-        if (fWidth > values.getWidth())
-            bitIndex += fWidth - values.getWidth();
+        if (width > value.getWidth()) {
+            bitIndex += width - value.getWidth();
+        }
 
         int wordOffset = bitIndex / 16;
         int bitOffset = (bitIndex * 2) % 32;
 
         // If the passed value is wider than the vector width, only copy the
         // low order bits of it.
-        for (int i = Math.min(values.getWidth(), fWidth) - 1; i >= 0; i--) {
-            fValues[wordOffset] |= values.getBit(i) << bitOffset;
+        for (int i = Math.min(value.getWidth(), width) - 1; i >= 0; i--) {
+            packedValues[wordOffset] |= value.getBit(i) << bitOffset;
             bitOffset += 2;
             if (bitOffset == 32) {
                 wordOffset++;
@@ -177,20 +196,6 @@ public class TransitionVector {
             }
         }
 
-        fTransitionCount++;
+        transitionCount++;
     }
-
-    // Number of bits for this net
-    private int fWidth;
-
-    private long[] fTimestamps;
-
-    // Values are packed into this array. Each bit in the output requires two
-    // bits in this array (to represent four values: 0, 1, X, and Z). These
-    // are stored starting with the first bit as the LSB of each array word
-    // up to the MSB. The next bit is then stored in the next higher array
-    // entry. There is no padding between adjacent transitions.
-    private int[] fValues;
-    private int fTransitionCount;
-    private int fAllocSize; // Used only while building
 }

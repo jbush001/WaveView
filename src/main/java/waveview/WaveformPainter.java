@@ -16,7 +16,8 @@
 
 package waveview;
 
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Rectangle;
 
 ///
 /// Delegate used to draw a waveform for a single net

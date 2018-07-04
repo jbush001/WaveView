@@ -16,80 +16,88 @@
 
 package waveview;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.*;
-import java.util.*;
-import javax.swing.tree.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
+import javax.swing.event.TreeModelListener;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
 
 ///
 /// Maintains module/net hieararchy, where leaf nodes are nets and interior nodes
 /// are modules.
 ///
 public class NetTreeModel implements TreeModel {
+    private Node root;
+    private final Deque<Node> nodeStack = new ArrayDeque<>();
+
     public void clear() {
-        fRoot = null;
+        root = null;
     }
 
     public void enterScope(String name) {
-        if (fNodeStack.isEmpty() && fRoot != null) {
+        if (nodeStack.isEmpty() && root != null) {
             // If you call $dumpvars more than once with iverilog, it will pop the root
-            // node off and re-push it.  Handle this case here.
-            fNodeStack.addLast(fRoot);
+            // node off and re-push it. Handle this case here.
+            nodeStack.addLast(root);
             return;
         }
 
         Node node = new Node(name);
-        if (fRoot == null)
-            fRoot = node;
-        else
-            fNodeStack.peekLast().fChildren.add(node);
+        if (root == null) {
+            root = node;
+        } else {
+            nodeStack.peekLast().children.add(node);
+        }
 
-        fNodeStack.addLast(node);
+        nodeStack.addLast(node);
     }
 
     public void leaveScope() {
-        fNodeStack.removeLast();
+        nodeStack.removeLast();
     }
 
     public void addNet(String name, int netId) {
-        fNodeStack.peekLast().fChildren.add(new Node(name, netId));
+        nodeStack.peekLast().children.add(new Node(name, netId));
     }
 
     public int getNetFromTreeObject(Object o) {
-        return ((Node)o).fNet;
+        return ((Node) o).net;
     }
 
     // Tree model methods. Listeners are unimplemented because the tree is
     // immutable.
     @Override
-    public void addTreeModelListener(TreeModelListener l) {}
+    public void addTreeModelListener(TreeModelListener l) {
+    }
 
     @Override
-    public void removeTreeModelListener(TreeModelListener l) {}
+    public void removeTreeModelListener(TreeModelListener l) {
+    }
 
     @Override
     public Object getChild(Object parent, int index) {
-        return ((Node) parent).fChildren.get(index);
+        return ((Node) parent).children.get(index);
     }
 
     @Override
     public int getChildCount(Object parent) {
         Node n = (Node) parent;
-        if (n.isLeaf())
+        if (n.isLeaf()) {
             return 0;
-        else
-            return n.fChildren.size();
+        } else {
+            return n.children.size();
+        }
     }
 
     @Override
     public int getIndexOfChild(Object parent, Object child) {
-        return ((Node) parent).fChildren.indexOf(child);
+        return ((Node) parent).children.indexOf(child);
     }
 
     @Override
     public Object getRoot() {
-        return fRoot;
+        return root;
     }
 
     @Override
@@ -103,32 +111,29 @@ public class NetTreeModel implements TreeModel {
     }
 
     static class Node {
+        private ArrayList<Node> children;
+        private String name;
+        private int net = -1;
+
         // Interior nodes only
         Node(String name) {
-            fName = name;
-            fChildren = new ArrayList<Node>();
+            this.name = name;
+            children = new ArrayList<Node>();
         }
 
         // Leaf nodes only
         Node(String name, int net) {
-            fName = name;
-            fNet = net;
+            this.name = name;
+            this.net = net;
         }
 
         @Override
         public String toString() {
-            return fName;
+            return name;
         }
 
         boolean isLeaf() {
-            return fChildren == null;
+            return children == null;
         }
-
-        private ArrayList<Node> fChildren;
-        private String fName;
-        private int fNet = -1;
-    };
-
-    private Node fRoot;
-    private Deque<Node> fNodeStack = new ArrayDeque<Node>();
+    }
 }
