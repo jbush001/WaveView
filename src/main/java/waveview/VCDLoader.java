@@ -380,7 +380,7 @@ public class VCDLoader implements TraceLoader {
 
     private static class ProgressInputStream extends InputStream {
         private long totalRead;
-        private InputStream wrapped;
+        private final InputStream wrapped;
 
         ProgressInputStream(InputStream wrapped) {
             this.wrapped = wrapped;

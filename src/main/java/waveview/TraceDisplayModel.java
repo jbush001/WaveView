@@ -251,11 +251,7 @@ public class TraceDisplayModel {
     // XXX also, if there is another marker that is very close, should
     // we detect that somehow?
     public void addMarker(String description, long timestamp) {
-        Marker marker = new Marker();
-        marker.id = nextMarkerId++;
-        marker.description = description;
-        marker.timestamp = timestamp;
-
+        Marker marker = new Marker(nextMarkerId++, timestamp, description);
         markers.add(marker);
         notifyMarkerChanged(timestamp);
     }
@@ -352,9 +348,15 @@ public class TraceDisplayModel {
     }
 
     private static class Marker implements SortedArrayList.Keyed {
-        int id;
+        final int id;
+        final long timestamp;
         String description;
-        long timestamp;
+
+        Marker(int id, long timestamp, String description) {
+            this.id = id;
+            this.timestamp = timestamp;
+            this.description = description;
+        }
 
         @Override
         public long getKey() {
@@ -363,8 +365,8 @@ public class TraceDisplayModel {
     }
 
     private static class NetSet {
-        final ArrayList<NetViewModel> visibleNets;
         private final String name;
+        final ArrayList<NetViewModel> visibleNets;
 
         NetSet(String name, ArrayList<NetViewModel> visibleNets) {
             this.name = name;
@@ -373,7 +375,7 @@ public class TraceDisplayModel {
     }
 
     private static class NetViewModel {
-        private int index;
+        private final int index;
         private ValueFormatter formatter = new HexadecimalValueFormatter();
 
         NetViewModel(int index) {

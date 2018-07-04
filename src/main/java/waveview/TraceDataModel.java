@@ -97,9 +97,9 @@ public class TraceDataModel {
     }
 
     private static class NetDataModel {
-        private TransitionVector transitionVector;
-        private String shortName;
-        private String fullName;
+        private final String shortName;
+        private final String fullName;
+        private final TransitionVector transitionVector;
 
         NetDataModel(String shortName, String fullName, int width) {
             this.shortName = shortName;

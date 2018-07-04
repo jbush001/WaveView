@@ -124,6 +124,8 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
     }
 
     class ListModelAdapter implements ListModel<Integer>, TraceDisplayModel.Listener {
+        private final ArrayList<ListDataListener> listeners = new ArrayList<>();
+
         ListModelAdapter() {
             traceDisplayModel.addListener(this);
         }
@@ -177,8 +179,6 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         @Override
         public void formatChanged(int index) {
         }
-
-        private ArrayList<ListDataListener> listeners = new ArrayList<>();
     }
 
     /// Handles lists of signals dropped onto this view

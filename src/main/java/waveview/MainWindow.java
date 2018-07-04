@@ -241,19 +241,18 @@ public class MainWindow extends JPanel implements ActionListener {
     class TraceLoadWorker extends SwingWorker<Void, Void> {
         private final File file;
         private final ProgressMonitor progressMonitor;
-        private TraceDataModel newModel;
+        private final TraceDataModel newModel = new TraceDataModel();
         private String errorMessage;
 
-        TraceLoadWorker(File file, ProgressMonitor monitor) {
+        TraceLoadWorker(File file, ProgressMonitor progressMonitor) {
             this.file = file;
-            progressMonitor = monitor;
+            this.progressMonitor = progressMonitor;
         }
 
         @Override
         public Void doInBackground() {
             /// @todo Determine the loader type dynamically
             try (TraceLoader loader = new VCDLoader()) {
-                newModel = new TraceDataModel();
                 TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
                     @Override
                     public boolean updateProgress(final int percentRead) {

@@ -121,8 +121,8 @@ public class Search {
     }
 
     public static class ParseException extends Exception {
-        private int startOffset;
-        private int endOffset;
+        private final int startOffset;
+        private final int endOffset;
 
         ParseException(String what, int startOffset, int endOffset) {
             super(what);

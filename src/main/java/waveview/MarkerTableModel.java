@@ -23,7 +23,6 @@ import javax.swing.table.AbstractTableModel;
 ///
 
 public class MarkerTableModel extends AbstractTableModel {
-    private static final int NUM_COLUMNS = 3;
     private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
     private final TraceDisplayModel traceDisplayModel;
 
@@ -33,7 +32,7 @@ public class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return NUM_COLUMNS;
+        return COLUMN_NAMES.length;
     }
 
     @Override
