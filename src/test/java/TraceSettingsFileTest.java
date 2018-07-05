@@ -90,8 +90,8 @@ public class TraceSettingsFileTest {
         // Save and reload contents
         TraceDisplayModel destDisplayModel = new TraceDisplayModel();
         File file = fTempFolder.newFile("test1.settings");
-        (new TraceSettingsFile(file, dataModel, sourceDisplayModel)).write();
-        (new TraceSettingsFile(file, dataModel, destDisplayModel)).read();
+        new TraceSettingsFile(file, dataModel, sourceDisplayModel).write();
+        new TraceSettingsFile(file, dataModel, destDisplayModel).read();
 
         // Check destDisplayModel
         assertEquals(4, destDisplayModel.getVisibleNetCount());
@@ -186,7 +186,7 @@ public class TraceSettingsFileTest {
         builder.loadFinished();
 
         TraceDisplayModel displayModel = new TraceDisplayModel();
-        (new TraceSettingsFile(file, dataModel, displayModel)).read();
+        new TraceSettingsFile(file, dataModel, displayModel).read();
         assertTrue(displayModel.getValueFormatter(0) instanceof BinaryValueFormatter);
     }
 

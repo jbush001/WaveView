@@ -226,8 +226,9 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
             } else {
                 // Drag from another window (for example, net tree)
                 String[] values = data.split("\n", 0);
-                for (String value : values)
+                for (String value : values) {
                     traceDisplayModel.makeNetVisible(insertionPoint++, traceDataModel.findNet(value));
+                }
             }
 
             // @todo Deal with selection changes. Should probably just clear the selection.
@@ -282,10 +283,9 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
     }
 
     private void computeBounds() {
-        Dimension d = getPreferredSize();
-        d.width = 200;
-        d.height = traceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
-        setPreferredSize(d);
+        int preferredHeight = traceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
+        Dimension preferredSize = new Dimension(200, preferredHeight);
+        setPreferredSize(preferredSize);
         validate();
         repaint();
     }

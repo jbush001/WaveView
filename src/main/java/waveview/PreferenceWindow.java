@@ -21,8 +21,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -76,22 +74,12 @@ class PreferenceWindow extends JDialog {
         Container okCancelContainer = new Container();
         okCancelContainer.setLayout(new FlowLayout());
         JButton okButton = new JButton("OK");
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                ok();
-            }
-        });
+        okButton.addActionListener(e -> ok());
 
         okCancelContainer.add(okButton);
 
         JButton cancelButton = new JButton("Cancel");
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                cancel();
-            }
-        });
+        cancelButton.addActionListener(e -> cancel());
         okCancelContainer.add(cancelButton);
 
         contentPane.add(okCancelContainer, BorderLayout.SOUTH);

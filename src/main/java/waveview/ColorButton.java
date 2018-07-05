@@ -16,14 +16,14 @@
 
 package waveview;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.JPanel;
 import javax.swing.JColorChooser;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.FontMetrics;
+import javax.swing.JPanel;
 
 class ColorButton extends JPanel {
     private Color color;

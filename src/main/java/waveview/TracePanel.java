@@ -73,21 +73,13 @@ class TracePanel extends JPanel {
         // the vertical scrollbar that also controls the net name view.
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, netNameContainer, scrollPane);
         add(splitPane, BorderLayout.CENTER);
-        scrollPane.getVerticalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent ae) {
-                netNameViewport.setViewPosition(new Point(0, ae.getValue()));
-            }
-        });
+        scrollPane.getVerticalScrollBar().addAdjustmentListener((ae) ->
+                netNameViewport.setViewPosition(new Point(0, ae.getValue())));
 
-        scrollPane.getHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-            @Override
-            public void adjustmentValueChanged(AdjustmentEvent ae) {
-                // Need to repaint when scrolling because values on partially visible
-                // nets will be centered.
-                waveformPanel.repaint();
-            }
-        });
+        // Need to repaint when scrolling because values on partially visible
+        // nets will be centered.
+        scrollPane.getHorizontalScrollBar().addAdjustmentListener((ae) ->
+                waveformPanel.repaint());
     }
 
     void zoomIn() {

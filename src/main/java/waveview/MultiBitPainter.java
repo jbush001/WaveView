@@ -77,8 +77,9 @@ class MultiBitPainter implements WaveformPainter {
 
             // Stop drawing when we've gone past the edge of the viewport
             // (trace is no longer visible).
-            if (x > visibleRect.x + visibleRect.width)
+            if (x > visibleRect.x + visibleRect.width) {
                 break;
+            }
 
             previousValue = formatter.format(transition);
             lastValueWasZ = isZ;
@@ -114,12 +115,13 @@ class MultiBitPainter implements WaveformPainter {
 
     private void drawSpan(Graphics g, int left, int right, int top, String label, boolean isZ, boolean isX,
             int fontBaseline, FontMetrics metrics) {
-        if (right <= left)
-            return; // You'll end up with single pixel boogers in some cases otherwise
+        if (right <= left) {
+            return; // Will end up with single pixel boogers in some cases otherwise
+        }
 
-        if (isZ)
+        if (isZ) {
             g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top + DrawMetrics.WAVEFORM_HEIGHT / 2);
-        else {
+        } else {
             if (isX) {
                 g.setColor(AppPreferences.getInstance().conflictColor);
                 g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);

@@ -16,13 +16,13 @@
 
 package waveview;
 
-import java.util.Map;
-import java.util.HashMap;
-import java.io.File;
-import java.io.IOException;
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 
 ///
 /// Converts a bitvector to one of a set of strings from an enumeration.

@@ -261,12 +261,7 @@ public class MainWindow extends JPanel implements ActionListener {
                         if (progressMonitor.isCanceled())
                             return false;
 
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                progressMonitor.setProgress(percentRead);
-                            }
-                        });
+                        SwingUtilities.invokeLater(() -> progressMonitor.setProgress(percentRead));
 
                         return true;
                     }
@@ -340,7 +335,7 @@ public class MainWindow extends JPanel implements ActionListener {
     private void loadTraceFile(File file) {
         saveTraceSettings();
         ProgressMonitor monitor = new ProgressMonitor(MainWindow.this, "Loading...", "", 0, 100);
-        (new TraceLoadWorker(file, monitor)).execute();
+        new TraceLoadWorker(file, monitor).execute();
     }
 
     private void showFindDialog() {
@@ -544,12 +539,6 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     public static void main(String[] args) {
-        final String[] _args = args;
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                createAndShowGUI(_args);
-            }
-        });
+        javax.swing.SwingUtilities.invokeLater(() -> createAndShowGUI(args));
     }
 }

@@ -27,7 +27,7 @@ public class BitVector {
     public static final byte VALUE_X = 2;
     public static final byte VALUE_Z = 3;
 
-    // Bit 0 is least significant value
+    // Index 0 is least significant value
     private byte[] values;
 
     public BitVector() {

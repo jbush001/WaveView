@@ -115,14 +115,14 @@ public class NetTreeModel implements TreeModel {
         private final int net;
         private final ArrayList<Node> children;
 
-        // Interior nodes only
+        // Interior nodes (modules/interfaces) only
         Node(String name) {
             this.name = name;
             net = -1;
             children = new ArrayList<>();
         }
 
-        // Leaf nodes only
+        // Leaf nodes (nets) only
         Node(String name, int net) {
             this.name = name;
             this.net = net;
