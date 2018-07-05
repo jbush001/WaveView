@@ -37,8 +37,6 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ProgressMonitor;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
 /// @todo Add menu item to jump to specific timestamp
 public class MainWindow extends JPanel implements ActionListener {
@@ -238,104 +236,63 @@ public class MainWindow extends JPanel implements ActionListener {
         loadTraceFile(new File(path));
     }
 
-    class TraceLoadWorker extends SwingWorker<Void, Void> {
-        private final File file;
-        private final ProgressMonitor progressMonitor;
-        private final TraceDataModel newModel = new TraceDataModel();
-        private String errorMessage;
-
-        TraceLoadWorker(File file, ProgressMonitor progressMonitor) {
-            this.file = file;
-            this.progressMonitor = progressMonitor;
-        }
-
-        @Override
-        public Void doInBackground() {
-            /// @todo Determine the loader type dynamically
-            try (TraceLoader loader = new VCDLoader()) {
-                TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
-                    @Override
-                    public boolean updateProgress(final int percentRead) {
-                        // Accessing the component from a different thread, technically
-                        // a no no, but probably okay.
-                        if (progressMonitor.isCanceled())
-                            return false;
-
-                        SwingUtilities.invokeLater(() -> progressMonitor.setProgress(percentRead));
-
-                        return true;
-                    }
-                };
-
-                long startTime = System.currentTimeMillis();
-                loader.load(file, newModel.startBuilding(), progressListener);
-                System.out.println("Loaded in " + (System.currentTimeMillis() - startTime) + " ms");
-            } catch (Exception exc) {
-                errorMessage = exc.getMessage();
-            }
-
-            return null;
-        }
-
-        // Executed on main thread
-        @Override
-        protected void done() {
-            progressMonitor.close();
-            if (errorMessage == null) {
-                currentSearch = null;
-
-                // XXX hack
-                // Because this is running a separate thread, and I don't want to add locking
-                // everywhere, we load into a new copy of a data model. However, there are
-                // references to the trace data model scattered all over the place. Rather
-                // than try to update all pointers to the new model, I just copy data from
-                // the new object to the old one. Since I'm in the main window thread now,
-                // this is safe.
-                traceDataModel.copyFrom(newModel);
-
-                traceDisplayModel.clear();
-                frame.setTitle("Waveform Viewer [" + file.getName() + "]");
-
-                try {
-                    recentFiles.add(file.getCanonicalPath());
-                    AppPreferences.getInstance().setRecentList(recentFiles.pack());
-
-                    File settingsFile = TraceSettingsFile.settingsFileName(file);
-                    traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, traceDisplayModel);
-                    if (settingsFile.exists()) {
-                        traceSettingsFile.read();
-                    }
-                } catch (Exception exc) {
-                    System.out.println("caught exception while reading settings " + exc);
-                    // XXX Display an error dialog?
-                }
-
-                buildRecentFilesMenu();
-                buildNetMenu();
-
-                // XXX hack
-                // The net search pane holds onto the old tree model, which has been
-                // replaced. Delete it so it will be re-created attached to the new one.
-                if (netSearchPane != null) {
-                    if (netSearchPane.isVisible()) {
-                        netSearchPane.setVisible(false);
-                    }
-
-                    remove(netSearchPane);
-                    netSearchPane = null;
-                }
-
-                currentTraceFile = file;
-            } else {
-                JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: " + errorMessage);
-            }
-        }
-    }
-
     private void loadTraceFile(File file) {
         saveTraceSettings();
         ProgressMonitor monitor = new ProgressMonitor(MainWindow.this, "Loading...", "", 0, 100);
-        new TraceLoadWorker(file, monitor).execute();
+        new TraceLoadWorker(file, monitor, (newModel, errorMessage)
+                -> handleLoadFinished(file, newModel, errorMessage)).execute();
+    }
+
+    private void handleLoadFinished(File file, TraceDataModel newModel, String errorMessage) {
+        if (errorMessage == null) {
+            currentSearch = null;
+
+            traceDisplayModel.clear();
+
+            // XXX hack
+            // Because the load ran on a separate thread, and I didn't want to add locking
+            // everywhere, this loaded into a new copy of a data model. However, there are
+            // references to the trace data model scattered all over the place. Rather
+            // than try to update all pointers to the new model, this just copies data from
+            // the new object to the old one. Since this runs on the main window thread now,
+            // this is safe.
+            traceDataModel.copyFrom(newModel);
+
+            frame.setTitle("Waveform Viewer [" + file.getName() + "]");
+
+            try {
+                recentFiles.add(file.getCanonicalPath());
+                AppPreferences.getInstance().setRecentList(recentFiles.pack());
+
+                File settingsFile = TraceSettingsFile.settingsFileName(file);
+                traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, traceDisplayModel);
+                if (settingsFile.exists()) {
+                    traceSettingsFile.read();
+                }
+            } catch (Exception exc) {
+                System.out.println("caught exception while reading settings " + exc);
+                // XXX Display an error dialog?
+            }
+
+            buildRecentFilesMenu();
+            buildNetMenu();
+
+            // XXX hack
+            // The net search pane holds onto the old tree model, which has been
+            // replaced. Delete it so it will be re-created attached to the new one.
+            if (netSearchPane != null) {
+                if (netSearchPane.isVisible()) {
+                    netSearchPane.setVisible(false);
+                }
+
+                remove(netSearchPane);
+                netSearchPane = null;
+            }
+
+            currentTraceFile = file;
+        } else {
+            JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: " + errorMessage);
+        }
     }
 
     private void showFindDialog() {
