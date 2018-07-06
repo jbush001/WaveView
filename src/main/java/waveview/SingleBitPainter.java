@@ -26,14 +26,14 @@ import java.util.Iterator;
 ///
 class SingleBitPainter implements WaveformPainter {
     @Override
-    public void paint(Graphics g, TraceDataModel model, int netId, int topOffset, Rectangle visibleRect,
+    public void paint(Graphics g, NetDataModel model, int topOffset, Rectangle visibleRect,
             double horizontalScale, ValueFormatter formatter) {
         g.setColor(AppPreferences.getInstance().traceColor);
 
         int lastValue = 0;
         int lastX = visibleRect.x + visibleRect.width;
         long firstTimestamp = (long) (visibleRect.x / horizontalScale);
-        Iterator<Transition> i = model.findTransition(netId, firstTimestamp);
+        Iterator<Transition> i = model.findTransition(firstTimestamp);
         while (true) {
             Transition transition = i.next();
 

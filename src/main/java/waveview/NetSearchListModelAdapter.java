@@ -47,13 +47,13 @@ public class NetSearchListModelAdapter implements ListModel<String>, DocumentLis
     public void setPattern(String pattern) {
         if (pattern.equals("")) {
             matches.clear();
-            for (int index = 0; index < traceDataModel.getTotalNetCount(); index++) {
-                matches.add(traceDataModel.getFullNetName(index));
+            for (NetDataModel netDataModel : traceDataModel) {
+                matches.add(netDataModel.getFullName());
             }
         } else {
             matches.clear();
-            for (int index = 0; index < traceDataModel.getTotalNetCount(); index++) {
-                String name = traceDataModel.getFullNetName(index);
+            for (NetDataModel netDataModel : traceDataModel) {
+                String name = netDataModel.getFullName();
                 if (name.indexOf(pattern) != -1) {
                     matches.add(name);
                 }

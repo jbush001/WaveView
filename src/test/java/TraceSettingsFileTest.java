@@ -16,6 +16,7 @@
 //
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import org.junit.Rule;
@@ -26,6 +27,7 @@ import waveview.BitVector;
 import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
+import waveview.NetDataModel;
 import waveview.TraceBuilder;
 import waveview.TraceDataModel;
 import waveview.TraceDisplayModel;
@@ -57,21 +59,27 @@ public class TraceSettingsFileTest {
         builder.exitScope();
         builder.loadFinished();
 
+        NetDataModel netDataModels[] = new NetDataModel[8];
+        int index = 0;
+        for (NetDataModel model : dataModel) {
+            netDataModels[index++] = model;
+        }
+
         // Populate sourceDisplayModel
-        sourceDisplayModel.makeNetVisible(1);
-        sourceDisplayModel.makeNetVisible(2);
+        sourceDisplayModel.makeNetVisible(netDataModels[1]);
+        sourceDisplayModel.makeNetVisible(netDataModels[2]);
         sourceDisplayModel.saveNetSet("set1");
 
         sourceDisplayModel.removeAllNets();
-        sourceDisplayModel.makeNetVisible(6);
-        sourceDisplayModel.makeNetVisible(7);
+        sourceDisplayModel.makeNetVisible(netDataModels[6]);
+        sourceDisplayModel.makeNetVisible(netDataModels[7]);
         sourceDisplayModel.saveNetSet("set2");
 
         sourceDisplayModel.removeAllNets();
-        sourceDisplayModel.makeNetVisible(0);
-        sourceDisplayModel.makeNetVisible(2);
-        sourceDisplayModel.makeNetVisible(4);
-        sourceDisplayModel.makeNetVisible(5);
+        sourceDisplayModel.makeNetVisible(netDataModels[0]);
+        sourceDisplayModel.makeNetVisible(netDataModels[2]);
+        sourceDisplayModel.makeNetVisible(netDataModels[4]);
+        sourceDisplayModel.makeNetVisible(netDataModels[5]);
 
         sourceDisplayModel.setValueFormatter(0, new BinaryValueFormatter());
         sourceDisplayModel.setValueFormatter(1, new DecimalValueFormatter());
@@ -95,10 +103,10 @@ public class TraceSettingsFileTest {
 
         // Check destDisplayModel
         assertEquals(4, destDisplayModel.getVisibleNetCount());
-        assertEquals(0, destDisplayModel.getVisibleNet(0));
-        assertEquals(2, destDisplayModel.getVisibleNet(1));
-        assertEquals(4, destDisplayModel.getVisibleNet(2));
-        assertEquals(5, destDisplayModel.getVisibleNet(3));
+        assertSame(netDataModels[0], destDisplayModel.getVisibleNet(0));
+        assertSame(netDataModels[2], destDisplayModel.getVisibleNet(1));
+        assertSame(netDataModels[4], destDisplayModel.getVisibleNet(2));
+        assertSame(netDataModels[5], destDisplayModel.getVisibleNet(3));
 
         assertTrue(destDisplayModel.getValueFormatter(0) instanceof BinaryValueFormatter);
         assertTrue(destDisplayModel.getValueFormatter(1) instanceof DecimalValueFormatter);
@@ -115,13 +123,13 @@ public class TraceSettingsFileTest {
 
         destDisplayModel.selectNetSet(0);
         assertEquals(2, destDisplayModel.getVisibleNetCount());
-        assertEquals(1, destDisplayModel.getVisibleNet(0));
-        assertEquals(2, destDisplayModel.getVisibleNet(1));
+        assertSame(netDataModels[1], destDisplayModel.getVisibleNet(0));
+        assertSame(netDataModels[2], destDisplayModel.getVisibleNet(1));
 
         destDisplayModel.selectNetSet(1);
         assertEquals(2, destDisplayModel.getVisibleNetCount());
-        assertEquals(6, destDisplayModel.getVisibleNet(0));
-        assertEquals(7, destDisplayModel.getVisibleNet(1));
+        assertSame(netDataModels[6], destDisplayModel.getVisibleNet(0));
+        assertSame(netDataModels[7], destDisplayModel.getVisibleNet(1));
 
         assertEquals(2, destDisplayModel.getMarkerCount());
         assertEquals("marker1", destDisplayModel.getDescriptionForMarker(0));
@@ -150,9 +158,10 @@ public class TraceSettingsFileTest {
         builder1.newNet("net3", -1, 1);
         builder1.exitScope();
         builder1.loadFinished();
-        sourceDisplayModel.makeNetVisible(0);
-        sourceDisplayModel.makeNetVisible(1);
-        sourceDisplayModel.makeNetVisible(2);
+
+        sourceDisplayModel.makeNetVisible(sourceDataModel.getNetDataModel(0));
+        sourceDisplayModel.makeNetVisible(sourceDataModel.getNetDataModel(1));
+        sourceDisplayModel.makeNetVisible(sourceDataModel.getNetDataModel(2));
 
         TraceDataModel destDataModel = new TraceDataModel();
         TraceDisplayModel destDisplayModel = new TraceDisplayModel();
@@ -170,8 +179,8 @@ public class TraceSettingsFileTest {
         (new TraceSettingsFile(file, destDataModel, destDisplayModel)).read();
 
         assertEquals(2, destDisplayModel.getVisibleNetCount());
-        assertEquals(0, destDisplayModel.getVisibleNet(0));
-        assertEquals(2, destDisplayModel.getVisibleNet(1));
+        assertSame(destDataModel.getNetDataModel(0), destDisplayModel.getVisibleNet(0));
+        assertSame(destDataModel.getNetDataModel(2), destDisplayModel.getVisibleNet(1));
     }
 
     // If the formatter class name is unknown, fall back to binary

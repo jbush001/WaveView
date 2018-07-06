@@ -435,13 +435,13 @@ public class Search {
     private ValueNode parseValue() throws ParseException {
         int lookahead = lexer.nextToken();
         if (lookahead == Lexer.TOK_IDENTIFIER) {
-            int netId = traceDataModel.findNet(lexer.getTokenString());
-            if (netId < 0) {
+            NetDataModel netDataModel = traceDataModel.findNet(lexer.getTokenString());
+            if (netDataModel == null) {
                 throw new ParseException("unknown net \"" + lexer.getTokenString() + "\"", lexer.getTokenStart(),
                         lexer.getTokenEnd());
             }
 
-            return new NetValueNode(netId, traceDataModel.getNetWidth(netId));
+            return new NetValueNode(netDataModel);
         } else {
             lexer.pushBackToken(lookahead);
             match(Lexer.TOK_LITERAL);
@@ -602,19 +602,19 @@ public class Search {
     }
 
     private static class NetValueNode extends ValueNode {
-        private int netId;
+        private final NetDataModel netDataModel;
 
         // Preallocated for efficiency. This is returned by evaluate.
         private BitVector value;
 
-        NetValueNode(int netId, int width) {
-            this.netId = netId;
-            value = new BitVector(width);
+        NetValueNode(NetDataModel netDataModel) {
+            this.netDataModel = netDataModel;
+            value = new BitVector(netDataModel.getWidth());
         }
 
         @Override
         BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
-            Iterator<Transition> i = model.findTransition(netId, timestamp);
+            Iterator<Transition> i = netDataModel.findTransition(timestamp);
             Transition t = i.next();
             value.assign(t);
             if (timestamp >= t.getTimestamp()) {
@@ -635,7 +635,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "net" + netId;
+            return netDataModel.getFullName();
         }
     }
 

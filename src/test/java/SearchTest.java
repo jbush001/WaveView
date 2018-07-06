@@ -761,35 +761,35 @@ public class SearchTest {
         TraceDataModel traceDataModel = makeFourBitModel();
 
         // Basic comparisons
-        assertEquals("(eq net0 net1)", new Search(traceDataModel, "m.a = m.b").toString());
-        assertEquals("(eq 00000111 net1)", new Search(traceDataModel, "7 = m.b").toString());
-        assertEquals("(eq net0 00000101)", new Search(traceDataModel, "m.a = 5").toString());
+        assertEquals("(eq m.a m.b)", new Search(traceDataModel, "m.a = m.b").toString());
+        assertEquals("(eq 00000111 m.b)", new Search(traceDataModel, "7 = m.b").toString());
+        assertEquals("(eq m.a 00000101)", new Search(traceDataModel, "m.a = 5").toString());
         assertEquals("(eq 00001000 00000101)", new Search(traceDataModel, "8 = 5").toString());
 
         // Use all comparison operators.
-        assertEquals("(or (and (ne net0 0) (lt net1 00000001)) (and (gt net2 00000010) (eq net3 00000000)))",
+        assertEquals("(or (and (ne m.a 0) (lt m.b 00000001)) (and (gt m.c 00000010) (eq m.d 00000000)))",
             new Search(traceDataModel, "m.a and m.b < 1 or m.c > 2 and m.d = 0").toString());
 
-        assertEquals("(or (and (ne net0 00000000) (le net1 00000001)) (and (ge net2 00000010) (ne net3 00000101)))",
+        assertEquals("(or (and (ne m.a 00000000) (le m.b 00000001)) (and (ge m.c 00000010) (ne m.d 00000101)))",
             new Search(traceDataModel, "m.a >< 0 and m.b <= 1 or m.c >= 2 and m.d <> 5").toString());
 
         // Precedence tests. These mirror the test above, but ensure the expression tree was
         // set up correctly.
-        assertEquals("(and (and (and (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+        assertEquals("(and (and (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
             new Search(traceDataModel, "m.a and m.b and m.c and m.d").toString());
-        assertEquals("(or (and (and (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+        assertEquals("(or (and (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
             new Search(traceDataModel, "m.a and m.b and m.c or m.d").toString());
-        assertEquals("(or (and (ne net0 0) (ne net1 0)) (and (ne net2 0) (ne net3 0)))",
+        assertEquals("(or (and (ne m.a 0) (ne m.b 0)) (and (ne m.c 0) (ne m.d 0)))",
             new Search(traceDataModel, "m.a and m.b or m.c and m.d").toString());
-        assertEquals("(or (or (and (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+        assertEquals("(or (or (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
             new Search(traceDataModel, "m.a and m.b or m.c or m.d").toString());
-        assertEquals("(or (ne net0 0) (and (and (ne net1 0) (ne net2 0)) (ne net3 0)))",
+        assertEquals("(or (ne m.a 0) (and (and (ne m.b 0) (ne m.c 0)) (ne m.d 0)))",
             new Search(traceDataModel, "m.a or m.b and m.c and m.d").toString());
-        assertEquals("(or (or (ne net0 0) (and (ne net1 0) (ne net2 0))) (ne net3 0))",
+        assertEquals("(or (or (ne m.a 0) (and (ne m.b 0) (ne m.c 0))) (ne m.d 0))",
             new Search(traceDataModel, "m.a or m.b and m.c or m.d").toString());
-        assertEquals("(or (or (ne net0 0) (ne net1 0)) (and (ne net2 0) (ne net3 0)))",
+        assertEquals("(or (or (ne m.a 0) (ne m.b 0)) (and (ne m.c 0) (ne m.d 0)))",
             new Search(traceDataModel, "m.a or m.b or m.c and m.d").toString());
-        assertEquals("(or (or (or (ne net0 0) (ne net1 0)) (ne net2 0)) (ne net3 0))",
+        assertEquals("(or (or (or (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
             new Search(traceDataModel, "m.a or m.b or m.c or m.d").toString());
     }
 

@@ -91,14 +91,14 @@ public class TraceDisplayModel {
         return minorTickInterval;
     }
 
-    public void makeNetVisible(int netId) {
-        makeNetVisible(visibleNets.size(), netId);
+    public void makeNetVisible(NetDataModel netDataModel) {
+        makeNetVisible(visibleNets.size(), netDataModel);
     }
 
-    public void makeNetVisible(int aboveIndex, int netId) {
-        visibleNets.add(aboveIndex, new NetViewModel(netId));
+    public void makeNetVisible(int aboveIndex, NetDataModel netDataModel) {
+        visibleNets.add(aboveIndex, new NetViewModel(netDataModel));
         for (Listener listener : listeners) {
-            listener.netsAdded(visibleNets.size() - 1, visibleNets.size() - 1);
+            listener.netsAdded(aboveIndex, aboveIndex);
         }
     }
 
@@ -145,8 +145,8 @@ public class TraceDisplayModel {
     /// Return mapping of visible order to internal index
     /// @param index Index of net in order displayed in net list
     /// @returns netID (as referenced in TraceDataModel)
-    public int getVisibleNet(int index) {
-        return visibleNets.get(index).index;
+    public NetDataModel getVisibleNet(int index) {
+        return visibleNets.get(index).getDataModel();
     }
 
     public void setValueFormatter(int listIndex, ValueFormatter formatter) {
@@ -375,11 +375,15 @@ public class TraceDisplayModel {
     }
 
     private static class NetViewModel {
-        private final int index;
+        private final NetDataModel netDataModel;
         private ValueFormatter formatter = new HexadecimalValueFormatter();
 
-        NetViewModel(int index) {
-            this.index = index;
+        NetViewModel(NetDataModel netDataModel) {
+            this.netDataModel = netDataModel;
+        }
+
+        NetDataModel getDataModel() {
+            return netDataModel;
         }
     }
 }

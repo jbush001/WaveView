@@ -55,8 +55,37 @@ public class NetTreeModel implements TreeModel {
             nodeStack.removeLast();
         }
 
-        public void addNet(String name, int netId) {
-            nodeStack.peekLast().children.add(new Node(name, netId));
+        public void addNet(NetDataModel netDataModel) {
+            nodeStack.peekLast().children.add(new Node(netDataModel));
+        }
+    }
+
+    static class Node {
+        private final String name;
+        private final NetDataModel netDataModel;
+        private final ArrayList<Node> children;
+
+        // Interior nodes (modules/interfaces) only
+        Node(String name) {
+            this.name = name;
+            netDataModel = null;
+            children = new ArrayList<>();
+        }
+
+        // Leaf nodes (nets) only
+        Node(NetDataModel netDataModel) {
+            name = netDataModel.getShortName();
+            this.netDataModel = netDataModel;
+            children = null;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        boolean isLeaf() {
+            return children == null;
         }
     }
 
@@ -68,8 +97,8 @@ public class NetTreeModel implements TreeModel {
         root = null;
     }
 
-    public int getNetFromTreeObject(Object o) {
-        return ((Node) o).net;
+    public NetDataModel getNetFromTreeObject(Object o) {
+        return ((Node) o).netDataModel;
     }
 
     // Tree model methods. Listeners are unimplemented because the tree is
@@ -115,34 +144,5 @@ public class NetTreeModel implements TreeModel {
     @Override
     public void valueForPathChanged(TreePath path, Object newValue) {
         throw new UnsupportedOperationException();
-    }
-
-    static class Node {
-        private final String name;
-        private final int net;
-        private final ArrayList<Node> children;
-
-        // Interior nodes (modules/interfaces) only
-        Node(String name) {
-            this.name = name;
-            net = -1;
-            children = new ArrayList<>();
-        }
-
-        // Leaf nodes (nets) only
-        Node(String name, int net) {
-            this.name = name;
-            this.net = net;
-            children = null;
-        }
-
-        @Override
-        public String toString() {
-            return name;
-        }
-
-        boolean isLeaf() {
-            return children == null;
-        }
     }
 }

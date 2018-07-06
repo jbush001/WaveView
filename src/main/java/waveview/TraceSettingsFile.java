@@ -120,7 +120,7 @@ public class TraceSettingsFile {
         Element netSetElement = document.createElement("netset");
 
         for (int i = 0; i < traceDisplayModel.getVisibleNetCount(); i++) {
-            int netId = traceDisplayModel.getVisibleNet(i);
+            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(i);
 
             Element sigElement = document.createElement("net");
             netSetElement.appendChild(sigElement);
@@ -128,7 +128,7 @@ public class TraceSettingsFile {
             Element name = document.createElement("name");
             sigElement.appendChild(name);
 
-            Text nameText = document.createTextNode(traceDataModel.getFullNetName(netId));
+            Text nameText = document.createTextNode(netDataModel.getFullName());
             name.appendChild(nameText);
 
             Element format = document.createElement("format");
@@ -192,11 +192,11 @@ public class TraceSettingsFile {
                 formatter = new BinaryValueFormatter();
             }
 
-            int netId = traceDataModel.findNet(name);
-            if (netId < 0) {
+            NetDataModel netDataModel = traceDataModel.findNet(name);
+            if (netDataModel == null) {
                 System.out.println("unknown net " + name);
             } else {
-                traceDisplayModel.makeNetVisible(netId);
+                traceDisplayModel.makeNetVisible(netDataModel);
                 traceDisplayModel.setValueFormatter(traceDisplayModel.getVisibleNetCount() - 1, formatter);
             }
         }

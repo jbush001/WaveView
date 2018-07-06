@@ -17,10 +17,13 @@
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
 import org.junit.Test;
 import waveview.BitVector;
+import waveview.NetDataModel;
 import waveview.NetTreeModel;
 import waveview.TraceBuilder;
 import waveview.TraceDataModel;
@@ -67,28 +70,35 @@ public class TraceDataModelTest {
         assertEquals("net3", grandkid0.toString());
         assertTrue(netTree.isLeaf(grandkid0));
 
-        // Make sure the net IDs in the tree match what was given during building
-        assertEquals(net1, model.getNetFromTreeObject(kid0));
-        assertEquals(net2, model.getNetFromTreeObject(kid1));
-        assertEquals(net3, model.getNetFromTreeObject(grandkid0));
-
         assertEquals(3, model.getTotalNetCount());
         assertEquals(20, model.getMaxTimestamp());
 
-        assertEquals(net1, model.findNet("mod1.net1"));
-        assertEquals(net2, model.findNet("mod1.net2"));
-        assertEquals(net3, model.findNet("mod1.mod2.net3"));
-        assertEquals("net1", model.getShortNetName(net1));
-        assertEquals("net2", model.getShortNetName(net2));
-        assertEquals("net3", model.getShortNetName(net3));
-        assertEquals("mod1.net1", model.getFullNetName(net1));
-        assertEquals("mod1.net2", model.getFullNetName(net2));
-        assertEquals("mod1.mod2.net3", model.getFullNetName(net3));
-        assertEquals(1, model.getNetWidth(0));
-        assertEquals(3, model.getNetWidth(1));
-        assertEquals(2, model.getNetWidth(2));
+        NetDataModel netData1 = model.findNet("mod1.net1");
+        NetDataModel netData2 = model.findNet("mod1.net2");
+        NetDataModel netData3 = model.findNet("mod1.mod2.net3");
+        assertNotNull(netData1);
+        assertSame(netData1, model.getNetDataModel(0));
+        assertNotNull(netData2);
+        assertSame(netData2, model.getNetDataModel(1));
+        assertNotNull(netData3);
+        assertSame(netData3, model.getNetDataModel(2));
 
-        Iterator<Transition> ati = model.findTransition(net2, 12);
+        // Make sure the nets in the tree match what was given during building
+        assertSame(netData1, model.getNetFromTreeObject(kid0));
+        assertSame(netData2, model.getNetFromTreeObject(kid1));
+        assertSame(netData3, model.getNetFromTreeObject(grandkid0));
+
+        assertEquals("net1", netData1.getShortName());
+        assertEquals("net2", netData2.getShortName());
+        assertEquals("net3", netData3.getShortName());
+        assertEquals("mod1.net1", netData1.getFullName());
+        assertEquals("mod1.net2", netData2.getFullName());
+        assertEquals("mod1.mod2.net3", netData3.getFullName());
+        assertEquals(1, netData1.getWidth());
+        assertEquals(3, netData2.getWidth());
+        assertEquals(2, netData3.getWidth());
+
+        Iterator<Transition> ati = netData2.findTransition(12);
         Transition t = ati.next();
         assertEquals(10, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("100", 2)));
@@ -102,7 +112,7 @@ public class TraceDataModelTest {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
-        int net2 = builder.newNet("net2", net1, 1);
+        builder.newNet("net2", net1, 1);
         builder.exitScope();
         builder.appendTransition(net1, 17, new BitVector("1", 2));
         builder.loadFinished();
@@ -113,14 +123,17 @@ public class TraceDataModelTest {
         Object kid0 = netTree.getChild(root, 0);
         Object kid1 = netTree.getChild(root, 1);
 
-        assertEquals(net1, model.getNetFromTreeObject(kid0));
-        assertEquals(net2, model.getNetFromTreeObject(kid1));
+        NetDataModel netData1 = model.getNetDataModel(0);
+        NetDataModel netData2 = model.getNetDataModel(1);
 
-        Iterator<Transition> ati = model.findTransition(net1, 0);
+        assertSame(netData1, model.getNetFromTreeObject(kid0));
+        assertSame(netData2, model.getNetFromTreeObject(kid1));
+
+        Iterator<Transition> ati = netData1.findTransition(0);
         assertEquals(17, ati.next().getTimestamp());
 
         // Same transition should be in this one (they share a TransitionVector)
-        ati = model.findTransition(net2, 0);
+        ati = netData2.findTransition(0);
         assertEquals(17, ati.next().getTimestamp());
     }
 
@@ -132,7 +145,7 @@ public class TraceDataModelTest {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
-        int net2 = builder.newNet("net2", net1, 1);
+        builder.newNet("net2", net1, 1);
         builder.exitScope();
         builder.appendTransition(net1, 17, new BitVector("1", 2));
         builder.loadFinished();
@@ -146,13 +159,16 @@ public class TraceDataModelTest {
         // Ensure max timestamp was copied
         assertEquals(17, model2.getMaxTimestamp());
 
+        NetDataModel netData1 = model1.getNetDataModel(0);
+        NetDataModel netData2 = model1.getNetDataModel(1);
+
         // Ensure net name map was copied
-        assertEquals(net1, model2.findNet("mod1.net1"));
-        assertEquals(net2, model2.findNet("mod1.net2"));
+        assertSame(netData1, model2.findNet("mod1.net1"));
+        assertSame(netData2, model2.findNet("mod1.net2"));
 
         // Ensure all nets list was copied
-        assertEquals("mod1.net1", model2.getFullNetName(net1));
-        assertEquals("mod1.net2", model2.getFullNetName(net2));
+        assertEquals("mod1.net1", netData1.getFullName());
+        assertEquals("mod1.net2", netData2.getFullName());
 
         // Ensure net tree was copied
         NetTreeModel netTree = model2.getNetTree();
@@ -160,7 +176,7 @@ public class TraceDataModelTest {
         assertEquals(2, netTree.getChildCount(root));
         Object kid0 = netTree.getChild(root, 0);
         Object kid1 = netTree.getChild(root, 1);
-        assertEquals(net1, model2.getNetFromTreeObject(kid0));
-        assertEquals(net2, model2.getNetFromTreeObject(kid1));
+        assertSame(netData1, model2.getNetFromTreeObject(kid0));
+        assertSame(netData2, model2.getNetFromTreeObject(kid1));
     }
 }

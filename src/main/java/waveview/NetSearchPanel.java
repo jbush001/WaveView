@@ -54,7 +54,7 @@ class NetSearchPanel extends JPanel {
 
         private void buildNetListRecursive(Object node, StringBuilder indexList) {
             if (tree.getModel().isLeaf(node)) {
-                indexList.append(traceDataModel.getFullNetName(traceDataModel.getNetFromTreeObject(node)));
+                indexList.append(traceDataModel.getNetFromTreeObject(node).getFullName());
                 indexList.append('\n');
                 return;
             }

@@ -106,20 +106,20 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
             g.setFont(labelFont);
             g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor : prefs.traceColor);
 
-            int netId = traceDisplayModel.getVisibleNet(currentNet);
-            String name = traceDataModel.getShortNetName(netId);
+            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(currentNet);
+            String name = netDataModel.getShortName();
             g.drawString(name, 1, labelBaseline);
 
             g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor : prefs.valueColor);
             g.setFont(valueFont);
 
-            Transition t = traceDataModel.findTransition(netId, traceDisplayModel.getCursorPosition()).next();
+            Transition t = netDataModel.findTransition(traceDisplayModel.getCursorPosition()).next();
             g.drawString(traceDisplayModel.getValueFormatter(currentNet).format(t), 1, valueBaseline);
         }
 
         @Override
         public String getToolTipText(MouseEvent event) {
-            return traceDataModel.getFullNetName(traceDisplayModel.getVisibleNet(currentNet));
+            return traceDisplayModel.getVisibleNet(currentNet).getFullName();
         }
     }
 

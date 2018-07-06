@@ -214,13 +214,13 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
         while (waveformIndex * DrawMetrics.WAVEFORM_V_SPACING < visibleRect.y + visibleRect.height
                 && waveformIndex < traceDisplayModel.getVisibleNetCount()) {
             ValueFormatter formatter = traceDisplayModel.getValueFormatter(waveformIndex);
-            int netId = traceDisplayModel.getVisibleNet(waveformIndex);
-            if (traceDataModel.getNetWidth(netId) > 1) {
-                multiBitPainter.paint(g, traceDataModel, netId,
+            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(waveformIndex);
+            if (netDataModel.getWidth() > 1) {
+                multiBitPainter.paint(g, netDataModel,
                         waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP, visibleRect,
                         horizontalScale, formatter);
             } else {
-                singleBitPainter.paint(g, traceDataModel, netId,
+                singleBitPainter.paint(g, netDataModel,
                         waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP, visibleRect,
                         horizontalScale, formatter);
             }

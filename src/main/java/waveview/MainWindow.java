@@ -314,15 +314,15 @@ public class MainWindow extends JPanel implements ActionListener {
         long cursorPosition = traceDisplayModel.getCursorPosition();
 
         for (int index : tracePanel.getSelectedNets()) {
-            int netId = traceDisplayModel.getVisibleNet(index);
+            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(index);
             if (first) {
                 first = false;
             } else {
                 searchExpr.append(" and ");
             }
 
-            searchExpr.append(traceDataModel.getFullNetName(netId));
-            Transition t = traceDataModel.findTransition(netId, cursorPosition).next();
+            searchExpr.append(netDataModel.getFullName());
+            Transition t = netDataModel.findTransition(cursorPosition).next();
 
             searchExpr.append(" = 'h");
             searchExpr.append(t.toString(16));

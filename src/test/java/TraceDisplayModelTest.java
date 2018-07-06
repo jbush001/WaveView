@@ -18,10 +18,13 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import waveview.DecimalValueFormatter;
+import waveview.NetDataModel;
 import waveview.TraceDisplayModel;
+import waveview.TransitionVector;
 
 public class TraceDisplayModelTest {
     static class TestModelListener implements TraceDisplayModel.Listener {
@@ -285,23 +288,33 @@ public class TraceDisplayModelTest {
 
         assertEquals(0, tdm.getVisibleNetCount());
 
+        NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
+        NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
+        NetDataModel net3 = new NetDataModel("net3", "net3", new TransitionVector(1));
+        NetDataModel net4 = new NetDataModel("net4", "net4", new TransitionVector(1));
+        NetDataModel net5 = new NetDataModel("net5", "net5", new TransitionVector(1));
+        NetDataModel net6 = new NetDataModel("net6", "net6", new TransitionVector(1));
+        NetDataModel net7 = new NetDataModel("net7", "net7", new TransitionVector(1));
+        NetDataModel net8 = new NetDataModel("net8", "net8", new TransitionVector(1));
+        NetDataModel net9 = new NetDataModel("net8", "net8", new TransitionVector(1));
+
         // Add a net
-        tdm.makeNetVisible(7);
+        tdm.makeNetVisible(net1);
         assertEquals(TestModelListener.NETS_ADDED, listener.notifications);
         assertEquals(0, listener.longArg0);
         assertEquals(0, listener.longArg1);
         assertEquals(1, tdm.getVisibleNetCount());
-        assertEquals(7, tdm.getVisibleNet(0));
+        assertSame(net1, tdm.getVisibleNet(0));
 
         // Add a second net
         listener.reset();
-        tdm.makeNetVisible(9);
+        tdm.makeNetVisible(net2);
         assertEquals(TestModelListener.NETS_ADDED, listener.notifications);
         assertEquals(1, listener.longArg0);
         assertEquals(1, listener.longArg1);
         assertEquals(2, tdm.getVisibleNetCount());
-        assertEquals(7, tdm.getVisibleNet(0));
-        assertEquals(9, tdm.getVisibleNet(1));
+        assertSame(net1, tdm.getVisibleNet(0));
+        assertSame(net2, tdm.getVisibleNet(1));
 
         // Remove first net
         listener.reset();
@@ -310,7 +323,7 @@ public class TraceDisplayModelTest {
         assertEquals(0, listener.longArg0);
         assertEquals(0, listener.longArg1);
         assertEquals(1, tdm.getVisibleNetCount());
-        assertEquals(9, tdm.getVisibleNet(0));
+        assertSame(net2, tdm.getVisibleNet(0));
 
         // Remove remaining net
         listener.reset();
@@ -321,23 +334,23 @@ public class TraceDisplayModelTest {
         assertEquals(0, tdm.getVisibleNetCount());
 
         // Add a bunch of nets again
-        tdm.makeNetVisible(11);
-        tdm.makeNetVisible(13);
-        tdm.makeNetVisible(17);
-        tdm.makeNetVisible(19);
-        tdm.makeNetVisible(23);
-        tdm.makeNetVisible(27);
-        tdm.makeNetVisible(5, 31); // Note: insert above last
+        tdm.makeNetVisible(net3);
+        tdm.makeNetVisible(net4);
+        tdm.makeNetVisible(net5);
+        tdm.makeNetVisible(net6);
+        tdm.makeNetVisible(net7);
+        tdm.makeNetVisible(net8);
+        tdm.makeNetVisible(5, net9); // Note: insert above last
 
         assertEquals(7, tdm.getVisibleNetCount());
 
-        assertEquals(11, tdm.getVisibleNet(0));
-        assertEquals(13, tdm.getVisibleNet(1));
-        assertEquals(17, tdm.getVisibleNet(2));
-        assertEquals(19, tdm.getVisibleNet(3));
-        assertEquals(23, tdm.getVisibleNet(4));
-        assertEquals(31, tdm.getVisibleNet(5));
-        assertEquals(27, tdm.getVisibleNet(6));
+        assertSame(net3, tdm.getVisibleNet(0));
+        assertSame(net4, tdm.getVisibleNet(1));
+        assertSame(net5, tdm.getVisibleNet(2));
+        assertSame(net6, tdm.getVisibleNet(3));
+        assertSame(net7, tdm.getVisibleNet(4));
+        assertSame(net9, tdm.getVisibleNet(5));
+        assertSame(net8, tdm.getVisibleNet(6));
 
         // Rearrange a set of nets
         int[] indices = { 1, 3, 4, 5 };
@@ -347,13 +360,13 @@ public class TraceDisplayModelTest {
         // XXX doesn't check parameters (multiple notifications from this)
 
         assertEquals(7, tdm.getVisibleNetCount());
-        assertEquals(11, tdm.getVisibleNet(0));
-        assertEquals(13, tdm.getVisibleNet(1));
-        assertEquals(19, tdm.getVisibleNet(2));
-        assertEquals(23, tdm.getVisibleNet(3));
-        assertEquals(31, tdm.getVisibleNet(4));
-        assertEquals(17, tdm.getVisibleNet(5));
-        assertEquals(27, tdm.getVisibleNet(6));
+        assertSame(net3, tdm.getVisibleNet(0));
+        assertSame(net4, tdm.getVisibleNet(1));
+        assertSame(net6, tdm.getVisibleNet(2));
+        assertSame(net7, tdm.getVisibleNet(3));
+        assertSame(net9, tdm.getVisibleNet(4));
+        assertSame(net5, tdm.getVisibleNet(5));
+        assertSame(net8, tdm.getVisibleNet(6));
 
         // Remove all nets
         listener.reset();
@@ -370,9 +383,14 @@ public class TraceDisplayModelTest {
 
         tdm.addMarker("marker0", 1000);
         tdm.addMarker("marker1", 1200);
-        tdm.makeNetVisible(11);
-        tdm.makeNetVisible(13);
-        tdm.makeNetVisible(17);
+
+        NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
+        NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
+        NetDataModel net3 = new NetDataModel("net3", "net3", new TransitionVector(1));
+
+        tdm.makeNetVisible(net1);
+        tdm.makeNetVisible(net2);
+        tdm.makeNetVisible(net3);
         assertEquals(3, tdm.getVisibleNetCount());
         assertEquals(2, tdm.getMarkerCount());
 
@@ -392,18 +410,25 @@ public class TraceDisplayModelTest {
     public void testNetSet() {
         TraceDisplayModel tdm = new TraceDisplayModel();
 
+        NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
+        NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
+        NetDataModel net3 = new NetDataModel("net3", "net3", new TransitionVector(1));
+        NetDataModel net4 = new NetDataModel("net4", "net4", new TransitionVector(1));
+        NetDataModel net5 = new NetDataModel("net5", "net5", new TransitionVector(1));
+        NetDataModel net6 = new NetDataModel("net6", "net6", new TransitionVector(1));
+
         // Create first net set
-        tdm.makeNetVisible(11);
-        tdm.makeNetVisible(13);
-        tdm.makeNetVisible(17);
+        tdm.makeNetVisible(net1);
+        tdm.makeNetVisible(net2);
+        tdm.makeNetVisible(net3);
         tdm.saveNetSet("set1");
         assertEquals(1, tdm.getNetSetCount());
         assertEquals("set1", tdm.getNetSetName(0));
 
         // Create second net set
         tdm.removeAllNets();
-        tdm.makeNetVisible(19);
-        tdm.makeNetVisible(23);
+        tdm.makeNetVisible(net4);
+        tdm.makeNetVisible(net5);
         tdm.saveNetSet("set2");
         assertEquals(2, tdm.getNetSetCount());
 
@@ -418,9 +443,9 @@ public class TraceDisplayModelTest {
         assertEquals(0, listener.longArg0); // First index (of added nets)
         assertEquals(2, listener.longArg1); // Last index (not count)
         assertEquals(3, tdm.getVisibleNetCount());
-        assertEquals(11, tdm.getVisibleNet(0));
-        assertEquals(13, tdm.getVisibleNet(1));
-        assertEquals(17, tdm.getVisibleNet(2));
+        assertSame(net1, tdm.getVisibleNet(0));
+        assertSame(net2, tdm.getVisibleNet(1));
+        assertSame(net3, tdm.getVisibleNet(2));
 
         // Select second net set
         listener.reset();
@@ -429,11 +454,11 @@ public class TraceDisplayModelTest {
         assertEquals(0, listener.longArg0); // First index
         assertEquals(1, listener.longArg1); // last index
         assertEquals(2, tdm.getVisibleNetCount());
-        assertEquals(19, tdm.getVisibleNet(0));
-        assertEquals(23, tdm.getVisibleNet(1));
+        assertSame(net4, tdm.getVisibleNet(0));
+        assertSame(net5, tdm.getVisibleNet(1));
 
         // Update second net set
-        tdm.makeNetVisible(31);
+        tdm.makeNetVisible(net6);
         tdm.saveNetSet("set2");
         assertEquals(2, tdm.getNetSetCount());
         assertEquals("set1", tdm.getNetSetName(0));
@@ -444,9 +469,9 @@ public class TraceDisplayModelTest {
         tdm.selectNetSet(0);
         tdm.selectNetSet(1);
         assertEquals(3, tdm.getVisibleNetCount());
-        assertEquals(19, tdm.getVisibleNet(0));
-        assertEquals(23, tdm.getVisibleNet(1));
-        assertEquals(31, tdm.getVisibleNet(2));
+        assertSame(net4, tdm.getVisibleNet(0));
+        assertSame(net5, tdm.getVisibleNet(1));
+        assertSame(net6, tdm.getVisibleNet(2));
     }
 
     // When removing all nets on from an empty model, don't create
@@ -470,11 +495,14 @@ public class TraceDisplayModelTest {
 
     @Test
     public void testSetGetValueFormatter() {
+        NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
+        NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
+
         TraceDisplayModel tdm = new TraceDisplayModel();
         TestModelListener listener = new TestModelListener();
         tdm.addListener(listener);
-        tdm.makeNetVisible(1);
-        tdm.makeNetVisible(2);
+        tdm.makeNetVisible(net1);
+        tdm.makeNetVisible(net2);
         DecimalValueFormatter dvf = new DecimalValueFormatter();
         listener.reset();
         tdm.setValueFormatter(1, dvf);

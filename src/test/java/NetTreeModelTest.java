@@ -16,24 +16,33 @@
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
+import waveview.NetDataModel;
 import waveview.NetTreeModel;
+import waveview.TransitionVector;
 
 public class NetTreeModelTest {
     @Test
     public void test1() {
+        NetDataModel child1 = new NetDataModel("child1", "scope1.child1", new TransitionVector(1));
+        NetDataModel child2 = new NetDataModel("child2", "scope1.child2", new TransitionVector(1));
+        NetDataModel child3 = new NetDataModel("child3", "scope1.scope2.child3", new TransitionVector(1));
+        NetDataModel child4 = new NetDataModel("child4", "scope1.scope2.child4", new TransitionVector(1));
+        NetDataModel child5 = new NetDataModel("child5", "scope1.child5", new TransitionVector(1));
+
         NetTreeModel model = new NetTreeModel();
         NetTreeModel.Builder builder = model.startBuilding();
         builder.enterScope("scope1");
-        builder.addNet("child1", 17);
-        builder.addNet("child2", 19);
+        builder.addNet(child1);
+        builder.addNet(child2);
         builder.enterScope("scope2");
-        builder.addNet("child3", 23);
-        builder.addNet("child4", 27);
+        builder.addNet(child3);
+        builder.addNet(child4);
         builder.leaveScope();
-        builder.addNet("child5", 31);
+        builder.addNet(child5);
 
         Object root = model.getRoot();
         assertEquals(4, model.getChildCount(root));
@@ -49,13 +58,13 @@ public class NetTreeModelTest {
         assertEquals(0, model.getChildCount(kid0));
         assertTrue(model.isLeaf(kid0));
         assertEquals(0, model.getIndexOfChild(root, kid0));
-        assertEquals(17, model.getNetFromTreeObject(kid0));
+        assertSame(child1, model.getNetFromTreeObject(kid0));
 
         assertEquals("child2", kid1.toString());
         assertEquals(0, model.getChildCount(kid1));
         assertTrue(model.isLeaf(kid1));
         assertEquals(1, model.getIndexOfChild(root, kid1));
-        assertEquals(19, model.getNetFromTreeObject(kid1));
+        assertSame(child2, model.getNetFromTreeObject(kid1));
 
         assertEquals("scope2", kid2.toString());
         assertEquals(2, model.getChildCount(kid2));
@@ -66,19 +75,19 @@ public class NetTreeModelTest {
         assertEquals(0, model.getChildCount(kid3));
         assertTrue(model.isLeaf(kid3));
         assertEquals(3, model.getIndexOfChild(root, kid3));
-        assertEquals(31, model.getNetFromTreeObject(kid3));
+        assertSame(child5, model.getNetFromTreeObject(kid3));
 
         assertEquals("child3", grandkid0.toString());
         assertEquals(0, model.getChildCount(grandkid0));
         assertTrue(model.isLeaf(grandkid0));
         assertEquals(0, model.getIndexOfChild(kid2, grandkid0));
-        assertEquals(23, model.getNetFromTreeObject(grandkid0));
+        assertSame(child3, model.getNetFromTreeObject(grandkid0));
 
         assertEquals("child4", grandkid1.toString());
         assertEquals(0, model.getChildCount(grandkid1));
         assertTrue(model.isLeaf(grandkid1));
         assertEquals(1, model.getIndexOfChild(kid2, grandkid1));
-        assertEquals(27, model.getNetFromTreeObject(grandkid1));
+        assertSame(child4, model.getNetFromTreeObject(grandkid1));
     }
 
     @Test
@@ -95,12 +104,14 @@ public class NetTreeModelTest {
     // exit the root node and re-push it. Ensure this is handled properly.
     @Test
     public void doubleRootTest() {
+        NetDataModel child1 = new NetDataModel("child1", "scope1.child1", new TransitionVector(1));
+
         NetTreeModel model = new NetTreeModel();
         NetTreeModel.Builder builder = model.startBuilding();
         builder.enterScope("scope1");
         builder.leaveScope();
         builder.enterScope("scope1");
-        builder.addNet("child1", 17);
+        builder.addNet(child1);
         builder.leaveScope();
 
         Object root = model.getRoot();

@@ -27,9 +27,9 @@ import java.util.Iterator;
 /// in TraceDisplayModel.
 ///
 
-public class TraceDataModel {
+public class TraceDataModel implements Iterable<NetDataModel> {
     private long maxTimestamp;
-    private HashMap<String, Integer> fullNameToNetMap = new HashMap<>();
+    private HashMap<String, NetDataModel> fullNameToNetMap = new HashMap<>();
     private ArrayList<NetDataModel> allNets = new ArrayList<>();
     private NetTreeModel netTree = new NetTreeModel();
     private int timescale;
@@ -55,8 +55,8 @@ public class TraceDataModel {
         return new ConcreteTraceBuilder();
     }
 
-    public Iterator<Transition> findTransition(int netId, long timestamp) {
-        return allNets.get(netId).findTransition(timestamp);
+    public NetDataModel getNetDataModel(int netId) {
+        return allNets.get(netId);
     }
 
     public long getMaxTimestamp() {
@@ -67,7 +67,7 @@ public class TraceDataModel {
         return timescale;
     }
 
-    public int getNetFromTreeObject(Object o) {
+    public NetDataModel getNetFromTreeObject(Object o) {
         return netTree.getNetFromTreeObject(o);
     }
 
@@ -76,68 +76,21 @@ public class TraceDataModel {
     }
 
     /// Look up net by full path
-    public int findNet(String name) {
-        Integer i = fullNameToNetMap.get(name);
-        if (i == null)
-            return -1;
-
-        return i.intValue();
+    public NetDataModel findNet(String name) {
+        return fullNameToNetMap.get(name);
     }
 
-    public int getNetWidth(int index) {
-        return allNets.get(index).getWidth();
-    }
-
-    public String getShortNetName(int index) {
-        return allNets.get(index).getShortName();
-    }
-
-    public String getFullNetName(int index) {
-        return allNets.get(index).getFullName();
-    }
-
-    private static class NetDataModel {
-        private final String shortName;
-        private final String fullName;
-        private final TransitionVector transitionVector;
-
-        NetDataModel(String shortName, String fullName, int width) {
-            this.shortName = shortName;
-            this.fullName = fullName;
-            transitionVector = new TransitionVector(width);
-        }
-
-        // This NetDataModel shares its transition data with another one.
-        NetDataModel(String shortName, String fullName, NetDataModel cloneFrom) {
-            this.shortName = shortName;
-            this.fullName = fullName;
-            this.transitionVector = cloneFrom.transitionVector;
-        }
-
-        String getFullName() {
-            return fullName;
-        }
-
-        String getShortName() {
-            return shortName;
-        }
-
-        Iterator<Transition> findTransition(long timestamp) {
-            return transitionVector.findTransition(timestamp);
-        }
-
-        long getMaxTimestamp() {
-            return transitionVector.getMaxTimestamp();
-        }
-
-        int getWidth() {
-            return transitionVector.getWidth();
-        }
+    @Override
+    public Iterator<NetDataModel> iterator() {
+        return allNets.iterator();
     }
 
     private class ConcreteTraceBuilder implements TraceBuilder {
         private final Deque<String> scopeStack = new ArrayDeque<>();
         private NetTreeModel.Builder treeBuilder = netTree.startBuilding();
+
+        // This mirrors allNets in TraceDataModel and must be kept in sync with it.
+        private final ArrayList<TransitionVector> transitionVectors = new ArrayList<>();
 
         @Override
         public void setTimescale(int timescale) {
@@ -166,8 +119,7 @@ public class TraceDataModel {
 
         @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
-            NetDataModel model = allNets.get(id);
-            model.transitionVector.appendTransition(timestamp, values);
+            transitionVectors.get(id).appendTransition(timestamp, values);
         }
 
         @Override
@@ -186,15 +138,22 @@ public class TraceDataModel {
             fullName.append(shortName);
 
             NetDataModel net;
-            if (cloneId == -1)
-                net = new NetDataModel(shortName, fullName.toString(), width);
-            else
+            TransitionVector transitionVector;
+            if (cloneId == -1) {
+                transitionVector = new TransitionVector(width);
+                net = new NetDataModel(shortName, fullName.toString(), transitionVector);
+            } else {
+                transitionVector = transitionVectors.get(cloneId);
                 net = new NetDataModel(shortName, fullName.toString(), allNets.get(cloneId));
+            }
 
             allNets.add(net);
+            transitionVectors.add(transitionVector);
+            assert allNets.size() == transitionVectors.size();
+
             int thisNetIndex = allNets.size() - 1;
-            treeBuilder.addNet(shortName, thisNetIndex);
-            fullNameToNetMap.put(fullName.toString(), thisNetIndex);
+            treeBuilder.addNet(net);
+            fullNameToNetMap.put(fullName.toString(), net);
             return thisNetIndex;
         }
     }

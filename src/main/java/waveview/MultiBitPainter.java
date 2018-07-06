@@ -30,7 +30,7 @@ class MultiBitPainter implements WaveformPainter {
     private final int[] polygonYPoints = new int[3];
 
     @Override
-    public void paint(Graphics g, TraceDataModel model, int netId, int topOffset, Rectangle visibleRect,
+    public void paint(Graphics g, NetDataModel model, int topOffset, Rectangle visibleRect,
             double horizontalScale, ValueFormatter formatter) {
         FontMetrics metrics = g.getFontMetrics();
         int fontBaseline = topOffset + (DrawMetrics.WAVEFORM_HEIGHT + metrics.getHeight()) / 2 - metrics.getDescent();
@@ -43,7 +43,7 @@ class MultiBitPainter implements WaveformPainter {
 
         g.setColor(AppPreferences.getInstance().traceColor);
 
-        Iterator<Transition> i = model.findTransition(netId, firstTimestamp);
+        Iterator<Transition> i = model.findTransition(firstTimestamp);
         while (true) {
             // Draw the segment to the left of this transition
             Transition transition = i.next();
