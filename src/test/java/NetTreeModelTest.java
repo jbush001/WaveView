@@ -26,7 +26,7 @@ import waveview.TransitionVector;
 
 public class NetTreeModelTest {
     @Test
-    public void test1() {
+    public void lookup() {
         NetDataModel child1 = new NetDataModel("child1", "scope1.child1", new TransitionVector(1));
         NetDataModel child2 = new NetDataModel("child2", "scope1.child2", new TransitionVector(1));
         NetDataModel child3 = new NetDataModel("child3", "scope1.scope2.child3", new TransitionVector(1));
@@ -103,7 +103,7 @@ public class NetTreeModelTest {
     // If you call $dumpvars more than once in iverilog, it will
     // exit the root node and re-push it. Ensure this is handled properly.
     @Test
-    public void doubleRootTest() {
+    public void doubleRoot() {
         NetDataModel child1 = new NetDataModel("child1", "scope1.child1", new TransitionVector(1));
 
         NetTreeModel model = new NetTreeModel();

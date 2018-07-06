@@ -38,10 +38,9 @@ public class SortedArrayListTest {
     }
 
     @Test
-    public void testAddLookup1() {
+    public void addLookupOddCount() {
         SortedArrayList<KeyedElement> vec = new SortedArrayList<>();
 
-        // Note: odd number of elements
         vec.add(new KeyedElement(100));
         vec.add(new KeyedElement(117));
         vec.add(new KeyedElement(110));
@@ -59,10 +58,9 @@ public class SortedArrayListTest {
     }
 
     @Test
-    public void testAddLookup2() {
+    public void addLookupEvenCount() {
         SortedArrayList<KeyedElement> vec = new SortedArrayList<>();
 
-        // Note: even number of elements
         vec.add(new KeyedElement(100));
         vec.add(new KeyedElement(115));
         vec.add(new KeyedElement(110));
@@ -79,7 +77,7 @@ public class SortedArrayListTest {
     }
 
     @Test
-    public void testIterator() {
+    public void iterator() {
         SortedArrayList<KeyedElement> vec = new SortedArrayList<>();
         vec.add(new KeyedElement(140));
         vec.add(new KeyedElement(100));

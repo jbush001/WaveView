@@ -38,7 +38,7 @@ public class TraceSettingsFileTest {
     public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
-    public void testLoad() throws Exception {
+    public void load() throws Exception {
         TraceDataModel dataModel = new TraceDataModel();
         TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
 
@@ -148,7 +148,7 @@ public class TraceSettingsFileTest {
     // @todo Does not test when markers are put in past the end time.
     // (not currently implemented in loader)
     @Test
-    public void testDataModelChanged() throws Exception {
+    public void dataModelChanged() throws Exception {
         TraceDataModel sourceDataModel = new TraceDataModel();
         TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
         TraceBuilder builder1 = sourceDataModel.startBuilding();
@@ -185,7 +185,7 @@ public class TraceSettingsFileTest {
 
     // If the formatter class name is unknown, fall back to binary
     @Test
-    public void testBadFormatter() throws Exception {
+    public void badFormatter() throws Exception {
         File file = new File("src/test/resources/trace_settings/bad_formatter.traceconfig");
         TraceDataModel dataModel = new TraceDataModel();
         TraceBuilder builder = dataModel.startBuilding();
@@ -201,7 +201,7 @@ public class TraceSettingsFileTest {
 
     // Test generating config file name for subdirectory
     @Test
-    public void testConfigFileName1() throws Exception {
+    public void configFileName1() throws Exception {
         assertEquals("foo/bar/.trace.vcd.traceconfig",
                 TraceSettingsFile.settingsFileName(new File("foo/bar/trace.vcd")).toString());
     }
@@ -209,7 +209,7 @@ public class TraceSettingsFileTest {
     /// Regression test. In this case, the full path isn't passed.
     /// It was putting 'null' inside the filename.
     @Test
-    public void testConfigFileName2() throws Exception {
+    public void configFileName2() throws Exception {
         assertEquals(".trace.vcd.traceconfig", TraceSettingsFile.settingsFileName(new File("trace.vcd")).toString());
     }
 }

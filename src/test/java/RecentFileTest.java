@@ -21,11 +21,10 @@ import org.junit.Test;
 import waveview.RecentFiles;
 
 public class RecentFileTest {
+    private final RecentFiles files = new RecentFiles();
 
     @Test
-    public void testLru() {
-        RecentFiles files = new RecentFiles();
-
+    public void lruMiss() {
         // Add 10 items.
         files.add("a");
         files.add("b");
@@ -38,24 +37,11 @@ public class RecentFileTest {
         files.add("i");
         files.add("j");
 
-        ArrayList<String> list = files.getList();
-        assertEquals(10, list.size());
-        assertEquals("j", list.get(0));
-        assertEquals("i", list.get(1));
-        assertEquals("h", list.get(2));
-        assertEquals("g", list.get(3));
-        assertEquals("f", list.get(4));
-        assertEquals("e", list.get(5));
-        assertEquals("d", list.get(6));
-        assertEquals("c", list.get(7));
-        assertEquals("b", list.get(8));
-        assertEquals("a", list.get(9));
-
         // Add an item that doesn't exist yet. This should kick an older
         // item out.
         files.add("k");
 
-        list = files.getList();
+        ArrayList<String> list = files.getList();
         assertEquals(10, list.size());
         assertEquals("k", list.get(0));
         assertEquals("j", list.get(1));
@@ -67,28 +53,41 @@ public class RecentFileTest {
         assertEquals("d", list.get(7));
         assertEquals("c", list.get(8));
         assertEquals("b", list.get(9));
-
-        // Try to add existing item. Should move to the most recently
-        // used slot
-
-        files.add("g");
-
-        list = files.getList();
-        assertEquals(10, list.size());
-        assertEquals("g", list.get(0));
-        assertEquals("k", list.get(1));
-        assertEquals("j", list.get(2));
-        assertEquals("i", list.get(3));
-        assertEquals("h", list.get(4));
-        assertEquals("f", list.get(5));
-        assertEquals("e", list.get(6));
-        assertEquals("d", list.get(7));
-        assertEquals("c", list.get(8));
-        assertEquals("b", list.get(9));
     }
 
     @Test
-    public void testPack() {
+    public void lruHit() {
+        // Add 10 items.
+        files.add("a");
+        files.add("b");
+        files.add("c");
+        files.add("d");
+        files.add("e");
+        files.add("f");
+        files.add("g");
+        files.add("h");
+        files.add("i");
+        files.add("j");
+
+        // g is already in the list, should move to the front
+        files.add("g");
+
+        ArrayList<String> list = files.getList();
+        assertEquals(10, list.size());
+        assertEquals("g", list.get(0));
+        assertEquals("j", list.get(1));
+        assertEquals("i", list.get(2));
+        assertEquals("h", list.get(3));
+        assertEquals("f", list.get(4));
+        assertEquals("e", list.get(5));
+        assertEquals("d", list.get(6));
+        assertEquals("c", list.get(7));
+        assertEquals("b", list.get(8));
+        assertEquals("a", list.get(9));
+    }
+
+    @Test
+    public void pack() {
         RecentFiles files = new RecentFiles();
         files.add("a");
         files.add("bb");
@@ -105,7 +104,7 @@ public class RecentFileTest {
     }
 
     @Test
-    public void testUnpack() {
+    public void unpack() {
         RecentFiles files = new RecentFiles();
         files.unpack("jj;iii;hhhh;ggggg;ff/ffff;eeeee;dd/dd;ccc;bb;a");
 

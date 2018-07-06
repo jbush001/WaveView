@@ -33,7 +33,7 @@ public class TransitionVectorTest {
     }
 
     @Test
-    public void testFindTransition() {
+    public void findTransition() {
         TransitionVector vec = new TransitionVector(8);
         vec.appendTransition(100, new BitVector("00000001", 2));
         vec.appendTransition(110, new BitVector("00000010", 2));
@@ -87,7 +87,7 @@ public class TransitionVectorTest {
     }
 
     @Test
-    public void testIterator() {
+    public void iterator() {
         TransitionVector vec = new TransitionVector(8);
         vec.appendTransition(100, new BitVector("00000001", 2));
         vec.appendTransition(110, new BitVector("00000010", 2));
@@ -128,7 +128,7 @@ public class TransitionVectorTest {
     /// The passed bitvector is larger than the transition vector width.
     /// Ensure it is truncated
     @Test
-    public void testTruncateVector() {
+    public void truncateVector() {
         TransitionVector vec = new TransitionVector(4);
         vec.appendTransition(100, new BitVector("00001111", 2));
         Iterator<Transition> ti = vec.findTransition(0);
@@ -138,7 +138,7 @@ public class TransitionVectorTest {
 
     /// The passed bitvector is smaller than the transition vector width
     @Test
-    public void testPadVector() {
+    public void padVector() {
         TransitionVector vec = new TransitionVector(16);
         vec.appendTransition(100, new BitVector("101", 2));
         Iterator<Transition> ti = vec.findTransition(0);
@@ -149,7 +149,7 @@ public class TransitionVectorTest {
     /// Build a large transition vector, which will require reallocating
     /// the array as it grows.
     @Test
-    public void testLargeTransitionVector() {
+    public void largeTransitionVector() {
         TransitionVector tvec = new TransitionVector(16);
         BitVector bvec = new BitVector(16);
         for (int idx = 0; idx < 100000; idx++) {
@@ -167,7 +167,7 @@ public class TransitionVectorTest {
     }
 
     @Test
-    public void testGetMaxTimestamp() {
+    public void getMaxTimestamp() {
         TransitionVector tvec = new TransitionVector(1);
         assertEquals(0, tvec.getMaxTimestamp());
         tvec.appendTransition(100, new BitVector("1", 2));

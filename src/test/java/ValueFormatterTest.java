@@ -32,7 +32,7 @@ public class ValueFormatterTest {
     }
 
     @Test
-    public void testEnumValueFormatter() throws IOException {
+    public void enumValueFormatter() throws IOException {
         EnumValueFormatter vf = new EnumValueFormatter(getTestFile("test1.txt"));
         assertEquals("STATE_INIT", vf.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", vf.format(new BitVector("2", 10)));
@@ -41,13 +41,13 @@ public class ValueFormatterTest {
     }
 
     @Test
-    public void testBinaryValueFormatter() {
+    public void binaryValueFormatter() {
         BinaryValueFormatter bf = new BinaryValueFormatter();
         assertEquals("0101zxz110", bf.format(new BitVector("0101zxz110", 2)));
     }
 
     @Test
-    public void testASCIIValueFormatter() {
+    public void asciiValueFormatter() {
         ASCIIValueFormatter bf = new ASCIIValueFormatter();
         assertEquals("A", bf.format(new BitVector("01000001", 2)));
         assertEquals("!", bf.format(new BitVector("00100001", 2)));
@@ -55,13 +55,13 @@ public class ValueFormatterTest {
     }
 
     @Test
-    public void testDecimalValueFormatter() {
+    public void decimalValueFormatter() {
         DecimalValueFormatter df = new DecimalValueFormatter();
         assertEquals("123843954387523457345345", df.format(new BitVector("123843954387523457345345", 10)));
     }
 
     @Test
-    public void testHexadecimalValueFormatter() {
+    public void hexadecimalValueFormatter() {
         HexadecimalValueFormatter hf = new HexadecimalValueFormatter();
         assertEquals("ABCDEF12345678", hf.format(new BitVector("ABCDEF12345678", 16)));
     }

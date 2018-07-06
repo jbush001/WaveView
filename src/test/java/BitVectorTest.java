@@ -24,7 +24,7 @@ import waveview.BitVector;
 
 public class BitVectorTest {
     @Test
-    public void testParseHex() {
+    public void parseHex() {
         assertEquals(0, new BitVector("0", 16).intValue());
         assertEquals(1, new BitVector("1", 16).intValue());
         assertEquals(2, new BitVector("2", 16).intValue());
@@ -44,7 +44,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testParseBinary() {
+    public void parseBinary() {
         BitVector bv = new BitVector("110111010100100100101100101001001010001001", 2);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
@@ -53,7 +53,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testParseDecimal() {
+    public void parseDecimal() {
         BitVector bv = new BitVector("3492343343482759676947735281634934371324", 10);
         assertFalse(bv.isZ());
         assertFalse(bv.isX());
@@ -61,7 +61,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testParseX() {
+    public void parseX() {
         BitVector bv = new BitVector("xxxxxxxxxxx", 2);
         assertEquals(11, bv.getWidth());
         assertFalse(bv.isZ());
@@ -88,7 +88,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testParseZ() {
+    public void parseZ() {
         BitVector bv = new BitVector("zzzzzzzz", 2);
         assertEquals(8, bv.getWidth());
         assertTrue(bv.isZ());
@@ -115,7 +115,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testNumberFormatException() {
+    public void numberFormatException() {
         // Digits other than 0/1 in binary
         try {
             new BitVector("0110102", 2);
@@ -186,7 +186,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testSetBit() {
+    public void setBit() {
         BitVector bv = new BitVector(8);
         bv.setBit(7, BitVector.VALUE_1);
         bv.setBit(6, BitVector.VALUE_0);
@@ -200,7 +200,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testGetBit() {
+    public void getBit() {
         BitVector bv = new BitVector("1x010z10", 2);
         assertEquals(BitVector.VALUE_1, bv.getBit(7));
         assertEquals(BitVector.VALUE_X, bv.getBit(6));
@@ -213,7 +213,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testCompare() {
+    public void compare() {
         BitVector bv1 = new BitVector("1", 2); // Shorter than others
         BitVector bv2 = new BitVector("01001", 2); // Has leading zeros
         BitVector bv3 = new BitVector("10100", 2);
@@ -264,7 +264,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testToString() {
+    public void convertToString() {
         BitVector bv1 = new BitVector("1010001001", 2); // Length is not multiple of 4
         BitVector bv2 = new BitVector("1z01xxxx11110000", 2);
 
@@ -285,7 +285,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void parseStringAllocate() {
+    public void stringAllocate() {
         // Ensure we grow a bitvector properly when assigning a larger value
         BitVector bv = new BitVector(1);
         bv.parseString("10000001001", 2);
@@ -333,7 +333,7 @@ public class BitVectorTest {
     }
 
     @Test
-    public void testCopy() {
+    public void copy() {
         final String SRC_VALUE = "010001001";
 
         BitVector bv1 = new BitVector(SRC_VALUE, 2);

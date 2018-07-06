@@ -24,7 +24,7 @@ import waveview.TraceDisplayModel;
 
 public class MarkerTableModelTest {
     @Test
-    public void test() {
+    public void createTable() {
         TraceDisplayModel tdm = new TraceDisplayModel();
         MarkerTableModel mtm = new MarkerTableModel(tdm);
 

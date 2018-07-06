@@ -70,7 +70,7 @@ public class SearchTest {
 
     /// Test various forms of whitespace (and lack thereof)
     @Test
-    public void testWhitespace() throws Exception {
+    public void whitespace() throws Exception {
         Search search = new Search(makeSingleBitModel(), "\r  \n \t  mod1.clk          =  1\n");
         assertEquals(10, search.getNextMatch(4));
 
@@ -80,7 +80,7 @@ public class SearchTest {
 
     /// Test identifier characters
     @Test
-    public void testIdentifier() throws Exception {
+    public void identifier() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -96,7 +96,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testSimpleSearch() throws Exception {
+    public void simpleSearch() throws Exception {
         // clk is high 10-14, 20-
         Search search = new Search(makeSingleBitModel(), "mod1.clk");
         assertEquals(10, search.getNextMatch(4));
@@ -115,7 +115,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testLiteralBases() throws Exception {
+    public void literalBases() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -146,7 +146,7 @@ public class SearchTest {
     /// matching.
     /// Verify it at least parses the search.
     @Test
-    public void testMatchXZ() throws Exception {
+    public void matchXZ() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.enterScope("mod1");
@@ -198,7 +198,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testUnknownNet() {
+    public void unknownNet() {
         try {
             new Search(makeSingleBitModel(), "mod1.stall_pipeline = 2");
             fail("Did not throw exception");
@@ -210,7 +210,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testStrayIdentifier() {
+    public void strayIdentifier() {
         try {
             new Search(makeSingleBitModel(), "mod1.clk = 'h2 foo");
             fail("Did not throw exception");
@@ -222,7 +222,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testMissingCompareValue() {
+    public void missingCompareValue() {
         try {
             new Search(makeSingleBitModel(), "mod1.clk = ");
             fail("Did not throw exception");
@@ -234,7 +234,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testMissingLiteral() {
+    public void missingLiteral() {
         try {
             new Search(makeSingleBitModel(), "mod1.clk = >");
             fail("Did not throw exception");
@@ -246,7 +246,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testUnknownLiteralType() {
+    public void unknownLiteralType() {
         try {
             new Search(makeSingleBitModel(), "mod1.clk = 'q3z");
             fail("Did not throw exception");
@@ -258,7 +258,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testMissingParen() {
+    public void missingParen() {
         try {
             new Search(makeSingleBitModel(), "(mod1.clk = 'h3 foo");
             fail("Did not throw exception");
@@ -270,7 +270,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testMissingIdentifier() {
+    public void missingIdentifier() {
         try {
             new Search(makeSingleBitModel(), "> 'h12");
             fail("Did not throw exception");
@@ -285,7 +285,7 @@ public class SearchTest {
     /// This implicitly verifies search hinting by starting at different
     /// transition points
     @Test
-    public void testAnd() throws Exception {
+    public void and() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -354,7 +354,7 @@ public class SearchTest {
     /// This implicitly verifies search hinting by starting at different
     /// transition points
     @Test
-    public void testOr() throws Exception {
+    public void or() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -419,7 +419,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testComparisons() throws Exception {
+    public void comparisons() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -489,7 +489,7 @@ public class SearchTest {
     }
 
     @Test
-    public void testPrecedence() throws Exception {
+    public void precedence() throws Exception {
         TraceDataModel traceDataModel = makeFourBitModel();
         Search search;
 
@@ -697,7 +697,7 @@ public class SearchTest {
     /// this case, we start in a match and hit the end while searching for
     /// the end of the match
     @Test
-    public void testGetNextMatchEnd1() throws Exception {
+    public void getNextMatchEnd1() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -712,7 +712,7 @@ public class SearchTest {
     // Similar to above, except finds the end of the first match then
     // doesn't find a second match
     @Test
-    public void testGetNextMatchEnd2() throws Exception {
+    public void getNextMatchEnd2() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -727,7 +727,7 @@ public class SearchTest {
 
     // Same as testGetNextMatchEnd1, except searching backward
     @Test
-    public void testGetPrevMatchEnd1() throws Exception {
+    public void getPrevMatchEnd1() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -741,7 +741,7 @@ public class SearchTest {
 
     // Same as testGetNextMatchEnd2, except searching backward
     @Test
-    public void testGetPrevMatchEnd2() throws Exception {
+    public void getPrevMatchEnd2() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -757,7 +757,7 @@ public class SearchTest {
     // Tests that the search expression is parsed and converted to an expression
     // tree correctly, as well as various operators.
     @Test
-    public void testSearchToString() throws Exception {
+    public void searchToString() throws Exception {
         TraceDataModel traceDataModel = makeFourBitModel();
 
         // Basic comparisons
@@ -796,7 +796,7 @@ public class SearchTest {
     // Tests that parens are treated as part of an identifier.
     // When a module is generated, it has the instance number: mod1.core_gen(0).mod2
     @Test
-    public void testGenerateInstance() throws Exception {
+    public void generateInstance() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);
@@ -817,7 +817,7 @@ public class SearchTest {
 
     /// Test comparing a net to another instead of a constant value
     @Test
-    public void testCompareNets() throws Exception {
+    public void compareNets() throws Exception {
         TraceDataModel traceDataModel = new TraceDataModel();
         TraceBuilder builder = traceDataModel.startBuilding();
         builder.setTimescale(-9);

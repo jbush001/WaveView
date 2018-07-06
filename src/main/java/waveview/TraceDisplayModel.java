@@ -119,6 +119,11 @@ public class TraceDisplayModel {
         }
     }
 
+    /**
+     * @param fromIndices Indices of items to move. This must be in ascending order.
+     * @param insertionPoint Insertion point in the new list. The items will be inserted
+     *        in the list before the element *currently* at that index.
+     */
     public void moveNets(int[] fromIndices, int insertionPoint) {
         NetViewModel[] nets = new NetViewModel[fromIndices.length];
         for (int i = fromIndices.length - 1; i >= 0; i--) {

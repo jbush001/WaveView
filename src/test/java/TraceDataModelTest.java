@@ -17,10 +17,11 @@
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
 import java.util.Iterator;
+import org.junit.Before;
 import org.junit.Test;
 import waveview.BitVector;
 import waveview.NetDataModel;
@@ -30,11 +31,16 @@ import waveview.TraceDataModel;
 import waveview.Transition;
 
 public class TraceDataModelTest {
-    @Test
-    public void testTraceDataModel() {
-        TraceDataModel model = new TraceDataModel();
-        TraceBuilder builder = model.startBuilding();
+    private final TraceDataModel model = new TraceDataModel();
+    private TraceBuilder builder;
 
+    @Before
+    public void initTest() {
+        builder = model.startBuilding();
+    }
+
+    @Test
+    public void buildTraceDataModel() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
@@ -105,14 +111,11 @@ public class TraceDataModelTest {
     }
 
     @Test
-    public void testAliasTrace() {
-        TraceDataModel model = new TraceDataModel();
-        TraceBuilder builder = model.startBuilding();
-
+    public void aliasTrace() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
-        builder.newNet("net2", net1, 1);
+        builder.newNet("net2", net1, 1);    // aliases net1
         builder.exitScope();
         builder.appendTransition(net1, 17, new BitVector("1", 2));
         builder.loadFinished();
@@ -138,10 +141,7 @@ public class TraceDataModelTest {
     }
 
     @Test
-    public void testCopyFrom() {
-        TraceDataModel model1 = new TraceDataModel();
-        TraceBuilder builder = model1.startBuilding();
-
+    public void copyFrom() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
@@ -151,7 +151,7 @@ public class TraceDataModelTest {
         builder.loadFinished();
 
         TraceDataModel model2 = new TraceDataModel();
-        model2.copyFrom(model1);
+        model2.copyFrom(model);
 
         // Ensure timescale was copied
         assertEquals(-9, model2.getTimescale());
@@ -159,16 +159,13 @@ public class TraceDataModelTest {
         // Ensure max timestamp was copied
         assertEquals(17, model2.getMaxTimestamp());
 
-        NetDataModel netData1 = model1.getNetDataModel(0);
-        NetDataModel netData2 = model1.getNetDataModel(1);
+        // Ensure net data models were copied
+        assertSame(model.getNetDataModel(0), model2.getNetDataModel(0));
+        assertSame(model.getNetDataModel(1), model2.getNetDataModel(1));
 
         // Ensure net name map was copied
-        assertSame(netData1, model2.findNet("mod1.net1"));
-        assertSame(netData2, model2.findNet("mod1.net2"));
-
-        // Ensure all nets list was copied
-        assertEquals("mod1.net1", netData1.getFullName());
-        assertEquals("mod1.net2", netData2.getFullName());
+        assertSame(model.getNetDataModel(0), model2.findNet("mod1.net1"));
+        assertSame(model.getNetDataModel(1), model2.findNet("mod1.net2"));
 
         // Ensure net tree was copied
         NetTreeModel netTree = model2.getNetTree();
@@ -176,7 +173,7 @@ public class TraceDataModelTest {
         assertEquals(2, netTree.getChildCount(root));
         Object kid0 = netTree.getChild(root, 0);
         Object kid1 = netTree.getChild(root, 1);
-        assertSame(netData1, model2.getNetFromTreeObject(kid0));
-        assertSame(netData2, model2.getNetFromTreeObject(kid1));
+        assertSame(model.getNetDataModel(0), model2.getNetFromTreeObject(kid0));
+        assertSame(model.getNetDataModel(1), model2.getNetFromTreeObject(kid1));
     }
 }
