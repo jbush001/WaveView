@@ -74,11 +74,6 @@ public class VCDLoader implements TraceLoader {
         System.out.println(Integer.toString(netMap.size()) + " total nets");
     }
 
-    @Override
-    public void close() throws IOException {
-        progressStream.close();
-    }
-
     private static class Net {
         final int builderId; /// ID given to this net by the builder
         final int width;

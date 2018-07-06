@@ -135,7 +135,7 @@ public class TraceSettingsFile {
             sigElement.appendChild(format);
 
             ValueFormatter formatter = traceDisplayModel.getValueFormatter(i);
-            Class c = formatter.getClass();
+            Class<? extends ValueFormatter> c = formatter.getClass();
             format.appendChild(document.createTextNode(c.getName()));
 
             if (formatter instanceof EnumValueFormatter) {

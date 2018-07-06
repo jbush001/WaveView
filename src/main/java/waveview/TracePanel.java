@@ -20,8 +20,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JPanel;

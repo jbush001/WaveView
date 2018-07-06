@@ -311,9 +311,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-15);
         builder.expectLoadFinished();
-        try (VCDLoader loader = new VCDLoader()) {
-            loader.load(testFile("timescale-fs.vcd"), builder, null);
-        }
+        new VCDLoader().load(testFile("timescale-fs.vcd"), builder, null);
     }
 
     @Test
@@ -321,9 +319,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-12);
         builder.expectLoadFinished();
-        try (VCDLoader loader = new VCDLoader()) {
-            loader.load(testFile("timescale-ps.vcd"), builder, null);
-        }
+        new VCDLoader().load(testFile("timescale-ps.vcd"), builder, null);
     }
 
     @Test
@@ -331,9 +327,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-9);
         builder.expectLoadFinished();
-        try (VCDLoader loader = new VCDLoader()) {
-            loader.load(testFile("timescale-ns.vcd"), builder, null);
-        }
+        new VCDLoader().load(testFile("timescale-ns.vcd"), builder, null);
     }
 
     @Test
@@ -341,9 +335,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-6);
         builder.expectLoadFinished();
-        try (VCDLoader loader = new VCDLoader()) {
-            loader.load(testFile("timescale-us.vcd"), builder, null);
-        }
+        new VCDLoader().load(testFile("timescale-us.vcd"), builder, null);
     }
 
     @Test
@@ -351,9 +343,7 @@ public class VCDLoaderTest {
         ExpectTraceBuilder builder = new ExpectTraceBuilder();
         builder.expectTimescale(-3);
         builder.expectLoadFinished();
-        try (VCDLoader loader = new VCDLoader()) {
-            loader.load(testFile("timescale-ms.vcd"), builder, null);
-        }
+        new VCDLoader().load(testFile("timescale-ms.vcd"), builder, null);
     }
 
     @Test

@@ -16,20 +16,18 @@
 
 package waveview;
 
-import javax.swing.JPanel;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import javax.swing.JPanel;
 import javax.swing.Timer;
 
 ///
 /// Draws the ruler with times at the top of the trace view.
 ///
-class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, ActionListener {
+class TimescalePanel extends JPanel implements TraceDisplayModel.Listener {
     private static final int TIMESTAMP_DISAPPEAR_INTERVAL = 500;
 
     private boolean showTimestamp;
@@ -37,7 +35,7 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
     private String unitName = "s";
     private final TraceDisplayModel traceDisplayModel;
     private final TraceDataModel traceDataModel;
-    private final Timer timestampDisplayTimer = new Timer(TIMESTAMP_DISAPPEAR_INTERVAL, this);
+    private final Timer timestampDisplayTimer;
 
     TimescalePanel(TraceDisplayModel traceDisplayModel, TraceDataModel traceDataModel) {
         this.traceDisplayModel = traceDisplayModel;
@@ -47,6 +45,14 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
         setPreferredSize(new Dimension(200, DrawMetrics.TIMESCALE_HEIGHT));
         setFont(new Font("SansSerif", Font.PLAIN, 9));
         scaleChanged(traceDisplayModel.getHorizontalScale());
+
+        // The timestamp is shown when the user clicks to set the cursor position.
+        // This timer makes it disappear after a bit.
+        timestampDisplayTimer = new Timer(TIMESTAMP_DISAPPEAR_INTERVAL, e -> {
+            showTimestamp = false;
+            repaint();
+        });
+
         timestampDisplayTimer.setRepeats(false);
     }
 
@@ -232,14 +238,5 @@ class TimescalePanel extends JPanel implements TraceDisplayModel.Listener, Actio
         g.setColor(AppPreferences.getInstance().traceColor);
         g.drawLine(visibleRect.x, DrawMetrics.TIMESCALE_HEIGHT, visibleRect.x + visibleRect.width,
                 DrawMetrics.TIMESCALE_HEIGHT);
-    }
-
-    /// This is called when the timer expires. It hides the timestamp displayed
-    /// above
-    /// the cursor.
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        showTimestamp = false;
-        repaint();
     }
 }

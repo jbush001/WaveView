@@ -43,7 +43,7 @@ class TraceLoadWorker extends SwingWorker<Void, Void> {
     @Override
     public Void doInBackground() {
         /// @todo Determine the loader type dynamically
-        try (TraceLoader loader = new VCDLoader()) {
+        try {
             TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
                 @Override
                 public boolean updateProgress(final int percentRead) {
@@ -59,7 +59,7 @@ class TraceLoadWorker extends SwingWorker<Void, Void> {
             };
 
             long startTime = System.currentTimeMillis();
-            loader.load(file, newModel.startBuilding(), progressListener);
+            new VCDLoader().load(file, newModel.startBuilding(), progressListener);
             System.out.println("Loaded in " + (System.currentTimeMillis() - startTime) + " ms");
         } catch (Exception exc) {
             errorMessage = exc.getMessage();
