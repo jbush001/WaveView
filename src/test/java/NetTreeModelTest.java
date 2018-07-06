@@ -25,14 +25,15 @@ public class NetTreeModelTest {
     @Test
     public void test1() {
         NetTreeModel model = new NetTreeModel();
-        model.enterScope("scope1");
-        model.addNet("child1", 17);
-        model.addNet("child2", 19);
-        model.enterScope("scope2");
-        model.addNet("child3", 23);
-        model.addNet("child4", 27);
-        model.leaveScope();
-        model.addNet("child5", 31);
+        NetTreeModel.Builder builder = model.startBuilding();
+        builder.enterScope("scope1");
+        builder.addNet("child1", 17);
+        builder.addNet("child2", 19);
+        builder.enterScope("scope2");
+        builder.addNet("child3", 23);
+        builder.addNet("child4", 27);
+        builder.leaveScope();
+        builder.addNet("child5", 31);
 
         Object root = model.getRoot();
         assertEquals(4, model.getChildCount(root));
@@ -95,11 +96,12 @@ public class NetTreeModelTest {
     @Test
     public void doubleRootTest() {
         NetTreeModel model = new NetTreeModel();
-        model.enterScope("scope1");
-        model.leaveScope();
-        model.enterScope("scope1");
-        model.addNet("child1", 17);
-        model.leaveScope();
+        NetTreeModel.Builder builder = model.startBuilding();
+        builder.enterScope("scope1");
+        builder.leaveScope();
+        builder.enterScope("scope1");
+        builder.addNet("child1", 17);
+        builder.leaveScope();
 
         Object root = model.getRoot();
         assertEquals(1, model.getChildCount(root));

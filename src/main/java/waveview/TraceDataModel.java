@@ -137,6 +137,7 @@ public class TraceDataModel {
 
     private class ConcreteTraceBuilder implements TraceBuilder {
         private final Deque<String> scopeStack = new ArrayDeque<>();
+        private NetTreeModel.Builder treeBuilder = netTree.startBuilding();
 
         @Override
         public void setTimescale(int timescale) {
@@ -145,13 +146,13 @@ public class TraceDataModel {
 
         @Override
         public void enterScope(String name) {
-            netTree.enterScope(name);
+            treeBuilder.enterScope(name);
             scopeStack.addLast(name);
         }
 
         @Override
         public void exitScope() {
-            netTree.leaveScope();
+            treeBuilder.leaveScope();
             scopeStack.removeLast();
         }
 
@@ -192,7 +193,7 @@ public class TraceDataModel {
 
             allNets.add(net);
             int thisNetIndex = allNets.size() - 1;
-            netTree.addNet(shortName, thisNetIndex);
+            treeBuilder.addNet(shortName, thisNetIndex);
             fullNameToNetMap.put(fullName.toString(), thisNetIndex);
             return thisNetIndex;
         }

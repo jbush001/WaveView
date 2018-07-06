@@ -29,36 +29,43 @@ import javax.swing.tree.TreePath;
 ///
 public class NetTreeModel implements TreeModel {
     private Node root;
-    private final Deque<Node> nodeStack = new ArrayDeque<>();
+
+    public class Builder {
+        private final Deque<Node> nodeStack = new ArrayDeque<>();
+
+        public void enterScope(String name) {
+            if (nodeStack.isEmpty() && root != null) {
+                // If you call $dumpvars more than once with iverilog, it will pop the root
+                // node off and re-push it. Handle this case here.
+                nodeStack.addLast(root);
+                return;
+            }
+
+            Node node = new Node(name);
+            if (root == null) {
+                root = node;
+            } else {
+                nodeStack.peekLast().children.add(node);
+            }
+
+            nodeStack.addLast(node);
+        }
+
+        public void leaveScope() {
+            nodeStack.removeLast();
+        }
+
+        public void addNet(String name, int netId) {
+            nodeStack.peekLast().children.add(new Node(name, netId));
+        }
+    }
+
+    public Builder startBuilding() {
+        return new Builder();
+    }
 
     public void clear() {
         root = null;
-    }
-
-    public void enterScope(String name) {
-        if (nodeStack.isEmpty() && root != null) {
-            // If you call $dumpvars more than once with iverilog, it will pop the root
-            // node off and re-push it. Handle this case here.
-            nodeStack.addLast(root);
-            return;
-        }
-
-        Node node = new Node(name);
-        if (root == null) {
-            root = node;
-        } else {
-            nodeStack.peekLast().children.add(node);
-        }
-
-        nodeStack.addLast(node);
-    }
-
-    public void leaveScope() {
-        nodeStack.removeLast();
-    }
-
-    public void addNet(String name, int netId) {
-        nodeStack.peekLast().children.add(new Node(name, netId));
     }
 
     public int getNetFromTreeObject(Object o) {

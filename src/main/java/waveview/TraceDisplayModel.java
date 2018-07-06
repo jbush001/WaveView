@@ -24,7 +24,7 @@ import java.util.ArrayList;
 ///
 
 public class TraceDisplayModel {
-    private final ArrayList<Listener> traceListeners = new ArrayList<>();
+    private final ArrayList<Listener> listeners = new ArrayList<>();
     private ArrayList<NetViewModel> visibleNets = new ArrayList<>();
     private final ArrayList<NetSet> netSets = new ArrayList<>();
     private long cursorPosition;
@@ -59,13 +59,13 @@ public class TraceDisplayModel {
         visibleNets.clear();
         markers.clear();
         netSets.clear();
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.netsRemoved(0, oldSize);
         }
     }
 
     public void addListener(Listener listener) {
-        traceListeners.add(listener);
+        listeners.add(listener);
     }
 
     // @param scale Pixels per time unit
@@ -76,7 +76,7 @@ public class TraceDisplayModel {
             minorTickInterval = 1;
         }
 
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.scaleChanged(scale);
         }
     }
@@ -97,14 +97,14 @@ public class TraceDisplayModel {
 
     public void makeNetVisible(int aboveIndex, int netId) {
         visibleNets.add(aboveIndex, new NetViewModel(netId));
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.netsAdded(visibleNets.size() - 1, visibleNets.size() - 1);
         }
     }
 
     public void removeNet(int listIndex) {
         visibleNets.remove(listIndex);
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.netsRemoved(listIndex, listIndex);
         }
     }
@@ -113,7 +113,7 @@ public class TraceDisplayModel {
         int oldSize = visibleNets.size();
         visibleNets.clear();
         if (oldSize > 0) {
-            for (Listener listener : traceListeners) {
+            for (Listener listener : listeners) {
                 listener.netsRemoved(0, oldSize - 1);
             }
         }
@@ -133,7 +133,7 @@ public class TraceDisplayModel {
             visibleNets.add(insertionPoint++, net);
         }
 
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.netsAdded(insertionPoint - fromIndices.length, insertionPoint - 1);
         }
     }
@@ -151,7 +151,7 @@ public class TraceDisplayModel {
 
     public void setValueFormatter(int listIndex, ValueFormatter formatter) {
         visibleNets.get(listIndex).formatter = formatter;
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.formatChanged(listIndex);
         }
     }
@@ -174,7 +174,7 @@ public class TraceDisplayModel {
         visibleNets = new ArrayList<>(netSets.get(index).visibleNets);
 
         // @todo There is probably a more efficient way to do this
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.netsRemoved(0, oldSize);
             listener.netsAdded(0, visibleNets.size() - 1);
         }
@@ -205,7 +205,7 @@ public class TraceDisplayModel {
     public void setCursorPosition(long timestamp) {
         long old = cursorPosition;
         cursorPosition = timestamp;
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.cursorChanged(old, timestamp);
         }
     }
@@ -241,7 +241,7 @@ public class TraceDisplayModel {
     }
 
     private void notifyMarkerChanged(long timestamp) {
-        for (Listener listener : traceListeners) {
+        for (Listener listener : listeners) {
             listener.markerChanged(timestamp);
         }
     }
