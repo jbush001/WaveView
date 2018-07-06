@@ -18,23 +18,32 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import org.junit.Before;
 import org.junit.Test;
 import waveview.MarkerTableModel;
 import waveview.TraceDisplayModel;
 
 public class MarkerTableModelTest {
-    @Test
-    public void createTable() {
-        TraceDisplayModel tdm = new TraceDisplayModel();
-        MarkerTableModel mtm = new MarkerTableModel(tdm);
+    private final TraceDisplayModel tdm = new TraceDisplayModel();
+    private MarkerTableModel mtm;
 
+    @Before
+    public void initTest() {
+        mtm = new MarkerTableModel(tdm);
+    }
+
+    @Test
+    public void emptyTable() {
         assertEquals(3, mtm.getColumnCount());
         assertEquals("ID", mtm.getColumnName(0));
         assertEquals("Timestamp", mtm.getColumnName(1));
         assertEquals("Comment", mtm.getColumnName(2));
-
         assertEquals(0, mtm.getRowCount());
+    }
 
+    @Test
+    public void readMarkers() {
         tdm.addMarker("foo", 1234);
         tdm.addMarker("bar", 5678);
 
@@ -42,6 +51,7 @@ public class MarkerTableModelTest {
         assertEquals("1", (String) mtm.getValueAt(0, 0));
         assertEquals("1234", (String) mtm.getValueAt(0, 1));
         assertEquals("foo", (String) mtm.getValueAt(0, 2));
+
         assertEquals("2", (String) mtm.getValueAt(1, 0));
         assertEquals("5678", (String) mtm.getValueAt(1, 1));
         assertEquals("bar", (String) mtm.getValueAt(1, 2));
@@ -52,11 +62,19 @@ public class MarkerTableModelTest {
         assertFalse(mtm.isCellEditable(1, 0));
         assertFalse(mtm.isCellEditable(1, 1));
         assertTrue(mtm.isCellEditable(1, 2));
+    }
 
+    @Test
+    public void setValueAt() {
+        tdm.addMarker("foo", 1234);
+        tdm.addMarker("bar", 5678);
         mtm.setValueAt("baz", 1, 2);
         assertEquals("baz", (String) mtm.getValueAt(1, 2));
+    }
 
-        // Column index past end, should check and return empty string.
+    // Column index past end, should check and return empty string.
+    @Test
+    public void invalidColumn() {
         assertEquals("", (String) mtm.getValueAt(1, 3));
     }
 }
