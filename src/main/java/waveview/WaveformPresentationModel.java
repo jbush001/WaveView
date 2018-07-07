@@ -175,7 +175,7 @@ public class WaveformPresentationModel {
 
         // @todo There is probably a more efficient way to do this
         for (Listener listener : listeners) {
-            listener.netsRemoved(0, oldSize);
+            listener.netsRemoved(0, oldSize - 1);
             listener.netsAdded(0, visibleNets.size() - 1);
         }
     }

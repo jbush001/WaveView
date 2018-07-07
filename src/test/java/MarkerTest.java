@@ -15,20 +15,25 @@
 //
 
 import static org.junit.Assert.assertEquals;
-
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import org.junit.Before;
 import org.junit.Test;
+
 import waveview.WaveformPresentationModel;
 
 public class MarkerTest {
     private final WaveformPresentationModel model = new WaveformPresentationModel();
-    private final WaveformPresentationModelListener listener = new WaveformPresentationModelListener();
+    private WaveformPresentationModel.Listener listener;
 
     @Before
     public void setUpTest() {
         // The scale determines how close the user has to click to a marker to
         // select it.
         model.setHorizontalScale(0.1);
+        listener = spy(WaveformPresentationModel.Listener.class);
         model.addListener(listener);
     }
 
@@ -42,51 +47,54 @@ public class MarkerTest {
     public void removeMarkerEmpty() {
         model.addListener(listener);
         model.removeMarkerAtTime(1000);
-        assertEquals(0, listener.notifications);
+        verifyZeroInteractions(listener);
     }
 
     @Test
     public void insertMarker() {
         model.addMarker("marker0", 1000);
-        assertEquals(WaveformPresentationModelListener.MARKER_CHANGED, listener.notifications);
-        assertEquals(1000, listener.longArg0);
+        verify(listener).markerChanged(1000);
         assertEquals(0, model.getMarkerAtTime(1000));
     }
 
     @Test
     public void removeMarkerNoMatch() {
         model.addMarker("marker0", 1000);
+        clearInvocations(listener);
 
-        listener.reset();
         model.removeMarkerAtTime(925);
+
+        verifyZeroInteractions(listener);
         assertEquals(1, model.getMarkerCount()); // Marker should still be present
-        assertEquals(0, listener.notifications);
 
         model.removeMarkerAtTime(1075);
+
         assertEquals(1, model.getMarkerCount()); // Marker should still be present
-        assertEquals(0, listener.notifications);
+        verifyZeroInteractions(listener);
     }
 
     @Test
     public void removeMarkerBeforeSingle() {
         // Marker is both first and last, test edge cases around it
         model.addMarker("marker0", 1000);
+        clearInvocations(listener);
 
         model.removeMarkerAtTime(990);
+
         assertEquals(0, model.getMarkerCount());
-        assertEquals(WaveformPresentationModelListener.MARKER_CHANGED, listener.notifications);
-        assertEquals(1000, listener.longArg0);
+        verify(listener).markerChanged(1000);
     }
 
     @Test
     public void removeMarkerAfterSingle() {
         // Marker is both first and last, test edge cases around it
         model.addMarker("marker0", 1000);
+        clearInvocations(listener);
 
         model.removeMarkerAtTime(1010);
+
         assertEquals(0, model.getMarkerCount());
-        assertEquals(WaveformPresentationModelListener.MARKER_CHANGED, listener.notifications);
-        assertEquals(1000, listener.longArg0);
+        verify(listener).markerChanged(1000);
     }
 
     // Remove a marker when there are multiple markers in the list
@@ -96,11 +104,11 @@ public class MarkerTest {
         model.addMarker("marker3", 200);
         model.addMarker("marker4", 300);
         model.addMarker("marker5", 400);
-        listener.reset();
+        clearInvocations(listener);
 
         model.removeMarkerAtTime(199);
-        assertEquals(WaveformPresentationModelListener.MARKER_CHANGED, listener.notifications);
-        assertEquals(200, listener.longArg0);
+
+        verify(listener).markerChanged(200);
 
         // Ensure other markers were unaffected
         assertEquals(3, model.getMarkerCount());
@@ -115,12 +123,11 @@ public class MarkerTest {
         model.addMarker("marker3", 200);
         model.addMarker("marker4", 300);
         model.addMarker("marker5", 400);
-        listener.reset();
+        clearInvocations(listener);
 
         model.removeAllMarkers();
 
-        assertEquals(WaveformPresentationModelListener.MARKER_CHANGED, listener.notifications);
-        assertEquals(-1, listener.longArg0);
+        verify(listener).markerChanged(-1);
         assertEquals(0, model.getMarkerCount());
     }
 

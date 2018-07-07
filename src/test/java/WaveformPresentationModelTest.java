@@ -20,36 +20,40 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import org.junit.Before;
 import org.junit.Test;
 import waveview.DecimalValueFormatter;
 import waveview.NetDataModel;
-import waveview.WaveformPresentationModel;
 import waveview.TransitionVector;
+import waveview.WaveformPresentationModel;
 
 public class WaveformPresentationModelTest {
     private final WaveformPresentationModel model = new WaveformPresentationModel();
-    private final WaveformPresentationModelListener listener = new WaveformPresentationModelListener();
+    private WaveformPresentationModel.Listener listener;
 
     @Before
     public void setUpTest() {
+        listener = spy(WaveformPresentationModel.Listener.class);
         model.addListener(listener);
     }
 
     @Test
     public void scaleChange() {
         model.setHorizontalScale(123.0);
-        assertEquals(WaveformPresentationModelListener.SCALE_CHANGED, listener.notifications);
-        assertEquals(123.0, listener.doubleArg, 0.0);
+
+        verify(listener).scaleChanged(123.0);
         assertEquals(123.0, model.getHorizontalScale(), 0.0);
     }
 
     @Test
     public void cursorChange() {
         model.setCursorPosition(1024);
-        assertEquals(WaveformPresentationModelListener.CURSOR_CHANGED, listener.notifications);
-        assertEquals(0, listener.longArg0);
-        assertEquals(1024, listener.longArg1);
+        verify(listener).cursorChanged(0, 1024);
+        assertEquals(1024, model.getCursorPosition());
     }
 
     @Test
@@ -58,9 +62,7 @@ public class WaveformPresentationModelTest {
 
         model.addNet(net1);
 
-        assertEquals(WaveformPresentationModelListener.NETS_ADDED, listener.notifications);
-        assertEquals(0, listener.longArg0);
-        assertEquals(0, listener.longArg1);
+        verify(listener).netsAdded(0, 0);
         assertEquals(1, model.getVisibleNetCount());
         assertSame(net1, model.getVisibleNet(0));
     }
@@ -74,17 +76,18 @@ public class WaveformPresentationModelTest {
             model.addNet(nets[i]);
         }
 
+        clearInvocations(listener);
+
         // Ensure some elements are below the insertion index to check that
         // it adjusts properly.
         // original: 0 1 2 3 4 5
         // after: 0 2 1 4 3 5
         int[] indices = { 1, 4 };
-        listener.reset();
         model.moveNets(indices, 3);
-        assertEquals(WaveformPresentationModelListener.NETS_REMOVED | WaveformPresentationModelListener.NETS_ADDED,
-            listener.notifications);
-        // XXX doesn't check parameters (multiple notifications from this)
 
+        verify(listener).netsRemoved(1, 1);
+        verify(listener).netsRemoved(4, 4);
+        verify(listener).netsAdded(2, 3);
         assertEquals(6, model.getVisibleNetCount());
         assertSame(nets[0], model.getVisibleNet(0));
         assertSame(nets[2], model.getVisibleNet(1));
@@ -102,13 +105,11 @@ public class WaveformPresentationModelTest {
         model.addNet(net1);
         model.addNet(net2);
         model.addNet(net3);
-        listener.reset();
+        clearInvocations(listener);
 
         model.removeNet(1);
 
-        assertEquals(WaveformPresentationModelListener.NETS_REMOVED, listener.notifications);
-        assertEquals(1, listener.longArg0); // low index
-        assertEquals(1, listener.longArg1); // high index
+        verify(listener).netsRemoved(1, 1);
         assertEquals(2, model.getVisibleNetCount());
         assertSame(net1, model.getVisibleNet(0));
         assertSame(net3, model.getVisibleNet(1));
@@ -123,13 +124,11 @@ public class WaveformPresentationModelTest {
         model.addNet(net2);
         model.addNet(net3);
         model.addMarker("a_marker", 1000);
-        listener.reset();
+        clearInvocations(listener);
 
         model.removeAllNets();
 
-        assertEquals(WaveformPresentationModelListener.NETS_REMOVED, listener.notifications);
-        assertEquals(0, listener.longArg0); // Low index
-        assertEquals(2, listener.longArg1); // High index
+        verify(listener).netsRemoved(0, 2);
         assertEquals(0, model.getVisibleNetCount());
 
         // Ensure this didn't remove a marker
@@ -142,7 +141,7 @@ public class WaveformPresentationModelTest {
     @Test
     public void removeAllEmpty() {
         model.removeAllNets();
-        assertEquals(0, listener.notifications);
+        verifyZeroInteractions(listener);
     }
 
     @Test
@@ -152,13 +151,11 @@ public class WaveformPresentationModelTest {
 
         model.addNet(net1);
         model.addNet(net2);
-        listener.reset();
+        clearInvocations(listener);
 
         model.clear();
 
-        assertEquals(WaveformPresentationModelListener.NETS_REMOVED, listener.notifications);
-        assertEquals(0, listener.longArg0);
-        assertEquals(2, listener.longArg1);
+        verify(listener).netsRemoved(0, 2);
         assertEquals(0, model.getVisibleNetCount());
     }
 
@@ -171,19 +168,18 @@ public class WaveformPresentationModelTest {
         NetDataModel net5 = new NetDataModel("net5", "net5", new TransitionVector(1));
         model.addNet(net1);
         model.addNet(net2);
-
         model.saveNetSet("set1");
-        listener.reset();
+
         model.removeAllNets();
         model.addNet(net3);
         model.addNet(net4);
         model.addNet(net5);
+        clearInvocations(listener);
+
         model.selectNetSet(0);
 
-        assertEquals(WaveformPresentationModelListener.NETS_ADDED | WaveformPresentationModelListener.NETS_REMOVED,
-                listener.notifications);
-        assertEquals(0, listener.longArg0); // First index (of added nets)
-        assertEquals(1, listener.longArg1); // Last index (not count)
+        verify(listener).netsRemoved(0, 2);
+        verify(listener).netsAdded(0, 1);
         assertEquals(2, model.getVisibleNetCount());
         assertSame(net1, model.getVisibleNet(0));
         assertSame(net2, model.getVisibleNet(1));
@@ -221,13 +217,12 @@ public class WaveformPresentationModelTest {
         NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
         model.addNet(net1);
         model.addNet(net2);
-        listener.reset();
+        clearInvocations(listener);
 
         DecimalValueFormatter dvf = new DecimalValueFormatter();
         model.setValueFormatter(1, dvf);
 
-        assertEquals(WaveformPresentationModelListener.FORMAT_CHANGED, listener.notifications);
-        assertEquals(1, listener.longArg0);
+        verify(listener).formatChanged(1);
         assertTrue(model.getValueFormatter(1) == dvf);
     }
 
@@ -242,11 +237,11 @@ public class WaveformPresentationModelTest {
     // that all notification types will notify all listeners.
     @Test
     public void multipleListeners() {
-        WaveformPresentationModelListener listener2 = new WaveformPresentationModelListener();
+        WaveformPresentationModel.Listener listener2 = spy(WaveformPresentationModel.Listener.class);
         model.addListener(listener2);
         model.setHorizontalScale(1);
-        assertEquals(WaveformPresentationModelListener.SCALE_CHANGED, listener.notifications);
-        assertEquals(WaveformPresentationModelListener.SCALE_CHANGED, listener2.notifications);
+        verify(listener).scaleChanged(1);
+        verify(listener2).scaleChanged(1);
     }
 
     @Test
