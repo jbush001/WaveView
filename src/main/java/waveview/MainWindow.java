@@ -244,54 +244,57 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     private void handleLoadFinished(File file, TraceDataModel newModel, String errorMessage) {
-        if (errorMessage == null) {
-            currentSearch = null;
+        if (errorMessage != null) {
+            JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
+                + errorMessage);
+            return;
+        }
 
-            traceDisplayModel.clear();
+        currentSearch = null;
+        traceDisplayModel.clear();
 
-            // XXX hack
-            // Because the load ran on a separate thread, and I didn't want to add locking
-            // everywhere, this loaded into a new copy of a data model. However, there are
-            // references to the trace data model scattered all over the place. Rather
-            // than try to update all pointers to the new model, this just copies data from
-            // the new object to the old one. Since this runs on the main window thread now,
-            // this is safe.
-            traceDataModel.copyFrom(newModel);
+        // XXX hack
+        // Because the load ran on a separate thread, and I didn't want to add locking
+        // everywhere, this loaded into a new copy of a data model. However, there are
+        // references to the trace data model scattered all over the place. Rather
+        // than try to update all pointers to the new model, this just copies data from
+        // the new object to the old one. Since this runs on the main window thread now,
+        // this is safe.
+        traceDataModel.copyFrom(newModel);
 
-            frame.setTitle("Waveform Viewer [" + file.getName() + "]");
+        frame.setTitle("Waveform Viewer [" + file.getName() + "]");
 
-            try {
-                recentFiles.add(file.getCanonicalPath());
-                AppPreferences.getInstance().setRecentList(recentFiles.pack());
+        try {
+            recentFiles.add(file.getCanonicalPath());
+            AppPreferences.getInstance().setRecentList(recentFiles.pack());
 
-                File settingsFile = TraceSettingsFile.settingsFileName(file);
-                traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, traceDisplayModel);
-                if (settingsFile.exists()) {
-                    traceSettingsFile.read();
-                }
-            } catch (Exception exc) {
-                System.out.println("caught exception while reading settings " + exc);
-                // XXX Display an error dialog?
+            File settingsFile = TraceSettingsFile.settingsFileName(file);
+            traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, traceDisplayModel);
+            if (settingsFile.exists()) {
+                traceSettingsFile.read();
+            }
+        } catch (Exception exc) {
+            System.out.println("caught exception while reading settings " + exc);
+            // XXX Display an error dialog?
+        }
+
+        buildRecentFilesMenu();
+        buildNetMenu();
+        destroyNetSearchPane();
+        currentTraceFile = file;
+    }
+
+    // XXX hack
+    // The net search pane holds onto the old tree model, which has been
+    // replaced. Delete it so it will be re-created attached to the new one.
+    private void destroyNetSearchPane() {
+        if (netSearchPane != null) {
+            if (netSearchPane.isVisible()) {
+                netSearchPane.setVisible(false);
             }
 
-            buildRecentFilesMenu();
-            buildNetMenu();
-
-            // XXX hack
-            // The net search pane holds onto the old tree model, which has been
-            // replaced. Delete it so it will be re-created attached to the new one.
-            if (netSearchPane != null) {
-                if (netSearchPane.isVisible()) {
-                    netSearchPane.setVisible(false);
-                }
-
-                remove(netSearchPane);
-                netSearchPane = null;
-            }
-
-            currentTraceFile = file;
-        } else {
-            JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: " + errorMessage);
+            remove(netSearchPane);
+            netSearchPane = null;
         }
     }
 

@@ -61,8 +61,8 @@ public class NetSearchListModelAdapter implements ListModel<String>, DocumentLis
         }
 
         if (listDataListener != null) {
-            listDataListener
-                    .contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size()));
+            ListDataEvent event = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size());
+            listDataListener.contentsChanged(event);
         }
     }
 

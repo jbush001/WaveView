@@ -83,17 +83,9 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
                 return;
             }
 
+            // Initialize this stuff once, then cache results
             if (labelBaseline == -1) {
-                // Initialize this stuff once, then cache results
-                FontMetrics labelMetrics = g.getFontMetrics(labelFont);
-                FontMetrics valueMetrics = g.getFontMetrics(valueFont);
-                labelBaseline = labelMetrics.getAscent();
-                valueBaseline = labelBaseline + labelMetrics.getDescent() + labelMetrics.getLeading()
-                        + valueMetrics.getAscent();
-                int totalHeight = valueBaseline + valueMetrics.getDescent();
-                int border = (DrawMetrics.WAVEFORM_V_SPACING - totalHeight) / 2;
-                labelBaseline += border;
-                valueBaseline += border;
+                computeFontPositioning(g);
             }
 
             if (currentNetIsSelected) {
@@ -120,6 +112,18 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         @Override
         public String getToolTipText(MouseEvent event) {
             return traceDisplayModel.getVisibleNet(currentNet).getFullName();
+        }
+
+        private void computeFontPositioning(Graphics g) {
+            FontMetrics labelMetrics = g.getFontMetrics(labelFont);
+            FontMetrics valueMetrics = g.getFontMetrics(valueFont);
+            labelBaseline = labelMetrics.getAscent();
+            valueBaseline = labelBaseline + labelMetrics.getDescent() + labelMetrics.getLeading()
+                    + valueMetrics.getAscent();
+            int totalHeight = valueBaseline + valueMetrics.getDescent();
+            int border = (DrawMetrics.WAVEFORM_V_SPACING - totalHeight) / 2;
+            labelBaseline += border;
+            valueBaseline += border;
         }
     }
 
@@ -254,23 +258,15 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         JMenuItem item = new JMenuItem("Remove Net");
         item.addActionListener(this);
         popupMenu.add(item);
-        item = new JMenu("Format");
-        JMenuItem subItem = new JMenuItem("Hex");
-        item.add(subItem);
-        subItem.addActionListener(this);
-        subItem = new JMenuItem("Binary");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        subItem = new JMenuItem("Decimal");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        subItem = new JMenuItem("ASCII");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        subItem = new JMenuItem("Enum");
-        subItem.addActionListener(this);
-        item.add(subItem);
-        popupMenu.add(item);
+        JMenuItem formatMenu = new JMenu("Format");
+        popupMenu.add(formatMenu);
+
+        final String[] FORMAT_MENU_ITEMS = { "Hex", "Binary", "Decimal", "ASCII", "Enum" };
+        for (String itemName : FORMAT_MENU_ITEMS) {
+            JMenuItem subItem = new JMenuItem(itemName);
+            formatMenu.add(subItem);
+            subItem.addActionListener(this);
+        }
     }
 
     @Override
