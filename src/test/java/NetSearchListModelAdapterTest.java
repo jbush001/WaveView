@@ -16,20 +16,48 @@
 //
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import waveview.NetSearchListModelAdapter;
 import waveview.WaveformBuilder;
 import waveview.WaveformDataModel;
 
 public class NetSearchListModelAdapterTest {
     private final WaveformDataModel model = new WaveformDataModel();
-    private final TestListDataListener listener = new TestListDataListener();
+    private ListDataListener listener;
     NetSearchListModelAdapter nslma;
+
+    static class ListDataEventMatcher implements ArgumentMatcher<ListDataEvent> {
+        private int type;
+        private int index1;
+        private Object source;
+
+        ListDataEventMatcher(Object source, int type, int index1) {
+            this.source = source;
+            this.type = type;
+            this.index1 = index1;
+        }
+
+        @Override
+        public boolean matches(ListDataEvent event) {
+            return event.getSource() == source
+                && event.getType() == this.type
+                && event.getIndex0() == 0
+                && event.getIndex1() == this.index1;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + this.type + ", 0, " + this.index1 + "]";
+        }
+    }
 
     @Before
     public void setUpTest() {
@@ -47,38 +75,8 @@ public class NetSearchListModelAdapterTest {
         builder.exitScope();
 
         nslma = new NetSearchListModelAdapter(model);
+        listener = spy(ListDataListener.class);
         nslma.addListDataListener(listener);
-    }
-
-    static class TestListDataListener implements ListDataListener {
-        boolean gotEvent;
-        int eventSize;
-
-        TestListDataListener() {
-        }
-
-        @Override
-        public void contentsChanged(ListDataEvent evt) {
-            gotEvent = true;
-            assertEquals(0, evt.getIndex0());
-            eventSize = evt.getIndex1();
-        }
-
-        @Override
-        public void intervalAdded(ListDataEvent evt) {
-            fail("unexpected intervalAdded");
-        }
-
-        @Override
-        public void intervalRemoved(ListDataEvent evt) {
-            fail("unexpected intervalAdded");
-        }
-
-        void checkEvent(int size) {
-            assertTrue(gotEvent);
-            assertEquals(size, eventSize);
-            gotEvent = false; // Reset for next check
-        }
     }
 
     @Test
@@ -98,7 +96,9 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void testPartialMatch1() {
         nslma.setPattern("foo");
-        listener.checkEvent(4);
+        verify(listener).contentsChanged(argThat(new ListDataEventMatcher(nslma,
+                 ListDataEvent.CONTENTS_CHANGED, 4)));
+        verifyNoMoreInteractions(listener);
         assertEquals(4, nslma.getSize());
         assertEquals("mod1.fooxxx", nslma.getElementAt(0));
         assertEquals("mod1.xfooxx", nslma.getElementAt(1));
@@ -109,7 +109,9 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void testPartialMatch2() {
         nslma.setPattern("bbbb");
-        listener.checkEvent(2);
+        verify(listener).contentsChanged(argThat(new ListDataEventMatcher(nslma,
+                ListDataEvent.CONTENTS_CHANGED, 2)));
+        verifyNoMoreInteractions(listener);
         assertEquals(2, nslma.getSize());
         assertEquals("mod1.bbbbb", nslma.getElementAt(0));
         assertEquals("mod1.bbbb", nslma.getElementAt(1));
@@ -118,7 +120,9 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void testNoMatch() {
         nslma.setPattern("z");
-        listener.checkEvent(0);
+        verify(listener).contentsChanged(argThat(new ListDataEventMatcher(nslma,
+                ListDataEvent.CONTENTS_CHANGED, 0)));
+        verifyNoMoreInteractions(listener);
         assertEquals(0, nslma.getSize());
     }
 }
