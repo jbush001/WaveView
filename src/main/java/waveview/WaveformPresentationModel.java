@@ -118,8 +118,9 @@ public class WaveformPresentationModel {
      * @param insertionPoint Insertion point in the new list. The items will be inserted
      *        in the list before the element *currently* at that index.
      */
-    public void moveNets(int[] fromIndices, int insertionPoint) {
+    public void moveNets(int[] fromIndices, int originalInsertionPoint) {
         NetPresentationModel[] nets = new NetPresentationModel[fromIndices.length];
+        int insertionPoint = originalInsertionPoint;
         for (int i = fromIndices.length - 1; i >= 0; i--) {
             nets[i] = visibleNets.get(fromIndices[i]);
             removeNet(fromIndices[i]);

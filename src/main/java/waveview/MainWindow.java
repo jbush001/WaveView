@@ -153,6 +153,7 @@ public class MainWindow extends JPanel implements ActionListener {
                 // Load from recents menu
                 loadWaveformFile(cmd.substring(5));
             }
+            break;
         }
     }
 

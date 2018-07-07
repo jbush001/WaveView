@@ -91,7 +91,7 @@ public class VCDLoaderTest {
         void appendTransition(int netId, long timestamp, int value) {
             StringBuilder tmp = new StringBuilder();
             for (int i = 0; i < 32; i++)
-                tmp.append((value & (0x80000000 >> i)) != 0 ? '1' : '0');
+                tmp.append((value & (0x80000000 >> i)) == 0 ? '0' : '1');
 
             appendTransition(netId, timestamp, tmp.toString());
         }

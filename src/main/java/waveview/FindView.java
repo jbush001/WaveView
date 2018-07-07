@@ -135,6 +135,7 @@ class FindView extends JPanel implements ActionListener {
             break;
         default:
             System.out.println("FindPanel: unknown action " + e.getActionCommand());
+            break;
         }
     }
 }
