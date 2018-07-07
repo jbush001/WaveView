@@ -33,14 +33,14 @@ import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 ///
-/// Load/Save TraceDisplayModel state for a trace.
+/// Load/Save TracePresentationModel state for a trace.
 /// @bug If markers are past the end offset, this should probably drop them.
 ///
 
 public class TraceSettingsFile {
     private final File settingsFile;
     private final TraceDataModel traceDataModel;
-    private final TraceDisplayModel traceDisplayModel;
+    private final TracePresentationModel tracePresentationModel;
 
     /// @param file Name of a trace file
     /// @returns configuration file for this (a .dotfile in the same
@@ -57,10 +57,10 @@ public class TraceSettingsFile {
         return new File(path);
     }
 
-    public TraceSettingsFile(File settingsFile, TraceDataModel traceDataModel, TraceDisplayModel traceDisplayModel) {
+    public TraceSettingsFile(File settingsFile, TraceDataModel traceDataModel, TracePresentationModel tracePresentationModel) {
         this.settingsFile = settingsFile;
         this.traceDataModel = traceDataModel;
-        this.traceDisplayModel = traceDisplayModel;
+        this.tracePresentationModel = tracePresentationModel;
     }
 
     public void write() throws ParserConfigurationException, TransformerException {
@@ -72,7 +72,7 @@ public class TraceSettingsFile {
 
         Element scale = document.createElement("scale");
         configuration.appendChild(scale);
-        scale.appendChild(document.createTextNode(Double.toString(traceDisplayModel.getHorizontalScale())));
+        scale.appendChild(document.createTextNode(Double.toString(tracePresentationModel.getHorizontalScale())));
 
         Element netSetsElement = document.createElement("netsets");
         configuration.appendChild(netSetsElement);
@@ -83,17 +83,17 @@ public class TraceSettingsFile {
         netSetsElement.appendChild(netSetElement);
 
         // Write out all of our saved net sets
-        for (int i = 0; i < traceDisplayModel.getNetSetCount(); i++) {
-            traceDisplayModel.selectNetSet(i);
+        for (int i = 0; i < tracePresentationModel.getNetSetCount(); i++) {
+            tracePresentationModel.selectNetSet(i);
             netSetElement = makeVisibleNetList(document);
-            netSetElement.setAttribute("name", traceDisplayModel.getNetSetName(i));
+            netSetElement.setAttribute("name", tracePresentationModel.getNetSetName(i));
             netSetsElement.appendChild(netSetElement);
         }
 
         Element markers = document.createElement("markers");
         configuration.appendChild(markers);
 
-        for (int i = 0; i < traceDisplayModel.getMarkerCount(); i++) {
+        for (int i = 0; i < tracePresentationModel.getMarkerCount(); i++) {
             Element markerElement = document.createElement("marker");
             markers.appendChild(markerElement);
 
@@ -103,11 +103,11 @@ public class TraceSettingsFile {
 
             Element timestamp = document.createElement("timestamp");
             markerElement.appendChild(timestamp);
-            timestamp.appendChild(document.createTextNode(Long.toString(traceDisplayModel.getTimestampForMarker(i))));
+            timestamp.appendChild(document.createTextNode(Long.toString(tracePresentationModel.getTimestampForMarker(i))));
 
             Element description = document.createElement("description");
             markerElement.appendChild(description);
-            description.appendChild(document.createTextNode(traceDisplayModel.getDescriptionForMarker(i)));
+            description.appendChild(document.createTextNode(tracePresentationModel.getDescriptionForMarker(i)));
         }
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -119,8 +119,8 @@ public class TraceSettingsFile {
     private Element makeVisibleNetList(Document document) {
         Element netSetElement = document.createElement("netset");
 
-        for (int i = 0; i < traceDisplayModel.getVisibleNetCount(); i++) {
-            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(i);
+        for (int i = 0; i < tracePresentationModel.getVisibleNetCount(); i++) {
+            NetDataModel netDataModel = tracePresentationModel.getVisibleNet(i);
 
             Element sigElement = document.createElement("net");
             netSetElement.appendChild(sigElement);
@@ -134,7 +134,7 @@ public class TraceSettingsFile {
             Element format = document.createElement("format");
             sigElement.appendChild(format);
 
-            ValueFormatter formatter = traceDisplayModel.getValueFormatter(i);
+            ValueFormatter formatter = tracePresentationModel.getValueFormatter(i);
             Class<? extends ValueFormatter> c = formatter.getClass();
             format.appendChild(document.createTextNode(c.getName()));
 
@@ -159,7 +159,7 @@ public class TraceSettingsFile {
     }
 
     private void readNetSet(Element element) {
-        traceDisplayModel.removeAllNets();
+        tracePresentationModel.removeAllNets();
 
         NodeList netElements = element.getElementsByTagName("net");
         for (int i = 0; i < netElements.getLength(); i++) {
@@ -196,8 +196,8 @@ public class TraceSettingsFile {
             if (netDataModel == null) {
                 System.out.println("unknown net " + name);
             } else {
-                traceDisplayModel.makeNetVisible(netDataModel);
-                traceDisplayModel.setValueFormatter(traceDisplayModel.getVisibleNetCount() - 1, formatter);
+                tracePresentationModel.addNet(netDataModel);
+                tracePresentationModel.setValueFormatter(tracePresentationModel.getVisibleNetCount() - 1, formatter);
             }
         }
     }
@@ -206,7 +206,7 @@ public class TraceSettingsFile {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(settingsFile);
 
-        traceDisplayModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
+        tracePresentationModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
         // read NetSet
         NodeList netSets = document.getElementsByTagName("netset");
@@ -215,7 +215,7 @@ public class TraceSettingsFile {
         for (int i = 1; i < netSets.getLength(); i++) {
             Element netSet = (Element) netSets.item(i);
             readNetSet(netSet);
-            traceDisplayModel.saveNetSet(netSet.getAttribute("name"));
+            tracePresentationModel.saveNetSet(netSet.getAttribute("name"));
         }
 
         // Default net set
@@ -230,7 +230,7 @@ public class TraceSettingsFile {
             /// @bug we ignore the ID and assume these are in order
             /// This will renumber markers if there are gaps. Is that okay?
             // Integer.parseInt(getSubTag(markerElem, "id"));
-            traceDisplayModel.addMarker(getSubTag(markerElem, "description"),
+            tracePresentationModel.addMarker(getSubTag(markerElem, "description"),
                     Long.parseLong(getSubTag(markerElem, "timestamp")));
         }
     }

@@ -19,13 +19,13 @@ package waveview;
 import java.util.ArrayList;
 
 ///
-/// TraceDisplayModel contains visible state for a waveform capture
+/// TracePresentationModel contains visible state for a waveform capture
 /// (e.g. Cursor position, scale, visible nets, etc.)
 ///
 
-public class TraceDisplayModel {
+public class TracePresentationModel {
     private final ArrayList<Listener> listeners = new ArrayList<>();
-    private ArrayList<NetViewModel> visibleNets = new ArrayList<>();
+    private ArrayList<NetPresentationModel> visibleNets = new ArrayList<>();
     private final ArrayList<NetSet> netSets = new ArrayList<>();
     private long cursorPosition;
     private long selectionStart;
@@ -37,19 +37,14 @@ public class TraceDisplayModel {
 
     public interface Listener {
         void cursorChanged(long oldTimestamp, long newTimestamp);
-
         void netsAdded(int firstIndex, int lastIndex);
-
         void netsRemoved(int firstIndex, int lastIndex);
-
         void scaleChanged(double newScale);
-
         void markerChanged(long timestamp);
-
         void formatChanged(int index);
     };
 
-    public TraceDisplayModel() {
+    public TracePresentationModel() {
         setHorizontalScale(10.0);
     }
 
@@ -91,12 +86,12 @@ public class TraceDisplayModel {
         return minorTickInterval;
     }
 
-    public void makeNetVisible(NetDataModel netDataModel) {
-        makeNetVisible(visibleNets.size(), netDataModel);
+    public void addNet(NetDataModel netDataModel) {
+        addNet(visibleNets.size(), netDataModel);
     }
 
-    public void makeNetVisible(int aboveIndex, NetDataModel netDataModel) {
-        visibleNets.add(aboveIndex, new NetViewModel(netDataModel));
+    public void addNet(int aboveIndex, NetDataModel netDataModel) {
+        visibleNets.add(aboveIndex, new NetPresentationModel(netDataModel));
         for (Listener listener : listeners) {
             listener.netsAdded(aboveIndex, aboveIndex);
         }
@@ -125,7 +120,7 @@ public class TraceDisplayModel {
      *        in the list before the element *currently* at that index.
      */
     public void moveNets(int[] fromIndices, int insertionPoint) {
-        NetViewModel[] nets = new NetViewModel[fromIndices.length];
+        NetPresentationModel[] nets = new NetPresentationModel[fromIndices.length];
         for (int i = fromIndices.length - 1; i >= 0; i--) {
             nets[i] = visibleNets.get(fromIndices[i]);
             removeNet(fromIndices[i]);
@@ -134,7 +129,7 @@ public class TraceDisplayModel {
             }
         }
 
-        for (NetViewModel net : nets) {
+        for (NetPresentationModel net : nets) {
             visibleNets.add(insertionPoint++, net);
         }
 
@@ -371,19 +366,19 @@ public class TraceDisplayModel {
 
     private static class NetSet {
         private final String name;
-        final ArrayList<NetViewModel> visibleNets;
+        final ArrayList<NetPresentationModel> visibleNets;
 
-        NetSet(String name, ArrayList<NetViewModel> visibleNets) {
+        NetSet(String name, ArrayList<NetPresentationModel> visibleNets) {
             this.name = name;
             this.visibleNets = new ArrayList<>(visibleNets);
         }
     }
 
-    private static class NetViewModel {
+    private static class NetPresentationModel {
         private final NetDataModel netDataModel;
         private ValueFormatter formatter = new HexadecimalValueFormatter();
 
-        NetViewModel(NetDataModel netDataModel) {
+        NetPresentationModel(NetDataModel netDataModel) {
             this.netDataModel = netDataModel;
         }
 

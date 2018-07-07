@@ -47,8 +47,8 @@ import javax.swing.event.ListDataListener;
 ///
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
-class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, ActionListener {
-    private final TraceDisplayModel traceDisplayModel;
+class NetNameList extends JList<Integer> implements TracePresentationModel.Listener, ActionListener {
+    private final TracePresentationModel tracePresentationModel;
     private final TraceDataModel traceDataModel;
     private JPopupMenu popupMenu;
 
@@ -98,20 +98,20 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
             g.setFont(labelFont);
             g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor : prefs.traceColor);
 
-            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(currentNet);
+            NetDataModel netDataModel = tracePresentationModel.getVisibleNet(currentNet);
             String name = netDataModel.getShortName();
             g.drawString(name, 1, labelBaseline);
 
             g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor : prefs.valueColor);
             g.setFont(valueFont);
 
-            Transition t = netDataModel.findTransition(traceDisplayModel.getCursorPosition()).next();
-            g.drawString(traceDisplayModel.getValueFormatter(currentNet).format(t), 1, valueBaseline);
+            Transition t = netDataModel.findTransition(tracePresentationModel.getCursorPosition()).next();
+            g.drawString(tracePresentationModel.getValueFormatter(currentNet).format(t), 1, valueBaseline);
         }
 
         @Override
         public String getToolTipText(MouseEvent event) {
-            return traceDisplayModel.getVisibleNet(currentNet).getFullName();
+            return tracePresentationModel.getVisibleNet(currentNet).getFullName();
         }
 
         private void computeFontPositioning(Graphics g) {
@@ -127,11 +127,11 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         }
     }
 
-    class ListModelAdapter implements ListModel<Integer>, TraceDisplayModel.Listener {
+    class ListModelAdapter implements ListModel<Integer>, TracePresentationModel.Listener {
         private final ArrayList<ListDataListener> listeners = new ArrayList<>();
 
         ListModelAdapter() {
-            traceDisplayModel.addListener(this);
+            tracePresentationModel.addListener(this);
         }
 
         @Override
@@ -151,7 +151,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
 
         @Override
         public int getSize() {
-            return traceDisplayModel.getVisibleNetCount();
+            return tracePresentationModel.getVisibleNetCount();
         }
 
         @Override
@@ -226,12 +226,12 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
             JList.DropLocation location = (JList.DropLocation) support.getDropLocation();
             int insertionPoint = location.getIndex();
             if (isLocalDrop) {
-                traceDisplayModel.moveNets(localIndices, insertionPoint);
+                tracePresentationModel.moveNets(localIndices, insertionPoint);
             } else {
                 // Drag from another window (for example, net tree)
                 String[] values = data.split("\n", 0);
                 for (String value : values) {
-                    traceDisplayModel.makeNetVisible(insertionPoint++, traceDataModel.findNet(value));
+                    tracePresentationModel.addNet(insertionPoint++, traceDataModel.findNet(value));
                 }
             }
 
@@ -241,10 +241,10 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
         }
     }
 
-    NetNameList(TraceDisplayModel traceDisplayModel, TraceDataModel traceDataModel) {
-        this.traceDisplayModel = traceDisplayModel;
+    NetNameList(TracePresentationModel tracePresentationModel, TraceDataModel traceDataModel) {
+        this.tracePresentationModel = tracePresentationModel;
         this.traceDataModel = traceDataModel;
-        traceDisplayModel.addListener(this);
+        tracePresentationModel.addListener(this);
         setModel(new ListModelAdapter());
         setCellRenderer(new NetNameRenderer());
         computeBounds();
@@ -279,7 +279,7 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
     }
 
     private void computeBounds() {
-        int preferredHeight = traceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
+        int preferredHeight = tracePresentationModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
         Dimension preferredSize = new Dimension(200, preferredHeight);
         setPreferredSize(preferredSize);
         validate();
@@ -353,14 +353,14 @@ class NetNameList extends JList<Integer> implements TraceDisplayModel.Listener, 
 
         if (formatter != null) {
             for (int i = 0; i < indices.length; i++) {
-                traceDisplayModel.setValueFormatter(indices[i], formatter);
+                tracePresentationModel.setValueFormatter(indices[i], formatter);
             }
         }
     }
 
     void removeNets(int[] indices) {
         for (int i = indices.length - 1; i >= 0; i--) {
-            traceDisplayModel.removeNet(indices[i]);
+            tracePresentationModel.removeNet(indices[i]);
         }
 
         clearSelection();

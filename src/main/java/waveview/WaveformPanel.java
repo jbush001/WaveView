@@ -32,20 +32,20 @@ import javax.swing.JPanel;
 /// This view displays the waveforms.
 ///
 
-class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener, TraceDisplayModel.Listener {
+class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener, TracePresentationModel.Listener {
 
     private static final float DOT_DESCRIPTION[] = { 2.0f, 4.0f };
     private static final Stroke DOTTED_STROKE = new BasicStroke(1, 0, 0, 10, DOT_DESCRIPTION, 0);
     private static final Stroke SOLID_STROKE = new BasicStroke(1);
     private final SingleBitPainter singleBitPainter = new SingleBitPainter();
     private final MultiBitPainter multiBitPainter = new MultiBitPainter();
-    private final TraceDisplayModel traceDisplayModel;
+    private final TracePresentationModel tracePresentationModel;
     private final TraceDataModel traceDataModel;
 
-    WaveformPanel(TraceDisplayModel traceDisplayModel, TraceDataModel traceDataModel) {
-        this.traceDisplayModel = traceDisplayModel;
+    WaveformPanel(TracePresentationModel tracePresentationModel, TraceDataModel traceDataModel) {
+        this.tracePresentationModel = tracePresentationModel;
         this.traceDataModel = traceDataModel;
-        traceDisplayModel.addListener(this);
+        tracePresentationModel.addListener(this);
 
         setBackground(AppPreferences.getInstance().backgroundColor);
         setFont(new Font("SansSerif", Font.PLAIN, 9));
@@ -58,7 +58,7 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
     private void computeBounds() {
         Dimension d = new Dimension();
         d.width = timestampToXCoordinate(traceDataModel.getMaxTimestamp());
-        d.height = traceDisplayModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
+        d.height = tracePresentationModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
         setPreferredSize(d);
         revalidate();
     }
@@ -153,10 +153,10 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
     }
 
     private void drawSelection(Graphics g) {
-        if (traceDisplayModel.getCursorPosition() != traceDisplayModel.getSelectionStart()) {
+        if (tracePresentationModel.getCursorPosition() != tracePresentationModel.getSelectionStart()) {
             g.setColor(AppPreferences.getInstance().selectionColor);
-            int selectionStart = timestampToXCoordinate(traceDisplayModel.getSelectionStart());
-            int selectionEnd = timestampToXCoordinate(traceDisplayModel.getCursorPosition());
+            int selectionStart = timestampToXCoordinate(tracePresentationModel.getSelectionStart());
+            int selectionEnd = timestampToXCoordinate(tracePresentationModel.getCursorPosition());
             int leftEdge = Math.min(selectionStart, selectionEnd);
             int rightEdge = Math.max(selectionStart, selectionEnd);
             g.fillRect(leftEdge, 0, rightEdge - leftEdge, getHeight());
@@ -166,10 +166,10 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
     private void drawTimingLines(Graphics g, Rectangle visibleRect) {
         Graphics2D g2d = (Graphics2D) g;
 
-        double horizontalScale = traceDisplayModel.getHorizontalScale();
+        double horizontalScale = tracePresentationModel.getHorizontalScale();
         long startTime = (long) (visibleRect.x / horizontalScale);
         long endTime = (long) ((visibleRect.x + visibleRect.width) / horizontalScale);
-        long minorTickInterval = traceDisplayModel.getMinorTickInterval();
+        long minorTickInterval = tracePresentationModel.getMinorTickInterval();
         long majorTickInterval = minorTickInterval * DrawMetrics.MINOR_TICKS_PER_MAJOR;
         startTime = ((startTime + majorTickInterval - 1) / majorTickInterval) * majorTickInterval;
 
@@ -190,9 +190,9 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
         long endTime = xCoordinateToTimestamp(visibleRect.x + visibleRect.width);
 
         // Draw Markers
-        int markerIndex = traceDisplayModel.getMarkerAtTime(startTime);
-        while (markerIndex < traceDisplayModel.getMarkerCount()) {
-            long timestamp = traceDisplayModel.getTimestampForMarker(markerIndex);
+        int markerIndex = tracePresentationModel.getMarkerAtTime(startTime);
+        while (markerIndex < tracePresentationModel.getMarkerCount()) {
+            long timestamp = tracePresentationModel.getTimestampForMarker(markerIndex);
             if (timestamp > endTime) {
                 break;
             }
@@ -210,11 +210,11 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
             waveformIndex--;
         }
 
-        double horizontalScale = traceDisplayModel.getHorizontalScale();
+        double horizontalScale = tracePresentationModel.getHorizontalScale();
         while (waveformIndex * DrawMetrics.WAVEFORM_V_SPACING < visibleRect.y + visibleRect.height
-                && waveformIndex < traceDisplayModel.getVisibleNetCount()) {
-            ValueFormatter formatter = traceDisplayModel.getValueFormatter(waveformIndex);
-            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(waveformIndex);
+                && waveformIndex < tracePresentationModel.getVisibleNetCount()) {
+            ValueFormatter formatter = tracePresentationModel.getValueFormatter(waveformIndex);
+            NetDataModel netDataModel = tracePresentationModel.getVisibleNet(waveformIndex);
             if (netDataModel.getWidth() > 1) {
                 multiBitPainter.paint(g, netDataModel,
                         waveformIndex * DrawMetrics.WAVEFORM_V_SPACING + DrawMetrics.WAVEFORM_V_GAP, visibleRect,
@@ -233,7 +233,7 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
         // Draw the cursor (a vertical line that runs from the top to the
         // bottom of the trace).
         g.setColor(AppPreferences.getInstance().cursorColor);
-        int cursorX = timestampToXCoordinate(traceDisplayModel.getCursorPosition());
+        int cursorX = timestampToXCoordinate(tracePresentationModel.getCursorPosition());
         g.drawLine(cursorX, visibleRect.y, cursorX, visibleRect.y + visibleRect.height);
     }
 
@@ -253,33 +253,33 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
     public void mousePressed(MouseEvent e) {
         // set cursor position
         long timestamp = xCoordinateToTimestamp(e.getX());
-        if (traceDisplayModel.getCursorPosition() != traceDisplayModel.getSelectionStart()) {
+        if (tracePresentationModel.getCursorPosition() != tracePresentationModel.getSelectionStart()) {
             repaint(); // we already had a selection, clear it
         }
 
         if (!e.isShiftDown()) {
-            traceDisplayModel.setSelectionStart(timestamp);
+            tracePresentationModel.setSelectionStart(timestamp);
         }
 
-        traceDisplayModel.setCursorPosition(timestamp);
+        tracePresentationModel.setCursorPosition(timestamp);
 
         /// @bug Be sure to do this after setting the position, otherwise the view will
         /// jump back to the
         /// old cursor position first and invoke the auto-scroll-to logic. This is
         /// pretty clunky, and
         /// should probably be rethought.
-        traceDisplayModel.setAdjustingCursor(true);
+        tracePresentationModel.setAdjustingCursor(true);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        traceDisplayModel.setAdjustingCursor(false);
+        tracePresentationModel.setAdjustingCursor(false);
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
         long timestamp = xCoordinateToTimestamp(e.getX());
-        traceDisplayModel.setCursorPosition(timestamp);
+        tracePresentationModel.setCursorPosition(timestamp);
 
         // Drag scrolling
         Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
@@ -291,10 +291,10 @@ class WaveformPanel extends JPanel implements MouseListener, MouseMotionListener
     }
 
     private long xCoordinateToTimestamp(int coordinate) {
-        return (long) (coordinate / traceDisplayModel.getHorizontalScale());
+        return (long) (coordinate / tracePresentationModel.getHorizontalScale());
     }
 
     private int timestampToXCoordinate(long timestamp) {
-        return (int) (timestamp * traceDisplayModel.getHorizontalScale());
+        return (int) (timestamp * tracePresentationModel.getHorizontalScale());
     }
 }

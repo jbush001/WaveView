@@ -24,12 +24,12 @@ import org.junit.Before;
 import org.junit.Test;
 import waveview.DecimalValueFormatter;
 import waveview.NetDataModel;
-import waveview.TraceDisplayModel;
+import waveview.TracePresentationModel;
 import waveview.TransitionVector;
 
-public class TraceDisplayModelTest {
-    private final TraceDisplayModel tdm = new TraceDisplayModel();
-    private final TraceDisplayModelListener listener = new TraceDisplayModelListener();
+public class TracePresentationModelTest {
+    private final TracePresentationModel tdm = new TracePresentationModel();
+    private final TracePresentationModelListener listener = new TracePresentationModelListener();
 
     @Before
     public void setUpTest() {
@@ -39,7 +39,7 @@ public class TraceDisplayModelTest {
     @Test
     public void scaleChange() {
         tdm.setHorizontalScale(123.0);
-        assertEquals(TraceDisplayModelListener.SCALE_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.SCALE_CHANGED, listener.notifications);
         assertEquals(123.0, listener.doubleArg, 0.0);
         assertEquals(123.0, tdm.getHorizontalScale(), 0.0);
     }
@@ -47,18 +47,18 @@ public class TraceDisplayModelTest {
     @Test
     public void cursorChange() {
         tdm.setCursorPosition(1024);
-        assertEquals(TraceDisplayModelListener.CURSOR_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.CURSOR_CHANGED, listener.notifications);
         assertEquals(0, listener.longArg0);
         assertEquals(1024, listener.longArg1);
     }
 
     @Test
-    public void makeNetVisible() {
+    public void addNet() {
         NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
 
-        // Add a net
-        tdm.makeNetVisible(net1);
-        assertEquals(TraceDisplayModelListener.NETS_ADDED, listener.notifications);
+        tdm.addNet(net1);
+
+        assertEquals(TracePresentationModelListener.NETS_ADDED, listener.notifications);
         assertEquals(0, listener.longArg0);
         assertEquals(0, listener.longArg1);
         assertEquals(1, tdm.getVisibleNetCount());
@@ -71,7 +71,7 @@ public class TraceDisplayModelTest {
         for (int i = 0; i < nets.length; i++) {
             String name = "net" + i;
             nets[i] = new NetDataModel(name, name, new TransitionVector(1));
-            tdm.makeNetVisible(nets[i]);
+            tdm.addNet(nets[i]);
         }
 
         // Ensure some elements are below the insertion index to check that
@@ -81,7 +81,7 @@ public class TraceDisplayModelTest {
         int[] indices = { 1, 4 };
         listener.reset();
         tdm.moveNets(indices, 3);
-        assertEquals(TraceDisplayModelListener.NETS_REMOVED | TraceDisplayModelListener.NETS_ADDED,
+        assertEquals(TracePresentationModelListener.NETS_REMOVED | TracePresentationModelListener.NETS_ADDED,
             listener.notifications);
         // XXX doesn't check parameters (multiple notifications from this)
 
@@ -99,14 +99,14 @@ public class TraceDisplayModelTest {
         NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
         NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
         NetDataModel net3 = new NetDataModel("net3", "net3", new TransitionVector(1));
-        tdm.makeNetVisible(net1);
-        tdm.makeNetVisible(net2);
-        tdm.makeNetVisible(net3);
+        tdm.addNet(net1);
+        tdm.addNet(net2);
+        tdm.addNet(net3);
         listener.reset();
 
         tdm.removeNet(1);
 
-        assertEquals(TraceDisplayModelListener.NETS_REMOVED, listener.notifications);
+        assertEquals(TracePresentationModelListener.NETS_REMOVED, listener.notifications);
         assertEquals(1, listener.longArg0); // low index
         assertEquals(1, listener.longArg1); // high index
         assertEquals(2, tdm.getVisibleNetCount());
@@ -119,15 +119,15 @@ public class TraceDisplayModelTest {
         NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
         NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
         NetDataModel net3 = new NetDataModel("net3", "net3", new TransitionVector(1));
-        tdm.makeNetVisible(net1);
-        tdm.makeNetVisible(net2);
-        tdm.makeNetVisible(net3);
+        tdm.addNet(net1);
+        tdm.addNet(net2);
+        tdm.addNet(net3);
         tdm.addMarker("a_marker", 1000);
         listener.reset();
 
         tdm.removeAllNets();
 
-        assertEquals(TraceDisplayModelListener.NETS_REMOVED, listener.notifications);
+        assertEquals(TracePresentationModelListener.NETS_REMOVED, listener.notifications);
         assertEquals(0, listener.longArg0); // Low index
         assertEquals(2, listener.longArg1); // High index
         assertEquals(0, tdm.getVisibleNetCount());
@@ -150,13 +150,13 @@ public class TraceDisplayModelTest {
         NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
         NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
 
-        tdm.makeNetVisible(net1);
-        tdm.makeNetVisible(net2);
+        tdm.addNet(net1);
+        tdm.addNet(net2);
         listener.reset();
 
         tdm.clear();
 
-        assertEquals(TraceDisplayModelListener.NETS_REMOVED, listener.notifications);
+        assertEquals(TracePresentationModelListener.NETS_REMOVED, listener.notifications);
         assertEquals(0, listener.longArg0);
         assertEquals(2, listener.longArg1);
         assertEquals(0, tdm.getVisibleNetCount());
@@ -169,18 +169,18 @@ public class TraceDisplayModelTest {
         NetDataModel net3 = new NetDataModel("net3", "net3", new TransitionVector(1));
         NetDataModel net4 = new NetDataModel("net4", "net4", new TransitionVector(1));
         NetDataModel net5 = new NetDataModel("net5", "net5", new TransitionVector(1));
-        tdm.makeNetVisible(net1);
-        tdm.makeNetVisible(net2);
+        tdm.addNet(net1);
+        tdm.addNet(net2);
 
         tdm.saveNetSet("set1");
         listener.reset();
         tdm.removeAllNets();
-        tdm.makeNetVisible(net3);
-        tdm.makeNetVisible(net4);
-        tdm.makeNetVisible(net5);
+        tdm.addNet(net3);
+        tdm.addNet(net4);
+        tdm.addNet(net5);
         tdm.selectNetSet(0);
 
-        assertEquals(TraceDisplayModelListener.NETS_ADDED | TraceDisplayModelListener.NETS_REMOVED,
+        assertEquals(TracePresentationModelListener.NETS_ADDED | TracePresentationModelListener.NETS_REMOVED,
                 listener.notifications);
         assertEquals(0, listener.longArg0); // First index (of added nets)
         assertEquals(1, listener.longArg1); // Last index (not count)
@@ -194,11 +194,11 @@ public class TraceDisplayModelTest {
         NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
         NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
         NetDataModel net3 = new NetDataModel("net3", "net3", new TransitionVector(1));
-        tdm.makeNetVisible(net1);
-        tdm.makeNetVisible(net2);
+        tdm.addNet(net1);
+        tdm.addNet(net2);
         tdm.saveNetSet("set2");
 
-        tdm.makeNetVisible(net3);
+        tdm.addNet(net3);
         tdm.saveNetSet("set2");
         tdm.removeAllNets();
         tdm.selectNetSet(0);
@@ -219,19 +219,19 @@ public class TraceDisplayModelTest {
     public void setGetValueFormatter() {
         NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
         NetDataModel net2 = new NetDataModel("net2", "net2", new TransitionVector(1));
-        tdm.makeNetVisible(net1);
-        tdm.makeNetVisible(net2);
+        tdm.addNet(net1);
+        tdm.addNet(net2);
         listener.reset();
 
         DecimalValueFormatter dvf = new DecimalValueFormatter();
         tdm.setValueFormatter(1, dvf);
 
-        assertEquals(TraceDisplayModelListener.FORMAT_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.FORMAT_CHANGED, listener.notifications);
         assertEquals(1, listener.longArg0);
         assertTrue(tdm.getValueFormatter(1) == dvf);
     }
 
-    // Ensure the minor tick interval is initialized when TraceDisplayModel
+    // Ensure the minor tick interval is initialized when TracePresentationModel
     // is created.
     @Test
     public void minorTickInit() {
@@ -242,11 +242,11 @@ public class TraceDisplayModelTest {
     // that all notification types will notify all listeners.
     @Test
     public void multipleListeners() {
-        TraceDisplayModelListener listener2 = new TraceDisplayModelListener();
+        TracePresentationModelListener listener2 = new TracePresentationModelListener();
         tdm.addListener(listener2);
         tdm.setHorizontalScale(1);
-        assertEquals(TraceDisplayModelListener.SCALE_CHANGED, listener.notifications);
-        assertEquals(TraceDisplayModelListener.SCALE_CHANGED, listener2.notifications);
+        assertEquals(TracePresentationModelListener.SCALE_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.SCALE_CHANGED, listener2.notifications);
     }
 
     @Test

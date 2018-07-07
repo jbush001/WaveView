@@ -22,10 +22,10 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 import waveview.MarkerTableModel;
-import waveview.TraceDisplayModel;
+import waveview.TracePresentationModel;
 
 public class MarkerTableModelTest {
-    private final TraceDisplayModel tdm = new TraceDisplayModel();
+    private final TracePresentationModel tdm = new TracePresentationModel();
     private MarkerTableModel mtm;
 
     @Before

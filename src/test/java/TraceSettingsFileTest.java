@@ -30,7 +30,7 @@ import waveview.HexadecimalValueFormatter;
 import waveview.NetDataModel;
 import waveview.TraceBuilder;
 import waveview.TraceDataModel;
-import waveview.TraceDisplayModel;
+import waveview.TracePresentationModel;
 import waveview.TraceSettingsFile;
 
 public class TraceSettingsFileTest {
@@ -40,7 +40,7 @@ public class TraceSettingsFileTest {
     @Test
     public void load() throws Exception {
         TraceDataModel dataModel = new TraceDataModel();
-        TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
+        TracePresentationModel sourcePresentationModel = new TracePresentationModel();
 
         TraceBuilder builder = dataModel.startBuilding();
         builder.enterScope("mod1");
@@ -65,81 +65,81 @@ public class TraceSettingsFileTest {
             netDataModels[index++] = model;
         }
 
-        // Populate sourceDisplayModel
-        sourceDisplayModel.makeNetVisible(netDataModels[1]);
-        sourceDisplayModel.makeNetVisible(netDataModels[2]);
-        sourceDisplayModel.saveNetSet("set1");
+        // Populate sourcePresentationModel
+        sourcePresentationModel.addNet(netDataModels[1]);
+        sourcePresentationModel.addNet(netDataModels[2]);
+        sourcePresentationModel.saveNetSet("set1");
 
-        sourceDisplayModel.removeAllNets();
-        sourceDisplayModel.makeNetVisible(netDataModels[6]);
-        sourceDisplayModel.makeNetVisible(netDataModels[7]);
-        sourceDisplayModel.saveNetSet("set2");
+        sourcePresentationModel.removeAllNets();
+        sourcePresentationModel.addNet(netDataModels[6]);
+        sourcePresentationModel.addNet(netDataModels[7]);
+        sourcePresentationModel.saveNetSet("set2");
 
-        sourceDisplayModel.removeAllNets();
-        sourceDisplayModel.makeNetVisible(netDataModels[0]);
-        sourceDisplayModel.makeNetVisible(netDataModels[2]);
-        sourceDisplayModel.makeNetVisible(netDataModels[4]);
-        sourceDisplayModel.makeNetVisible(netDataModels[5]);
+        sourcePresentationModel.removeAllNets();
+        sourcePresentationModel.addNet(netDataModels[0]);
+        sourcePresentationModel.addNet(netDataModels[2]);
+        sourcePresentationModel.addNet(netDataModels[4]);
+        sourcePresentationModel.addNet(netDataModels[5]);
 
-        sourceDisplayModel.setValueFormatter(0, new BinaryValueFormatter());
-        sourceDisplayModel.setValueFormatter(1, new DecimalValueFormatter());
-        sourceDisplayModel.setValueFormatter(2, new HexadecimalValueFormatter());
+        sourcePresentationModel.setValueFormatter(0, new BinaryValueFormatter());
+        sourcePresentationModel.setValueFormatter(1, new DecimalValueFormatter());
+        sourcePresentationModel.setValueFormatter(2, new HexadecimalValueFormatter());
         EnumValueFormatter enumFormatter = new EnumValueFormatter(
                 new File("src/test/resources/enum_mapping/test1.txt"));
-        sourceDisplayModel.setValueFormatter(3, enumFormatter);
+        sourcePresentationModel.setValueFormatter(3, enumFormatter);
 
-        sourceDisplayModel.addMarker("marker1", 1234);
-        sourceDisplayModel.addMarker("marker2", 5678);
-        assertEquals(1, sourceDisplayModel.getIdForMarker(0));
-        assertEquals(2, sourceDisplayModel.getIdForMarker(1));
+        sourcePresentationModel.addMarker("marker1", 1234);
+        sourcePresentationModel.addMarker("marker2", 5678);
+        assertEquals(1, sourcePresentationModel.getIdForMarker(0));
+        assertEquals(2, sourcePresentationModel.getIdForMarker(1));
 
-        sourceDisplayModel.setHorizontalScale(123.0);
+        sourcePresentationModel.setHorizontalScale(123.0);
 
         // Save and reload contents
-        TraceDisplayModel destDisplayModel = new TraceDisplayModel();
+        TracePresentationModel destPresentationModel = new TracePresentationModel();
         File file = fTempFolder.newFile("test1.settings");
-        new TraceSettingsFile(file, dataModel, sourceDisplayModel).write();
-        new TraceSettingsFile(file, dataModel, destDisplayModel).read();
+        new TraceSettingsFile(file, dataModel, sourcePresentationModel).write();
+        new TraceSettingsFile(file, dataModel, destPresentationModel).read();
 
-        // Check destDisplayModel
-        assertEquals(4, destDisplayModel.getVisibleNetCount());
-        assertSame(netDataModels[0], destDisplayModel.getVisibleNet(0));
-        assertSame(netDataModels[2], destDisplayModel.getVisibleNet(1));
-        assertSame(netDataModels[4], destDisplayModel.getVisibleNet(2));
-        assertSame(netDataModels[5], destDisplayModel.getVisibleNet(3));
+        // Check destPresentationModel
+        assertEquals(4, destPresentationModel.getVisibleNetCount());
+        assertSame(netDataModels[0], destPresentationModel.getVisibleNet(0));
+        assertSame(netDataModels[2], destPresentationModel.getVisibleNet(1));
+        assertSame(netDataModels[4], destPresentationModel.getVisibleNet(2));
+        assertSame(netDataModels[5], destPresentationModel.getVisibleNet(3));
 
-        assertTrue(destDisplayModel.getValueFormatter(0) instanceof BinaryValueFormatter);
-        assertTrue(destDisplayModel.getValueFormatter(1) instanceof DecimalValueFormatter);
-        assertTrue(destDisplayModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
-        assertTrue(destDisplayModel.getValueFormatter(3) instanceof EnumValueFormatter);
-        enumFormatter = (EnumValueFormatter) destDisplayModel.getValueFormatter(3);
+        assertTrue(destPresentationModel.getValueFormatter(0) instanceof BinaryValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(1) instanceof DecimalValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(3) instanceof EnumValueFormatter);
+        enumFormatter = (EnumValueFormatter) destPresentationModel.getValueFormatter(3);
         assertEquals("STATE_INIT", enumFormatter.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", enumFormatter.format(new BitVector("2", 10)));
         assertEquals("STATE_WAIT", enumFormatter.format(new BitVector("3", 10)));
 
-        assertEquals(2, destDisplayModel.getNetSetCount());
-        assertEquals("set1", destDisplayModel.getNetSetName(0));
-        assertEquals("set2", destDisplayModel.getNetSetName(1));
+        assertEquals(2, destPresentationModel.getNetSetCount());
+        assertEquals("set1", destPresentationModel.getNetSetName(0));
+        assertEquals("set2", destPresentationModel.getNetSetName(1));
 
-        destDisplayModel.selectNetSet(0);
-        assertEquals(2, destDisplayModel.getVisibleNetCount());
-        assertSame(netDataModels[1], destDisplayModel.getVisibleNet(0));
-        assertSame(netDataModels[2], destDisplayModel.getVisibleNet(1));
+        destPresentationModel.selectNetSet(0);
+        assertEquals(2, destPresentationModel.getVisibleNetCount());
+        assertSame(netDataModels[1], destPresentationModel.getVisibleNet(0));
+        assertSame(netDataModels[2], destPresentationModel.getVisibleNet(1));
 
-        destDisplayModel.selectNetSet(1);
-        assertEquals(2, destDisplayModel.getVisibleNetCount());
-        assertSame(netDataModels[6], destDisplayModel.getVisibleNet(0));
-        assertSame(netDataModels[7], destDisplayModel.getVisibleNet(1));
+        destPresentationModel.selectNetSet(1);
+        assertEquals(2, destPresentationModel.getVisibleNetCount());
+        assertSame(netDataModels[6], destPresentationModel.getVisibleNet(0));
+        assertSame(netDataModels[7], destPresentationModel.getVisibleNet(1));
 
-        assertEquals(2, destDisplayModel.getMarkerCount());
-        assertEquals("marker1", destDisplayModel.getDescriptionForMarker(0));
-        assertEquals("marker2", destDisplayModel.getDescriptionForMarker(1));
-        assertEquals(1234, destDisplayModel.getTimestampForMarker(0));
-        assertEquals(5678, destDisplayModel.getTimestampForMarker(1));
-        assertEquals(1, destDisplayModel.getIdForMarker(0));
-        assertEquals(2, destDisplayModel.getIdForMarker(1));
+        assertEquals(2, destPresentationModel.getMarkerCount());
+        assertEquals("marker1", destPresentationModel.getDescriptionForMarker(0));
+        assertEquals("marker2", destPresentationModel.getDescriptionForMarker(1));
+        assertEquals(1234, destPresentationModel.getTimestampForMarker(0));
+        assertEquals(5678, destPresentationModel.getTimestampForMarker(1));
+        assertEquals(1, destPresentationModel.getIdForMarker(0));
+        assertEquals(2, destPresentationModel.getIdForMarker(1));
 
-        assertEquals(123.0, sourceDisplayModel.getHorizontalScale(), 0.001);
+        assertEquals(123.0, sourcePresentationModel.getHorizontalScale(), 0.001);
     }
 
     // When the data model changes, ensure the loader falls back
@@ -150,7 +150,7 @@ public class TraceSettingsFileTest {
     @Test
     public void dataModelChanged() throws Exception {
         TraceDataModel sourceDataModel = new TraceDataModel();
-        TraceDisplayModel sourceDisplayModel = new TraceDisplayModel();
+        TracePresentationModel sourcePresentationModel = new TracePresentationModel();
         TraceBuilder builder1 = sourceDataModel.startBuilding();
         builder1.enterScope("mod1");
         builder1.newNet("net1", -1, 1);
@@ -159,12 +159,12 @@ public class TraceSettingsFileTest {
         builder1.exitScope();
         builder1.loadFinished();
 
-        sourceDisplayModel.makeNetVisible(sourceDataModel.getNetDataModel(0));
-        sourceDisplayModel.makeNetVisible(sourceDataModel.getNetDataModel(1));
-        sourceDisplayModel.makeNetVisible(sourceDataModel.getNetDataModel(2));
+        sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(0));
+        sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(1));
+        sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(2));
 
         TraceDataModel destDataModel = new TraceDataModel();
-        TraceDisplayModel destDisplayModel = new TraceDisplayModel();
+        TracePresentationModel destPresentationModel = new TracePresentationModel();
 
         TraceBuilder builder2 = destDataModel.startBuilding();
         builder2.enterScope("mod1");
@@ -175,12 +175,12 @@ public class TraceSettingsFileTest {
         builder2.loadFinished();
 
         File file = fTempFolder.newFile("test2.settings");
-        (new TraceSettingsFile(file, sourceDataModel, sourceDisplayModel)).write();
-        (new TraceSettingsFile(file, destDataModel, destDisplayModel)).read();
+        (new TraceSettingsFile(file, sourceDataModel, sourcePresentationModel)).write();
+        (new TraceSettingsFile(file, destDataModel, destPresentationModel)).read();
 
-        assertEquals(2, destDisplayModel.getVisibleNetCount());
-        assertSame(destDataModel.getNetDataModel(0), destDisplayModel.getVisibleNet(0));
-        assertSame(destDataModel.getNetDataModel(2), destDisplayModel.getVisibleNet(1));
+        assertEquals(2, destPresentationModel.getVisibleNetCount());
+        assertSame(destDataModel.getNetDataModel(0), destPresentationModel.getVisibleNet(0));
+        assertSame(destDataModel.getNetDataModel(2), destPresentationModel.getVisibleNet(1));
     }
 
     // If the formatter class name is unknown, fall back to binary
@@ -194,9 +194,9 @@ public class TraceSettingsFileTest {
         builder.exitScope();
         builder.loadFinished();
 
-        TraceDisplayModel displayModel = new TraceDisplayModel();
-        new TraceSettingsFile(file, dataModel, displayModel).read();
-        assertTrue(displayModel.getValueFormatter(0) instanceof BinaryValueFormatter);
+        TracePresentationModel presentationModel = new TracePresentationModel();
+        new TraceSettingsFile(file, dataModel, presentationModel).read();
+        assertTrue(presentationModel.getValueFormatter(0) instanceof BinaryValueFormatter);
     }
 
     // Test generating config file name for subdirectory

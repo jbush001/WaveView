@@ -24,10 +24,10 @@ import javax.swing.table.AbstractTableModel;
 
 public class MarkerTableModel extends AbstractTableModel {
     private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
-    private final TraceDisplayModel traceDisplayModel;
+    private final TracePresentationModel tracePresentationModel;
 
-    public MarkerTableModel(TraceDisplayModel traceDisplayModel) {
-        this.traceDisplayModel = traceDisplayModel;
+    public MarkerTableModel(TracePresentationModel tracePresentationModel) {
+        this.tracePresentationModel = tracePresentationModel;
     }
 
     @Override
@@ -42,19 +42,19 @@ public class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return traceDisplayModel.getMarkerCount();
+        return tracePresentationModel.getMarkerCount();
     }
 
     @Override
     public Object getValueAt(int row, int col) {
         switch (col) {
         case 0:
-            return Integer.toString(traceDisplayModel.getIdForMarker(row));
+            return Integer.toString(tracePresentationModel.getIdForMarker(row));
         case 1:
             // XXX add suffix with units here.
-            return Long.toString(traceDisplayModel.getTimestampForMarker(row));
+            return Long.toString(tracePresentationModel.getTimestampForMarker(row));
         case 2:
-            return traceDisplayModel.getDescriptionForMarker(row);
+            return tracePresentationModel.getDescriptionForMarker(row);
         default:
             return "";
         }
@@ -67,6 +67,6 @@ public class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        traceDisplayModel.setDescriptionForMarker(row, (String) value);
+        tracePresentationModel.setDescriptionForMarker(row, (String) value);
     }
 }

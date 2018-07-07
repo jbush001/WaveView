@@ -30,18 +30,18 @@ import javax.swing.JTable;
 /// on them to jump to that point in the trace.
 /// @todo Add a way to remove entries from this list
 ///
-class MarkerListPanel extends JPanel implements ActionListener, TraceDisplayModel.Listener {
-    private final TraceDisplayModel traceDisplayModel;
+class MarkerListPanel extends JPanel implements ActionListener, TracePresentationModel.Listener {
+    private final TracePresentationModel tracePresentationModel;
     private final MarkerTableModel tableModel;
     private final JTable table;
 
-    MarkerListPanel(TraceDisplayModel traceDisplayModel) {
+    MarkerListPanel(TracePresentationModel tracePresentationModel) {
         setLayout(new GridLayout(1, 1));
 
-        this.traceDisplayModel = traceDisplayModel;
-        traceDisplayModel.addListener(this);
+        this.tracePresentationModel = tracePresentationModel;
+        tracePresentationModel.addListener(this);
 
-        tableModel = new MarkerTableModel(traceDisplayModel);
+        tableModel = new MarkerTableModel(tracePresentationModel);
         table = new JTable(tableModel);
 
         table.getColumnModel().getColumn(0).setMaxWidth(35);
@@ -64,10 +64,10 @@ class MarkerListPanel extends JPanel implements ActionListener, TraceDisplayMode
     }
 
     private void select(boolean extendSelection) {
-        long timestamp = traceDisplayModel.getTimestampForMarker(table.getSelectedRow());
-        traceDisplayModel.setCursorPosition(timestamp);
+        long timestamp = tracePresentationModel.getTimestampForMarker(table.getSelectedRow());
+        tracePresentationModel.setCursorPosition(timestamp);
         if (!extendSelection) {
-            traceDisplayModel.setSelectionStart(timestamp);
+            tracePresentationModel.setSelectionStart(timestamp);
         }
     }
 

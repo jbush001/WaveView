@@ -41,7 +41,7 @@ import javax.swing.ProgressMonitor;
 /// @todo Add menu item to jump to specific timestamp
 public class MainWindow extends JPanel implements ActionListener {
     private final TracePanel tracePanel;
-    private final TraceDisplayModel traceDisplayModel = new TraceDisplayModel();
+    private final TracePresentationModel tracePresentationModel = new TracePresentationModel();
     private final TraceDataModel traceDataModel = new TraceDataModel();
     private Search currentSearch;
     private JMenu netMenu;
@@ -64,7 +64,7 @@ public class MainWindow extends JPanel implements ActionListener {
         toolBar.add(createButton("add-marker.png", "Insert Marker", "insertMarker"));
         toolBar.add(createButton("remove-marker.png", "Remove Marker", "removeMarker"));
 
-        tracePanel = new TracePanel(traceDisplayModel, traceDataModel);
+        tracePanel = new TracePanel(tracePresentationModel, traceDataModel);
         add(tracePanel, BorderLayout.CENTER);
 
         recentFiles.unpack(AppPreferences.getInstance().getRecentList());
@@ -110,10 +110,10 @@ public class MainWindow extends JPanel implements ActionListener {
             frame.dispose();
             break;
         case "removeAllMarkers":
-            traceDisplayModel.removeAllMarkers();
+            tracePresentationModel.removeAllMarkers();
             break;
         case "removeAllNets":
-            traceDisplayModel.removeAllNets();
+            tracePresentationModel.removeAllNets();
             break;
         case "insertMarker":
             insertMarker();
@@ -148,7 +148,7 @@ public class MainWindow extends JPanel implements ActionListener {
         default:
             if (cmd.length() > 7 && cmd.substring(0, 7).equals("netSet_")) {
                 int index = Integer.parseInt(cmd.substring(7));
-                traceDisplayModel.selectNetSet(index);
+                tracePresentationModel.selectNetSet(index);
             } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
                 // Load from recents menu
                 loadTraceFile(cmd.substring(5));
@@ -177,14 +177,14 @@ public class MainWindow extends JPanel implements ActionListener {
         String description = (String) JOptionPane.showInputDialog(frame, "Description for this marker", "New Marker",
                 JOptionPane.PLAIN_MESSAGE, null, null, null);
         if (description != null) {
-            traceDisplayModel.addMarker(description, traceDisplayModel.getCursorPosition());
+            tracePresentationModel.addMarker(description, tracePresentationModel.getCursorPosition());
         }
     }
 
     private void showMarkerList() {
         JDialog markersWindow = new JDialog(frame, "Markers", true);
         markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        MarkerListPanel contentPane = new MarkerListPanel(traceDisplayModel);
+        MarkerListPanel contentPane = new MarkerListPanel(tracePresentationModel);
         contentPane.setOpaque(true);
         markersWindow.setPreferredSize(new Dimension(400, 300));
         markersWindow.setContentPane(contentPane);
@@ -194,15 +194,15 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     private void nextMarker(ActionEvent e) {
-        traceDisplayModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+        tracePresentationModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     }
 
     private void prevMarker(ActionEvent e) {
-        traceDisplayModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+        tracePresentationModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     }
 
     private void removeMarker() {
-        traceDisplayModel.removeMarkerAtTime(traceDisplayModel.getCursorPosition());
+        tracePresentationModel.removeMarkerAtTime(tracePresentationModel.getCursorPosition());
     }
 
     private void openTrace() {
@@ -220,7 +220,7 @@ public class MainWindow extends JPanel implements ActionListener {
         String name = (String) JOptionPane.showInputDialog(frame, "Net Set Name", "Save Net Set",
                 JOptionPane.PLAIN_MESSAGE, null, null, null);
         if (!name.equals("")) {
-            traceDisplayModel.saveNetSet(name);
+            tracePresentationModel.saveNetSet(name);
             buildNetMenu();
         }
     }
@@ -251,7 +251,7 @@ public class MainWindow extends JPanel implements ActionListener {
         }
 
         currentSearch = null;
-        traceDisplayModel.clear();
+        tracePresentationModel.clear();
 
         // XXX hack
         // Because the load ran on a separate thread, and I didn't want to add locking
@@ -269,7 +269,7 @@ public class MainWindow extends JPanel implements ActionListener {
             AppPreferences.getInstance().setRecentList(recentFiles.pack());
 
             File settingsFile = TraceSettingsFile.settingsFileName(file);
-            traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, traceDisplayModel);
+            traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, tracePresentationModel);
             if (settingsFile.exists()) {
                 traceSettingsFile.read();
             }
@@ -314,10 +314,10 @@ public class MainWindow extends JPanel implements ActionListener {
     private String generateSearchFromSelection() {
         StringBuilder searchExpr = new StringBuilder();
         boolean first = true;
-        long cursorPosition = traceDisplayModel.getCursorPosition();
+        long cursorPosition = tracePresentationModel.getCursorPosition();
 
         for (int index : tracePanel.getSelectedNets()) {
-            NetDataModel netDataModel = traceDisplayModel.getVisibleNet(index);
+            NetDataModel netDataModel = tracePresentationModel.getVisibleNet(index);
             if (first) {
                 first = false;
             } else {
@@ -340,26 +340,26 @@ public class MainWindow extends JPanel implements ActionListener {
 
     void findNext(boolean extendSelection) {
         if (currentSearch != null) {
-            long newTimestamp = currentSearch.getNextMatch(traceDisplayModel.getCursorPosition());
+            long newTimestamp = currentSearch.getNextMatch(tracePresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
                 if (!extendSelection) {
-                    traceDisplayModel.setSelectionStart(newTimestamp);
+                    tracePresentationModel.setSelectionStart(newTimestamp);
                 }
 
-                traceDisplayModel.setCursorPosition(newTimestamp);
+                tracePresentationModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
     void findPrev(boolean extendSelection) {
         if (currentSearch != null) {
-            long newTimestamp = currentSearch.getPreviousMatch(traceDisplayModel.getCursorPosition());
+            long newTimestamp = currentSearch.getPreviousMatch(tracePresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
                 if (!extendSelection) {
-                    traceDisplayModel.setSelectionStart(newTimestamp);
+                    tracePresentationModel.setSelectionStart(newTimestamp);
                 }
 
-                traceDisplayModel.setCursorPosition(newTimestamp);
+                tracePresentationModel.setCursorPosition(newTimestamp);
             }
         }
     }
@@ -391,10 +391,10 @@ public class MainWindow extends JPanel implements ActionListener {
         item.addActionListener(this);
         netMenu.add(item);
 
-        if (traceDisplayModel.getNetSetCount() > 0) {
+        if (tracePresentationModel.getNetSetCount() > 0) {
             netMenu.addSeparator();
-            for (int i = 0; i < traceDisplayModel.getNetSetCount(); i++) {
-                item = new JMenuItem(traceDisplayModel.getNetSetName(i));
+            for (int i = 0; i < tracePresentationModel.getNetSetCount(); i++) {
+                item = new JMenuItem(tracePresentationModel.getNetSetName(i));
                 item.setActionCommand("netSet_" + i);
                 item.addActionListener(this);
                 netMenu.add(item);

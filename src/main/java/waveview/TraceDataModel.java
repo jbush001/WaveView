@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 ///
 /// Contains information about nets and transitions. View state is contained
-/// in TraceDisplayModel.
+/// in TracePresentationModel.
 ///
 
 public class TraceDataModel implements Iterable<NetDataModel> {

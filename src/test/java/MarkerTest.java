@@ -18,11 +18,11 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
-import waveview.TraceDisplayModel;
+import waveview.TracePresentationModel;
 
 public class MarkerTest {
-    private final TraceDisplayModel tdm = new TraceDisplayModel();
-    private final TraceDisplayModelListener listener = new TraceDisplayModelListener();
+    private final TracePresentationModel tdm = new TracePresentationModel();
+    private final TracePresentationModelListener listener = new TracePresentationModelListener();
 
     @Before
     public void setUpTest() {
@@ -48,7 +48,7 @@ public class MarkerTest {
     @Test
     public void insertMarker() {
         tdm.addMarker("marker0", 1000);
-        assertEquals(TraceDisplayModelListener.MARKER_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.MARKER_CHANGED, listener.notifications);
         assertEquals(1000, listener.longArg0);
         assertEquals(0, tdm.getMarkerAtTime(1000));
     }
@@ -74,7 +74,7 @@ public class MarkerTest {
 
         tdm.removeMarkerAtTime(990);
         assertEquals(0, tdm.getMarkerCount());
-        assertEquals(TraceDisplayModelListener.MARKER_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.MARKER_CHANGED, listener.notifications);
         assertEquals(1000, listener.longArg0);
     }
 
@@ -85,7 +85,7 @@ public class MarkerTest {
 
         tdm.removeMarkerAtTime(1010);
         assertEquals(0, tdm.getMarkerCount());
-        assertEquals(TraceDisplayModelListener.MARKER_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.MARKER_CHANGED, listener.notifications);
         assertEquals(1000, listener.longArg0);
     }
 
@@ -99,7 +99,7 @@ public class MarkerTest {
         listener.reset();
 
         tdm.removeMarkerAtTime(199);
-        assertEquals(TraceDisplayModelListener.MARKER_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.MARKER_CHANGED, listener.notifications);
         assertEquals(200, listener.longArg0);
 
         // Ensure other markers were unaffected
@@ -119,7 +119,7 @@ public class MarkerTest {
 
         tdm.removeAllMarkers();
 
-        assertEquals(TraceDisplayModelListener.MARKER_CHANGED, listener.notifications);
+        assertEquals(TracePresentationModelListener.MARKER_CHANGED, listener.notifications);
         assertEquals(-1, listener.longArg0);
         assertEquals(0, tdm.getMarkerCount());
     }
