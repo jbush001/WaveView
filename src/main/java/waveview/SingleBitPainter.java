@@ -28,7 +28,7 @@ class SingleBitPainter implements WaveformPainter {
     @Override
     public void paint(Graphics g, NetDataModel model, int topOffset, Rectangle visibleRect,
             double horizontalScale, ValueFormatter formatter) {
-        g.setColor(AppPreferences.getInstance().traceColor);
+        g.setColor(AppPreferences.getInstance().waveformColor);
 
         int lastValue = 0;
         int lastX = visibleRect.x + visibleRect.width;
@@ -95,7 +95,7 @@ class SingleBitPainter implements WaveformPainter {
         default:
             g.setColor(AppPreferences.getInstance().conflictColor);
             g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
-            g.setColor(AppPreferences.getInstance().traceColor);
+            g.setColor(AppPreferences.getInstance().waveformColor);
             g.drawLine(left, top, right, top);
             g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top + DrawMetrics.WAVEFORM_HEIGHT);
             break;

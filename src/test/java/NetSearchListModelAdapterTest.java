@@ -23,17 +23,17 @@ import javax.swing.event.ListDataListener;
 import org.junit.Before;
 import org.junit.Test;
 import waveview.NetSearchListModelAdapter;
-import waveview.TraceBuilder;
-import waveview.TraceDataModel;
+import waveview.WaveformBuilder;
+import waveview.WaveformDataModel;
 
 public class NetSearchListModelAdapterTest {
-    private final TraceDataModel model = new TraceDataModel();
+    private final WaveformDataModel model = new WaveformDataModel();
     private final TestListDataListener listener = new TestListDataListener();
     NetSearchListModelAdapter nslma;
 
     @Before
     public void setUpTest() {
-        TraceBuilder builder = model.startBuilding();
+        WaveformBuilder builder = model.startBuilding();
         builder.enterScope("mod1");
         builder.newNet("fooxxx", -1, 1);
         builder.newNet("xfooxx", -1, 1);

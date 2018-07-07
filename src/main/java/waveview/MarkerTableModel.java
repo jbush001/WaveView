@@ -19,15 +19,15 @@ package waveview;
 import javax.swing.table.AbstractTableModel;
 
 ///
-/// Used by MarkerListPanel to display all markers
+/// Used by MarkerListView to display all markers
 ///
 
 public class MarkerTableModel extends AbstractTableModel {
     private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
-    private final TracePresentationModel tracePresentationModel;
+    private final WaveformPresentationModel waveformPresentationModel;
 
-    public MarkerTableModel(TracePresentationModel tracePresentationModel) {
-        this.tracePresentationModel = tracePresentationModel;
+    public MarkerTableModel(WaveformPresentationModel waveformPresentationModel) {
+        this.waveformPresentationModel = waveformPresentationModel;
     }
 
     @Override
@@ -42,19 +42,19 @@ public class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return tracePresentationModel.getMarkerCount();
+        return waveformPresentationModel.getMarkerCount();
     }
 
     @Override
     public Object getValueAt(int row, int col) {
         switch (col) {
         case 0:
-            return Integer.toString(tracePresentationModel.getIdForMarker(row));
+            return Integer.toString(waveformPresentationModel.getIdForMarker(row));
         case 1:
             // XXX add suffix with units here.
-            return Long.toString(tracePresentationModel.getTimestampForMarker(row));
+            return Long.toString(waveformPresentationModel.getTimestampForMarker(row));
         case 2:
-            return tracePresentationModel.getDescriptionForMarker(row);
+            return waveformPresentationModel.getDescriptionForMarker(row);
         default:
             return "";
         }
@@ -67,6 +67,6 @@ public class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        tracePresentationModel.setDescriptionForMarker(row, (String) value);
+        waveformPresentationModel.setDescriptionForMarker(row, (String) value);
     }
 }

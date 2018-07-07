@@ -27,29 +27,29 @@ import javax.swing.JTable;
 
 ///
 /// Displays a list of all markers and their timestamps.  The user can click
-/// on them to jump to that point in the trace.
+/// on them to jump to that point in the waveform.
 /// @todo Add a way to remove entries from this list
 ///
-class MarkerListPanel extends JPanel implements ActionListener, TracePresentationModel.Listener {
-    private final TracePresentationModel tracePresentationModel;
+class MarkerListView extends JPanel implements ActionListener, WaveformPresentationModel.Listener {
+    private final WaveformPresentationModel waveformPresentationModel;
     private final MarkerTableModel tableModel;
     private final JTable table;
 
-    MarkerListPanel(TracePresentationModel tracePresentationModel) {
+    MarkerListView(WaveformPresentationModel waveformPresentationModel) {
         setLayout(new GridLayout(1, 1));
 
-        this.tracePresentationModel = tracePresentationModel;
-        tracePresentationModel.addListener(this);
+        this.waveformPresentationModel = waveformPresentationModel;
+        waveformPresentationModel.addListener(this);
 
-        tableModel = new MarkerTableModel(tracePresentationModel);
+        tableModel = new MarkerTableModel(waveformPresentationModel);
         table = new JTable(tableModel);
 
         table.getColumnModel().getColumn(0).setMaxWidth(35);
 
-        // Double clicking an item in the list will cause the trace
+        // Double clicking an item in the list will cause the waveform
         // view to jump to that location. Holding shift will select
         // the area between the old cursor and new location (consistent
-        // with click selection in the trace view)
+        // with click selection in the waveform view)
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -64,10 +64,10 @@ class MarkerListPanel extends JPanel implements ActionListener, TracePresentatio
     }
 
     private void select(boolean extendSelection) {
-        long timestamp = tracePresentationModel.getTimestampForMarker(table.getSelectedRow());
-        tracePresentationModel.setCursorPosition(timestamp);
+        long timestamp = waveformPresentationModel.getTimestampForMarker(table.getSelectedRow());
+        waveformPresentationModel.setCursorPosition(timestamp);
         if (!extendSelection) {
-            tracePresentationModel.setSelectionStart(timestamp);
+            waveformPresentationModel.setSelectionStart(timestamp);
         }
     }
 

@@ -24,10 +24,10 @@ import java.util.Iterator;
 
 ///
 /// Contains information about nets and transitions. View state is contained
-/// in TracePresentationModel.
+/// in WaveformPresentationModel.
 ///
 
-public class TraceDataModel implements Iterable<NetDataModel> {
+public class WaveformDataModel implements Iterable<NetDataModel> {
     private long maxTimestamp;
     private HashMap<String, NetDataModel> fullNameToNetMap = new HashMap<>();
     private ArrayList<NetDataModel> allNets = new ArrayList<>();
@@ -39,7 +39,7 @@ public class TraceDataModel implements Iterable<NetDataModel> {
     }
 
     /// A bit of a kludge. Used when loading a new model.
-    public void copyFrom(TraceDataModel from) {
+    public void copyFrom(WaveformDataModel from) {
         maxTimestamp = from.maxTimestamp;
         fullNameToNetMap = from.fullNameToNetMap;
         allNets = from.allNets;
@@ -47,12 +47,12 @@ public class TraceDataModel implements Iterable<NetDataModel> {
         timescale = from.timescale;
     }
 
-    public TraceBuilder startBuilding() {
+    public WaveformBuilder startBuilding() {
         allNets.clear();
         fullNameToNetMap.clear();
         netTree.clear();
 
-        return new ConcreteTraceBuilder();
+        return new ConcreteWaveformBuilder();
     }
 
     public NetDataModel getNetDataModel(int netId) {
@@ -85,16 +85,16 @@ public class TraceDataModel implements Iterable<NetDataModel> {
         return allNets.iterator();
     }
 
-    private class ConcreteTraceBuilder implements TraceBuilder {
+    private class ConcreteWaveformBuilder implements WaveformBuilder {
         private final Deque<String> scopeStack = new ArrayDeque<>();
         private NetTreeModel.Builder treeBuilder = netTree.startBuilding();
 
-        // This mirrors allNets in TraceDataModel and must be kept in sync with it.
+        // This mirrors allNets in WaveformDataModel and must be kept in sync with it.
         private final ArrayList<TransitionVector> transitionVectors = new ArrayList<>();
 
         @Override
         public void setTimescale(int timescale) {
-            TraceDataModel.this.timescale = timescale;
+            WaveformDataModel.this.timescale = timescale;
         }
 
         @Override

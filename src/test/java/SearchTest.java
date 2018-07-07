@@ -21,14 +21,14 @@ import static org.junit.Assert.fail;
 import org.junit.Test;
 import waveview.BitVector;
 import waveview.Search;
-import waveview.TraceBuilder;
-import waveview.TraceDataModel;
+import waveview.WaveformBuilder;
+import waveview.WaveformDataModel;
 
 public class SearchTest {
-    /// Utility function to create a sample trace with a clock signal
-    TraceDataModel makeSingleBitModel() {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+    /// Utility function to create a sample waveform with a clock signal
+    WaveformDataModel makeSingleBitModel() {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("clk", -1, 1);
@@ -39,12 +39,12 @@ public class SearchTest {
         builder.appendTransition(id1, 20, new BitVector("1", 2));
         builder.loadFinished();
 
-        return traceDataModel;
+        return waveformDataModel;
     }
 
-    TraceDataModel makeFourBitModel() {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+    WaveformDataModel makeFourBitModel() {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("m");
         builder.newNet("a", -1, 1);
@@ -65,7 +65,7 @@ public class SearchTest {
 
         builder.loadFinished();
 
-        return traceDataModel;
+        return waveformDataModel;
     }
 
     /// Test various forms of whitespace (and lack thereof)
@@ -81,8 +81,8 @@ public class SearchTest {
     /// Test identifier characters
     @Test
     public void identifier() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", -1, 1);
@@ -91,7 +91,7 @@ public class SearchTest {
         builder.appendTransition(id1, 10, new BitVector("1", 2));
         builder.loadFinished();
 
-        Search search = new Search(traceDataModel, "mod1._abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 = 1\n");
+        Search search = new Search(waveformDataModel, "mod1._abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 = 1\n");
         assertEquals(10, search.getNextMatch(4));
     }
 
@@ -116,8 +116,8 @@ public class SearchTest {
 
     @Test
     public void literalBases() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("value", -1, 4);
@@ -126,19 +126,19 @@ public class SearchTest {
         builder.appendTransition(id1, 23, new BitVector("10", 10));
         builder.loadFinished();
 
-        Search search = new Search(traceDataModel, "mod1.value = 10");
+        Search search = new Search(waveformDataModel, "mod1.value = 10");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "mod1.value = 'd10");
+        search = new Search(waveformDataModel, "mod1.value = 'd10");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "mod1.value = 'ha");
+        search = new Search(waveformDataModel, "mod1.value = 'ha");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "mod1.value = 'hA");
+        search = new Search(waveformDataModel, "mod1.value = 'hA");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "mod1.value = 'b1010");
+        search = new Search(waveformDataModel, "mod1.value = 'b1010");
         assertEquals(23, search.getNextMatch(0));
     }
 
@@ -147,8 +147,8 @@ public class SearchTest {
     /// Verify it at least parses the search.
     @Test
     public void matchXZ() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.enterScope("mod1");
         int id1 = builder.newNet("value", -1, 4);
         builder.exitScope();
@@ -158,39 +158,39 @@ public class SearchTest {
 
         // Try upper and lower case versions of X and Z for hex and decimal
         // bases. Ensure this doesn't throw an exception.
-        new Search(traceDataModel, "mod1.value = 'bxxxx");
-        new Search(traceDataModel, "mod1.value = 'bXXXX");
-        new Search(traceDataModel, "mod1.value = 'hx");
-        new Search(traceDataModel, "mod1.value = 'hX");
-        new Search(traceDataModel, "mod1.value = 'bzzzz");
-        new Search(traceDataModel, "mod1.value = 'bZZZZ");
-        new Search(traceDataModel, "mod1.value = 'hz");
-        new Search(traceDataModel, "mod1.value = 'hZ");
+        new Search(waveformDataModel, "mod1.value = 'bxxxx");
+        new Search(waveformDataModel, "mod1.value = 'bXXXX");
+        new Search(waveformDataModel, "mod1.value = 'hx");
+        new Search(waveformDataModel, "mod1.value = 'hX");
+        new Search(waveformDataModel, "mod1.value = 'bzzzz");
+        new Search(waveformDataModel, "mod1.value = 'bZZZZ");
+        new Search(waveformDataModel, "mod1.value = 'hz");
+        new Search(waveformDataModel, "mod1.value = 'hZ");
 
         // X and Z with decimal values should fail
         try {
-            new Search(traceDataModel, "mod1.value = 'dx");
+            new Search(waveformDataModel, "mod1.value = 'dx");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
         }
 
         try {
-            new Search(traceDataModel, "mod1.value = 'dX");
+            new Search(waveformDataModel, "mod1.value = 'dX");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
         }
 
         try {
-            new Search(traceDataModel, "mod1.value = 'dz");
+            new Search(waveformDataModel, "mod1.value = 'dz");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
         }
 
         try {
-            new Search(traceDataModel, "mod1.value = 'dZ");
+            new Search(waveformDataModel, "mod1.value = 'dZ");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Should throw this
@@ -286,8 +286,8 @@ public class SearchTest {
     /// transition points
     @Test
     public void and() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
@@ -317,7 +317,7 @@ public class SearchTest {
         builder.loadFinished();
 
         System.out.println("parse search");
-        Search search = new Search(traceDataModel, "mod1.a and mod1.b");
+        Search search = new Search(waveformDataModel, "mod1.a and mod1.b");
         System.out.println("finished parsing");
 
         // Expression is true:
@@ -355,8 +355,8 @@ public class SearchTest {
     /// transition points
     @Test
     public void or() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
@@ -385,7 +385,7 @@ public class SearchTest {
 
         builder.loadFinished();
 
-        Search search = new Search(traceDataModel, "mod1.a or mod1.b");
+        Search search = new Search(waveformDataModel, "mod1.a or mod1.b");
         System.out.println("search is " + search.toString());
 
         // Expression is true:
@@ -420,8 +420,8 @@ public class SearchTest {
 
     @Test
     public void comparisons() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("value", -1, 4);
@@ -438,62 +438,62 @@ public class SearchTest {
         builder.appendTransition(id1, 9, new BitVector("9", 16));
         builder.loadFinished();
 
-        Search search = new Search(traceDataModel, "mod1.value > 'h5");
+        Search search = new Search(waveformDataModel, "mod1.value > 'h5");
         assertEquals(6, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "'h5 < mod1.value");
+        search = new Search(waveformDataModel, "'h5 < mod1.value");
         assertEquals(6, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "mod1.value >= 'h5");
+        search = new Search(waveformDataModel, "mod1.value >= 'h5");
         assertEquals(5, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "'h5 <= mod1.value");
+        search = new Search(waveformDataModel, "'h5 <= mod1.value");
         assertEquals(5, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "mod1.value < 'h5");
+        search = new Search(waveformDataModel, "mod1.value < 'h5");
         assertEquals(4, search.getPreviousMatch(10));
 
-        search = new Search(traceDataModel, "'h5 > mod1.value");
+        search = new Search(waveformDataModel, "'h5 > mod1.value");
         assertEquals(4, search.getPreviousMatch(10));
 
-        search = new Search(traceDataModel, "mod1.value <= 'h5");
+        search = new Search(waveformDataModel, "mod1.value <= 'h5");
         assertEquals(5, search.getPreviousMatch(10));
 
-        search = new Search(traceDataModel, "'h5 >= mod1.value");
+        search = new Search(waveformDataModel, "'h5 >= mod1.value");
         assertEquals(5, search.getPreviousMatch(10));
 
-        search = new Search(traceDataModel, "mod1.value = 'h5");
+        search = new Search(waveformDataModel, "mod1.value = 'h5");
         assertEquals(5, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "'h5 = mod1.value");
+        search = new Search(waveformDataModel, "'h5 = mod1.value");
         assertEquals(5, search.getNextMatch(0));
 
-        search = new Search(traceDataModel, "mod1.value <> 'h5");
+        search = new Search(waveformDataModel, "mod1.value <> 'h5");
         assertEquals(6, search.getNextMatch(4));
 
-        search = new Search(traceDataModel, "'h5 <> mod1.value");
+        search = new Search(waveformDataModel, "'h5 <> mod1.value");
         assertEquals(6, search.getNextMatch(4));
 
-        search = new Search(traceDataModel, "mod1.value >< 'h5");
+        search = new Search(waveformDataModel, "mod1.value >< 'h5");
         assertEquals(6, search.getNextMatch(4));
 
         // This will never find the next, because it is never false.
         // Ensure it doesn't go into an infinite loop
-        search = new Search(traceDataModel, "mod1.value = mod1.value");
+        search = new Search(waveformDataModel, "mod1.value = mod1.value");
         assertEquals(-1, search.getNextMatch(4));
 
         // Likewise, this will never find the next, because it is never
         // true
-        search = new Search(traceDataModel, "mod1.value <> mod1.value");
+        search = new Search(waveformDataModel, "mod1.value <> mod1.value");
         assertEquals(-1, search.getNextMatch(4));
     }
 
     @Test
     public void precedence() throws Exception {
-        TraceDataModel traceDataModel = makeFourBitModel();
+        WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search;
 
-        search = new Search(traceDataModel, "m.a and m.b and m.c and m.d");
+        search = new Search(waveformDataModel, "m.a and m.b and m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -511,7 +511,7 @@ public class SearchTest {
         assertFalse(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a and m.b and m.c or m.d");
+        search = new Search(waveformDataModel, "m.a and m.b and m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertFalse(search.matches(2));
@@ -529,7 +529,7 @@ public class SearchTest {
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a and m.b or m.c and m.d");
+        search = new Search(waveformDataModel, "m.a and m.b or m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -547,7 +547,7 @@ public class SearchTest {
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a and m.b or m.c or m.d");
+        search = new Search(waveformDataModel, "m.a and m.b or m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertTrue(search.matches(2));
@@ -565,7 +565,7 @@ public class SearchTest {
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a or m.b and m.c and m.d");
+        search = new Search(waveformDataModel, "m.a or m.b and m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -583,7 +583,7 @@ public class SearchTest {
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a or m.b and m.c or m.d");
+        search = new Search(waveformDataModel, "m.a or m.b and m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertFalse(search.matches(2));
@@ -601,7 +601,7 @@ public class SearchTest {
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a or m.b or m.c and m.d");
+        search = new Search(waveformDataModel, "m.a or m.b or m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -619,7 +619,7 @@ public class SearchTest {
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a or m.b or m.c or m.d");
+        search = new Search(waveformDataModel, "m.a or m.b or m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertTrue(search.matches(2));
@@ -638,7 +638,7 @@ public class SearchTest {
         assertTrue(search.matches(15));
 
         // Parentheses
-        search = new Search(traceDataModel, "m.a and (m.b or m.c) and m.d");
+        search = new Search(waveformDataModel, "m.a and (m.b or m.c) and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -656,7 +656,7 @@ public class SearchTest {
         assertFalse(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "m.a and m.b and (m.c or m.d)");
+        search = new Search(waveformDataModel, "m.a and m.b and (m.c or m.d)");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -674,7 +674,7 @@ public class SearchTest {
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
 
-        search = new Search(traceDataModel, "(m.a or m.b) and m.c and m.d");
+        search = new Search(waveformDataModel, "(m.a or m.b) and m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -693,19 +693,19 @@ public class SearchTest {
         assertTrue(search.matches(15));
     }
 
-    /// Test running off the end of the trace without finding a match. In
+    /// Test running off the end of the waveform without finding a match. In
     /// this case, we start in a match and hit the end while searching for
     /// the end of the match
     @Test
     public void getNextMatchEnd1() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
-        Search search = new Search(traceDataModel, "mod1.a");
+        Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getNextMatch(0));
     }
 
@@ -713,44 +713,44 @@ public class SearchTest {
     // doesn't find a second match
     @Test
     public void getNextMatchEnd2() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         builder.appendTransition(id1, 10, new BitVector("0", 2));
-        Search search = new Search(traceDataModel, "mod1.a");
+        Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getNextMatch(0));
     }
 
     // Same as testGetNextMatchEnd1, except searching backward
     @Test
     public void getPrevMatchEnd1() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
-        Search search = new Search(traceDataModel, "mod1.a");
+        Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getPreviousMatch(50));
     }
 
     // Same as testGetNextMatchEnd2, except searching backward
     @Test
     public void getPrevMatchEnd2() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 1);
         builder.exitScope();
         builder.appendTransition(id1, 0, new BitVector("1", 2));
         builder.appendTransition(id1, 40, new BitVector("1", 2));
-        Search search = new Search(traceDataModel, "mod1.a");
+        Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getPreviousMatch(50));
     }
 
@@ -758,47 +758,47 @@ public class SearchTest {
     // tree correctly, as well as various operators.
     @Test
     public void searchToString() throws Exception {
-        TraceDataModel traceDataModel = makeFourBitModel();
+        WaveformDataModel waveformDataModel = makeFourBitModel();
 
         // Basic comparisons
-        assertEquals("(eq m.a m.b)", new Search(traceDataModel, "m.a = m.b").toString());
-        assertEquals("(eq 00000111 m.b)", new Search(traceDataModel, "7 = m.b").toString());
-        assertEquals("(eq m.a 00000101)", new Search(traceDataModel, "m.a = 5").toString());
-        assertEquals("(eq 00001000 00000101)", new Search(traceDataModel, "8 = 5").toString());
+        assertEquals("(eq m.a m.b)", new Search(waveformDataModel, "m.a = m.b").toString());
+        assertEquals("(eq 00000111 m.b)", new Search(waveformDataModel, "7 = m.b").toString());
+        assertEquals("(eq m.a 00000101)", new Search(waveformDataModel, "m.a = 5").toString());
+        assertEquals("(eq 00001000 00000101)", new Search(waveformDataModel, "8 = 5").toString());
 
         // Use all comparison operators.
         assertEquals("(or (and (ne m.a 0) (lt m.b 00000001)) (and (gt m.c 00000010) (eq m.d 00000000)))",
-            new Search(traceDataModel, "m.a and m.b < 1 or m.c > 2 and m.d = 0").toString());
+            new Search(waveformDataModel, "m.a and m.b < 1 or m.c > 2 and m.d = 0").toString());
 
         assertEquals("(or (and (ne m.a 00000000) (le m.b 00000001)) (and (ge m.c 00000010) (ne m.d 00000101)))",
-            new Search(traceDataModel, "m.a >< 0 and m.b <= 1 or m.c >= 2 and m.d <> 5").toString());
+            new Search(waveformDataModel, "m.a >< 0 and m.b <= 1 or m.c >= 2 and m.d <> 5").toString());
 
         // Precedence tests. These mirror the test above, but ensure the expression tree was
         // set up correctly.
         assertEquals("(and (and (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(traceDataModel, "m.a and m.b and m.c and m.d").toString());
+            new Search(waveformDataModel, "m.a and m.b and m.c and m.d").toString());
         assertEquals("(or (and (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(traceDataModel, "m.a and m.b and m.c or m.d").toString());
+            new Search(waveformDataModel, "m.a and m.b and m.c or m.d").toString());
         assertEquals("(or (and (ne m.a 0) (ne m.b 0)) (and (ne m.c 0) (ne m.d 0)))",
-            new Search(traceDataModel, "m.a and m.b or m.c and m.d").toString());
+            new Search(waveformDataModel, "m.a and m.b or m.c and m.d").toString());
         assertEquals("(or (or (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(traceDataModel, "m.a and m.b or m.c or m.d").toString());
+            new Search(waveformDataModel, "m.a and m.b or m.c or m.d").toString());
         assertEquals("(or (ne m.a 0) (and (and (ne m.b 0) (ne m.c 0)) (ne m.d 0)))",
-            new Search(traceDataModel, "m.a or m.b and m.c and m.d").toString());
+            new Search(waveformDataModel, "m.a or m.b and m.c and m.d").toString());
         assertEquals("(or (or (ne m.a 0) (and (ne m.b 0) (ne m.c 0))) (ne m.d 0))",
-            new Search(traceDataModel, "m.a or m.b and m.c or m.d").toString());
+            new Search(waveformDataModel, "m.a or m.b and m.c or m.d").toString());
         assertEquals("(or (or (ne m.a 0) (ne m.b 0)) (and (ne m.c 0) (ne m.d 0)))",
-            new Search(traceDataModel, "m.a or m.b or m.c and m.d").toString());
+            new Search(waveformDataModel, "m.a or m.b or m.c and m.d").toString());
         assertEquals("(or (or (or (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(traceDataModel, "m.a or m.b or m.c or m.d").toString());
+            new Search(waveformDataModel, "m.a or m.b or m.c or m.d").toString());
     }
 
     // Tests that parens are treated as part of an identifier.
     // When a module is generated, it has the instance number: mod1.core_gen(0).mod2
     @Test
     public void generateInstance() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         builder.enterScope("mod_gen(0)");
@@ -811,15 +811,15 @@ public class SearchTest {
         builder.appendTransition(id1, 5, new BitVector("1", 2));
         builder.loadFinished();
 
-        Search search = new Search(traceDataModel, "mod1.mod_gen(0).mod2.a = 1");
+        Search search = new Search(waveformDataModel, "mod1.mod_gen(0).mod2.a = 1");
         assertEquals(5, search.getNextMatch(0));
     }
 
     /// Test comparing a net to another instead of a constant value
     @Test
     public void compareNets() throws Exception {
-        TraceDataModel traceDataModel = new TraceDataModel();
-        TraceBuilder builder = traceDataModel.startBuilding();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int id1 = builder.newNet("a", -1, 4);
@@ -833,12 +833,12 @@ public class SearchTest {
         builder.appendTransition(id2, 2, new BitVector("2", 10));
         builder.appendTransition(id2, 3, new BitVector("1", 10));
 
-        Search search = new Search(traceDataModel, "mod1.a = mod1.b");
+        Search search = new Search(waveformDataModel, "mod1.a = mod1.b");
         assertEquals(2, search.getNextMatch(0));
         assertEquals(2, search.getPreviousMatch(5));
 
         // Swap the terms to ensure the hint is handled correctly.
-        search = new Search(traceDataModel, "mod1.b = mod1.a");
+        search = new Search(waveformDataModel, "mod1.b = mod1.a");
         assertEquals(2, search.getNextMatch(0));
         assertEquals(2, search.getPreviousMatch(5));
     }

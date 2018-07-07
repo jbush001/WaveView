@@ -33,34 +33,34 @@ import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 ///
-/// Load/Save TracePresentationModel state for a trace.
+/// Load/Save WaveformPresentationModel state for a waveform file.
 /// @bug If markers are past the end offset, this should probably drop them.
 ///
 
-public class TraceSettingsFile {
+public class WaveformSettingsFile {
     private final File settingsFile;
-    private final TraceDataModel traceDataModel;
-    private final TracePresentationModel tracePresentationModel;
+    private final WaveformDataModel waveformDataModel;
+    private final WaveformPresentationModel waveformPresentationModel;
 
-    /// @param file Name of a trace file
+    /// @param file Name of a waveform file
     /// @returns configuration file for this (a .dotfile in the same
     /// directory)
-    public static File settingsFileName(File file) throws IOException {
-        String parent = file.getParent();
+    public static File settingsFileName(File waveformFile) throws IOException {
+        String parent = waveformFile.getParent();
         String path;
         if (parent == null) {
-            path = "." + file.getName() + ".traceconfig";
+            path = "." + waveformFile.getName() + ".waveconfig";
         } else {
-            path = file.getParent() + "/." + file.getName() + ".traceconfig";
+            path = waveformFile.getParent() + "/." + waveformFile.getName() + ".waveconfig";
         }
 
         return new File(path);
     }
 
-    public TraceSettingsFile(File settingsFile, TraceDataModel traceDataModel, TracePresentationModel tracePresentationModel) {
+    public WaveformSettingsFile(File settingsFile, WaveformDataModel waveformDataModel, WaveformPresentationModel waveformPresentationModel) {
         this.settingsFile = settingsFile;
-        this.traceDataModel = traceDataModel;
-        this.tracePresentationModel = tracePresentationModel;
+        this.waveformDataModel = waveformDataModel;
+        this.waveformPresentationModel = waveformPresentationModel;
     }
 
     public void write() throws ParserConfigurationException, TransformerException {
@@ -72,7 +72,7 @@ public class TraceSettingsFile {
 
         Element scale = document.createElement("scale");
         configuration.appendChild(scale);
-        scale.appendChild(document.createTextNode(Double.toString(tracePresentationModel.getHorizontalScale())));
+        scale.appendChild(document.createTextNode(Double.toString(waveformPresentationModel.getHorizontalScale())));
 
         Element netSetsElement = document.createElement("netsets");
         configuration.appendChild(netSetsElement);
@@ -83,17 +83,17 @@ public class TraceSettingsFile {
         netSetsElement.appendChild(netSetElement);
 
         // Write out all of our saved net sets
-        for (int i = 0; i < tracePresentationModel.getNetSetCount(); i++) {
-            tracePresentationModel.selectNetSet(i);
+        for (int i = 0; i < waveformPresentationModel.getNetSetCount(); i++) {
+            waveformPresentationModel.selectNetSet(i);
             netSetElement = makeVisibleNetList(document);
-            netSetElement.setAttribute("name", tracePresentationModel.getNetSetName(i));
+            netSetElement.setAttribute("name", waveformPresentationModel.getNetSetName(i));
             netSetsElement.appendChild(netSetElement);
         }
 
         Element markers = document.createElement("markers");
         configuration.appendChild(markers);
 
-        for (int i = 0; i < tracePresentationModel.getMarkerCount(); i++) {
+        for (int i = 0; i < waveformPresentationModel.getMarkerCount(); i++) {
             Element markerElement = document.createElement("marker");
             markers.appendChild(markerElement);
 
@@ -103,11 +103,11 @@ public class TraceSettingsFile {
 
             Element timestamp = document.createElement("timestamp");
             markerElement.appendChild(timestamp);
-            timestamp.appendChild(document.createTextNode(Long.toString(tracePresentationModel.getTimestampForMarker(i))));
+            timestamp.appendChild(document.createTextNode(Long.toString(waveformPresentationModel.getTimestampForMarker(i))));
 
             Element description = document.createElement("description");
             markerElement.appendChild(description);
-            description.appendChild(document.createTextNode(tracePresentationModel.getDescriptionForMarker(i)));
+            description.appendChild(document.createTextNode(waveformPresentationModel.getDescriptionForMarker(i)));
         }
 
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -119,8 +119,8 @@ public class TraceSettingsFile {
     private Element makeVisibleNetList(Document document) {
         Element netSetElement = document.createElement("netset");
 
-        for (int i = 0; i < tracePresentationModel.getVisibleNetCount(); i++) {
-            NetDataModel netDataModel = tracePresentationModel.getVisibleNet(i);
+        for (int i = 0; i < waveformPresentationModel.getVisibleNetCount(); i++) {
+            NetDataModel netDataModel = waveformPresentationModel.getVisibleNet(i);
 
             Element sigElement = document.createElement("net");
             netSetElement.appendChild(sigElement);
@@ -134,7 +134,7 @@ public class TraceSettingsFile {
             Element format = document.createElement("format");
             sigElement.appendChild(format);
 
-            ValueFormatter formatter = tracePresentationModel.getValueFormatter(i);
+            ValueFormatter formatter = waveformPresentationModel.getValueFormatter(i);
             Class<? extends ValueFormatter> c = formatter.getClass();
             format.appendChild(document.createTextNode(c.getName()));
 
@@ -159,7 +159,7 @@ public class TraceSettingsFile {
     }
 
     private void readNetSet(Element element) {
-        tracePresentationModel.removeAllNets();
+        waveformPresentationModel.removeAllNets();
 
         NodeList netElements = element.getElementsByTagName("net");
         for (int i = 0; i < netElements.getLength(); i++) {
@@ -192,12 +192,12 @@ public class TraceSettingsFile {
                 formatter = new BinaryValueFormatter();
             }
 
-            NetDataModel netDataModel = traceDataModel.findNet(name);
+            NetDataModel netDataModel = waveformDataModel.findNet(name);
             if (netDataModel == null) {
                 System.out.println("unknown net " + name);
             } else {
-                tracePresentationModel.addNet(netDataModel);
-                tracePresentationModel.setValueFormatter(tracePresentationModel.getVisibleNetCount() - 1, formatter);
+                waveformPresentationModel.addNet(netDataModel);
+                waveformPresentationModel.setValueFormatter(waveformPresentationModel.getVisibleNetCount() - 1, formatter);
             }
         }
     }
@@ -206,7 +206,7 @@ public class TraceSettingsFile {
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document document = builder.parse(settingsFile);
 
-        tracePresentationModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
+        waveformPresentationModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
         // read NetSet
         NodeList netSets = document.getElementsByTagName("netset");
@@ -215,7 +215,7 @@ public class TraceSettingsFile {
         for (int i = 1; i < netSets.getLength(); i++) {
             Element netSet = (Element) netSets.item(i);
             readNetSet(netSet);
-            tracePresentationModel.saveNetSet(netSet.getAttribute("name"));
+            waveformPresentationModel.saveNetSet(netSet.getAttribute("name"));
         }
 
         // Default net set
@@ -230,7 +230,7 @@ public class TraceSettingsFile {
             /// @bug we ignore the ID and assume these are in order
             /// This will renumber markers if there are gaps. Is that okay?
             // Integer.parseInt(getSubTag(markerElem, "id"));
-            tracePresentationModel.addMarker(getSubTag(markerElem, "description"),
+            waveformPresentationModel.addMarker(getSubTag(markerElem, "description"),
                     Long.parseLong(getSubTag(markerElem, "timestamp")));
         }
     }

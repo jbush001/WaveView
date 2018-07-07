@@ -28,7 +28,7 @@ class AppPreferences {
     private static AppPreferences instance;
     private final Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
 
-    Color traceColor;
+    Color waveformColor;
     Color conflictColor;
     Color selectionColor;
     Color cursorColor;
@@ -51,14 +51,14 @@ class AppPreferences {
         readColors();
     }
 
-    // The initial trace directory is the one the file chooser will open by
-    // default when opened when the user tries to open a trace.
-    void setInitialTraceDirectory(File file) {
-        prefs.put("initialTraceDirectory", file.toString());
+    // The initial waveform directory is the one the file chooser will open by
+    // default when opened when the user tries to open a waveform.
+    void setInitialWaveformDirectory(File file) {
+        prefs.put("initialWaveformDirectory", file.toString());
     }
 
-    File getInitialTraceDirectory() {
-        return new File(prefs.get("initialTraceDirectory", ""));
+    File getInitialWaveformDirectory() {
+        return new File(prefs.get("initialWaveformDirectory", ""));
     }
 
     // The initial enum directory is the one the file chooser will open by
@@ -80,7 +80,7 @@ class AppPreferences {
     }
 
     void readColors() {
-        traceColor = readColor("traceColor", Color.black);
+        waveformColor = readColor("waveformColor", Color.black);
         conflictColor = readColor("conflictColor", new Color(255, 200, 200));
         selectionColor = readColor("selectionColor", new Color(230, 230, 230));
         cursorColor = readColor("cursorColor", Color.red);
@@ -93,7 +93,7 @@ class AppPreferences {
     }
 
     void writeColors() {
-        writeColor("traceColor", traceColor);
+        writeColor("waveformColor", waveformColor);
         writeColor("conflictColor", conflictColor);
         writeColor("selectionColor", selectionColor);
         writeColor("cursorColor", cursorColor);

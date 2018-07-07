@@ -17,10 +17,10 @@
 package waveview;
 
 ///
-/// Loader calls this to copy information from a trace into the model.
+/// Loader calls this to copy information from a waveform into the model.
 ///
 
-public interface TraceBuilder {
+public interface WaveformBuilder {
     /// Set timescale.
     /// @param order 10 raised to this number is the number of seconds per
     /// time unit.
@@ -51,6 +51,6 @@ public interface TraceBuilder {
     public void appendTransition(int netId, long timestamp, BitVector values);
 
     /// Called when all nets and transitions have been added. No other methods
-    /// in TraceBuilder will be called after this.
+    /// in WaveformBuilder will be called after this.
     public void loadFinished();
 }

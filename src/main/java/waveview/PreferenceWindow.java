@@ -27,7 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 class PreferenceWindow extends JDialog {
-    private final ColorButton traceColorButton;
+    private final ColorButton waveformColorButton;
     private final ColorButton conflictColorButton;
     private final ColorButton selectionColorButton;
     private final ColorButton cursorColorButton;
@@ -49,8 +49,8 @@ class PreferenceWindow extends JDialog {
         JPanel bodyArea = new JPanel();
         bodyArea.setLayout(new GridLayout(10, 1));
         AppPreferences prefs = AppPreferences.getInstance();
-        traceColorButton = new ColorButton("Trace", prefs.traceColor);
-        bodyArea.add(traceColorButton);
+        waveformColorButton = new ColorButton("Waveform", prefs.waveformColor);
+        bodyArea.add(waveformColorButton);
         conflictColorButton = new ColorButton("Conflict", prefs.conflictColor);
         bodyArea.add(conflictColorButton);
         selectionColorButton = new ColorButton("Selection", prefs.selectionColor);
@@ -93,7 +93,7 @@ class PreferenceWindow extends JDialog {
 
     protected void ok() {
         AppPreferences prefs = AppPreferences.getInstance();
-        prefs.traceColor = traceColorButton.getColor();
+        prefs.waveformColor = waveformColorButton.getColor();
         prefs.conflictColor = conflictColorButton.getColor();
         prefs.selectionColor = selectionColorButton.getColor();
         prefs.cursorColor = cursorColorButton.getColor();

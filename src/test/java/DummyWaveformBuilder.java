@@ -15,9 +15,9 @@
 //
 
 import waveview.BitVector;
-import waveview.TraceBuilder;
+import waveview.WaveformBuilder;
 
-class DummyTraceBuilder implements TraceBuilder {
+class DummyWaveformBuilder implements WaveformBuilder {
     private int nextNetId;
 
     @Override

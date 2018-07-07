@@ -14,10 +14,10 @@
 // limitations under the License.
 //
 
-import waveview.TracePresentationModel;
+import waveview.WaveformPresentationModel;
 
-// TraceDisplay listener stand-in, validates that the proper events were received.
-class TracePresentationModelListener implements TracePresentationModel.Listener {
+// WaveformPresentationModel.Listener stand-in, validates that the proper events were received.
+class WaveformPresentationModelListener implements WaveformPresentationModel.Listener {
     public static final int CURSOR_CHANGED = 1;
     public static final int NETS_ADDED = 2;
     public static final int NETS_REMOVED = 4;

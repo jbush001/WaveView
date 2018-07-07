@@ -38,9 +38,9 @@ import javax.swing.tree.TreePath;
 /// Displays searchable lists of all nets in a design. Can be dragged onto
 /// the visible net view to see them.
 ///
-class NetSearchPanel extends JPanel {
+class NetSearchView extends JPanel {
     private final JTree tree;
-    private final TraceDataModel traceDataModel;
+    private final WaveformDataModel waveformDataModel;
     private final ImageIcon netIcon;
     private final ImageIcon moduleIcon;
 
@@ -54,7 +54,7 @@ class NetSearchPanel extends JPanel {
 
         private void buildNetListRecursive(Object node, StringBuilder indexList) {
             if (tree.getModel().isLeaf(node)) {
-                indexList.append(traceDataModel.getNetFromTreeObject(node).getFullName());
+                indexList.append(waveformDataModel.getNetFromTreeObject(node).getFullName());
                 indexList.append('\n');
                 return;
             }
@@ -90,11 +90,11 @@ class NetSearchPanel extends JPanel {
         }
     }
 
-    NetSearchPanel(TraceDataModel traceDataModel) {
+    NetSearchView(WaveformDataModel waveformDataModel) {
         super(new BorderLayout());
         setPreferredSize(new Dimension(275, 500));
 
-        this.traceDataModel = traceDataModel;
+        this.waveformDataModel = waveformDataModel;
 
         JTabbedPane tabView = new JTabbedPane();
         add(tabView);
@@ -103,7 +103,7 @@ class NetSearchPanel extends JPanel {
         JPanel treeTab = new JPanel();
         tabView.addTab("Tree", null, treeTab, "tree view");
         treeTab.setLayout(new BorderLayout());
-        tree = new JTree(traceDataModel.getNetTree());
+        tree = new JTree(waveformDataModel.getNetTree());
         tree.setCellRenderer(new NetTreeCellRenderer());
         tree.setDragEnabled(true);
         tree.setTransferHandler(new NetTreeTransferHandler());
@@ -119,7 +119,7 @@ class NetSearchPanel extends JPanel {
         searchTab.setLayout(new BorderLayout());
         JTextField searchField = new JTextField();
         searchTab.add(searchField, BorderLayout.NORTH);
-        NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(traceDataModel);
+        NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(waveformDataModel);
         JList<String> netList = new JList<>(adapter);
         searchField.getDocument().addDocumentListener(adapter);
         netList.setDragEnabled(true);

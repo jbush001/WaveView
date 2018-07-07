@@ -21,14 +21,14 @@ import java.util.NoSuchElementException;
 
 ///
 /// An ordered series of value changes on a single net (which may have
-/// one or more bits).  This is a convenience class used by TraceDataModel.
+/// one or more bits).  This is a convenience class used by WaveformDataModel.
 /// Allocating hundreds of thousands of Transition objects would be slow and
 /// inefficient, so this stores the values packed into a single array.
 /// Because it is sorted, it supports efficient binary searches for values
 /// at specific timestamps.
 ///
 /// @bug This doesn't propertly handle nets that are uninitalized at the beginning
-/// of the trace.  They are assumed to have the value of the first transition.
+/// of the waveform.  They are assumed to have the value of the first transition.
 ///
 public class TransitionVector {
     // Number of bits for this net

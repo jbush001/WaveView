@@ -33,14 +33,14 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 
-class FindPanel extends JPanel implements ActionListener {
+class FindView extends JPanel implements ActionListener {
     private final MainWindow mainWindow;
     private final transient Highlighter errorHighlighter;
     private final transient Highlighter.HighlightPainter highlightPainter;
     private final JTextArea searchExprTextArea;
     private boolean needToParseSearch = true;
 
-    FindPanel(MainWindow mainWindow, String initialSearch) {
+    FindView(MainWindow mainWindow, String initialSearch) {
         this.mainWindow = mainWindow;
 
         setLayout(new BorderLayout());

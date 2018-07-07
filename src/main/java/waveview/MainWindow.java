@@ -40,16 +40,16 @@ import javax.swing.ProgressMonitor;
 
 /// @todo Add menu item to jump to specific timestamp
 public class MainWindow extends JPanel implements ActionListener {
-    private final TracePanel tracePanel;
-    private final TracePresentationModel tracePresentationModel = new TracePresentationModel();
-    private final TraceDataModel traceDataModel = new TraceDataModel();
+    private final WaveformContainerView waveformContainer;
+    private final WaveformPresentationModel waveformPresentationModel = new WaveformPresentationModel();
+    private final WaveformDataModel waveformDataModel = new WaveformDataModel();
     private Search currentSearch;
     private JMenu netMenu;
     private JFrame frame;
     private JMenu recentFilesMenu;
-    private TraceSettingsFile traceSettingsFile;
-    private File currentTraceFile;
-    private NetSearchPanel netSearchPane;
+    private WaveformSettingsFile waveformSettingsFile;
+    private File currentWaveformFile;
+    private NetSearchView netSearchPane;
     private final RecentFiles recentFiles = new RecentFiles();
 
     public MainWindow() {
@@ -64,8 +64,8 @@ public class MainWindow extends JPanel implements ActionListener {
         toolBar.add(createButton("add-marker.png", "Insert Marker", "insertMarker"));
         toolBar.add(createButton("remove-marker.png", "Remove Marker", "removeMarker"));
 
-        tracePanel = new TracePanel(tracePresentationModel, traceDataModel);
-        add(tracePanel, BorderLayout.CENTER);
+        waveformContainer = new WaveformContainerView(waveformPresentationModel, waveformDataModel);
+        add(waveformContainer, BorderLayout.CENTER);
 
         recentFiles.unpack(AppPreferences.getInstance().getRecentList());
 
@@ -89,31 +89,31 @@ public class MainWindow extends JPanel implements ActionListener {
         String cmd = e.getActionCommand();
         switch (cmd) {
         case "zoomin":
-            tracePanel.zoomIn();
+            waveformContainer.zoomIn();
             break;
         case "zoomout":
-            tracePanel.zoomOut();
+            waveformContainer.zoomOut();
             break;
         case "zoomselection":
-            tracePanel.zoomToSelection();
+            waveformContainer.zoomToSelection();
             break;
         case "addnet":
             addNet();
             break;
-        case "opentrace":
-            openTrace();
+        case "openwaveform":
+            openWaveform();
             break;
-        case "reloadtrace":
-            loadTraceFile(currentTraceFile);
+        case "reloadwaveform":
+            loadWaveformFile(currentWaveformFile);
             break;
         case "quit":
             frame.dispose();
             break;
         case "removeAllMarkers":
-            tracePresentationModel.removeAllMarkers();
+            waveformPresentationModel.removeAllMarkers();
             break;
         case "removeAllNets":
-            tracePresentationModel.removeAllNets();
+            waveformPresentationModel.removeAllNets();
             break;
         case "insertMarker":
             insertMarker();
@@ -148,10 +148,10 @@ public class MainWindow extends JPanel implements ActionListener {
         default:
             if (cmd.length() > 7 && cmd.substring(0, 7).equals("netSet_")) {
                 int index = Integer.parseInt(cmd.substring(7));
-                tracePresentationModel.selectNetSet(index);
+                waveformPresentationModel.selectNetSet(index);
             } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
                 // Load from recents menu
-                loadTraceFile(cmd.substring(5));
+                loadWaveformFile(cmd.substring(5));
             }
         }
     }
@@ -160,7 +160,7 @@ public class MainWindow extends JPanel implements ActionListener {
         if (netSearchPane == null) {
             /// @bug This is a hack. It makes sure the search
             /// panel is created after the file is loaded.
-            netSearchPane = new NetSearchPanel(traceDataModel);
+            netSearchPane = new NetSearchView(waveformDataModel);
             add(netSearchPane, BorderLayout.WEST);
 
             /// @bug Bigger hack: for some reason it doesn't show up
@@ -177,14 +177,14 @@ public class MainWindow extends JPanel implements ActionListener {
         String description = (String) JOptionPane.showInputDialog(frame, "Description for this marker", "New Marker",
                 JOptionPane.PLAIN_MESSAGE, null, null, null);
         if (description != null) {
-            tracePresentationModel.addMarker(description, tracePresentationModel.getCursorPosition());
+            waveformPresentationModel.addMarker(description, waveformPresentationModel.getCursorPosition());
         }
     }
 
     private void showMarkerList() {
         JDialog markersWindow = new JDialog(frame, "Markers", true);
         markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        MarkerListPanel contentPane = new MarkerListPanel(tracePresentationModel);
+        MarkerListView contentPane = new MarkerListView(waveformPresentationModel);
         contentPane.setOpaque(true);
         markersWindow.setPreferredSize(new Dimension(400, 300));
         markersWindow.setContentPane(contentPane);
@@ -194,25 +194,25 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     private void nextMarker(ActionEvent e) {
-        tracePresentationModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+        waveformPresentationModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     }
 
     private void prevMarker(ActionEvent e) {
-        tracePresentationModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+        waveformPresentationModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     }
 
     private void removeMarker() {
-        tracePresentationModel.removeMarkerAtTime(tracePresentationModel.getCursorPosition());
+        waveformPresentationModel.removeMarkerAtTime(waveformPresentationModel.getCursorPosition());
     }
 
-    private void openTrace() {
-        JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialTraceDirectory());
+    private void openWaveform() {
+        JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialWaveformDirectory());
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
         int returnValue = chooser.showOpenDialog(this);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            AppPreferences.getInstance().setInitialTraceDirectory(chooser.getSelectedFile().getParentFile());
-            loadTraceFile(chooser.getSelectedFile());
+            AppPreferences.getInstance().setInitialWaveformDirectory(chooser.getSelectedFile().getParentFile());
+            loadWaveformFile(chooser.getSelectedFile());
         }
     }
 
@@ -220,7 +220,7 @@ public class MainWindow extends JPanel implements ActionListener {
         String name = (String) JOptionPane.showInputDialog(frame, "Net Set Name", "Save Net Set",
                 JOptionPane.PLAIN_MESSAGE, null, null, null);
         if (!name.equals("")) {
-            tracePresentationModel.saveNetSet(name);
+            waveformPresentationModel.saveNetSet(name);
             buildNetMenu();
         }
     }
@@ -232,18 +232,18 @@ public class MainWindow extends JPanel implements ActionListener {
         prefsWindow.setVisible(true);
     }
 
-    public void loadTraceFile(String path) {
-        loadTraceFile(new File(path));
+    public void loadWaveformFile(String path) {
+        loadWaveformFile(new File(path));
     }
 
-    private void loadTraceFile(File file) {
-        saveTraceSettings();
+    private void loadWaveformFile(File file) {
+        saveWaveformSettings();
         ProgressMonitor monitor = new ProgressMonitor(MainWindow.this, "Loading...", "", 0, 100);
-        new TraceLoadWorker(file, monitor, (newModel, errorMessage)
+        new WaveformLoadWorker(file, monitor, (newModel, errorMessage)
                 -> handleLoadFinished(file, newModel, errorMessage)).execute();
     }
 
-    private void handleLoadFinished(File file, TraceDataModel newModel, String errorMessage) {
+    private void handleLoadFinished(File file, WaveformDataModel newModel, String errorMessage) {
         if (errorMessage != null) {
             JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
                 + errorMessage);
@@ -251,16 +251,16 @@ public class MainWindow extends JPanel implements ActionListener {
         }
 
         currentSearch = null;
-        tracePresentationModel.clear();
+        waveformPresentationModel.clear();
 
         // XXX hack
         // Because the load ran on a separate thread, and I didn't want to add locking
         // everywhere, this loaded into a new copy of a data model. However, there are
-        // references to the trace data model scattered all over the place. Rather
+        // references to the waveform data model scattered all over the place. Rather
         // than try to update all pointers to the new model, this just copies data from
         // the new object to the old one. Since this runs on the main window thread now,
         // this is safe.
-        traceDataModel.copyFrom(newModel);
+        waveformDataModel.copyFrom(newModel);
 
         frame.setTitle("Waveform Viewer [" + file.getName() + "]");
 
@@ -268,10 +268,10 @@ public class MainWindow extends JPanel implements ActionListener {
             recentFiles.add(file.getCanonicalPath());
             AppPreferences.getInstance().setRecentList(recentFiles.pack());
 
-            File settingsFile = TraceSettingsFile.settingsFileName(file);
-            traceSettingsFile = new TraceSettingsFile(settingsFile, traceDataModel, tracePresentationModel);
+            File settingsFile = WaveformSettingsFile.settingsFileName(file);
+            waveformSettingsFile = new WaveformSettingsFile(settingsFile, waveformDataModel, waveformPresentationModel);
             if (settingsFile.exists()) {
-                traceSettingsFile.read();
+                waveformSettingsFile.read();
             }
         } catch (Exception exc) {
             System.out.println("caught exception while reading settings " + exc);
@@ -281,7 +281,7 @@ public class MainWindow extends JPanel implements ActionListener {
         buildRecentFilesMenu();
         buildNetMenu();
         destroyNetSearchPane();
-        currentTraceFile = file;
+        currentWaveformFile = file;
     }
 
     // XXX hack
@@ -300,7 +300,7 @@ public class MainWindow extends JPanel implements ActionListener {
 
     private void showFindDialog() {
         String initialSearch = generateSearchFromSelection();
-        FindPanel findPanel = new FindPanel(this, initialSearch);
+        FindView findPanel = new FindView(this, initialSearch);
         JDialog findFrame = new JDialog(this.frame, "Find", true);
         findFrame.getContentPane().add(findPanel);
         findFrame.setSize(new Dimension(450, 150));
@@ -314,10 +314,10 @@ public class MainWindow extends JPanel implements ActionListener {
     private String generateSearchFromSelection() {
         StringBuilder searchExpr = new StringBuilder();
         boolean first = true;
-        long cursorPosition = tracePresentationModel.getCursorPosition();
+        long cursorPosition = waveformPresentationModel.getCursorPosition();
 
-        for (int index : tracePanel.getSelectedNets()) {
-            NetDataModel netDataModel = tracePresentationModel.getVisibleNet(index);
+        for (int index : waveformContainer.getSelectedNets()) {
+            NetDataModel netDataModel = waveformPresentationModel.getVisibleNet(index);
             if (first) {
                 first = false;
             } else {
@@ -335,39 +335,39 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     void setSearch(String searchString) throws Search.ParseException {
-        currentSearch = new Search(traceDataModel, searchString);
+        currentSearch = new Search(waveformDataModel, searchString);
     }
 
     void findNext(boolean extendSelection) {
         if (currentSearch != null) {
-            long newTimestamp = currentSearch.getNextMatch(tracePresentationModel.getCursorPosition());
+            long newTimestamp = currentSearch.getNextMatch(waveformPresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
                 if (!extendSelection) {
-                    tracePresentationModel.setSelectionStart(newTimestamp);
+                    waveformPresentationModel.setSelectionStart(newTimestamp);
                 }
 
-                tracePresentationModel.setCursorPosition(newTimestamp);
+                waveformPresentationModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
     void findPrev(boolean extendSelection) {
         if (currentSearch != null) {
-            long newTimestamp = currentSearch.getPreviousMatch(tracePresentationModel.getCursorPosition());
+            long newTimestamp = currentSearch.getPreviousMatch(waveformPresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
                 if (!extendSelection) {
-                    tracePresentationModel.setSelectionStart(newTimestamp);
+                    waveformPresentationModel.setSelectionStart(newTimestamp);
                 }
 
-                tracePresentationModel.setCursorPosition(newTimestamp);
+                waveformPresentationModel.setCursorPosition(newTimestamp);
             }
         }
     }
 
-    private void saveTraceSettings() {
+    private void saveWaveformSettings() {
         try {
-            if (traceSettingsFile != null)
-                traceSettingsFile.write();
+            if (waveformSettingsFile != null)
+                waveformSettingsFile.write();
         } catch (Exception exc) {
             System.out.println("Error saving configuration file " + exc);
         }
@@ -391,10 +391,10 @@ public class MainWindow extends JPanel implements ActionListener {
         item.addActionListener(this);
         netMenu.add(item);
 
-        if (tracePresentationModel.getNetSetCount() > 0) {
+        if (waveformPresentationModel.getNetSetCount() > 0) {
             netMenu.addSeparator();
-            for (int i = 0; i < tracePresentationModel.getNetSetCount(); i++) {
-                item = new JMenuItem(tracePresentationModel.getNetSetName(i));
+            for (int i = 0; i < waveformPresentationModel.getNetSetCount(); i++) {
+                item = new JMenuItem(waveformPresentationModel.getNetSetName(i));
                 item.setActionCommand("netSet_" + i);
                 item.addActionListener(this);
                 netMenu.add(item);
@@ -408,14 +408,14 @@ public class MainWindow extends JPanel implements ActionListener {
 
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
-        fileMenu.add(createMenuItem("Open Trace...", "opentrace",
+        fileMenu.add(createMenuItem("Open Waveform...", "openwaveform",
                 KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.META_DOWN_MASK)));
 
         recentFilesMenu = new JMenu("Open Recent");
         fileMenu.add(recentFilesMenu);
         buildRecentFilesMenu();
 
-        fileMenu.add(createMenuItem("Reload Trace", "reloadtrace", null));
+        fileMenu.add(createMenuItem("Reload Waveform", "reloadwaveform", null));
         fileMenu.add(createMenuItem("Preferences...", "prefs", null));
         fileMenu.add(createMenuItem("Quit", "quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.META_DOWN_MASK)));
 
@@ -484,7 +484,7 @@ public class MainWindow extends JPanel implements ActionListener {
         frame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                contentPane.saveTraceSettings();
+                contentPane.saveWaveformSettings();
             }
         });
 
@@ -494,7 +494,7 @@ public class MainWindow extends JPanel implements ActionListener {
         frame.setVisible(true);
 
         if (args.length > 0) {
-            contentPane.loadTraceFile(args[0]);
+            contentPane.loadWaveformFile(args[0]);
         }
     }
 

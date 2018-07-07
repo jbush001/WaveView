@@ -33,10 +33,10 @@ import javax.swing.event.ListDataEvent;
 public class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     private ListDataListener listDataListener;
     private final ArrayList<String> matches = new ArrayList<>();
-    private final TraceDataModel traceDataModel;
+    private final WaveformDataModel waveformDataModel;
 
-    public NetSearchListModelAdapter(TraceDataModel traceDataModel) {
-        this.traceDataModel = traceDataModel;
+    public NetSearchListModelAdapter(WaveformDataModel waveformDataModel) {
+        this.waveformDataModel = waveformDataModel;
         setPattern("");
     }
 
@@ -47,12 +47,12 @@ public class NetSearchListModelAdapter implements ListModel<String>, DocumentLis
     public void setPattern(String pattern) {
         if (pattern.equals("")) {
             matches.clear();
-            for (NetDataModel netDataModel : traceDataModel) {
+            for (NetDataModel netDataModel : waveformDataModel) {
                 matches.add(netDataModel.getFullName());
             }
         } else {
             matches.clear();
-            for (NetDataModel netDataModel : traceDataModel) {
+            for (NetDataModel netDataModel : waveformDataModel) {
                 String name = netDataModel.getFullName();
                 if (name.indexOf(pattern) != -1) {
                     matches.add(name);

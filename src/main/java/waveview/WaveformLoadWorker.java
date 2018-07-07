@@ -21,20 +21,20 @@ import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-class TraceLoadWorker extends SwingWorker<Void, Void> {
+class WaveformLoadWorker extends SwingWorker<Void, Void> {
     interface LoadFinishedHandler {
         // On success, error message will be null.
         // If an error occurs, errorMessage will be set.
-        void handleLoadFinished(TraceDataModel newModel, String errorMessage);
+        void handleLoadFinished(WaveformDataModel newModel, String errorMessage);
     }
 
     private final File file;
     private final ProgressMonitor progressMonitor;
-    private final TraceDataModel newModel = new TraceDataModel();
+    private final WaveformDataModel newModel = new WaveformDataModel();
     private String errorMessage;
     private LoadFinishedHandler finishHandler;
 
-    TraceLoadWorker(File file, ProgressMonitor progressMonitor, LoadFinishedHandler finishHandler) {
+    WaveformLoadWorker(File file, ProgressMonitor progressMonitor, LoadFinishedHandler finishHandler) {
         this.file = file;
         this.progressMonitor = progressMonitor;
         this.finishHandler = finishHandler;
@@ -44,7 +44,7 @@ class TraceLoadWorker extends SwingWorker<Void, Void> {
     public Void doInBackground() {
         /// @todo Determine the loader type dynamically
         try {
-            TraceLoader.ProgressListener progressListener = new TraceLoader.ProgressListener() {
+            WaveformLoader.ProgressListener progressListener = new WaveformLoader.ProgressListener() {
                 @Override
                 public boolean updateProgress(final int percentRead) {
                     // Accessing the component from a different thread, technically

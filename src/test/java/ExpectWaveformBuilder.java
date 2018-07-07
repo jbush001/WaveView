@@ -17,11 +17,11 @@
 import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import waveview.BitVector;
-import waveview.TraceBuilder;
+import waveview.WaveformBuilder;
 
-//// Implements TraceBuilder interface, which the VCDLoader will write into,
+//// Implements WaveformBuilder interface, which the VCDLoader will write into,
 /// but asserts if events don't match a pre-defined sequence.
-class ExpectTraceBuilder implements TraceBuilder {
+class ExpectWaveformBuilder implements WaveformBuilder {
     static final int EXPECT_ENTER = 0;
     static final int EXPECT_EXIT = 1;
     static final int EXPECT_NET = 2;

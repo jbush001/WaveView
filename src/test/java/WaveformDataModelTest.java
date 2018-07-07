@@ -26,13 +26,13 @@ import org.junit.Test;
 import waveview.BitVector;
 import waveview.NetDataModel;
 import waveview.NetTreeModel;
-import waveview.TraceBuilder;
-import waveview.TraceDataModel;
+import waveview.WaveformBuilder;
+import waveview.WaveformDataModel;
 import waveview.Transition;
 
-public class TraceDataModelTest {
-    private final TraceDataModel model = new TraceDataModel();
-    private TraceBuilder builder;
+public class WaveformDataModelTest {
+    private final WaveformDataModel model = new WaveformDataModel();
+    private WaveformBuilder builder;
 
     @Before
     public void initTest() {
@@ -40,7 +40,7 @@ public class TraceDataModelTest {
     }
 
     @Test
-    public void buildTraceDataModel() {
+    public void buildWaveformDataModel() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
@@ -111,7 +111,7 @@ public class TraceDataModelTest {
     }
 
     @Test
-    public void aliasTrace() {
+    public void aliasNet() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
         int net1 = builder.newNet("net1", -1, 1);
@@ -150,7 +150,7 @@ public class TraceDataModelTest {
         builder.appendTransition(net1, 17, new BitVector("1", 2));
         builder.loadFinished();
 
-        TraceDataModel model2 = new TraceDataModel();
+        WaveformDataModel model2 = new WaveformDataModel();
         model2.copyFrom(model);
 
         // Ensure timescale was copied

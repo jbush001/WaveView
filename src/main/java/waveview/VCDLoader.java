@@ -27,12 +27,12 @@ import java.util.HashMap;
 
 ///
 /// Parse a value change dump (VCD) formatted text file and push the contents into a
-/// provided trace model
+/// provided waveform model
 /// All section references are to IEEE 1364-2001.
 ///
-public class VCDLoader implements TraceLoader {
+public class VCDLoader implements WaveformLoader {
     private StreamTokenizer tokenizer;
-    private TraceBuilder traceBuilder;
+    private WaveformBuilder waveformBuilder;
     private long currentTime;
     private final HashMap<String, Net> netMap = new HashMap<>();
     private int totalTransitions;
@@ -43,10 +43,10 @@ public class VCDLoader implements TraceLoader {
     private long updateInterval;
 
     @Override
-    public void load(File file, TraceBuilder traceBuilder, ProgressListener progressListener)
+    public void load(File file, WaveformBuilder waveformBuilder, ProgressListener progressListener)
             throws LoadException, IOException {
         this.progressListener = progressListener;
-        this.traceBuilder = traceBuilder;
+        this.waveformBuilder = waveformBuilder;
 
         try (FileInputStream inputStream = new FileInputStream(file))  {
             progressStream = new ProgressInputStream(inputStream);
@@ -67,7 +67,7 @@ public class VCDLoader implements TraceLoader {
                     parseTransition();
             }
 
-            traceBuilder.loadFinished();
+            waveformBuilder.loadFinished();
         }
 
         System.out.println("parsed " + totalTransitions + " total transitions");
@@ -92,14 +92,14 @@ public class VCDLoader implements TraceLoader {
         nextToken(true); // Scope type
         nextToken(true);
         String scopeIdentifier = getTokenString();
-        traceBuilder.enterScope(scopeIdentifier);
+        waveformBuilder.enterScope(scopeIdentifier);
         match("$end");
     }
 
     // 18.2.3.6 $upscope
     private void parseUpscope() throws LoadException, IOException {
         match("$end");
-        traceBuilder.exitScope();
+        waveformBuilder.exitScope();
     }
 
     /// 18.2.3.8 $var
@@ -136,11 +136,11 @@ public class VCDLoader implements TraceLoader {
                 netName = netName.substring(0, openBracket);
             }
 
-            net = new Net(traceBuilder.newNet(netName, -1, width), width);
+            net = new Net(waveformBuilder.newNet(netName, -1, width), width);
             netMap.put(id, net);
         } else {
             // Shares data with existing net. Add as clone.
-            traceBuilder.newNet(netName, net.builderId, width);
+            waveformBuilder.newNet(netName, net.builderId, width);
         }
     }
 
@@ -202,7 +202,7 @@ public class VCDLoader implements TraceLoader {
         }
 
         match("$end");
-        traceBuilder.setTimescale(order);
+        waveformBuilder.setTimescale(order);
     }
 
     /// @returns true if there are more definitions, false if it has hit
@@ -331,7 +331,7 @@ public class VCDLoader implements TraceLoader {
                 decodedValues.setBit(outBit++, padValue);
             }
 
-            traceBuilder.appendTransition(net.builderId, currentTime, decodedValues);
+            waveformBuilder.appendTransition(net.builderId, currentTime, decodedValues);
         }
     }
 

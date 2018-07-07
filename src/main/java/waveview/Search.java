@@ -29,11 +29,11 @@ import java.util.Iterator;
 public class Search {
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
     private final Lexer lexer;
-    private final TraceDataModel traceDataModel;
+    private final WaveformDataModel waveformDataModel;
     private ExpressionNode searchExpression;
 
-    public Search(TraceDataModel traceModel, String searchString) throws ParseException {
-        this.traceDataModel = traceModel;
+    public Search(WaveformDataModel waveformDataModel, String searchString) throws ParseException {
+        this.waveformDataModel = waveformDataModel;
         lexer = new Lexer(searchString);
         searchExpression = parseExpression();
         match(Lexer.TOK_END);
@@ -43,7 +43,7 @@ public class Search {
     /// @returns true if this search string matches at the passed timestamp
     public boolean matches(long timestamp) {
         SearchHint hint = new SearchHint();
-        return searchExpression.evaluate(traceDataModel, timestamp, hint);
+        return searchExpression.evaluate(waveformDataModel, timestamp, hint);
     }
 
     ///
@@ -61,27 +61,27 @@ public class Search {
     public long getNextMatch(long startTimestamp) {
         SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
+        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
 
         // If the start timestamp is already at a region that is true, scan
         // first to find a place where the expression is false.
         while (currentValue) {
             if (hint.forwardTimestamp == Long.MAX_VALUE) {
-                return -1; // End of trace
+                return -1; // End of waveform
             }
 
             currentTime = hint.forwardTimestamp;
-            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
         }
 
         // Scan to find where the expression is true
         while (!currentValue) {
             if (hint.forwardTimestamp == Long.MAX_VALUE) {
-                return -1; // End of trace
+                return -1; // End of waveform
             }
 
             currentTime = hint.forwardTimestamp;
-            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
         }
 
         return currentTime;
@@ -98,23 +98,23 @@ public class Search {
     public long getPreviousMatch(long startTimestamp) {
         SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
+        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
         while (currentValue) {
             if (hint.backwardTimestamp == Long.MIN_VALUE) {
-                return -1; // End of trace
+                return -1; // End of waveform
             }
 
             currentTime = hint.backwardTimestamp;
-            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
         }
 
         while (!currentValue) {
             if (hint.backwardTimestamp == Long.MIN_VALUE) {
-                return -1; // End of trace
+                return -1; // End of waveform
             }
 
             currentTime = hint.backwardTimestamp;
-            currentValue = searchExpression.evaluate(traceDataModel, currentTime, hint);
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
         }
 
         return currentTime;
@@ -435,7 +435,7 @@ public class Search {
     private ValueNode parseValue() throws ParseException {
         int lookahead = lexer.nextToken();
         if (lookahead == Lexer.TOK_IDENTIFIER) {
-            NetDataModel netDataModel = traceDataModel.findNet(lexer.getTokenString());
+            NetDataModel netDataModel = waveformDataModel.findNet(lexer.getTokenString());
             if (netDataModel == null) {
                 throw new ParseException("unknown net \"" + lexer.getTokenString() + "\"", lexer.getTokenStart(),
                         lexer.getTokenEnd());
@@ -464,7 +464,7 @@ public class Search {
         /// @return
         /// - true if the value at the timestamp makes this expression true
         /// - false if the value at the timestamp makes this expression true
-        abstract boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint);
+        abstract boolean evaluate(WaveformDataModel model, long timestamp, SearchHint outHint);
     }
 
     private abstract static class BooleanExpressionNode extends ExpressionNode {
@@ -482,7 +482,7 @@ public class Search {
         }
 
         @Override
-        boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
+        boolean evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
             boolean leftResult = leftChild.evaluate(model, timestamp, leftHint);
             boolean rightResult = rightChild.evaluate(model, timestamp, rightHint);
 
@@ -598,7 +598,7 @@ public class Search {
     }
 
     private abstract static class ValueNode {
-        abstract BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint);
+        abstract BitVector evaluate(WaveformDataModel model, long timestamp, SearchHint outHint);
     }
 
     private static class NetValueNode extends ValueNode {
@@ -613,7 +613,7 @@ public class Search {
         }
 
         @Override
-        BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
+        BitVector evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
             Iterator<Transition> i = netDataModel.findTransition(timestamp);
             Transition t = i.next();
             value.assign(t);
@@ -647,7 +647,7 @@ public class Search {
         }
 
         @Override
-        BitVector evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
+        BitVector evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
             outHint.backwardTimestamp = Long.MIN_VALUE;
             outHint.forwardTimestamp = Long.MAX_VALUE;
             return value;
@@ -674,7 +674,7 @@ public class Search {
         }
 
         @Override
-        boolean evaluate(TraceDataModel model, long timestamp, SearchHint outHint) {
+        boolean evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
             BitVector leftValue = leftNode.evaluate(model, timestamp, leftHint);
             BitVector rightValue = rightNode.evaluate(model, timestamp, rightHint);
             boolean result = doCompare(leftValue, rightValue);

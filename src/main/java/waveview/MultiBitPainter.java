@@ -41,7 +41,7 @@ class MultiBitPainter implements WaveformPainter {
         String previousValue = "";
         long firstTimestamp = (long) (visibleRect.x / horizontalScale);
 
-        g.setColor(AppPreferences.getInstance().traceColor);
+        g.setColor(AppPreferences.getInstance().waveformColor);
 
         Iterator<Transition> i = model.findTransition(firstTimestamp);
         while (true) {
@@ -76,7 +76,7 @@ class MultiBitPainter implements WaveformPainter {
                     previousValue, lastValueWasZ, lastValueWasX, fontBaseline, metrics);
 
             // Stop drawing when we've gone past the edge of the viewport
-            // (trace is no longer visible).
+            // (waveform is no longer visible).
             if (x > visibleRect.x + visibleRect.width) {
                 break;
             }
@@ -86,7 +86,7 @@ class MultiBitPainter implements WaveformPainter {
             lastValueWasX = isX;
             lastX = x;
             if (!i.hasNext()) {
-                // End of the trace. Draw remaining span running off to the right...
+                // End of the waveform. Draw remaining span running off to the right...
                 drawSpan(g, Math.max(visibleRect.x, lastX + DrawMetrics.WAVEFORM_TRANSITION_WIDTH),
                         visibleRect.x + visibleRect.width, topOffset, previousValue, lastValueWasZ, lastValueWasX,
                         fontBaseline, metrics);
@@ -107,7 +107,7 @@ class MultiBitPainter implements WaveformPainter {
             g.fillPolygon(polygonXPoints, polygonYPoints, 3);
         }
 
-        g.setColor(AppPreferences.getInstance().traceColor);
+        g.setColor(AppPreferences.getInstance().waveformColor);
         g.drawLine(baseX, topOffset, transitionX, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
         g.drawLine(baseX, topOffset + DrawMetrics.WAVEFORM_HEIGHT, transitionX,
                 topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
@@ -125,7 +125,7 @@ class MultiBitPainter implements WaveformPainter {
             if (isX) {
                 g.setColor(AppPreferences.getInstance().conflictColor);
                 g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
-                g.setColor(AppPreferences.getInstance().traceColor);
+                g.setColor(AppPreferences.getInstance().waveformColor);
             }
 
             g.drawLine(left, top, right, top);

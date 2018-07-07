@@ -25,26 +25,26 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 ///
-/// Draws the ruler with times at the top of the trace view.
+/// Draws the ruler with times at the top of the waveform view.
 ///
-class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
+class TimescaleView extends JPanel implements WaveformPresentationModel.Listener {
     private static final int TIMESTAMP_DISAPPEAR_INTERVAL = 500;
 
     private boolean showTimestamp;
     private long unitMagnitude = 1;
     private String unitName = "s";
-    private final TracePresentationModel tracePresentationModel;
-    private final TraceDataModel traceDataModel;
+    private final WaveformPresentationModel waveformPresentationModel;
+    private final WaveformDataModel waveformDataModel;
     private final Timer timestampDisplayTimer;
 
-    TimescalePanel(TracePresentationModel tracePresentationModel, TraceDataModel traceDataModel) {
-        this.tracePresentationModel = tracePresentationModel;
-        this.traceDataModel = traceDataModel;
-        tracePresentationModel.addListener(this);
+    TimescaleView(WaveformPresentationModel waveformPresentationModel, WaveformDataModel waveformDataModel) {
+        this.waveformPresentationModel = waveformPresentationModel;
+        this.waveformDataModel = waveformDataModel;
+        waveformPresentationModel.addListener(this);
         setBackground(AppPreferences.getInstance().backgroundColor);
         setPreferredSize(new Dimension(200, DrawMetrics.TIMESCALE_HEIGHT));
         setFont(new Font("SansSerif", Font.PLAIN, 9));
-        scaleChanged(tracePresentationModel.getHorizontalScale());
+        scaleChanged(waveformPresentationModel.getHorizontalScale());
 
         // The timestamp is shown when the user clicks to set the cursor position.
         // This timer makes it disappear after a bit.
@@ -57,20 +57,20 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
     }
 
     private void adjustCanvasSize() {
-        scaleChanged(tracePresentationModel.getHorizontalScale());
+        scaleChanged(waveformPresentationModel.getHorizontalScale());
     }
 
     @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        int oldX = (int) (oldTimestamp * tracePresentationModel.getHorizontalScale());
-        int newX = (int) (newTimestamp * tracePresentationModel.getHorizontalScale());
+        int oldX = (int) (oldTimestamp * waveformPresentationModel.getHorizontalScale());
+        int newX = (int) (newTimestamp * waveformPresentationModel.getHorizontalScale());
         int leftEdge = Math.min(oldX, newX) - DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         int rightEdge = Math.max(oldX, newX) + DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         repaint(leftEdge, 0, rightEdge - leftEdge, getHeight());
 
         // When the cursor moves, draw the current time in the timescale
         // for a little while, then hide it when the timer expires.
-        if (tracePresentationModel.isAdjustingCursor()) {
+        if (waveformPresentationModel.isAdjustingCursor()) {
             showTimestamp = true;
         } else {
             timestampDisplayTimer.start();
@@ -82,7 +82,7 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
         if (timestamp < 0) {
             repaint();
         } else {
-            int x = (int) (timestamp * tracePresentationModel.getHorizontalScale());
+            int x = (int) (timestamp * waveformPresentationModel.getHorizontalScale());
             repaint(x - (DrawMetrics.MAX_MARKER_LABEL_WIDTH / 2), 0, DrawMetrics.MAX_MARKER_LABEL_WIDTH,
                     DrawMetrics.TIMESCALE_HEIGHT);
         }
@@ -107,8 +107,8 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
 
         // Convert to femto seconds, compute unit, then convert back to
         // time units.
-        long femtoSecondsPerTimeUnit = (long) Math.pow(10, traceDataModel.getTimescale() + 15);
-        long minorTickIntervalFs = tracePresentationModel.getMinorTickInterval() * femtoSecondsPerTimeUnit;
+        long femtoSecondsPerTimeUnit = (long) Math.pow(10, waveformDataModel.getTimescale() + 15);
+        long minorTickIntervalFs = waveformPresentationModel.getMinorTickInterval() * femtoSecondsPerTimeUnit;
         long unitMagnitudeFs;
         if (minorTickIntervalFs < 100L) {
             unitMagnitudeFs = 1L;
@@ -136,7 +136,7 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
         // Not sure the best approach for that.
 
         Dimension d = getPreferredSize();
-        d.width = (int) (traceDataModel.getMaxTimestamp() * tracePresentationModel.getHorizontalScale());
+        d.width = (int) (waveformDataModel.getMaxTimestamp() * waveformPresentationModel.getHorizontalScale());
         setPreferredSize(d);
         revalidate();
         repaint();
@@ -147,14 +147,14 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
         super.paintComponent(g);
 
         Rectangle visibleRect = getVisibleRect();
-        long minorTickInterval = tracePresentationModel.getMinorTickInterval();
+        long minorTickInterval = waveformPresentationModel.getMinorTickInterval();
 
         // The -100 in start time keeps labels that are to the left of the window from
         // not being drawn
         // (which causes artifacts when scrolling). It needs to be bigger than the
         // largest label.
-        long startTime = (long) ((visibleRect.x - 100) / tracePresentationModel.getHorizontalScale());
-        long endTime = (long) ((visibleRect.x + visibleRect.width) / tracePresentationModel.getHorizontalScale());
+        long startTime = (long) ((visibleRect.x - 100) / waveformPresentationModel.getHorizontalScale());
+        long endTime = (long) ((visibleRect.x + visibleRect.width) / waveformPresentationModel.getHorizontalScale());
         if (startTime < 0) {
             startTime = 0;
         }
@@ -162,7 +162,7 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
         // Round to an event tick boundary
         startTime = (startTime / minorTickInterval) * minorTickInterval;
 
-        g.setColor(AppPreferences.getInstance().traceColor);
+        g.setColor(AppPreferences.getInstance().waveformColor);
         drawTicks(g, startTime, endTime);
         drawMarkers(g, startTime, endTime);
         if (showTimestamp) {
@@ -173,8 +173,8 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
     }
 
     private void drawTicks(Graphics g, long startTime, long endTime) {
-        double horizontalScale = tracePresentationModel.getHorizontalScale();
-        long minorTickInterval = tracePresentationModel.getMinorTickInterval();
+        double horizontalScale = waveformPresentationModel.getHorizontalScale();
+        long minorTickInterval = waveformPresentationModel.getMinorTickInterval();
         FontMetrics metrics = g.getFontMetrics();
 
         for (long ts = startTime; ts < endTime; ts += minorTickInterval) {
@@ -190,24 +190,24 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
     }
 
     private void drawMarkers(Graphics g, long startTime, long endTime) {
-        double horizontalScale = tracePresentationModel.getHorizontalScale();
-        int markerIndex = tracePresentationModel.getMarkerAtTime(startTime);
-        while (markerIndex < tracePresentationModel.getMarkerCount()) {
-            long timestamp = tracePresentationModel.getTimestampForMarker(markerIndex);
+        double horizontalScale = waveformPresentationModel.getHorizontalScale();
+        int markerIndex = waveformPresentationModel.getMarkerAtTime(startTime);
+        while (markerIndex < waveformPresentationModel.getMarkerCount()) {
+            long timestamp = waveformPresentationModel.getTimestampForMarker(markerIndex);
             if (timestamp > endTime) {
                 break;
             }
 
-            String labelString = Integer.toString(tracePresentationModel.getIdForMarker(markerIndex));
+            String labelString = Integer.toString(waveformPresentationModel.getIdForMarker(markerIndex));
             int labelWidth = g.getFontMetrics().stringWidth(labelString);
             int x = (int) (timestamp * horizontalScale);
             g.setColor(AppPreferences.getInstance().backgroundColor);
             g.fillRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP), DrawMetrics.TIMESCALE_HEIGHT - 12,
                     labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
-            g.setColor(AppPreferences.getInstance().traceColor);
+            g.setColor(AppPreferences.getInstance().waveformColor);
             g.drawRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP), DrawMetrics.TIMESCALE_HEIGHT - 12,
                     labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
-            g.setColor(AppPreferences.getInstance().traceColor);
+            g.setColor(AppPreferences.getInstance().waveformColor);
             g.drawString(labelString, x - labelWidth / 2, DrawMetrics.TIMESCALE_HEIGHT - 3);
             markerIndex++;
         }
@@ -215,27 +215,27 @@ class TimescalePanel extends JPanel implements TracePresentationModel.Listener {
 
     private void drawTimestamp(Graphics g) {
         Rectangle visibleRect = getVisibleRect();
-        double horizontalScale = tracePresentationModel.getHorizontalScale();
-        String timeString = Double.toString((double) tracePresentationModel.getCursorPosition() / unitMagnitude) + " "
+        double horizontalScale = waveformPresentationModel.getHorizontalScale();
+        String timeString = Double.toString((double) waveformPresentationModel.getCursorPosition() / unitMagnitude) + " "
                 + unitName;
         int timeWidth = g.getFontMetrics().stringWidth(timeString);
-        int cursorX = (int) (tracePresentationModel.getCursorPosition() * horizontalScale);
+        int cursorX = (int) (waveformPresentationModel.getCursorPosition() * horizontalScale);
         int labelLeft = cursorX + timeWidth > visibleRect.x + visibleRect.width ? cursorX - timeWidth : cursorX;
 
         g.setColor(AppPreferences.getInstance().backgroundColor);
         g.fillRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP, DrawMetrics.TIMESCALE_HEIGHT - 15,
                 timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
-        g.setColor(AppPreferences.getInstance().traceColor);
+        g.setColor(AppPreferences.getInstance().waveformColor);
         g.drawRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP, DrawMetrics.TIMESCALE_HEIGHT - 15,
                 timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
-        g.setColor(AppPreferences.getInstance().traceColor);
+        g.setColor(AppPreferences.getInstance().waveformColor);
         g.drawString(timeString, labelLeft + DrawMetrics.TIMESTAMP_H_GAP,
                 DrawMetrics.TIMESCALE_HEIGHT - DrawMetrics.TIMESTAMP_H_GAP);
     }
 
     private void drawUnderline(Graphics g) {
         Rectangle visibleRect = getVisibleRect();
-        g.setColor(AppPreferences.getInstance().traceColor);
+        g.setColor(AppPreferences.getInstance().waveformColor);
         g.drawLine(visibleRect.x, DrawMetrics.TIMESCALE_HEIGHT, visibleRect.x + visibleRect.width,
                 DrawMetrics.TIMESCALE_HEIGHT);
     }

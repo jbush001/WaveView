@@ -20,10 +20,10 @@ import java.io.File;
 import java.io.IOException;
 
 //
-// Classes override this interface to create an object that can load traces
+// Classes override this interface to create an object that can load waveforms
 // from a file.
 //
-public interface TraceLoader {
+public interface WaveformLoader {
     /// @todo Some kind of file detection APIs (register by extension, sniff, etc)
 
     public class LoadException extends Exception {
@@ -39,6 +39,6 @@ public interface TraceLoader {
         boolean updateProgress(int percentRead);
     }
 
-    public void load(File file, TraceBuilder builder, ProgressListener listener)
+    public void load(File file, WaveformBuilder builder, ProgressListener listener)
         throws LoadException, IOException;
 }

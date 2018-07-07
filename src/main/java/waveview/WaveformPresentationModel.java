@@ -19,11 +19,10 @@ package waveview;
 import java.util.ArrayList;
 
 ///
-/// TracePresentationModel contains visible state for a waveform capture
-/// (e.g. Cursor position, scale, visible nets, etc.)
+/// Contains visible state for a waveform capture (e.g. Cursor position, scale, visible nets, etc.)
 ///
 
-public class TracePresentationModel {
+public class WaveformPresentationModel {
     private final ArrayList<Listener> listeners = new ArrayList<>();
     private ArrayList<NetPresentationModel> visibleNets = new ArrayList<>();
     private final ArrayList<NetSet> netSets = new ArrayList<>();
@@ -44,7 +43,7 @@ public class TracePresentationModel {
         void formatChanged(int index);
     };
 
-    public TracePresentationModel() {
+    public WaveformPresentationModel() {
         setHorizontalScale(10.0);
     }
 
@@ -144,7 +143,7 @@ public class TracePresentationModel {
 
     /// Return mapping of visible order to internal index
     /// @param index Index of net in order displayed in net list
-    /// @returns netID (as referenced in TraceDataModel)
+    /// @returns netID (as referenced in WaveformDataModel)
     public NetDataModel getVisibleNet(int index) {
         return visibleNets.get(index).getDataModel();
     }

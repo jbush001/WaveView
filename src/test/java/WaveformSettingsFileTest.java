@@ -28,21 +28,21 @@ import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
 import waveview.NetDataModel;
-import waveview.TraceBuilder;
-import waveview.TraceDataModel;
-import waveview.TracePresentationModel;
-import waveview.TraceSettingsFile;
+import waveview.WaveformBuilder;
+import waveview.WaveformDataModel;
+import waveview.WaveformPresentationModel;
+import waveview.WaveformSettingsFile;
 
-public class TraceSettingsFileTest {
+public class WaveformSettingsFileTest {
     @Rule
     public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
     public void load() throws Exception {
-        TraceDataModel dataModel = new TraceDataModel();
-        TracePresentationModel sourcePresentationModel = new TracePresentationModel();
+        WaveformDataModel dataModel = new WaveformDataModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
-        TraceBuilder builder = dataModel.startBuilding();
+        WaveformBuilder builder = dataModel.startBuilding();
         builder.enterScope("mod1");
         builder.newNet("net1", -1, 1);
         builder.newNet("net2", -1, 1);
@@ -96,10 +96,10 @@ public class TraceSettingsFileTest {
         sourcePresentationModel.setHorizontalScale(123.0);
 
         // Save and reload contents
-        TracePresentationModel destPresentationModel = new TracePresentationModel();
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
         File file = fTempFolder.newFile("test1.settings");
-        new TraceSettingsFile(file, dataModel, sourcePresentationModel).write();
-        new TraceSettingsFile(file, dataModel, destPresentationModel).read();
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
+        new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
         // Check destPresentationModel
         assertEquals(4, destPresentationModel.getVisibleNetCount());
@@ -149,9 +149,9 @@ public class TraceSettingsFileTest {
     // (not currently implemented in loader)
     @Test
     public void dataModelChanged() throws Exception {
-        TraceDataModel sourceDataModel = new TraceDataModel();
-        TracePresentationModel sourcePresentationModel = new TracePresentationModel();
-        TraceBuilder builder1 = sourceDataModel.startBuilding();
+        WaveformDataModel sourceDataModel = new WaveformDataModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
+        WaveformBuilder builder1 = sourceDataModel.startBuilding();
         builder1.enterScope("mod1");
         builder1.newNet("net1", -1, 1);
         builder1.newNet("net2", -1, 1);
@@ -163,10 +163,10 @@ public class TraceSettingsFileTest {
         sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(1));
         sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(2));
 
-        TraceDataModel destDataModel = new TraceDataModel();
-        TracePresentationModel destPresentationModel = new TracePresentationModel();
+        WaveformDataModel destDataModel = new WaveformDataModel();
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
 
-        TraceBuilder builder2 = destDataModel.startBuilding();
+        WaveformBuilder builder2 = destDataModel.startBuilding();
         builder2.enterScope("mod1");
         builder2.newNet("net1", -1, 1);
         builder2.newNet("net4", -1, 1);
@@ -175,8 +175,8 @@ public class TraceSettingsFileTest {
         builder2.loadFinished();
 
         File file = fTempFolder.newFile("test2.settings");
-        (new TraceSettingsFile(file, sourceDataModel, sourcePresentationModel)).write();
-        (new TraceSettingsFile(file, destDataModel, destPresentationModel)).read();
+        (new WaveformSettingsFile(file, sourceDataModel, sourcePresentationModel)).write();
+        (new WaveformSettingsFile(file, destDataModel, destPresentationModel)).read();
 
         assertEquals(2, destPresentationModel.getVisibleNetCount());
         assertSame(destDataModel.getNetDataModel(0), destPresentationModel.getVisibleNet(0));
@@ -186,30 +186,30 @@ public class TraceSettingsFileTest {
     // If the formatter class name is unknown, fall back to binary
     @Test
     public void badFormatter() throws Exception {
-        File file = new File("src/test/resources/trace_settings/bad_formatter.traceconfig");
-        TraceDataModel dataModel = new TraceDataModel();
-        TraceBuilder builder = dataModel.startBuilding();
+        File file = new File("src/test/resources/waveform_settings/bad_formatter.waveconfig");
+        WaveformDataModel dataModel = new WaveformDataModel();
+        WaveformBuilder builder = dataModel.startBuilding();
         builder.enterScope("foo");
         builder.newNet("bar", -1, 1);
         builder.exitScope();
         builder.loadFinished();
 
-        TracePresentationModel presentationModel = new TracePresentationModel();
-        new TraceSettingsFile(file, dataModel, presentationModel).read();
+        WaveformPresentationModel presentationModel = new WaveformPresentationModel();
+        new WaveformSettingsFile(file, dataModel, presentationModel).read();
         assertTrue(presentationModel.getValueFormatter(0) instanceof BinaryValueFormatter);
     }
 
     // Test generating config file name for subdirectory
     @Test
     public void configFileName1() throws Exception {
-        assertEquals("foo/bar/.trace.vcd.traceconfig",
-                TraceSettingsFile.settingsFileName(new File("foo/bar/trace.vcd")).toString());
+        assertEquals("foo/bar/.dumpfile.vcd.waveconfig",
+                WaveformSettingsFile.settingsFileName(new File("foo/bar/dumpfile.vcd")).toString());
     }
 
     /// Regression test. In this case, the full path isn't passed.
     /// It was putting 'null' inside the filename.
     @Test
     public void configFileName2() throws Exception {
-        assertEquals(".trace.vcd.traceconfig", TraceSettingsFile.settingsFileName(new File("trace.vcd")).toString());
+        assertEquals(".dumpfile.vcd.waveconfig", WaveformSettingsFile.settingsFileName(new File("dumpfile.vcd")).toString());
     }
 }
