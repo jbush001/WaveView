@@ -16,7 +16,7 @@
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import org.junit.Before;
@@ -26,14 +26,13 @@ import waveview.WaveformPresentationModel;
 
 public class MarkerTest {
     private final WaveformPresentationModel model = new WaveformPresentationModel();
-    private WaveformPresentationModel.Listener listener;
+    private WaveformPresentationModel.Listener listener = mock(WaveformPresentationModel.Listener.class);
 
     @Before
     public void setUpTest() {
         // The scale determines how close the user has to click to a marker to
         // select it.
         model.setHorizontalScale(0.1);
-        listener = spy(WaveformPresentationModel.Listener.class);
         model.addListener(listener);
     }
 
@@ -45,7 +44,6 @@ public class MarkerTest {
     // Ensure no crash when removing marker from empty set
     @Test
     public void removeMarkerEmpty() {
-        model.addListener(listener);
         model.removeMarkerAtTime(1000);
         verifyZeroInteractions(listener);
     }
