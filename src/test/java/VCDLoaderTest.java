@@ -43,7 +43,7 @@ import waveview.WaveformLoader;
 
 public class VCDLoaderTest {
     @Rule
-    public final TemporaryFolder fTempFolder = new TemporaryFolder();
+    public final TemporaryFolder tempFolder = new TemporaryFolder();
 
     WaveformBuilder builder = mock(WaveformBuilder.class);
 
@@ -61,7 +61,7 @@ public class VCDLoaderTest {
 
     File tempFileFrom(String contents) {
         try {
-            File f = fTempFolder.newFile("test.vcd");
+            File f = tempFolder.newFile("test.vcd");
             FileOutputStream fos = new FileOutputStream(f);
             fos.write(contents.getBytes(StandardCharsets.US_ASCII));
             fos.close();

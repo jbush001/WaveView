@@ -19,11 +19,11 @@ package waveview;
 import java.io.IOException;
 import java.io.InputStream;
 
-class ProgressInputStream extends InputStream {
+public class ProgressInputStream extends InputStream {
     private long totalRead;
     private final InputStream wrapped;
 
-    ProgressInputStream(InputStream wrapped) {
+    public ProgressInputStream(InputStream wrapped) {
         this.wrapped = wrapped;
     }
 
@@ -62,7 +62,7 @@ class ProgressInputStream extends InputStream {
         return got;
     }
 
-    long getTotalRead() {
+    public long getTotalRead() {
         return totalRead;
     }
 }

@@ -21,8 +21,8 @@ import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-class WaveformLoadWorker extends SwingWorker<Void, Void> {
-    interface LoadFinishedHandler {
+public class WaveformLoadWorker extends SwingWorker<Void, Void> {
+    public interface LoadFinishedHandler {
         // On success, error message will be null.
         // If an error occurs, errorMessage will be set.
         void handleLoadFinished(WaveformDataModel newModel, String errorMessage);
@@ -34,7 +34,7 @@ class WaveformLoadWorker extends SwingWorker<Void, Void> {
     private String errorMessage;
     private LoadFinishedHandler finishHandler;
 
-    WaveformLoadWorker(File file, ProgressMonitor progressMonitor, LoadFinishedHandler finishHandler) {
+    public WaveformLoadWorker(File file, ProgressMonitor progressMonitor, LoadFinishedHandler finishHandler) {
         this.file = file;
         this.progressMonitor = progressMonitor;
         this.finishHandler = finishHandler;
