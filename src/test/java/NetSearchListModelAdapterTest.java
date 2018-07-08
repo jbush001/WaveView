@@ -16,15 +16,14 @@
 //
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.spy;
+import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import waveview.NetSearchListModelAdapter;
 import waveview.WaveformBuilder;
 import waveview.WaveformDataModel;
@@ -33,31 +32,6 @@ public class NetSearchListModelAdapterTest {
     private final WaveformDataModel model = new WaveformDataModel();
     private ListDataListener listener;
     NetSearchListModelAdapter nslma;
-
-    static class ListDataEventMatcher implements ArgumentMatcher<ListDataEvent> {
-        private int type;
-        private int index1;
-        private Object source;
-
-        ListDataEventMatcher(Object source, int type, int index1) {
-            this.source = source;
-            this.type = type;
-            this.index1 = index1;
-        }
-
-        @Override
-        public boolean matches(ListDataEvent event) {
-            return event.getSource() == source
-                && event.getType() == this.type
-                && event.getIndex0() == 0
-                && event.getIndex1() == this.index1;
-        }
-
-        @Override
-        public String toString() {
-            return "[" + this.type + ", 0, " + this.index1 + "]";
-        }
-    }
 
     @Before
     public void setUpTest() {
@@ -75,7 +49,7 @@ public class NetSearchListModelAdapterTest {
         builder.exitScope();
 
         nslma = new NetSearchListModelAdapter(model);
-        listener = spy(ListDataListener.class);
+        listener = mock(ListDataListener.class);
         nslma.addListDataListener(listener);
     }
 
@@ -96,8 +70,8 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void testPartialMatch1() {
         nslma.setPattern("foo");
-        verify(listener).contentsChanged(argThat(new ListDataEventMatcher(nslma,
-                 ListDataEvent.CONTENTS_CHANGED, 4)));
+        verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
+                ListDataEvent.CONTENTS_CHANGED, 0, 4)));
         verifyNoMoreInteractions(listener);
         assertEquals(4, nslma.getSize());
         assertEquals("mod1.fooxxx", nslma.getElementAt(0));
@@ -109,8 +83,8 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void testPartialMatch2() {
         nslma.setPattern("bbbb");
-        verify(listener).contentsChanged(argThat(new ListDataEventMatcher(nslma,
-                ListDataEvent.CONTENTS_CHANGED, 2)));
+        verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
+                ListDataEvent.CONTENTS_CHANGED, 0, 2)));
         verifyNoMoreInteractions(listener);
         assertEquals(2, nslma.getSize());
         assertEquals("mod1.bbbbb", nslma.getElementAt(0));
@@ -120,8 +94,8 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void testNoMatch() {
         nslma.setPattern("z");
-        verify(listener).contentsChanged(argThat(new ListDataEventMatcher(nslma,
-                ListDataEvent.CONTENTS_CHANGED, 0)));
+        verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
+                ListDataEvent.CONTENTS_CHANGED, 0, 0)));
         verifyNoMoreInteractions(listener);
         assertEquals(0, nslma.getSize());
     }

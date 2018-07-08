@@ -15,124 +15,48 @@
 //
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.InOrder;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import waveview.VCDLoader;
 import waveview.WaveformBuilder;
 import waveview.WaveformLoader;
-import waveview.VCDLoader;
 
 public class VCDLoaderTest {
     @Rule
     public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
-    // Simulataneously builds VCD file contents and populates the
-    // ExpectWaveformBuilder with matching events
-    class TestBuilder {
-        private final ArrayList<Boolean> netIsMultiBit = new ArrayList<>();
-        private final ExpectWaveformBuilder waveformBuilder = new ExpectWaveformBuilder();
-        private final StringBuilder vcdContents = new StringBuilder();
-        private long lastTimestamp = -1;
+    WaveformBuilder builder = mock(WaveformBuilder.class);
 
-        void addString(String data) {
-            vcdContents.append(data);
-        }
-
-        void setTimescale(String str, int order) {
-            vcdContents.append("$timescale\n  1us\n$end\n");
-            waveformBuilder.expectTimescale(order);
-        }
-
-        void enterScope(String name) {
-            vcdContents.append("$scope module ");
-            vcdContents.append(name);
-            vcdContents.append(" $end\n");
-            waveformBuilder.expectEnterScope(name);
-        }
-
-        void exitScope() {
-            vcdContents.append("$upscope $end\n");
-            waveformBuilder.expectExitScope();
-        }
-
-        int defineNet(String name, int cloneId, int width) {
-            int index = netIsMultiBit.size();
-            netIsMultiBit.add(width != 1);
-            vcdContents.append("$var wire ");
-            vcdContents.append(width);
-            vcdContents.append(' ');
-            vcdContents.append(getIdForIndex(index));
-            vcdContents.append(' ');
-            vcdContents.append(name);
-            if (width > 1) {
-                vcdContents.append(" [");
-                vcdContents.append(width - 1);
-                vcdContents.append(":0]");
+    @Before
+    public void initTests() {
+        // Ensure newNet in the mock builder returns a unique ID.
+        doAnswer(new Answer<Integer>() {
+            private int nextNetId;
+            @Override
+            public Integer answer(InvocationOnMock invocation) {
+                return nextNetId++;
             }
-
-            vcdContents.append(" $end\n");
-
-            waveformBuilder.expectNewNet(name, cloneId, width);
-            return index;
-        }
-
-        void endDefinitions() {
-            vcdContents.append("$enddefinitions $end\n");
-        }
-
-        void appendTransition(int netId, long timestamp, int value) {
-            StringBuilder tmp = new StringBuilder();
-            for (int i = 0; i < 32; i++)
-                tmp.append((value & (0x80000000 >> i)) == 0 ? '0' : '1');
-
-            appendTransition(netId, timestamp, tmp.toString());
-        }
-
-        void appendTransition(int netId, long timestamp, String bitString) {
-            if (lastTimestamp != timestamp) {
-                lastTimestamp = timestamp;
-                vcdContents.append('#');
-                vcdContents.append(timestamp);
-                vcdContents.append('\n');
-            }
-
-            if (netIsMultiBit.get(netId)) {
-                vcdContents.append('b');
-                vcdContents.append(bitString);
-                vcdContents.append(' ');
-            } else
-                vcdContents.append(bitString);
-
-            vcdContents.append(getIdForIndex(netId));
-            vcdContents.append('\n');
-
-            waveformBuilder.expectAppendTransition(netId, timestamp, bitString);
-        }
-
-        void finish() {
-            waveformBuilder.expectLoadFinished();
-            System.out.println("output is\n" + vcdContents.toString());
-        }
-
-        File getVCDFile() {
-            return tempFileFrom(vcdContents.toString());
-        }
-
-        private String getIdForIndex(int index) {
-            return String.valueOf((char) (index + 33));
-        }
-
-        WaveformBuilder getWaveformBuilder() {
-            return waveformBuilder;
-        }
+        }).when(builder).newNet(anyString(), anyInt(), anyInt());
     }
 
     File tempFileFrom(String contents) {
@@ -154,83 +78,83 @@ public class VCDLoaderTest {
 
     @Test
     public void timescaleFs() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-15);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-fs.vcd"), builder, null);
+        verify(builder).setTimescale(-15);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void timescalePs() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-12);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-ps.vcd"), builder, null);
+        verify(builder).setTimescale(-12);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void timescaleNs() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-9);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-ns.vcd"), builder, null);
+        verify(builder).setTimescale(-9);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void timescaleUs() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-6);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-us.vcd"), builder, null);
+        verify(builder).setTimescale(-6);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void timescaleMs() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-3);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-ms.vcd"), builder, null);
+        verify(builder).setTimescale(-3);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void timescaleS() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(0);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-s.vcd"), builder, null);
+        verify(builder).setTimescale(0);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     // Ensure it handles both the unit and the number correctly.
     @Test
     public void timescale10Us() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-5);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-10us.vcd"), builder, null);
+        verify(builder).setTimescale(-5);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void timescale100Us() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-4);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-100us.vcd"), builder, null);
+        verify(builder).setTimescale(-4);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     // Check that it handles a space between the number and unit in
     // the timescale definition.
     @Test
     public void timescaleSpace() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-12);
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("timescale-space.vcd"), builder, null);
+        verify(builder).setTimescale(-12);
+        verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void unknownTimescale() throws Exception {
         try {
-            new VCDLoader().load(testFile("unknown-timescale.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("unknown-timescale.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 2: unknown timescale value 1qs", exc.getMessage());
@@ -240,7 +164,7 @@ public class VCDLoaderTest {
     @Test
     public void timescaleMissingUnit() throws Exception {
         try {
-            new VCDLoader().load(testFile("timescale-missing-unit.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("timescale-missing-unit.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 3: unknown timescale value $end", exc.getMessage());
@@ -249,7 +173,6 @@ public class VCDLoaderTest {
 
     @Test
     public void timescaleBadValue() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
         try {
             new VCDLoader().load(testFile("timescale-bad-value.vcd"), builder, null);
             fail("didn't throw exception");
@@ -262,33 +185,36 @@ public class VCDLoaderTest {
     // (for example $date, $version)
     @Test
     public void unknownHeaderFields() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-6);
-        builder.expectEnterScope("mod1");
-        builder.expectNewNet("clk", -1, 1);
-        builder.expectExitScope();
-        builder.expectAppendTransition(0, 0, "1");
-        builder.expectLoadFinished();
-
         new VCDLoader().load(testFile("unknown-header-fields.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).setTimescale(-6);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet("clk", -1, 1);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     // When a timestamp is out of order, the loader will set it to the
     // last value silently.
+    // last value silently.
     @Test
     public void timestampOutOfOrder() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-9);
-        builder.expectEnterScope("mod1");
-        builder.expectNewNet("foo", -1, 1);
-        builder.expectExitScope();
-        builder.expectAppendTransition(0, 0, "1");
-        builder.expectAppendTransition(0, 5, "0");
-        builder.expectAppendTransition(0, 5, "1");
-        builder.expectAppendTransition(0, 6, "0");
-        builder.expectLoadFinished();
-
         new VCDLoader().load(testFile("timestamp-out-of-order.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).setTimescale(-9);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet("foo", -1, 1);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("0")));
+        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).appendTransition(eq(0), eq(6L), argThat(new BitVectorMatcher("0")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     // This tests a few things:
@@ -299,68 +225,72 @@ public class VCDLoaderTest {
     // $var wire 3 B data[2:0] $end
     @Test
     public void multibit() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-9);
-        builder.expectEnterScope("mod1");
-        builder.expectNewNet("addr", -1, 16);
-        builder.expectNewNet("data", -1, 3);
-        builder.expectNewNet("enable", -1, 1);
-        builder.expectExitScope();
-        builder.expectAppendTransition(0, 0, "1010111000101011");
-        builder.expectAppendTransition(1, 0, "011");
-        builder.expectAppendTransition(2, 0, "z");
-        builder.expectAppendTransition(0, 5, "1101010010100010");
-        builder.expectAppendTransition(1, 5, "100");
-        builder.expectAppendTransition(2, 5, "x");
-        builder.expectAppendTransition(1, 10, "01zxxz10zxzx1010");
-        builder.expectAppendTransition(2, 10, "1");
-        builder.expectAppendTransition(0, 15, "zzzzzzzzzzzzzzzz");
-        builder.expectAppendTransition(1, 15, "xxx");
-        builder.expectLoadFinished();
-
         new VCDLoader().load(testFile("multibit.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).setTimescale(-9);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet("addr", -1, 16);
+        ord.verify(builder).newNet("data", -1, 3);
+        ord.verify(builder).newNet("enable", -1, 1);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
+        ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
+        ord.verify(builder).appendTransition(eq(2), eq(0L), argThat(new BitVectorMatcher("z")));
+        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("1101010010100010")));
+        ord.verify(builder).appendTransition(eq(1), eq(5L), argThat(new BitVectorMatcher("100")));
+        ord.verify(builder).appendTransition(eq(2), eq(5L), argThat(new BitVectorMatcher("x")));
+        ord.verify(builder).appendTransition(eq(0), eq(10L), argThat(new BitVectorMatcher("01zxxz10zxzx1010")));
+        ord.verify(builder).appendTransition(eq(2), eq(10L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).appendTransition(eq(0), eq(15L), argThat(new BitVectorMatcher("zzzzzzzzzzzzzzzz")));
+        ord.verify(builder).appendTransition(eq(1), eq(15L), argThat(new BitVectorMatcher("xxx")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void padding() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-9);
-        builder.expectEnterScope("mod1");
-        builder.expectNewNet("value", -1, 16);
-        builder.expectExitScope();
-        builder.expectAppendTransition(0, 0, "zzzzzzzzzzzx1010");
-        builder.expectAppendTransition(0, 1, "xxxxxxxxxxxz1010");
-        builder.expectAppendTransition(0, 2, "0000000000001101");
-        builder.expectAppendTransition(0, 3, "0000000000000010");
-        builder.expectLoadFinished();
-
         new VCDLoader().load(testFile("padding.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).setTimescale(-9);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet("value", -1, 16);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("zzzzzzzzzzzx1010")));
+        ord.verify(builder).appendTransition(eq(0), eq(1L), argThat(new BitVectorMatcher("xxxxxxxxxxxz1010")));
+        ord.verify(builder).appendTransition(eq(0), eq(2L), argThat(new BitVectorMatcher("0000000000001101")));
+        ord.verify(builder).appendTransition(eq(0), eq(3L), argThat(new BitVectorMatcher("0000000000000010")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     // Test that $dumpvars is handled correctly
     @Test
     public void dumpvars() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-9);
-        builder.expectEnterScope("mod1");
-        builder.expectNewNet("addr", -1, 16);
-        builder.expectNewNet("data", -1, 3);
-        builder.expectNewNet("enable", -1, 1);
-        builder.expectExitScope();
-        builder.expectAppendTransition(0, 0, "1010111000101011");
-        builder.expectAppendTransition(1, 0, "011");
-        builder.expectAppendTransition(2, 0, "z");
-        builder.expectAppendTransition(0, 5, "1101010010100010");
-        builder.expectAppendTransition(1, 5, "100");
-        builder.expectAppendTransition(2, 5, "x");
-        builder.expectLoadFinished();
         new VCDLoader().load(testFile("dumpvars.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).setTimescale(-9);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet("addr", -1, 16);
+        ord.verify(builder).newNet("data", -1, 3);
+        ord.verify(builder).newNet("enable", -1, 1);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
+        ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
+        ord.verify(builder).appendTransition(eq(2), eq(0L), argThat(new BitVectorMatcher("z")));
+        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("1101010010100010")));
+        ord.verify(builder).appendTransition(eq(1), eq(5L), argThat(new BitVectorMatcher("100")));
+        ord.verify(builder).appendTransition(eq(2), eq(5L), argThat(new BitVectorMatcher("x")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void unknownNetId() throws Exception {
         try {
-            new VCDLoader().load(testFile("unknown-net-id.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("unknown-net-id.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 6: Unknown net id $", exc.getMessage());
@@ -370,7 +300,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidValueType() throws Exception {
         try {
-            new VCDLoader().load(testFile("bad-transition-type.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("bad-transition-type.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 6: invalid value type 'q'", exc.getMessage());
@@ -380,7 +310,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidScope() throws Exception {
         try {
-            new VCDLoader().load(testFile("scope-parse-error.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("scope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 2: parse error, expected $end got $var", exc.getMessage());
@@ -390,7 +320,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidUpscope() throws Exception {
         try {
-            new VCDLoader().load(testFile("upscope-parse-error.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("upscope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 4: parse error, expected $end got $enddefinitions", exc.getMessage());
@@ -400,7 +330,7 @@ public class VCDLoaderTest {
     @Test
     public void varParseError() throws Exception {
         try {
-            new VCDLoader().load(testFile("var-parse-error.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("var-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 3: parse error, expected $end got $upscope", exc.getMessage());
@@ -410,7 +340,7 @@ public class VCDLoaderTest {
     @Test
     public void timescaleParseError() throws Exception {
         try {
-            new VCDLoader().load(testFile("timescale-parse-error.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("timescale-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 3: parse error, expected $end got $scope", exc.getMessage());
@@ -420,7 +350,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidLogicValue() throws Exception {
         try {
-            new VCDLoader().load(testFile("invalid-logic-value.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("invalid-logic-value.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 9: invalid logic value", exc.getMessage());
@@ -430,7 +360,7 @@ public class VCDLoaderTest {
     @Test
     public void truncatedFile() throws Exception {
         try {
-            new VCDLoader().load(testFile("truncated.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("truncated.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 2: unexpected end of file", exc.getMessage());
@@ -441,7 +371,7 @@ public class VCDLoaderTest {
     @Test
     public void realValueType() throws Exception {
         try {
-            new VCDLoader().load(testFile("real-value.vcd"), new DummyWaveformBuilder(), null);
+            new VCDLoader().load(testFile("real-value.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
             assertEquals("line 6: real values are not supported", exc.getMessage());
@@ -450,112 +380,68 @@ public class VCDLoaderTest {
 
     @Test
     public void waveformAlias() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectEnterScope("mod1");
-        builder.expectNewNet("foo", -1, 1);
-        builder.expectNewNet("source", -1, 1);
-        builder.expectNewNet("alias", 1, 1);
-        builder.expectExitScope();
-        builder.expectAppendTransition(1, 0, "1");
-        builder.expectLoadFinished();
-
         new VCDLoader().load(testFile("waveform-alias.vcd"), builder, null);
-    }
 
-    // Put everything together with more data and multiple signals
-    @Test
-    public void mixed() throws Exception {
-        TestBuilder builder = new TestBuilder();
-        builder.addString("$date\n\tMon Aug 15 22:28:13 2016\n$end\n");
-        builder.addString("$version\n\tIcarus Verilog\n$end\n");
-        builder.setTimescale("1us", -6);
-        builder.enterScope("mod1");
-        builder.defineNet("clk", -1, 1);
-        builder.defineNet("reset", -1, 1);
-        builder.enterScope("mod2");
-        builder.defineNet("addr", -1, 32);
-        builder.defineNet("data", -1, 32);
-        builder.exitScope();
-        builder.exitScope();
-        builder.endDefinitions();
-        for (int i = 0; i < 10000; i++) {
-            long time = (long) i * 5;
-
-            if (i % 2 == 0)
-                builder.appendTransition(0, time, "0");
-            else {
-                if (i > 5) {
-                    builder.appendTransition(0, time, "1");
-                    builder.appendTransition(2, time, i * 8);
-                    builder.appendTransition(3, time, (i * 123123123) ^ i);
-                }
-
-                if (i == 0)
-                    builder.appendTransition(1, time, "1");
-                else if (i == 5)
-                    builder.appendTransition(1, time, "0");
-            }
-        }
-
-        builder.finish();
-        VCDLoader loader = new VCDLoader();
-        loader.load(builder.getVCDFile(), builder.getWaveformBuilder(), null);
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet("foo", -1, 1);
+        ord.verify(builder).newNet("source", -1, 1);
+        ord.verify(builder).newNet("alias", 1, 1);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 
     static class TestProgressListener implements WaveformLoader.ProgressListener {
+        int lastUpdate = -1;
+
         @Override
         public boolean updateProgress(int percentRead) {
-            assertTrue(percentRead >= fLastUpdate);
+            assertTrue(percentRead >= lastUpdate);
             assertTrue(percentRead >= 0);
             assertTrue(percentRead <= 100);
-            fLastUpdate = percentRead;
+            lastUpdate = percentRead;
             return true;
         }
-
-        int fLastUpdate = -1;
     }
 
     // Write a bunch of data, make sure we get callbacks
     @Test
     public void progressListener() throws Exception {
-        TestBuilder builder = new TestBuilder();
-        builder.setTimescale("1us", -6);
-        builder.enterScope("mod1");
-        builder.defineNet("value", -1, 16);
-        builder.exitScope();
-        builder.endDefinitions();
-
         // Need to append enough data to cause at least one progress
         // update
-        for (int i = 0; i < 10000; i++)
-            builder.appendTransition(0, i * 5, "0000000000000000");
+        StringBuilder vcdContents = new StringBuilder();
+        vcdContents.append("$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
+        for (int i = 0; i < 10000; i++) {
+            vcdContents.append('#');
+            vcdContents.append(i * 5);
+            vcdContents.append("\n1A\n");
+        }
 
-        builder.finish();
-
-        TestProgressListener listener = new TestProgressListener();
+        File vcdFile = tempFileFrom(vcdContents.toString());
+        TestProgressListener progressListener = new TestProgressListener();
         VCDLoader loader = new VCDLoader();
-        loader.load(builder.getVCDFile(), builder.getWaveformBuilder(), listener);
-        assertNotEquals(-1, listener.fLastUpdate);
+        loader.load(vcdFile, builder, progressListener);
+        assertTrue(progressListener.lastUpdate > 90);
     }
 
     // If the user clicks cancel, the progress listener update
     // method will return false. Ensure this aborts the load.
     @Test
     public void interruptedLoad() throws IOException {
-        TestBuilder builder = new TestBuilder();
-        builder.setTimescale("1us", -6);
-        builder.enterScope("mod1");
-        builder.defineNet("value", -1, 16);
-        builder.exitScope();
-        builder.endDefinitions();
-        for (int i = 0; i < 10000; i++)
-            builder.appendTransition(0, i * 5, "0000000000000000");
+        StringBuilder vcdContents = new StringBuilder();
+        vcdContents.append("$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
+        for (int i = 0; i < 10000; i++) {
+            vcdContents.append('#');
+            vcdContents.append(i * 5);
+            vcdContents.append("\n1A\n");
+        }
 
-        builder.finish();
+        File vcdFile = tempFileFrom(vcdContents.toString());
 
         try {
-            VCDLoader loader = new VCDLoader();
-            loader.load(builder.getVCDFile(), builder.getWaveformBuilder(), new VCDLoader.ProgressListener() {
+            new VCDLoader().load(vcdFile, builder, new VCDLoader.ProgressListener() {
                 @Override
                 public boolean updateProgress(int percentRead) {
                     return false;
@@ -570,15 +456,18 @@ public class VCDLoaderTest {
     // File produced by Accellera SystemC
     @Test
     public void accellera() throws Exception {
-        ExpectWaveformBuilder builder = new ExpectWaveformBuilder();
-        builder.expectTimescale(-12);
-        builder.expectEnterScope("SystemC");
-        builder.expectNewNet("int_val", -1, 32);
-        builder.expectNewNet("float_val", -1, 1);
-        builder.expectNewNet("clk", -1, 1);
-        builder.expectNewNet("rstn", -1, 1);
-        builder.expectExitScope();
-        builder.expectLoadFinished();
+        InOrder ord = inOrder(builder);
+
         new VCDLoader().load(testFile("accellera.vcd"), builder, null);
+
+        ord.verify(builder).setTimescale(-12);
+        ord.verify(builder).enterScope("SystemC");
+        ord.verify(builder).newNet("int_val", -1, 32);
+        ord.verify(builder).newNet("float_val", -1, 1);
+        ord.verify(builder).newNet("clk", -1, 1);
+        ord.verify(builder).newNet("rstn", -1, 1);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
     }
 }

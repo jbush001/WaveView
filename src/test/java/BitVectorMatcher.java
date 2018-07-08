@@ -1,3 +1,4 @@
+
 //
 // Copyright 2016 Jeff Bush
 //
@@ -14,34 +15,28 @@
 // limitations under the License.
 //
 
+import org.mockito.ArgumentMatcher;
 import waveview.BitVector;
-import waveview.WaveformBuilder;
 
-class DummyWaveformBuilder implements WaveformBuilder {
-    private int nextNetId;
+///
+/// Matcher for Mockito mock objects that take a BitVector parameter
+///
+class BitVectorMatcher implements ArgumentMatcher<BitVector> {
+    private final BitVector expected;
 
-    @Override
-    public void setTimescale(int order) {
+    public BitVectorMatcher(String expected) {
+        this.expected = new BitVector(expected, 2);
     }
 
     @Override
-    public void enterScope(String name) {
+    public boolean matches(BitVector check) {
+        System.out.println("Calling BitVectorMatcher.matches " + expected.toString() + " ?= " + check
+            + " : " + check.compare(expected));
+        return check.compare(expected) == 0;
     }
 
     @Override
-    public void exitScope() {
-    }
-
-    @Override
-    public int newNet(String shortName, int cloneId, int width) {
-        return nextNetId++;
-    }
-
-    @Override
-    public void appendTransition(int id, long timestamp, BitVector values) {
-    }
-
-    @Override
-    public void loadFinished() {
+    public String toString() {
+        return expected.toString(2);
     }
 }
