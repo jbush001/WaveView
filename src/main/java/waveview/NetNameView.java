@@ -52,7 +52,7 @@ class NetNameView extends JList<Integer> implements WaveformPresentationModel.Li
     private final WaveformDataModel waveformDataModel;
     private JPopupMenu popupMenu;
 
-    class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
+    private class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
         private int currentNet;
         private boolean currentNetIsSelected;
         private int labelBaseline = -1;
@@ -127,7 +127,7 @@ class NetNameView extends JList<Integer> implements WaveformPresentationModel.Li
         }
     }
 
-    class ListModelAdapter implements ListModel<Integer>, WaveformPresentationModel.Listener {
+    private class ListModelAdapter implements ListModel<Integer>, WaveformPresentationModel.Listener {
         private final ArrayList<ListDataListener> listeners = new ArrayList<>();
 
         ListModelAdapter() {
@@ -186,7 +186,7 @@ class NetNameView extends JList<Integer> implements WaveformPresentationModel.Li
     }
 
     /// Handles lists of signals dropped onto this view
-    class NetTransferHandler extends TransferHandler {
+    private class NetTransferHandler extends TransferHandler {
         private boolean isLocalDrop;
         private int[] localIndices;
 
@@ -358,7 +358,7 @@ class NetNameView extends JList<Integer> implements WaveformPresentationModel.Li
         }
     }
 
-    void removeNets(int[] indices) {
+    private void removeNets(int[] indices) {
         for (int i = indices.length - 1; i >= 0; i--) {
             waveformPresentationModel.removeNet(indices[i]);
         }
@@ -366,7 +366,7 @@ class NetNameView extends JList<Integer> implements WaveformPresentationModel.Li
         clearSelection();
     }
 
-    ValueFormatter createEnumFormatter() {
+    private ValueFormatter createEnumFormatter() {
         ValueFormatter formatter = null;
         JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialEnumDirectory());
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);

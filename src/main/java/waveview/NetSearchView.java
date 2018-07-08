@@ -128,7 +128,7 @@ class NetSearchView extends JPanel {
         listScroller.add(new JTextArea());
     }
 
-    class NetTreeCellRenderer extends DefaultTreeCellRenderer {
+    private class NetTreeCellRenderer extends DefaultTreeCellRenderer {
         @Override
         public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
                 boolean leaf, int row, boolean hasFocus) {

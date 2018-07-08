@@ -434,7 +434,7 @@ public class MainWindow extends JPanel implements ActionListener {
         markerMenu.add(createMenuItem("Show marker list", "showmarkerlist", null));
     }
 
-    JMenuItem createMenuItem(String text, String actionCommand,
+    private JMenuItem createMenuItem(String text, String actionCommand,
             KeyStroke accelerator) {
         JMenuItem item = new JMenuItem(text);
         item.setActionCommand(actionCommand);

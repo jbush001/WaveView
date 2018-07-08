@@ -79,7 +79,7 @@ class AppPreferences {
         return prefs.get("recentFiles", "");
     }
 
-    void readColors() {
+    private void readColors() {
         waveformColor = readColor("waveformColor", Color.black);
         conflictColor = readColor("conflictColor", new Color(255, 200, 200));
         selectionColor = readColor("selectionColor", new Color(230, 230, 230));

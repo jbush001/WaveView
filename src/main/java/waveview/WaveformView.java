@@ -203,7 +203,7 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
         }
     }
 
-    void drawNets(Graphics g, Rectangle visibleRect) {
+    private void drawNets(Graphics g, Rectangle visibleRect) {
         // Draw nets
         int waveformIndex = visibleRect.y / DrawMetrics.WAVEFORM_V_SPACING;
         if (waveformIndex > 0) {
@@ -229,7 +229,7 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
         }
     }
 
-    void drawCursor(Graphics g, Rectangle visibleRect) {
+    private void drawCursor(Graphics g, Rectangle visibleRect) {
         // Draw the cursor (a vertical line that runs from the top to the
         // bottom of the waveform).
         g.setColor(AppPreferences.getInstance().cursorColor);

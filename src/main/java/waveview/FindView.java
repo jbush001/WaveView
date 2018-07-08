@@ -88,7 +88,7 @@ class FindView extends JPanel implements ActionListener {
     }
 
     /// Called when the user changes the search string.
-    void invalidateSearch() {
+    private void invalidateSearch() {
         // The next time the user hits next/prev, need to regenerate the Search.
         needToParseSearch = true;
 
