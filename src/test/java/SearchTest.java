@@ -20,6 +20,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
 import waveview.BitVector;
+import waveview.NetDataModel;
 import waveview.Search;
 import waveview.WaveformBuilder;
 import waveview.WaveformDataModel;
@@ -841,5 +842,29 @@ public class SearchTest {
         search = new Search(waveformDataModel, "mod1.b = mod1.a");
         assertEquals(2, search.getNextMatch(0));
         assertEquals(2, search.getPreviousMatch(5));
+    }
+
+    @Test
+    public void generateSearch() throws Exception {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        WaveformBuilder builder = waveformDataModel.startBuilding();
+        builder.enterScope("mod1");
+        int id1 = builder.newNet("a", -1, 4);
+        int id2 = builder.newNet("b", -1, 4);
+        builder.exitScope();
+        builder.appendTransition(id1, 0, new BitVector("0", 10));
+        builder.appendTransition(id1, 1, new BitVector("1", 10));
+        builder.appendTransition(id1, 2, new BitVector("2", 10));
+        builder.appendTransition(id2, 0, new BitVector("3", 10));
+        builder.appendTransition(id2, 1, new BitVector("4", 10));
+        builder.appendTransition(id2, 2, new BitVector("5", 10));
+        final NetDataModel[] nets = {
+            waveformDataModel.getNetDataModel(0),
+            waveformDataModel.getNetDataModel(1)
+        };
+
+        String searchString = Search.generateSearch(nets, 1);
+
+        assertEquals("mod1.a = 'h1 and mod1.b = 'h4", searchString);
     }
 }

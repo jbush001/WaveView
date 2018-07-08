@@ -313,26 +313,15 @@ public class MainWindow extends JPanel implements ActionListener {
     /// The initial search string is formed by the selected nets and
     /// their values at the cursor position.
     private String generateSearchFromSelection() {
-        StringBuilder searchExpr = new StringBuilder();
-        boolean first = true;
-        long cursorPosition = waveformPresentationModel.getCursorPosition();
-
-        for (int index : waveformContainer.getSelectedNets()) {
-            NetDataModel netDataModel = waveformPresentationModel.getVisibleNet(index);
-            if (first) {
-                first = false;
-            } else {
-                searchExpr.append(" and ");
-            }
-
-            searchExpr.append(netDataModel.getFullName());
-            Transition t = netDataModel.findTransition(cursorPosition).next();
-
-            searchExpr.append(" = 'h");
-            searchExpr.append(t.toString(16));
+        int[] selectedIndices = waveformContainer.getSelectedNets();
+        NetDataModel[] nets = new NetDataModel[selectedIndices.length];
+        int netIndex = 0;
+        for (int visibleIndex : selectedIndices) {
+            nets[netIndex++] = waveformPresentationModel.getVisibleNet(visibleIndex);
         }
 
-        return searchExpr.toString();
+        long cursorPosition = waveformPresentationModel.getCursorPosition();
+        return Search.generateSearch(nets, cursorPosition);
     }
 
     void setSearch(String searchString) throws Search.ParseException {

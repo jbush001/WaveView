@@ -32,6 +32,27 @@ public class Search {
     private final WaveformDataModel waveformDataModel;
     private ExpressionNode searchExpression;
 
+    /// Generate a search given a set of nets that matches at the given timestamp.
+    public static String generateSearch(NetDataModel[] nets, long timestamp) {
+        StringBuilder searchExpr = new StringBuilder();
+        boolean first = true;
+        for (NetDataModel netDataModel : nets) {
+            if (first) {
+                first = false;
+            } else {
+                searchExpr.append(" and ");
+            }
+
+            searchExpr.append(netDataModel.getFullName());
+
+            Transition t = netDataModel.findTransition(timestamp).next();
+            searchExpr.append(" = 'h");
+            searchExpr.append(t.toString(16));
+        }
+
+        return searchExpr.toString();
+    }
+
     public Search(WaveformDataModel waveformDataModel, String searchString) throws ParseException {
         this.waveformDataModel = waveformDataModel;
         lexer = new Lexer(searchString);
