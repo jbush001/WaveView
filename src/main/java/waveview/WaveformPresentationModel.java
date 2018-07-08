@@ -49,12 +49,17 @@ public class WaveformPresentationModel {
 
     public void clear() {
         int oldSize = visibleNets.size();
+        boolean hadMarkers = markers.size() != 0;
 
         visibleNets.clear();
         markers.clear();
         netSets.clear();
         for (Listener listener : listeners) {
-            listener.netsRemoved(0, oldSize);
+            if (oldSize != 0)
+                listener.netsRemoved(0, oldSize);
+
+            if (hadMarkers)
+                listener.markerChanged(-1);
         }
     }
 
@@ -205,8 +210,10 @@ public class WaveformPresentationModel {
     public void setCursorPosition(long timestamp) {
         long old = cursorPosition;
         cursorPosition = timestamp;
-        for (Listener listener : listeners) {
-            listener.cursorChanged(old, timestamp);
+        if (old != timestamp) {
+            for (Listener listener : listeners) {
+                listener.cursorChanged(old, timestamp);
+            }
         }
     }
 

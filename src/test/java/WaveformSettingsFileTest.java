@@ -38,7 +38,7 @@ public class WaveformSettingsFileTest {
     public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
-    public void load() throws Exception {
+    public void saveLoad() throws Exception {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
@@ -142,9 +142,9 @@ public class WaveformSettingsFileTest {
         assertEquals(123.0, sourcePresentationModel.getHorizontalScale(), 0.001);
     }
 
-    // When the data model changes, ensure the loader falls back
-    // gracefully. Specifically if a visible net is no longer in
-    // the data model after it is reloaded
+    // When the data model changes on disk between the time the settings file was saved and
+    // when it was reloaded, ensure the loader falls back gracefully. Specifically if a
+    // visible net is no longer in the data model after it is reloaded
     // @todo Does not test when markers are put in past the end time.
     // (not currently implemented in loader)
     @Test

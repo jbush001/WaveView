@@ -49,14 +49,12 @@ public class WaveformDataModelTest {
         int net3 = builder.newNet("net3", -1, 2);
         builder.exitScope();
         builder.exitScope();
-
         builder.appendTransition(net1, 10, new BitVector("1", 2));
         builder.appendTransition(net1, 20, new BitVector("0", 2));
         builder.appendTransition(net2, 10, new BitVector("100", 2));
         builder.appendTransition(net2, 15, new BitVector("010", 2));
         builder.appendTransition(net3, 12, new BitVector("11", 2));
         builder.appendTransition(net3, 17, new BitVector("01", 2));
-
         builder.loadFinished();
 
         NetTreeModel netTree = model.getNetTree();

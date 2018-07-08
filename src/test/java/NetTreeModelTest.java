@@ -90,6 +90,7 @@ public class NetTreeModelTest {
         assertSame(child4, model.getNetFromTreeObject(grandkid1));
     }
 
+    // This method is not implemented (nor needed).
     @Test
     public void valueForPathChanged() {
         NetTreeModel model = new NetTreeModel();
@@ -105,7 +106,6 @@ public class NetTreeModelTest {
     @Test
     public void doubleRoot() {
         NetDataModel child1 = new NetDataModel("child1", "scope1.child1", new TransitionVector(1));
-
         NetTreeModel model = new NetTreeModel();
         NetTreeModel.Builder builder = model.startBuilding();
         builder.enterScope("scope1");

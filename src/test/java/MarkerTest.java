@@ -15,13 +15,17 @@
 //
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import org.junit.Before;
 import org.junit.Test;
-
+import waveview.NetDataModel;
+import waveview.TransitionVector;
 import waveview.WaveformPresentationModel;
 
 public class MarkerTest {
@@ -51,24 +55,32 @@ public class MarkerTest {
     @Test
     public void insertMarker() {
         model.addMarker("marker0", 1000);
+
         verify(listener).markerChanged(1000);
+        verifyNoMoreInteractions(listener);
         assertEquals(0, model.getMarkerAtTime(1000));
     }
 
     @Test
-    public void removeMarkerNoMatch() {
+    public void removeMarkerNoMatchBefore() {
         model.addMarker("marker0", 1000);
         clearInvocations(listener);
 
-        model.removeMarkerAtTime(925);
+        model.removeMarkerAtTime(925);  // less than marker time
 
         verifyZeroInteractions(listener);
         assertEquals(1, model.getMarkerCount()); // Marker should still be present
+    }
 
-        model.removeMarkerAtTime(1075);
+    @Test
+    public void removeMarkerNoMatchAfter() {
+        model.addMarker("marker0", 1000);
+        clearInvocations(listener);
 
-        assertEquals(1, model.getMarkerCount()); // Marker should still be present
+        model.removeMarkerAtTime(1075); // greater than marker time
+
         verifyZeroInteractions(listener);
+        assertEquals(1, model.getMarkerCount()); // Marker should still be present
     }
 
     @Test
@@ -79,8 +91,9 @@ public class MarkerTest {
 
         model.removeMarkerAtTime(990);
 
-        assertEquals(0, model.getMarkerCount());
         verify(listener).markerChanged(1000);
+        verifyNoMoreInteractions(listener);
+        assertEquals(0, model.getMarkerCount());
     }
 
     @Test
@@ -91,8 +104,9 @@ public class MarkerTest {
 
         model.removeMarkerAtTime(1010);
 
-        assertEquals(0, model.getMarkerCount());
         verify(listener).markerChanged(1000);
+        verifyNoMoreInteractions(listener);
+        assertEquals(0, model.getMarkerCount());
     }
 
     // Remove a marker when there are multiple markers in the list
@@ -107,6 +121,7 @@ public class MarkerTest {
         model.removeMarkerAtTime(199);
 
         verify(listener).markerChanged(200);
+        verifyNoMoreInteractions(listener);
 
         // Ensure other markers were unaffected
         assertEquals(3, model.getMarkerCount());
@@ -126,6 +141,7 @@ public class MarkerTest {
         model.removeAllMarkers();
 
         verify(listener).markerChanged(-1);
+        verifyNoMoreInteractions(listener);
         assertEquals(0, model.getMarkerCount());
     }
 
@@ -134,29 +150,49 @@ public class MarkerTest {
     public void removeMarkerHighZoom() {
         model.setHorizontalScale(0.037);
         model.addMarker("marker1", 14);
+        clearInvocations(listener);
+
         model.removeMarkerAtTime(14);
+
+        verify(listener).markerChanged(14);
+        verifyNoMoreInteractions(listener);
         assertEquals(0, model.getMarkerCount());
     }
 
     @Test
-    public void setDescriptionForMarker() {
+    public void getDescriptionForMarker() {
         model.addMarker("foo", 1000);
         assertEquals("foo", model.getDescriptionForMarker(0));
-        model.setDescriptionForMarker(0, "bar");
-        assertEquals("bar", model.getDescriptionForMarker(0));
     }
 
+    // Go to next marker when we are before the first marker
     @Test
-    public void nextMarker() {
+    public void nextMarkerBeforeFirst() {
         model.addMarker("marker2", 100);
         model.addMarker("marker3", 200);
-        model.setCursorPosition(0);
+        model.setCursorPosition(20);
+        clearInvocations(listener);
 
         model.nextMarker(false);
+
+        verify(listener).cursorChanged(20, 100);
+        verifyNoMoreInteractions(listener);
         assertEquals(100, model.getCursorPosition());
         assertEquals(100, model.getSelectionStart());
+    }
+
+    // Go to the next marker when we are on the first marker
+    @Test
+    public void nextMarkerFirst() {
+        model.addMarker("marker2", 100);
+        model.addMarker("marker3", 200);
+        model.setCursorPosition(100);
+        clearInvocations(listener);
 
         model.nextMarker(false);
+
+        verify(listener).cursorChanged(100, 200);
+        verifyNoMoreInteractions(listener);
         assertEquals(200, model.getCursorPosition());
         assertEquals(200, model.getSelectionStart());
     }
@@ -167,23 +203,40 @@ public class MarkerTest {
         model.addMarker("marker1", 100);
         model.addMarker("marker2", 200);
         model.setCursorPosition(200);
+        clearInvocations(listener);
 
         model.nextMarker(false);
+
+        verifyZeroInteractions(listener);
         assertEquals(200, model.getCursorPosition());
     }
 
     @Test
-    public void prevMarker() {
+    public void prevMarkerAfterLast() {
         model.addMarker("marker2", 100);
         model.addMarker("marker3", 200);
-
         model.setCursorPosition(500);
+        clearInvocations(listener);
 
         model.prevMarker(false);
+
+        verify(listener).cursorChanged(500, 200);
+        verifyNoMoreInteractions(listener);
         assertEquals(200, model.getCursorPosition());
         assertEquals(200, model.getSelectionStart());
+    }
+
+    @Test
+    public void prevMarkerOnLast() {
+        model.addMarker("marker2", 100);
+        model.addMarker("marker3", 200);
+        model.setCursorPosition(200);
+        clearInvocations(listener);
 
         model.prevMarker(false);
+
+        verify(listener).cursorChanged(200, 100);
+        verifyNoMoreInteractions(listener);
         assertEquals(100, model.getCursorPosition());
         assertEquals(100, model.getSelectionStart());
     }
@@ -194,8 +247,11 @@ public class MarkerTest {
         model.addMarker("marker1", 100);
         model.addMarker("marker2", 200);
         model.setCursorPosition(100);
+        clearInvocations(listener);
 
         model.prevMarker(false);
+
+        verifyZeroInteractions(listener);
         assertEquals(100, model.getCursorPosition());
     }
 
@@ -204,10 +260,14 @@ public class MarkerTest {
     public void extendSelectionNextMarker() {
         model.addMarker("marker1", 100);
         model.addMarker("marker2", 200);
-
         model.setCursorPosition(50);
         model.setSelectionStart(50);
+        clearInvocations(listener);
+
         model.nextMarker(true);
+
+        verify(listener).cursorChanged(50, 100);
+        verifyNoMoreInteractions(listener);
         assertEquals(100, model.getCursorPosition());
         assertEquals(50, model.getSelectionStart());
     }
@@ -217,10 +277,14 @@ public class MarkerTest {
     public void extendSelectionPrevMarker() {
         model.addMarker("marker2", 100);
         model.addMarker("marker3", 200);
-
         model.setCursorPosition(150);
         model.setSelectionStart(150);
+        clearInvocations(listener);
+
         model.prevMarker(true);
+
+        verify(listener).cursorChanged(150, 100);
+        verifyNoMoreInteractions(listener);
         assertEquals(100, model.getCursorPosition());
         assertEquals(150, model.getSelectionStart());
     }
@@ -229,9 +293,26 @@ public class MarkerTest {
     public void clearMarkers() {
         model.addMarker("marker0", 1000);
         model.addMarker("marker1", 1200);
+        clearInvocations(listener);
 
         model.clear();
 
+        verify(listener).markerChanged(-1);
+        verifyNoMoreInteractions(listener);
         assertEquals(0, model.getMarkerCount());
+    }
+
+    // Ensure removeAllNets doesn't affect markers
+    @Test
+    public void removeAllNets() {
+        NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
+        model.addNet(net1);
+        model.addMarker("a_marker", 1000);
+        clearInvocations(listener);
+
+        model.removeAllNets();
+
+        verify(listener, never()).markerChanged(anyInt());
+        assertEquals(1, model.getMarkerCount());
     }
 }

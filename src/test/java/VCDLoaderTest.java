@@ -393,7 +393,7 @@ public class VCDLoaderTest {
         verifyNoMoreInteractions(builder);
     }
 
-    static class TestProgressListener implements WaveformLoader.ProgressListener {
+    static class MockProgressListener implements WaveformLoader.ProgressListener {
         int lastUpdate = -1;
 
         @Override
@@ -420,7 +420,7 @@ public class VCDLoaderTest {
         }
 
         File vcdFile = tempFileFrom(vcdContents.toString());
-        TestProgressListener progressListener = new TestProgressListener();
+        MockProgressListener progressListener = new MockProgressListener();
         VCDLoader loader = new VCDLoader();
         loader.load(vcdFile, builder, progressListener);
         assertTrue(progressListener.lastUpdate > 90);
@@ -453,7 +453,7 @@ public class VCDLoaderTest {
         }
     }
 
-    // File produced by Accellera SystemC
+    // File produced by Accellera SystemC. Regression test, this used to have issues loading.
     @Test
     public void accellera() throws Exception {
         InOrder ord = inOrder(builder);

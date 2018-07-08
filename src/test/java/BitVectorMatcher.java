@@ -30,8 +30,6 @@ class BitVectorMatcher implements ArgumentMatcher<BitVector> {
 
     @Override
     public boolean matches(BitVector check) {
-        System.out.println("Calling BitVectorMatcher.matches " + expected.toString() + " ?= " + check
-            + " : " + check.compare(expected));
         return check.compare(expected) == 0;
     }
 
