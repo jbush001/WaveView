@@ -343,11 +343,7 @@ public class MainWindow extends JPanel implements ActionListener {
         if (currentSearch != null) {
             long newTimestamp = currentSearch.getNextMatch(waveformPresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                if (!extendSelection) {
-                    waveformPresentationModel.setSelectionStart(newTimestamp);
-                }
-
-                waveformPresentationModel.setCursorPosition(newTimestamp);
+                waveformPresentationModel.setCursorPosition(newTimestamp, extendSelection);
             }
         }
     }
@@ -356,11 +352,7 @@ public class MainWindow extends JPanel implements ActionListener {
         if (currentSearch != null) {
             long newTimestamp = currentSearch.getPreviousMatch(waveformPresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                if (!extendSelection) {
-                    waveformPresentationModel.setSelectionStart(newTimestamp);
-                }
-
-                waveformPresentationModel.setCursorPosition(newTimestamp);
+                waveformPresentationModel.setCursorPosition(newTimestamp, extendSelection);
             }
         }
     }

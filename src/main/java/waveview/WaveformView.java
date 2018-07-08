@@ -257,11 +257,8 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
             repaint(); // we already had a selection, clear it
         }
 
-        if (!e.isShiftDown()) {
-            waveformPresentationModel.setSelectionStart(timestamp);
-        }
-
-        waveformPresentationModel.setCursorPosition(timestamp);
+        boolean extendSelection = e.isShiftDown();
+        waveformPresentationModel.setCursorPosition(timestamp, extendSelection);
 
         /// @bug Be sure to do this after setting the position, otherwise the view will
         /// jump back to the

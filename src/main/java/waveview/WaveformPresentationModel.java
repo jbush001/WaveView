@@ -207,14 +207,22 @@ public class WaveformPresentationModel {
         return cursorPosition;
     }
 
-    public void setCursorPosition(long timestamp) {
+    public void setCursorPosition(long timestamp, boolean extendSelection) {
         long old = cursorPosition;
         cursorPosition = timestamp;
+        if (!extendSelection) {
+            selectionStart = timestamp;
+        }
+
         if (old != timestamp) {
             for (Listener listener : listeners) {
                 listener.cursorChanged(old, timestamp);
             }
         }
+    }
+
+    public void setCursorPosition(long timestamp) {
+        setCursorPosition(timestamp, false);
     }
 
     // This is used to display the timestamp at the top of the cursor when the user
@@ -235,10 +243,6 @@ public class WaveformPresentationModel {
 
     public long getSelectionStart() {
         return selectionStart;
-    }
-
-    public void setSelectionStart(long timestamp) {
-        selectionStart = timestamp;
     }
 
     public void removeAllMarkers() {
@@ -332,10 +336,7 @@ public class WaveformPresentationModel {
             timestamp = getTimestampForMarker(id);
         }
 
-        setCursorPosition(timestamp);
-        if (!extendSelection) {
-            setSelectionStart(timestamp);
-        }
+        setCursorPosition(timestamp, extendSelection);
     }
 
     public void nextMarker(boolean extendSelection) {
@@ -347,11 +348,13 @@ public class WaveformPresentationModel {
                 timestamp = getTimestampForMarker(id);
             }
 
-            setCursorPosition(timestamp);
-            if (!extendSelection) {
-                setSelectionStart(timestamp);
-            }
+            setCursorPosition(timestamp, extendSelection);
         }
+    }
+
+    public void jumpToMarker(int markerId, boolean extendSelection) {
+        long timestamp = getTimestampForMarker(markerId);
+        setCursorPosition(timestamp, extendSelection);
     }
 
     private static class Marker implements SortedArrayList.Keyed {

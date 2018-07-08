@@ -64,11 +64,7 @@ class MarkerListView extends JPanel implements ActionListener, WaveformPresentat
     }
 
     private void select(boolean extendSelection) {
-        long timestamp = waveformPresentationModel.getTimestampForMarker(table.getSelectedRow());
-        waveformPresentationModel.setCursorPosition(timestamp);
-        if (!extendSelection) {
-            waveformPresentationModel.setSelectionStart(timestamp);
-        }
+        waveformPresentationModel.jumpToMarker(table.getSelectedRow(), extendSelection);
     }
 
     @Override

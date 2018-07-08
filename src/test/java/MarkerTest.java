@@ -257,11 +257,10 @@ public class MarkerTest {
 
     // Extend the selection while navigating to next marker
     @Test
-    public void extendSelectionNextMarker() {
+    public void nextMarkerExtendSelection() {
         model.addMarker("marker1", 100);
         model.addMarker("marker2", 200);
         model.setCursorPosition(50);
-        model.setSelectionStart(50);
         clearInvocations(listener);
 
         model.nextMarker(true);
@@ -274,11 +273,10 @@ public class MarkerTest {
 
     // Extend the selection while navigating to previous marker
     @Test
-    public void extendSelectionPrevMarker() {
+    public void prevMarkerExtendSelection() {
         model.addMarker("marker2", 100);
         model.addMarker("marker3", 200);
         model.setCursorPosition(150);
-        model.setSelectionStart(150);
         clearInvocations(listener);
 
         model.prevMarker(true);
@@ -287,6 +285,34 @@ public class MarkerTest {
         verifyNoMoreInteractions(listener);
         assertEquals(100, model.getCursorPosition());
         assertEquals(150, model.getSelectionStart());
+    }
+
+    @Test
+    public void jumpToMarker() {
+        model.addMarker("marker", 100);
+        model.setCursorPosition(50);
+        clearInvocations(listener);
+
+        model.jumpToMarker(0, false);
+
+        verify(listener).cursorChanged(50, 100);
+        verifyNoMoreInteractions(listener);
+        assertEquals(100, model.getCursorPosition());
+        assertEquals(100, model.getSelectionStart());
+    }
+
+    @Test
+    public void jumpToMarkerExtendSelection() {
+        model.addMarker("marker", 100);
+        model.setCursorPosition(50);
+        clearInvocations(listener);
+
+        model.jumpToMarker(0, true);
+
+        verify(listener).cursorChanged(50, 100);
+        verifyNoMoreInteractions(listener);
+        assertEquals(100, model.getCursorPosition());
+        assertEquals(50, model.getSelectionStart());
     }
 
     @Test
