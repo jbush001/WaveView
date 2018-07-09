@@ -134,6 +134,16 @@ public class VCDLoaderTest {
     }
 
     @Test
+    public void invalidFile() throws Exception {
+        try {
+            new VCDLoader().load(testFile("invalid_file_shasdjkfhaldkfhadfhadsjkfhadsf.vcd"), builder, null);
+            fail("Didn't throw exception");
+        } catch (IOException exc) {
+            // expected
+        }
+    }
+
+    @Test
     public void unknownTimescale() throws Exception {
         try {
             new VCDLoader().load(testFile("unknown-timescale.vcd"), builder, null);

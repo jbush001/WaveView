@@ -19,6 +19,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,5 +102,11 @@ public class ProgressInputStreamTest {
         assertEquals(BYTES_RETURNED, progressInputStream.read(testDest, REQUEST_OFFSET, BYTES_REQUESTED));
         assertArrayEquals(expectedDest, testDest);
         assertEquals(BYTES_RETURNED, progressInputStream.getTotalRead());
+    }
+
+    @Test
+    public void close() throws IOException {
+        progressInputStream.close();
+        verify(inputStream).close();
     }
 }
