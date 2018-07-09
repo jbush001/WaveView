@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeoutException;
 import javax.swing.ProgressMonitor;
-
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
