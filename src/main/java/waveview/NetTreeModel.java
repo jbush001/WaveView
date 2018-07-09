@@ -63,20 +63,18 @@ public class NetTreeModel implements TreeModel {
     static class Node {
         private final String name;
         private final NetDataModel netDataModel;
-        private final ArrayList<Node> children;
+        private final ArrayList<Node> children = new ArrayList<>();
 
         // Interior nodes (modules/interfaces) only
         Node(String name) {
             this.name = name;
             netDataModel = null;
-            children = new ArrayList<>();
         }
 
         // Leaf nodes (nets) only
         Node(NetDataModel netDataModel) {
             name = netDataModel.getShortName();
             this.netDataModel = netDataModel;
-            children = null;
         }
 
         @Override
@@ -85,7 +83,7 @@ public class NetTreeModel implements TreeModel {
         }
 
         boolean isLeaf() {
-            return children == null;
+            return children.size() == 0;
         }
     }
 

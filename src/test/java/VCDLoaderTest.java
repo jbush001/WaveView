@@ -389,6 +389,7 @@ public class VCDLoaderTest {
         ord.verify(builder).newNet(0, "foo", 1);
         ord.verify(builder).newNet(1, "source", 1);
         ord.verify(builder).newNet(1, "alias", 1);
+        ord.verify(builder).newNet(2, "bar", 1);    // Ensure index incremented properly
         ord.verify(builder).exitScope();
         ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("1")));
         ord.verify(builder).loadFinished();

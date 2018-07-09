@@ -33,7 +33,7 @@ public interface WaveformBuilder {
     public void exitScope();
 
     /// Create a new net
-    /// @param netId This will either be the next sequential integer if this is a
+    /// @param netIndex This will either be the next sequential integer if this is a
     ///   new net, or less than the highest netId if this is a alias of an existing
     ///   net (shares transition data; the nets are connected).
     /// @param shortName Name of the signal. It's called 'short' to distinguish

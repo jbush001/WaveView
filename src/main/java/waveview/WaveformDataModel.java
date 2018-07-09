@@ -139,23 +139,20 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
 
             NetDataModel net;
             TransitionVector transitionVector;
+
             if (netId < transitionVectors.size()) {
                 // alias of existing net
                 transitionVector = transitionVectors.get(netId);
-                if (transitionVector.getWidth() != width) {
-                    System.out.println("Aliased net width mismatch");
-                }
+                assert transitionVector.getWidth() == width;
             } else {
                 // new net
                 assert netId == transitionVectors.size();
                 transitionVector = new TransitionVector(width);
+                transitionVectors.add(transitionVector);
             }
 
             net = new NetDataModel(shortName, fullName.toString(), transitionVector);
             allNets.add(net);
-            transitionVectors.add(transitionVector);
-            assert allNets.size() == transitionVectors.size();
-
             treeBuilder.addNet(net);
             fullNameToNetMap.put(fullName.toString(), net);
         }

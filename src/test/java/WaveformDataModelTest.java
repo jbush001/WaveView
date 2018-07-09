@@ -138,6 +138,26 @@ public class WaveformDataModelTest {
         assertEquals(17, ati.next().getTimestamp());
     }
 
+    // Regression test: when a net is aliased, it doesn't increment the net index.
+    // Make sure WaveformDataModel doesn't get out of sync.
+    @Test
+    public void netAfterAlias() {
+        builder.setTimescale(-9);
+        builder.enterScope("mod1");
+        builder.newNet(0, "net1", 1);
+        builder.newNet(0, "net2", 1);    // aliases net1
+        builder.newNet(1, "net3", 1);    // not alias
+        builder.exitScope();
+        builder.appendTransition(0, 17, new BitVector("1", 2));
+        builder.appendTransition(1, 21, new BitVector("0", 2));
+        builder.loadFinished();
+
+        NetDataModel netData3 = model.getNetDataModel(2);
+
+        Iterator<Transition> ati = netData3.findTransition(0);
+        assertEquals(21, ati.next().getTimestamp());
+    }
+
     @Test
     public void copyFrom() {
         builder.setTimescale(-9);
