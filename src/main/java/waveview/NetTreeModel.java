@@ -83,7 +83,7 @@ public class NetTreeModel implements TreeModel {
         }
 
         boolean isLeaf() {
-            return children.size() == 0;
+            return children.isEmpty();
         }
     }
 
