@@ -37,15 +37,15 @@ public class NetSearchListModelAdapterTest {
     public void setUpTest() {
         WaveformBuilder builder = model.startBuilding();
         builder.enterScope("mod1");
-        builder.newNet("fooxxx", -1, 1);
-        builder.newNet("xfooxx", -1, 1);
-        builder.newNet("xxfoox", -1, 1);
-        builder.newNet("xxxfoo", -1, 1);
-        builder.newNet("bbbbb", -1, 1);
-        builder.newNet("bbbb", -1, 1);
-        builder.newNet("bbb", -1, 1);
-        builder.newNet("bb", -1, 1);
-        builder.newNet("yyy", -1, 1);
+        builder.newNet(0, "fooxxx", 1);
+        builder.newNet(1, "xfooxx", 1);
+        builder.newNet(2, "xxfoox", 1);
+        builder.newNet(3, "xxxfoo", 1);
+        builder.newNet(4, "bbbbb", 1);
+        builder.newNet(5, "bbbb", 1);
+        builder.newNet(6, "bbb", 1);
+        builder.newNet(7, "bb", 1);
+        builder.newNet(8, "yyy", 1);
         builder.exitScope();
 
         nslma = new NetSearchListModelAdapter(model);

@@ -44,18 +44,18 @@ public class WaveformSettingsFileTest {
 
         WaveformBuilder builder = dataModel.startBuilding();
         builder.enterScope("mod1");
-        builder.newNet("net1", -1, 1);
-        builder.newNet("net2", -1, 1);
+        builder.newNet(0, "net1", 1);
+        builder.newNet(1, "net2", 1);
         builder.enterScope("mod2");
-        builder.newNet("net3", -1, 1);
-        builder.newNet("net4", -1, 1);
+        builder.newNet(2, "net3", 1);
+        builder.newNet(3, "net4", 1);
         builder.enterScope("mod3");
-        builder.newNet("net5", -1, 1);
-        builder.newNet("net6", -1, 1);
+        builder.newNet(4, "net5", 1);
+        builder.newNet(5, "net6", 1);
         builder.exitScope();
-        builder.newNet("net7", -1, 1);
+        builder.newNet(6, "net7", 1);
         builder.exitScope();
-        builder.newNet("net8", -1, 1);
+        builder.newNet(7, "net8", 1);
         builder.exitScope();
         builder.loadFinished();
 
@@ -153,9 +153,9 @@ public class WaveformSettingsFileTest {
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
         WaveformBuilder builder1 = sourceDataModel.startBuilding();
         builder1.enterScope("mod1");
-        builder1.newNet("net1", -1, 1);
-        builder1.newNet("net2", -1, 1);
-        builder1.newNet("net3", -1, 1);
+        builder1.newNet(0, "net1", 1);
+        builder1.newNet(1, "net2", 1);
+        builder1.newNet(2, "net3", 1);
         builder1.exitScope();
         builder1.loadFinished();
 
@@ -168,9 +168,9 @@ public class WaveformSettingsFileTest {
 
         WaveformBuilder builder2 = destDataModel.startBuilding();
         builder2.enterScope("mod1");
-        builder2.newNet("net1", -1, 1);
-        builder2.newNet("net4", -1, 1);
-        builder2.newNet("net3", -1, 1);
+        builder2.newNet(0, "net1", 1);
+        builder2.newNet(1, "net4", 1);
+        builder2.newNet(2, "net3", 1);
         builder2.exitScope();
         builder2.loadFinished();
 
@@ -190,7 +190,7 @@ public class WaveformSettingsFileTest {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformBuilder builder = dataModel.startBuilding();
         builder.enterScope("foo");
-        builder.newNet("bar", -1, 1);
+        builder.newNet(0, "bar", 1);
         builder.exitScope();
         builder.loadFinished();
 

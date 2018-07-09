@@ -32,12 +32,12 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("clk", -1, 1);
+        builder.newNet(0, "clk", 1);
         builder.exitScope();
-        builder.appendTransition(id1, 5, new BitVector("0", 2));
-        builder.appendTransition(id1, 10, new BitVector("1", 2));
-        builder.appendTransition(id1, 15, new BitVector("0", 2));
-        builder.appendTransition(id1, 20, new BitVector("1", 2));
+        builder.appendTransition(0, 5, new BitVector("0", 2));
+        builder.appendTransition(0, 10, new BitVector("1", 2));
+        builder.appendTransition(0, 15, new BitVector("0", 2));
+        builder.appendTransition(0, 20, new BitVector("1", 2));
         builder.loadFinished();
 
         return waveformDataModel;
@@ -48,10 +48,10 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("m");
-        builder.newNet("a", -1, 1);
-        builder.newNet("b", -1, 1);
-        builder.newNet("c", -1, 1);
-        builder.newNet("d", -1, 1);
+        builder.newNet(0, "a", 1);
+        builder.newNet(1, "b", 1);
+        builder.newNet(2, "c", 1);
+        builder.newNet(3, "d", 1);
         builder.exitScope();
 
         BitVector bv = new BitVector(1);
@@ -86,10 +86,10 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", -1, 1);
+        builder.newNet(0, "_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 1);
         builder.exitScope();
-        builder.appendTransition(id1, 5, new BitVector("0", 2));
-        builder.appendTransition(id1, 10, new BitVector("1", 2));
+        builder.appendTransition(0, 5, new BitVector("0", 2));
+        builder.appendTransition(0, 10, new BitVector("1", 2));
         builder.loadFinished();
 
         Search search = new Search(waveformDataModel, "mod1._abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 = 1\n");
@@ -121,10 +121,10 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("value", -1, 4);
+        builder.newNet(0, "value", 4);
         builder.exitScope();
-        builder.appendTransition(id1, 17, new BitVector("5", 10));
-        builder.appendTransition(id1, 23, new BitVector("10", 10));
+        builder.appendTransition(0, 17, new BitVector("5", 10));
+        builder.appendTransition(0, 23, new BitVector("10", 10));
         builder.loadFinished();
 
         Search search = new Search(waveformDataModel, "mod1.value = 10");
@@ -151,10 +151,10 @@ public class SearchTest {
         WaveformDataModel waveformDataModel = new WaveformDataModel();
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.enterScope("mod1");
-        int id1 = builder.newNet("value", -1, 4);
+        builder.newNet(0, "value", 4);
         builder.exitScope();
-        builder.appendTransition(id1, 17, new BitVector("1111", 2));
-        builder.appendTransition(id1, 23, new BitVector("xxxx", 2));
+        builder.appendTransition(0, 17, new BitVector("1111", 2));
+        builder.appendTransition(0, 23, new BitVector("xxxx", 2));
         builder.loadFinished();
 
         // Try upper and lower case versions of X and Z for hex and decimal
@@ -291,29 +291,29 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 1);
-        int id2 = builder.newNet("b", -1, 1);
+        builder.newNet(0, "a", 1);
+        builder.newNet(1, "b", 1);
         builder.exitScope();
 
         // Fast toggle (a).
         // True 5-9, 15-19, 25-29, 35-40, 45-
-        builder.appendTransition(id1, 0, new BitVector("0", 2));
-        builder.appendTransition(id1, 5, new BitVector("1", 2));
-        builder.appendTransition(id1, 10, new BitVector("0", 2));
-        builder.appendTransition(id1, 15, new BitVector("1", 2));
-        builder.appendTransition(id1, 20, new BitVector("0", 2));
-        builder.appendTransition(id1, 25, new BitVector("1", 2));
-        builder.appendTransition(id1, 30, new BitVector("0", 2));
-        builder.appendTransition(id1, 35, new BitVector("1", 2));
-        builder.appendTransition(id1, 40, new BitVector("0", 2));
-        builder.appendTransition(id1, 45, new BitVector("1", 2));
+        builder.appendTransition(0, 0, new BitVector("0", 2));
+        builder.appendTransition(0, 5, new BitVector("1", 2));
+        builder.appendTransition(0, 10, new BitVector("0", 2));
+        builder.appendTransition(0, 15, new BitVector("1", 2));
+        builder.appendTransition(0, 20, new BitVector("0", 2));
+        builder.appendTransition(0, 25, new BitVector("1", 2));
+        builder.appendTransition(0, 30, new BitVector("0", 2));
+        builder.appendTransition(0, 35, new BitVector("1", 2));
+        builder.appendTransition(0, 40, new BitVector("0", 2));
+        builder.appendTransition(0, 45, new BitVector("1", 2));
 
         // Slow toggle (b)
         // True 15-29, 45-
-        builder.appendTransition(id2, 0, new BitVector("0", 2));
-        builder.appendTransition(id2, 15, new BitVector("1", 2));
-        builder.appendTransition(id2, 30, new BitVector("0", 2));
-        builder.appendTransition(id2, 45, new BitVector("1", 2));
+        builder.appendTransition(1, 0, new BitVector("0", 2));
+        builder.appendTransition(1, 15, new BitVector("1", 2));
+        builder.appendTransition(1, 30, new BitVector("0", 2));
+        builder.appendTransition(1, 45, new BitVector("1", 2));
 
         builder.loadFinished();
 
@@ -360,29 +360,29 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 1);
-        int id2 = builder.newNet("b", -1, 1);
+        builder.newNet(0, "a", 1);
+        builder.newNet(1, "b", 1);
         builder.exitScope();
 
         // Fast toggle (a).
         // True 5-9, 15-19, 25-29, 35-40, 45-
-        builder.appendTransition(id1, 0, new BitVector("0", 2));
-        builder.appendTransition(id1, 5, new BitVector("1", 2));
-        builder.appendTransition(id1, 10, new BitVector("0", 2));
-        builder.appendTransition(id1, 15, new BitVector("1", 2));
-        builder.appendTransition(id1, 20, new BitVector("0", 2));
-        builder.appendTransition(id1, 25, new BitVector("1", 2));
-        builder.appendTransition(id1, 30, new BitVector("0", 2));
-        builder.appendTransition(id1, 35, new BitVector("1", 2));
-        builder.appendTransition(id1, 40, new BitVector("0", 2));
-        builder.appendTransition(id1, 45, new BitVector("1", 2));
+        builder.appendTransition(0, 0, new BitVector("0", 2));
+        builder.appendTransition(0, 5, new BitVector("1", 2));
+        builder.appendTransition(0, 10, new BitVector("0", 2));
+        builder.appendTransition(0, 15, new BitVector("1", 2));
+        builder.appendTransition(0, 20, new BitVector("0", 2));
+        builder.appendTransition(0, 25, new BitVector("1", 2));
+        builder.appendTransition(0, 30, new BitVector("0", 2));
+        builder.appendTransition(0, 35, new BitVector("1", 2));
+        builder.appendTransition(0, 40, new BitVector("0", 2));
+        builder.appendTransition(0, 45, new BitVector("1", 2));
 
         // Slow toggle (b)
         // True 15-29, 45-
-        builder.appendTransition(id2, 0, new BitVector("0", 2));
-        builder.appendTransition(id2, 15, new BitVector("1", 2));
-        builder.appendTransition(id2, 30, new BitVector("0", 2));
-        builder.appendTransition(id2, 45, new BitVector("1", 2));
+        builder.appendTransition(1, 0, new BitVector("0", 2));
+        builder.appendTransition(1, 15, new BitVector("1", 2));
+        builder.appendTransition(1, 30, new BitVector("0", 2));
+        builder.appendTransition(1, 45, new BitVector("1", 2));
 
         builder.loadFinished();
 
@@ -425,18 +425,18 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("value", -1, 4);
+        builder.newNet(0, "value", 4);
         builder.exitScope();
 
-        builder.appendTransition(id1, 1, new BitVector("0", 16));
-        builder.appendTransition(id1, 2, new BitVector("2", 16));
-        builder.appendTransition(id1, 3, new BitVector("3", 16));
-        builder.appendTransition(id1, 4, new BitVector("4", 16));
-        builder.appendTransition(id1, 5, new BitVector("5", 16));
-        builder.appendTransition(id1, 6, new BitVector("6", 16));
-        builder.appendTransition(id1, 7, new BitVector("7", 16));
-        builder.appendTransition(id1, 8, new BitVector("8", 16));
-        builder.appendTransition(id1, 9, new BitVector("9", 16));
+        builder.appendTransition(0, 1, new BitVector("0", 16));
+        builder.appendTransition(0, 2, new BitVector("2", 16));
+        builder.appendTransition(0, 3, new BitVector("3", 16));
+        builder.appendTransition(0, 4, new BitVector("4", 16));
+        builder.appendTransition(0, 5, new BitVector("5", 16));
+        builder.appendTransition(0, 6, new BitVector("6", 16));
+        builder.appendTransition(0, 7, new BitVector("7", 16));
+        builder.appendTransition(0, 8, new BitVector("8", 16));
+        builder.appendTransition(0, 9, new BitVector("9", 16));
         builder.loadFinished();
 
         Search search = new Search(waveformDataModel, "mod1.value > 'h5");
@@ -703,9 +703,9 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 1);
+        builder.newNet(0, "a", 1);
         builder.exitScope();
-        builder.appendTransition(id1, 0, new BitVector("1", 2));
+        builder.appendTransition(0, 0, new BitVector("1", 2));
         Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getNextMatch(0));
     }
@@ -718,10 +718,10 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 1);
+        builder.newNet(0, "a", 1);
         builder.exitScope();
-        builder.appendTransition(id1, 0, new BitVector("1", 2));
-        builder.appendTransition(id1, 10, new BitVector("0", 2));
+        builder.appendTransition(0, 0, new BitVector("1", 2));
+        builder.appendTransition(0, 10, new BitVector("0", 2));
         Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getNextMatch(0));
     }
@@ -733,9 +733,9 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 1);
+        builder.newNet(0, "a", 1);
         builder.exitScope();
-        builder.appendTransition(id1, 0, new BitVector("1", 2));
+        builder.appendTransition(0, 0, new BitVector("1", 2));
         Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getPreviousMatch(50));
     }
@@ -747,10 +747,10 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 1);
+        builder.newNet(0, "a", 1);
         builder.exitScope();
-        builder.appendTransition(id1, 0, new BitVector("1", 2));
-        builder.appendTransition(id1, 40, new BitVector("1", 2));
+        builder.appendTransition(0, 0, new BitVector("1", 2));
+        builder.appendTransition(0, 40, new BitVector("1", 2));
         Search search = new Search(waveformDataModel, "mod1.a");
         assertEquals(-1, search.getPreviousMatch(50));
     }
@@ -804,12 +804,12 @@ public class SearchTest {
         builder.enterScope("mod1");
         builder.enterScope("mod_gen(0)");
         builder.enterScope("mod2");
-        int id1 = builder.newNet("a", -1, 1);
+        builder.newNet(0, "a", 1);
         builder.exitScope();
         builder.exitScope();
         builder.exitScope();
-        builder.appendTransition(id1, 0, new BitVector("0", 2));
-        builder.appendTransition(id1, 5, new BitVector("1", 2));
+        builder.appendTransition(0, 0, new BitVector("0", 2));
+        builder.appendTransition(0, 5, new BitVector("1", 2));
         builder.loadFinished();
 
         Search search = new Search(waveformDataModel, "mod1.mod_gen(0).mod2.a = 1");
@@ -823,16 +823,16 @@ public class SearchTest {
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 4);
-        int id2 = builder.newNet("b", -1, 4);
+        builder.newNet(0, "a", 4);
+        builder.newNet(1, "b", 4);
         builder.exitScope();
-        builder.appendTransition(id1, 0, new BitVector("0", 10));
-        builder.appendTransition(id1, 1, new BitVector("1", 10));
-        builder.appendTransition(id1, 2, new BitVector("2", 10));
-        builder.appendTransition(id1, 3, new BitVector("3", 10));
-        builder.appendTransition(id2, 0, new BitVector("3", 10));
-        builder.appendTransition(id2, 2, new BitVector("2", 10));
-        builder.appendTransition(id2, 3, new BitVector("1", 10));
+        builder.appendTransition(0, 0, new BitVector("0", 10));
+        builder.appendTransition(0, 1, new BitVector("1", 10));
+        builder.appendTransition(0, 2, new BitVector("2", 10));
+        builder.appendTransition(0, 3, new BitVector("3", 10));
+        builder.appendTransition(1, 0, new BitVector("3", 10));
+        builder.appendTransition(1, 2, new BitVector("2", 10));
+        builder.appendTransition(1, 3, new BitVector("1", 10));
 
         Search search = new Search(waveformDataModel, "mod1.a = mod1.b");
         assertEquals(2, search.getNextMatch(0));
@@ -849,15 +849,15 @@ public class SearchTest {
         WaveformDataModel waveformDataModel = new WaveformDataModel();
         WaveformBuilder builder = waveformDataModel.startBuilding();
         builder.enterScope("mod1");
-        int id1 = builder.newNet("a", -1, 4);
-        int id2 = builder.newNet("b", -1, 4);
+         builder.newNet(0, "a", 4);
+         builder.newNet(1, "b", 4);
         builder.exitScope();
-        builder.appendTransition(id1, 0, new BitVector("0", 10));
-        builder.appendTransition(id1, 1, new BitVector("1", 10));
-        builder.appendTransition(id1, 2, new BitVector("2", 10));
-        builder.appendTransition(id2, 0, new BitVector("3", 10));
-        builder.appendTransition(id2, 1, new BitVector("4", 10));
-        builder.appendTransition(id2, 2, new BitVector("5", 10));
+        builder.appendTransition(0, 0, new BitVector("0", 10));
+        builder.appendTransition(0, 1, new BitVector("1", 10));
+        builder.appendTransition(0, 2, new BitVector("2", 10));
+        builder.appendTransition(1, 0, new BitVector("3", 10));
+        builder.appendTransition(1, 1, new BitVector("4", 10));
+        builder.appendTransition(1, 2, new BitVector("5", 10));
         final NetDataModel[] nets = {
             waveformDataModel.getNetDataModel(0),
             waveformDataModel.getNetDataModel(1)

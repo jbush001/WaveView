@@ -34,13 +34,14 @@ public class VCDLoader implements WaveformLoader {
     private StreamTokenizer tokenizer;
     private WaveformBuilder waveformBuilder;
     private long currentTime;
-    private final HashMap<String, Net> netMap = new HashMap<>();
+    private final HashMap<String, Var> varMap = new HashMap<>();
     private int totalTransitions;
     private ProgressListener progressListener;
     private ProgressInputStream progressStream;
     private long lastProgressUpdate;
     private long fileLength;
     private long updateInterval;
+    private int nextNetIndex;
 
     @Override
     public void load(File file, WaveformBuilder waveformBuilder, ProgressListener progressListener)
@@ -71,17 +72,17 @@ public class VCDLoader implements WaveformLoader {
         }
 
         System.out.println("parsed " + totalTransitions + " total transitions");
-        System.out.println(Integer.toString(netMap.size()) + " total nets");
+        System.out.println(Integer.toString(varMap.size()) + " total nets");
     }
 
-    private static class Net {
-        final int builderId; /// ID given to this net by the builder
-        final int width;
-
-        Net(int builderId, int width) {
-            this.builderId = builderId;
+    private static class Var {
+        Var(int netIndex, int width) {
+            this.netIndex = netIndex;
             this.width = width;
         }
+
+        int netIndex;
+        int width;
     }
 
     /// 18.2.3.4 $scope
@@ -127,20 +128,26 @@ public class VCDLoader implements WaveformLoader {
 
         match("$end");
 
-        Net net = netMap.get(id);
-        if (net == null) {
-            // We've never seen this net before
+        Var var = varMap.get(id);
+        if (var == null) {
+            // We've never seen this var before
             // Strip off the width declaration
             int openBracket = netName.indexOf('[');
             if (openBracket != -1) {
                 netName = netName.substring(0, openBracket);
             }
 
-            net = new Net(waveformBuilder.newNet(netName, -1, width), width);
-            netMap.put(id, net);
+            waveformBuilder.newNet(nextNetIndex, netName, width);
+            varMap.put(id, new Var(nextNetIndex, width));
+            nextNetIndex++;
         } else {
-            // Shares data with existing net. Add as clone.
-            waveformBuilder.newNet(netName, net.builderId, width);
+            if (width != var.width) {
+                throw new LoadException("line " + tokenizer.lineno()
+                    + ": alias net does not match width of parent (" + width + " != " + var.width + ")");
+            }
+
+            // Shares data with existing net. Add as alias.
+            waveformBuilder.newNet(var.netIndex, netName, width);
         }
     }
 
@@ -280,17 +287,17 @@ public class VCDLoader implements WaveformLoader {
                 throw new LoadException("line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
             }
 
-            Net net = netMap.get(id);
-            if (net == null) {
-                throw new LoadException("line " + tokenizer.lineno() + ": Unknown net id " + id);
+            Var var = varMap.get(id);
+            if (var == null) {
+                throw new LoadException("line " + tokenizer.lineno() + ": Unknown var id " + id);
             }
 
-            BitVector decodedValues = new BitVector(net.width);
+            BitVector decodedValues = new BitVector(var.width);
 
             // Decode and pad if necessary.
             // 18.2.1 value ::= 0 | 1 | x | X | z | Z
             int valueLength = value.length();
-            int bitsToCopy = Math.min(valueLength, net.width);
+            int bitsToCopy = Math.min(valueLength, var.width);
             int outBit = 0;
             int bitValue = BitVector.VALUE_0;
             while (outBit < bitsToCopy) {
@@ -327,11 +334,11 @@ public class VCDLoader implements WaveformLoader {
                 padValue = BitVector.VALUE_0;
             }
 
-            while (outBit < net.width) {
+            while (outBit < var.width) {
                 decodedValues.setBit(outBit++, padValue);
             }
 
-            waveformBuilder.appendTransition(net.builderId, currentTime, decodedValues);
+            waveformBuilder.appendTransition(var.netIndex, currentTime, decodedValues);
         }
     }
 

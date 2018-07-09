@@ -32,13 +32,6 @@ public class NetDataModel {
         this.transitionVector = transitionVector;
     }
 
-    // This NetDataModel shares its transition data with another one.
-    public NetDataModel(String shortName, String fullName, NetDataModel cloneFrom) {
-        this.shortName = shortName;
-        this.fullName = fullName;
-        this.transitionVector = cloneFrom.transitionVector;
-    }
-
     public String getFullName() {
         return fullName;
     }

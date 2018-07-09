@@ -123,7 +123,7 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
         }
 
         @Override
-        public int newNet(String shortName, int cloneId, int width) {
+        public void newNet(int netId, String shortName, int width) {
             // Build full path
             StringBuilder fullName = new StringBuilder();
             for (String scope : scopeStack) {
@@ -139,22 +139,25 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
 
             NetDataModel net;
             TransitionVector transitionVector;
-            if (cloneId == -1) {
-                transitionVector = new TransitionVector(width);
-                net = new NetDataModel(shortName, fullName.toString(), transitionVector);
+            if (netId < transitionVectors.size()) {
+                // alias of existing net
+                transitionVector = transitionVectors.get(netId);
+                if (transitionVector.getWidth() != width) {
+                    System.out.println("Aliased net width mismatch");
+                }
             } else {
-                transitionVector = transitionVectors.get(cloneId);
-                net = new NetDataModel(shortName, fullName.toString(), allNets.get(cloneId));
+                // new net
+                assert netId == transitionVectors.size();
+                transitionVector = new TransitionVector(width);
             }
 
+            net = new NetDataModel(shortName, fullName.toString(), transitionVector);
             allNets.add(net);
             transitionVectors.add(transitionVector);
             assert allNets.size() == transitionVectors.size();
 
-            int thisNetIndex = allNets.size() - 1;
             treeBuilder.addNet(net);
             fullNameToNetMap.put(fullName.toString(), net);
-            return thisNetIndex;
         }
     }
 }

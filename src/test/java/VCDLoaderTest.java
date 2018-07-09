@@ -47,18 +47,6 @@ public class VCDLoaderTest {
 
     WaveformBuilder builder = mock(WaveformBuilder.class);
 
-    @Before
-    public void initTests() {
-        // Ensure newNet in the mock builder returns a unique ID.
-        doAnswer(new Answer<Integer>() {
-            private int nextNetId;
-            @Override
-            public Integer answer(InvocationOnMock invocation) {
-                return nextNetId++;
-            }
-        }).when(builder).newNet(anyString(), anyInt(), anyInt());
-    }
-
     File tempFileFrom(String contents) {
         try {
             File f = tempFolder.newFile("test.vcd");
@@ -190,7 +178,7 @@ public class VCDLoaderTest {
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-6);
         ord.verify(builder).enterScope("mod1");
-        ord.verify(builder).newNet("clk", -1, 1);
+        ord.verify(builder).newNet(0, "clk", 1);
         ord.verify(builder).exitScope();
         ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
         ord.verify(builder).loadFinished();
@@ -207,7 +195,7 @@ public class VCDLoaderTest {
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
         ord.verify(builder).enterScope("mod1");
-        ord.verify(builder).newNet("foo", -1, 1);
+        ord.verify(builder).newNet(0, "foo", 1);
         ord.verify(builder).exitScope();
         ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
         ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("0")));
@@ -230,9 +218,9 @@ public class VCDLoaderTest {
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
         ord.verify(builder).enterScope("mod1");
-        ord.verify(builder).newNet("addr", -1, 16);
-        ord.verify(builder).newNet("data", -1, 3);
-        ord.verify(builder).newNet("enable", -1, 1);
+        ord.verify(builder).newNet(0, "addr", 16);
+        ord.verify(builder).newNet(1, "data", 3);
+        ord.verify(builder).newNet(2, "enable", 1);
         ord.verify(builder).exitScope();
         ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
         ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
@@ -255,7 +243,7 @@ public class VCDLoaderTest {
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
         ord.verify(builder).enterScope("mod1");
-        ord.verify(builder).newNet("value", -1, 16);
+        ord.verify(builder).newNet(0, "value", 16);
         ord.verify(builder).exitScope();
         ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("zzzzzzzzzzzx1010")));
         ord.verify(builder).appendTransition(eq(0), eq(1L), argThat(new BitVectorMatcher("xxxxxxxxxxxz1010")));
@@ -273,9 +261,9 @@ public class VCDLoaderTest {
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
         ord.verify(builder).enterScope("mod1");
-        ord.verify(builder).newNet("addr", -1, 16);
-        ord.verify(builder).newNet("data", -1, 3);
-        ord.verify(builder).newNet("enable", -1, 1);
+        ord.verify(builder).newNet(0, "addr", 16);
+        ord.verify(builder).newNet(1, "data", 3);
+        ord.verify(builder).newNet(2, "enable", 1);
         ord.verify(builder).exitScope();
         ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
         ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
@@ -293,7 +281,7 @@ public class VCDLoaderTest {
             new VCDLoader().load(testFile("unknown-net-id.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadException exc) {
-            assertEquals("line 6: Unknown net id $", exc.getMessage());
+            assertEquals("line 6: Unknown var id $", exc.getMessage());
         }
     }
 
@@ -379,14 +367,24 @@ public class VCDLoaderTest {
     }
 
     @Test
+    public void aliasWidthMismatch() throws Exception {
+        try {
+            new VCDLoader().load(testFile("alias-bad-width.vcd"), builder, null);
+            fail("Didn't throw exception");
+        } catch (WaveformLoader.LoadException exc) {
+            assertEquals("line 3: alias net does not match width of parent (15 != 16)", exc.getMessage());
+        }
+    }
+
+    @Test
     public void waveformAlias() throws Exception {
         new VCDLoader().load(testFile("waveform-alias.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).enterScope("mod1");
-        ord.verify(builder).newNet("foo", -1, 1);
-        ord.verify(builder).newNet("source", -1, 1);
-        ord.verify(builder).newNet("alias", 1, 1);
+        ord.verify(builder).newNet(0, "foo", 1);
+        ord.verify(builder).newNet(1, "source", 1);
+        ord.verify(builder).newNet(1, "alias", 1);
         ord.verify(builder).exitScope();
         ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("1")));
         ord.verify(builder).loadFinished();
@@ -462,10 +460,10 @@ public class VCDLoaderTest {
 
         ord.verify(builder).setTimescale(-12);
         ord.verify(builder).enterScope("SystemC");
-        ord.verify(builder).newNet("int_val", -1, 32);
-        ord.verify(builder).newNet("float_val", -1, 1);
-        ord.verify(builder).newNet("clk", -1, 1);
-        ord.verify(builder).newNet("rstn", -1, 1);
+        ord.verify(builder).newNet(0, "int_val", 32);
+        ord.verify(builder).newNet(1, "float_val", 1);
+        ord.verify(builder).newNet(2, "clk", 1);
+        ord.verify(builder).newNet(3, "rstn", 1);
         ord.verify(builder).exitScope();
         ord.verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);

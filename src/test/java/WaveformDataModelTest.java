@@ -43,18 +43,18 @@ public class WaveformDataModelTest {
     public void buildWaveformDataModel() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int net1 = builder.newNet("net1", -1, 1);
-        int net2 = builder.newNet("net2", -1, 3);
+        builder.newNet(0, "net1", 1);
+        builder.newNet(1, "net2", 3);
         builder.enterScope("mod2");
-        int net3 = builder.newNet("net3", -1, 2);
+        builder.newNet(2, "net3", 2);
         builder.exitScope();
         builder.exitScope();
-        builder.appendTransition(net1, 10, new BitVector("1", 2));
-        builder.appendTransition(net1, 20, new BitVector("0", 2));
-        builder.appendTransition(net2, 10, new BitVector("100", 2));
-        builder.appendTransition(net2, 15, new BitVector("010", 2));
-        builder.appendTransition(net3, 12, new BitVector("11", 2));
-        builder.appendTransition(net3, 17, new BitVector("01", 2));
+        builder.appendTransition(0, 10, new BitVector("1", 2));
+        builder.appendTransition(0, 20, new BitVector("0", 2));
+        builder.appendTransition(1, 10, new BitVector("100", 2));
+        builder.appendTransition(1, 15, new BitVector("010", 2));
+        builder.appendTransition(2, 12, new BitVector("11", 2));
+        builder.appendTransition(2, 17, new BitVector("01", 2));
         builder.loadFinished();
 
         NetTreeModel netTree = model.getNetTree();
@@ -112,10 +112,10 @@ public class WaveformDataModelTest {
     public void aliasNet() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int net1 = builder.newNet("net1", -1, 1);
-        builder.newNet("net2", net1, 1);    // aliases net1
+        builder.newNet(0, "net1", 1);
+        builder.newNet(0, "net2", 1);    // aliases net1
         builder.exitScope();
-        builder.appendTransition(net1, 17, new BitVector("1", 2));
+        builder.appendTransition(0, 17, new BitVector("1", 2));
         builder.loadFinished();
 
         NetTreeModel netTree = model.getNetTree();
@@ -142,10 +142,10 @@ public class WaveformDataModelTest {
     public void copyFrom() {
         builder.setTimescale(-9);
         builder.enterScope("mod1");
-        int net1 = builder.newNet("net1", -1, 1);
-        builder.newNet("net2", net1, 1);
+        builder.newNet(0, "net1", 1);
+        builder.newNet(0, "net2", 1);
         builder.exitScope();
-        builder.appendTransition(net1, 17, new BitVector("1", 2));
+        builder.appendTransition(0, 17, new BitVector("1", 2));
         builder.loadFinished();
 
         WaveformDataModel model2 = new WaveformDataModel();
