@@ -230,11 +230,10 @@ public class WaveformPresentationModel {
     public void setAdjustingCursor(boolean adjust) {
         adjustingCursor = adjust;
 
-        /// @bug This is a hacky way to force everyone to update, but has odd
-        /// side effects if it is done in the wrong order. There should most
-        /// likely be another way to do this, like, for example, another event
-        /// to notify clients that the cursor is in the adjusting state.
-        setCursorPosition(cursorPosition);
+        // This forces views to update
+        for (Listener listener : listeners) {
+            listener.cursorChanged(cursorPosition, cursorPosition);
+        }
     }
 
     public boolean isAdjustingCursor() {

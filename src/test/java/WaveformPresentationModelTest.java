@@ -253,7 +253,11 @@ public class WaveformPresentationModelTest {
     public void adjustingCursor() {
         model.setAdjustingCursor(true);
         assertTrue(model.isAdjustingCursor());
+        verify(listener).cursorChanged(0, 0);
+        clearInvocations(listener);
+
         model.setAdjustingCursor(false);
         assertFalse(model.isAdjustingCursor());
+        verify(listener).cursorChanged(0, 0);
     }
 }

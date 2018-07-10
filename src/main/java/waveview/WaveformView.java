@@ -260,11 +260,9 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
         boolean extendSelection = e.isShiftDown();
         waveformPresentationModel.setCursorPosition(timestamp, extendSelection);
 
-        /// @bug Be sure to do this after setting the position, otherwise the view will
-        /// jump back to the
-        /// old cursor position first and invoke the auto-scroll-to logic. This is
-        /// pretty clunky, and
-        /// should probably be rethought.
+        // Do this after setting cursor position, otherwise it will jump to the old
+        // cursor position (as it send a cursor position update as a hacky way to
+        // force the timestamp view to update).
         waveformPresentationModel.setAdjustingCursor(true);
     }
 
@@ -276,7 +274,8 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
     @Override
     public void mouseDragged(MouseEvent e) {
         long timestamp = xCoordinateToTimestamp(e.getX());
-        waveformPresentationModel.setCursorPosition(timestamp);
+        boolean extendSelection = e.isShiftDown();
+        waveformPresentationModel.setCursorPosition(timestamp, extendSelection);
 
         // Drag scrolling
         Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
