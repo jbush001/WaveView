@@ -30,7 +30,7 @@ class SingleBitPainter implements WaveformPainter {
             double horizontalScale, ValueFormatter formatter) {
         g.setColor(AppPreferences.getInstance().waveformColor);
 
-        BitValue lastValue = BitValue.VALUE_0;
+        BitValue lastValue = BitValue.ZERO;
         int lastX = visibleRect.x + visibleRect.width;
         long firstTimestamp = (long) (visibleRect.x / horizontalScale);
         Iterator<Transition> i = model.findTransition(firstTimestamp);
@@ -45,15 +45,15 @@ class SingleBitPainter implements WaveformPainter {
 
             // Draw transition line at beginning of interval
             if (lastValue != value) {
-                if (lastValue == BitValue.VALUE_Z && value != BitValue.VALUE_X) {
-                    if (value == BitValue.VALUE_0) {
+                if (lastValue == BitValue.Z && value != BitValue.X) {
+                    if (value == BitValue.ZERO) {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x,
                                 topOffset + DrawMetrics.WAVEFORM_HEIGHT);
                     } else {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x, topOffset);
                     }
-                } else if (value == BitValue.VALUE_Z && lastValue != BitValue.VALUE_X) {
-                    if (lastValue == BitValue.VALUE_0) {
+                } else if (value == BitValue.Z && lastValue != BitValue.X) {
+                    if (lastValue == BitValue.ZERO) {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT, x,
                                 topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
                     } else {
@@ -82,16 +82,16 @@ class SingleBitPainter implements WaveformPainter {
             return;
 
         switch (value) {
-            case VALUE_1:
+            case ONE:
                 g.drawLine(left, top, right, top);
                 break;
-            case VALUE_0:
+            case ZERO:
                 g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top + DrawMetrics.WAVEFORM_HEIGHT);
                 break;
-            case VALUE_Z:
+            case Z:
                 g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top + DrawMetrics.WAVEFORM_HEIGHT / 2);
                 break;
-            case VALUE_X:
+            case X:
             default:
                 g.setColor(AppPreferences.getInstance().conflictColor);
                 g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);

@@ -189,28 +189,28 @@ public class BitVectorTest {
     @Test
     public void setBit() {
         BitVector bv = new BitVector(8);
-        bv.setBit(7, BitValue.VALUE_1);
-        bv.setBit(6, BitValue.VALUE_0);
-        bv.setBit(5, BitValue.VALUE_1);
-        bv.setBit(4, BitValue.VALUE_Z);
-        bv.setBit(3, BitValue.VALUE_0);
-        bv.setBit(2, BitValue.VALUE_1);
-        bv.setBit(1, BitValue.VALUE_X);
-        bv.setBit(0, BitValue.VALUE_1);
+        bv.setBit(7, BitValue.ONE);
+        bv.setBit(6, BitValue.ZERO);
+        bv.setBit(5, BitValue.ONE);
+        bv.setBit(4, BitValue.Z);
+        bv.setBit(3, BitValue.ZERO);
+        bv.setBit(2, BitValue.ONE);
+        bv.setBit(1, BitValue.X);
+        bv.setBit(0, BitValue.ONE);
         assertEquals("101z01x1", bv.toString(2));
     }
 
     @Test
     public void getBit() {
         BitVector bv = new BitVector("1x010z10", 2);
-        assertEquals(BitValue.VALUE_1, bv.getBit(7));
-        assertEquals(BitValue.VALUE_X, bv.getBit(6));
-        assertEquals(BitValue.VALUE_0, bv.getBit(5));
-        assertEquals(BitValue.VALUE_1, bv.getBit(4));
-        assertEquals(BitValue.VALUE_0, bv.getBit(3));
-        assertEquals(BitValue.VALUE_Z, bv.getBit(2));
-        assertEquals(BitValue.VALUE_1, bv.getBit(1));
-        assertEquals(BitValue.VALUE_0, bv.getBit(0));
+        assertEquals(BitValue.ONE, bv.getBit(7));
+        assertEquals(BitValue.X, bv.getBit(6));
+        assertEquals(BitValue.ZERO, bv.getBit(5));
+        assertEquals(BitValue.ONE, bv.getBit(4));
+        assertEquals(BitValue.ZERO, bv.getBit(3));
+        assertEquals(BitValue.Z, bv.getBit(2));
+        assertEquals(BitValue.ONE, bv.getBit(1));
+        assertEquals(BitValue.ZERO, bv.getBit(0));
     }
 
     @Test

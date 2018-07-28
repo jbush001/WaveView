@@ -76,7 +76,7 @@ public class BitVector {
     /// @returns true if this is all Zs
     public boolean isZ() {
         for (int i = 0; i < values.length; i++) {
-            if (values[i] != BitValue.VALUE_Z) {
+            if (values[i] != BitValue.Z) {
                 return false;
             }
         }
@@ -87,7 +87,7 @@ public class BitVector {
     /// @returns true if this contains any Z or X values in any positions
     public boolean isX() {
         for (int i = 0; i < values.length; i++) {
-            if (values[i] == BitValue.VALUE_Z || values[i] == BitValue.VALUE_X) {
+            if (values[i] == BitValue.Z || values[i] == BitValue.X) {
                 return true;
             }
         }
@@ -122,7 +122,7 @@ public class BitVector {
             // The other one is wider than me. Check if its leading digits
             // have any ones. If so, it is bigger
             for (int i = otherWidth - 1; i >= myWidth; i--) {
-                if (other.values[i] == BitValue.VALUE_1) {
+                if (other.values[i] == BitValue.ONE) {
                     return -1;
                 }
             }
@@ -130,7 +130,7 @@ public class BitVector {
             // I am wider than the other number. Check if my leading digits
             // have any ones. If so, I am bigger.
             for (int i = myWidth - 1; i >= otherWidth; i--) {
-                if (values[i] == BitValue.VALUE_1) {
+                if (values[i] == BitValue.ONE) {
                     return 1;
                 }
             }
@@ -238,11 +238,11 @@ public class BitVector {
                 }
             } else if (c == 'X' || c == 'x') {
                 for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] = BitValue.VALUE_X;
+                    values[(index + 1) * 4 - offset - 1] = BitValue.X;
                 }
             } else if (c == 'Z' || c == 'z') {
                 for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] = BitValue.VALUE_Z;
+                    values[(index + 1) * 4 - offset - 1] = BitValue.Z;
                 }
             } else {
                 throw new NumberFormatException("number format exception parsing " + string);
@@ -267,7 +267,7 @@ public class BitVector {
         byte[] bytes = new byte[(values.length + 7) / 8 + 1];
 
         for (int i = 0; i < values.length; i++) {
-            if (values[i] == BitValue.VALUE_1) {
+            if (values[i] == BitValue.ONE) {
                 bytes[bytes.length - (i / 8) - 1] |= (byte) (1 << (i % 8));
             }
         }
@@ -281,14 +281,14 @@ public class BitVector {
         for (int i = count - 1; i >= 0; i--) {
             value <<= 1;
             switch (getBit(i + offset)) {
-                case VALUE_0:
+                case ZERO:
                     break;
-                case VALUE_1:
+                case ONE:
                     value |= 1;
                     break;
-                case VALUE_X:
+                case X:
                     return 'X';
-                case VALUE_Z: // @bug should only be Z if all bits are Z
+                case Z: // @bug should only be Z if all bits are Z
                     return 'Z';
             }
         }

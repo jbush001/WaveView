@@ -297,7 +297,7 @@ public class VCDLoader implements WaveformLoader {
             // 18.2.1 value ::= 0 | 1 | x | X | z | Z
             int valueLength = value.length();
             int bitsToCopy = Math.min(valueLength, var.width);
-            BitValue bitValue = BitValue.VALUE_0;
+            BitValue bitValue = BitValue.ZERO;
             int outBit = 0;
             try {
                 // Reading from right to left
@@ -312,12 +312,12 @@ public class VCDLoader implements WaveformLoader {
             // Table 83: Rules for left-extending vector values
             // 0 & 1 extend with 0. Z extends with Z, X extends with X.
             BitValue padValue;
-            if (bitValue == BitValue.VALUE_Z) {
-                padValue = BitValue.VALUE_Z;
-            } else if (bitValue == BitValue.VALUE_X) {
-                padValue = BitValue.VALUE_X;
+            if (bitValue == BitValue.Z) {
+                padValue = BitValue.Z;
+            } else if (bitValue == BitValue.X) {
+                padValue = BitValue.X;
             } else {
-                padValue = BitValue.VALUE_0;
+                padValue = BitValue.ZERO;
             }
 
             while (outBit < var.width) {
