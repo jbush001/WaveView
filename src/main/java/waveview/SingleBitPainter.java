@@ -30,7 +30,7 @@ class SingleBitPainter implements WaveformPainter {
             double horizontalScale, ValueFormatter formatter) {
         g.setColor(AppPreferences.getInstance().waveformColor);
 
-        int lastValue = 0;
+        BitValue lastValue = BitValue.VALUE_0;
         int lastX = visibleRect.x + visibleRect.width;
         long firstTimestamp = (long) (visibleRect.x / horizontalScale);
         Iterator<Transition> i = model.findTransition(firstTimestamp);
@@ -39,21 +39,21 @@ class SingleBitPainter implements WaveformPainter {
 
             // Compute the boundaries of this segment
             int x = (int) (transition.getTimestamp() * horizontalScale);
-            int value = transition.getBit(0);
+            BitValue value = transition.getBit(0);
 
             drawSpan(g, lastValue, lastX, x, topOffset);
 
             // Draw transition line at beginning of interval
             if (lastValue != value) {
-                if (lastValue == BitVector.VALUE_Z && value != BitVector.VALUE_X) {
-                    if (value == BitVector.VALUE_0) {
+                if (lastValue == BitValue.VALUE_Z && value != BitValue.VALUE_X) {
+                    if (value == BitValue.VALUE_0) {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x,
                                 topOffset + DrawMetrics.WAVEFORM_HEIGHT);
                     } else {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x, topOffset);
                     }
-                } else if (value == BitVector.VALUE_Z && lastValue != BitVector.VALUE_X) {
-                    if (lastValue == BitVector.VALUE_0) {
+                } else if (value == BitValue.VALUE_Z && lastValue != BitValue.VALUE_X) {
+                    if (lastValue == BitValue.VALUE_0) {
                         g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT, x,
                                 topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
                     } else {
@@ -77,21 +77,21 @@ class SingleBitPainter implements WaveformPainter {
         }
     }
 
-    private void drawSpan(Graphics g, int value, int left, int right, int top) {
+    private void drawSpan(Graphics g, BitValue value, int left, int right, int top) {
         if (left >= right)
             return;
 
         switch (value) {
-        case BitVector.VALUE_1:
+        case VALUE_1:
             g.drawLine(left, top, right, top);
             break;
-        case BitVector.VALUE_0:
+        case VALUE_0:
             g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top + DrawMetrics.WAVEFORM_HEIGHT);
             break;
-        case BitVector.VALUE_Z:
+        case VALUE_Z:
             g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right, top + DrawMetrics.WAVEFORM_HEIGHT / 2);
             break;
-        case BitVector.VALUE_X:
+        case VALUE_X:
         default:
             g.setColor(AppPreferences.getInstance().conflictColor);
             g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);

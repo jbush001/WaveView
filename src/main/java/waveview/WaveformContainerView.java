@@ -95,11 +95,9 @@ class WaveformContainerView extends JPanel {
 
         waveformPresentationModel.setHorizontalScale(newScale);
 
-        // Scroll to new center timestamp
         int centerX = (int) (centerTimestamp * newScale);
         Rectangle newVisibleRect = waveformPanel.getVisibleRect();
         newVisibleRect.x = centerX - newVisibleRect.width / 2;
-
         waveformPanel.scrollRectToVisible(newVisibleRect);
     }
 
@@ -108,8 +106,10 @@ class WaveformContainerView extends JPanel {
         double oldScale = waveformPresentationModel.getHorizontalScale();
         long selectionStartTimestamp = waveformPresentationModel.getSelectionStart();
         long cursorPositionTimestamp = waveformPresentationModel.getCursorPosition();
+
+        // If the selection has a size of zero, can't zoom to it.
         if (selectionStartTimestamp == cursorPositionTimestamp)
-            return; // Will do bad things otherwise
+            return;
 
         long lowTimestamp = Math.min(selectionStartTimestamp, cursorPositionTimestamp);
         long highTimestamp = Math.max(selectionStartTimestamp, cursorPositionTimestamp);

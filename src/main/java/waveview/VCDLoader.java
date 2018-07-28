@@ -298,22 +298,22 @@ public class VCDLoader implements WaveformLoader {
             int valueLength = value.length();
             int bitsToCopy = Math.min(valueLength, var.width);
             int outBit = 0;
-            int bitValue = BitVector.VALUE_0;
+            BitValue bitValue = BitValue.VALUE_0;
             while (outBit < bitsToCopy) {
                 switch (value.charAt(valueLength - outBit - 1)) {
                 case 'z':
                 case 'Z':
-                    bitValue = BitVector.VALUE_Z;
+                    bitValue = BitValue.VALUE_Z;
                     break;
                 case 'x':
                 case 'X':
-                    bitValue = BitVector.VALUE_X;
+                    bitValue = BitValue.VALUE_X;
                     break;
                 case '1':
-                    bitValue = BitVector.VALUE_1;
+                    bitValue = BitValue.VALUE_1;
                     break;
                 case '0':
-                    bitValue = BitVector.VALUE_0;
+                    bitValue = BitValue.VALUE_0;
                     break;
                 default:
                     throw new LoadException("line " + tokenizer.lineno() + ": invalid logic value");
@@ -324,13 +324,13 @@ public class VCDLoader implements WaveformLoader {
 
             // Table 83: Rules for left-extending vector values
             // 0 & 1 extend with 0. Z extends with Z, X extends with X.
-            int padValue;
-            if (bitValue == BitVector.VALUE_Z) {
-                padValue = BitVector.VALUE_Z;
-            } else if (bitValue == BitVector.VALUE_X) {
-                padValue = BitVector.VALUE_X;
+            BitValue padValue;
+            if (bitValue == BitValue.VALUE_Z) {
+                padValue = BitValue.VALUE_Z;
+            } else if (bitValue == BitValue.VALUE_X) {
+                padValue = BitValue.VALUE_X;
             } else {
-                padValue = BitVector.VALUE_0;
+                padValue = BitValue.VALUE_0;
             }
 
             while (outBit < var.width) {

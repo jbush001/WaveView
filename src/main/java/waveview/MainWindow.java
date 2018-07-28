@@ -146,10 +146,10 @@ public class MainWindow extends JPanel implements ActionListener {
             showPrefs();
             break;
         default:
-            if (cmd.length() > 7 && cmd.substring(0, 7).equals("netSet_")) {
+            if (cmd.startsWith("netSet_")) {
                 int index = Integer.parseInt(cmd.substring(7));
                 waveformPresentationModel.selectNetSet(index);
-            } else if (cmd.length() > 5 && cmd.substring(0, 5).equals("open ")) {
+            } else if (cmd.startsWith("open ")) {
                 // Load from recents menu
                 loadWaveformFile(cmd.substring(5));
             }
@@ -175,10 +175,11 @@ public class MainWindow extends JPanel implements ActionListener {
     }
 
     private void insertMarker() {
-        String description = (String) JOptionPane.showInputDialog(frame, "Description for this marker", "New Marker",
-                JOptionPane.PLAIN_MESSAGE, null, null, null);
+        String description = (String) JOptionPane.showInputDialog(frame, "Description for this marker",
+                "New Marker", JOptionPane.PLAIN_MESSAGE, null, null, null);
         if (description != null) {
-            waveformPresentationModel.addMarker(description, waveformPresentationModel.getCursorPosition());
+            waveformPresentationModel.addMarker(description,
+                    waveformPresentationModel.getCursorPosition());
         }
     }
 
@@ -240,17 +241,23 @@ public class MainWindow extends JPanel implements ActionListener {
     private void loadWaveformFile(File file) {
         saveWaveformSettings();
         ProgressMonitor monitor = new ProgressMonitor(MainWindow.this, "Loading...", "", 0, 100);
-        new WaveformLoadWorker(file, monitor, (newModel, errorMessage)
-                -> handleLoadFinished(file, newModel, errorMessage)).execute();
+        WaveformLoadWorker.LoadFinishedHandler handler = new WaveformLoadWorker.LoadFinishedHandler() {
+            @Override
+            public void handleLoadSuccess(WaveformDataModel newModel) {
+                MainWindow.this.handleLoadSuccess(file, newModel);
+            }
+
+            @Override
+            public void handleLoadError(String errorMessage) {
+                JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
+                    + errorMessage);
+            }
+        };
+
+        new WaveformLoadWorker(file, monitor, handler).execute();
     }
 
-    private void handleLoadFinished(File file, WaveformDataModel newModel, String errorMessage) {
-        if (errorMessage != null) {
-            JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
-                + errorMessage);
-            return;
-        }
-
+    private void handleLoadSuccess(File file, WaveformDataModel newModel) {
         currentSearch = null;
         waveformPresentationModel.clear();
 

@@ -24,7 +24,7 @@ import java.util.Iterator;
 /// It builds an expression tree to represent the search criteria. It is optimized
 /// for fast searching, skipping events that cannot meet the criteria.
 ///
-/// @todo Support partial multi-net matches
+/// @todo Support slice multi-net matches
 ///
 public class Search {
     private static final BitVector ZERO_VEC = new BitVector("0", 2);

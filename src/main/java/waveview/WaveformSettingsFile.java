@@ -177,7 +177,7 @@ public class WaveformSettingsFile {
             //
             try {
                 Class<?> c = Class.forName(formatStr);
-                if (formatStr.equals("waveview.EnumValueFormatter")) {
+                if (formatStr.equals(EnumValueFormatter.class.getName())) {
                     String pathStr = ((Text) formatTag.getElementsByTagName("path").item(0).getFirstChild()).getData();
                     formatter = (ValueFormatter) c.getConstructor(File.class).newInstance(new File(pathStr));
                 } else {
@@ -208,17 +208,14 @@ public class WaveformSettingsFile {
 
         waveformPresentationModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
-        // read NetSet
         NodeList netSets = document.getElementsByTagName("netset");
-
-        // Read saved net sets
         for (int i = 1; i < netSets.getLength(); i++) {
             Element netSet = (Element) netSets.item(i);
             readNetSet(netSet);
             waveformPresentationModel.saveNetSet(netSet.getAttribute("name"));
         }
 
-        // Default net set
+        // Index zero represents the current state (which isn't saved as a named net set)
         if (netSets.getLength() > 0) {
             readNetSet((Element) netSets.item(0));
         }

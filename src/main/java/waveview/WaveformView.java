@@ -28,10 +28,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 
-///
-/// This view displays the waveforms.
-///
-
 class WaveformView extends JPanel implements MouseListener, MouseMotionListener, WaveformPresentationModel.Listener {
 
     private static final float DOT_DESCRIPTION[] = { 2.0f, 4.0f };
@@ -70,7 +66,7 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
         Rectangle visibleRect = getVisibleRect();
 
         if (x2 < visibleRect.x || x2 > visibleRect.x + visibleRect.width) {
-            // Cursor is not visible, scroll to
+            // Cursor is not visible, scroll to make it.
             visibleRect.x = x2 - 50;
             if (visibleRect.x < 0) {
                 visibleRect.x = 0;
@@ -102,8 +98,8 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
             // Need to match behavior of NetNameView, inherited from JList.
             // If the list is scrolled to the bottom and items are removed,
             // scroll up so there's no space at the bottom. If we don't do
-            // this, the name view and waveform view will become vertically
-            // unaligned.
+            // this, the name view and waveform view will become misaligned
+            // vertically.
             visibleRect.y -= visibleRect.y + visibleRect.height - preferredSize.height;
             scrollRectToVisible(visibleRect);
         } else if (visibleRect.y > getHeight()) {
@@ -189,8 +185,7 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
         long startTime = xCoordinateToTimestamp(visibleRect.x);
         long endTime = xCoordinateToTimestamp(visibleRect.x + visibleRect.width);
 
-        // Draw Markers
-        int markerIndex = waveformPresentationModel.getMarkerAtTime(startTime);
+        int markerIndex = waveformPresentationModel.findMarkerAtOrBeforeTime(startTime);
         while (markerIndex < waveformPresentationModel.getMarkerCount()) {
             long timestamp = waveformPresentationModel.getTimestampForMarker(markerIndex);
             if (timestamp > endTime) {
@@ -204,7 +199,6 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
     }
 
     private void drawNets(Graphics g, Rectangle visibleRect) {
-        // Draw nets
         int waveformIndex = visibleRect.y / DrawMetrics.WAVEFORM_V_SPACING;
         if (waveformIndex > 0) {
             waveformIndex--;
@@ -230,8 +224,6 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
     }
 
     private void drawCursor(Graphics g, Rectangle visibleRect) {
-        // Draw the cursor (a vertical line that runs from the top to the
-        // bottom of the waveform).
         g.setColor(AppPreferences.getInstance().cursorColor);
         int cursorX = timestampToXCoordinate(waveformPresentationModel.getCursorPosition());
         g.drawLine(cursorX, visibleRect.y, cursorX, visibleRect.y + visibleRect.height);
@@ -277,7 +269,6 @@ class WaveformView extends JPanel implements MouseListener, MouseMotionListener,
         boolean extendSelection = e.isShiftDown();
         waveformPresentationModel.setCursorPosition(timestamp, extendSelection);
 
-        // Drag scrolling
         Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
         scrollRectToVisible(r);
     }

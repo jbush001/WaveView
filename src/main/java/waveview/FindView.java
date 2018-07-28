@@ -88,8 +88,8 @@ class FindView extends JPanel implements ActionListener {
     }
 
     /// Called when the user changes the search string.
+    // The next time the user hits next/prev, will regenerate the Search object.
     private void invalidateSearch() {
-        // The next time the user hits next/prev, need to regenerate the Search.
         needToParseSearch = true;
 
         // When the user begins editing, remove the error highlights
@@ -99,19 +99,13 @@ class FindView extends JPanel implements ActionListener {
 
     /// If the user changed the search string, try to parse it and generate
     /// a new Search object. If the search string is invalid, highlight the
-    /// incorrect portion and pop up an error message.
+    /// position of the error and pop up an error message.
     private void parseSearchIfNeeded() {
         if (needToParseSearch) {
             try {
                 mainWindow.setSearch(searchExprTextArea.getText());
             } catch (Search.ParseException exc) {
-                // Highlight error
-                errorHighlighter.removeAllHighlights();
-                try {
-                    errorHighlighter.addHighlight(exc.getStartOffset(), exc.getEndOffset() + 1, highlightPainter);
-                } catch (BadLocationException ble) {
-                    System.out.println("execption " + ble);
-                }
+                highlightErrorText(exc.getStartOffset(), exc.getEndOffset() + 1);
 
                 /// @todo Should this be displayed in the window somewhere?
                 JOptionPane.showMessageDialog(null, exc.getMessage(), "Error parsing expression",
@@ -122,7 +116,15 @@ class FindView extends JPanel implements ActionListener {
         }
     }
 
-    /// Handle button presses
+    private void highlightErrorText(int start, int end) {
+        errorHighlighter.removeAllHighlights();
+        try {
+            errorHighlighter.addHighlight(start, end, highlightPainter);
+        } catch (BadLocationException ble) {
+            System.out.println("highlightErrorText: exception " + ble);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         parseSearchIfNeeded();

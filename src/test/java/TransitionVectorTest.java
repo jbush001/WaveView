@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import org.junit.Test;
+import waveview.BitValue;
 import waveview.BitVector;
 import waveview.Transition;
 import waveview.TransitionVector;
@@ -29,7 +30,7 @@ import waveview.TransitionVector;
 public class TransitionVectorTest {
     private void makeBitVectorFromInt(BitVector vec, int value) {
         for (int i = 0; i < vec.getWidth(); i++)
-            vec.setBit(i, (value >> i) & 1);
+            vec.setBit(i, BitValue.values()[(value >> i) & 1]);
     }
 
     @Test

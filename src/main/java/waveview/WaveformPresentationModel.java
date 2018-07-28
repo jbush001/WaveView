@@ -147,9 +147,7 @@ public class WaveformPresentationModel {
         return visibleNets.size();
     }
 
-    /// Return mapping of visible order to internal index
     /// @param index Index of net in order displayed in net list
-    /// @returns netID (as referenced in WaveformDataModel)
     public NetDataModel getVisibleNet(int index) {
         return visibleNets.get(index).getDataModel();
     }
@@ -266,7 +264,7 @@ public class WaveformPresentationModel {
         notifyMarkerChanged(timestamp);
     }
 
-    public int getMarkerAtTime(long timestamp) {
+    public int findMarkerAtOrBeforeTime(long timestamp) {
         return markers.findIndex(timestamp);
     }
 
@@ -279,18 +277,18 @@ public class WaveformPresentationModel {
 
         // Because it's hard to click exactly on the marker, allow removing
         // markers a few pixels to the right or left of the current cursor.
-        final long MARKER_REMOVE_SLACK = (long) (5.0 / getHorizontalScale());
+        long markerRemoveSlack = (long) (5.0 / getHorizontalScale());
 
         int index = markers.findIndex(timestamp);
         long targetTimestamp = markers.get(index).timestamp;
 
         // The lookup function sometimes rounds to the lower marker, so
         // check both the current marker and the next one.
-        if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
+        if (Math.abs(timestamp - targetTimestamp) <= markerRemoveSlack) {
             return index;
         } else if (index < markers.size() - 1) {
             targetTimestamp = markers.get(index + 1).timestamp;
-            if (Math.abs(timestamp - targetTimestamp) <= MARKER_REMOVE_SLACK) {
+            if (Math.abs(timestamp - targetTimestamp) <= markerRemoveSlack) {
                 return index + 1;
             }
         }
@@ -328,7 +326,7 @@ public class WaveformPresentationModel {
     }
 
     public void prevMarker(boolean extendSelection) {
-        int id = getMarkerAtTime(getCursorPosition()); // Rounds back
+        int id = findMarkerAtOrBeforeTime(getCursorPosition());
         long timestamp = getTimestampForMarker(id);
         if (timestamp >= getCursorPosition() && id > 0) {
             id--;
@@ -339,7 +337,7 @@ public class WaveformPresentationModel {
     }
 
     public void nextMarker(boolean extendSelection) {
-        int id = getMarkerAtTime(getCursorPosition()); // Rounds back
+        int id = findMarkerAtOrBeforeTime(getCursorPosition());
         if (id < getMarkerCount() - 1) {
             long timestamp = getTimestampForMarker(id);
             if (timestamp <= getCursorPosition()) {

@@ -191,7 +191,7 @@ class TimescaleView extends JPanel implements WaveformPresentationModel.Listener
 
     private void drawMarkers(Graphics g, long startTime, long endTime) {
         double horizontalScale = waveformPresentationModel.getHorizontalScale();
-        int markerIndex = waveformPresentationModel.getMarkerAtTime(startTime);
+        int markerIndex = waveformPresentationModel.findMarkerAtOrBeforeTime(startTime);
         while (markerIndex < waveformPresentationModel.getMarkerCount()) {
             long timestamp = waveformPresentationModel.getTimestampForMarker(markerIndex);
             if (timestamp > endTime) {

@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
+import waveview.BitValue;
 import waveview.BitVector;
 
 public class BitVectorTest {
@@ -188,28 +189,28 @@ public class BitVectorTest {
     @Test
     public void setBit() {
         BitVector bv = new BitVector(8);
-        bv.setBit(7, BitVector.VALUE_1);
-        bv.setBit(6, BitVector.VALUE_0);
-        bv.setBit(5, BitVector.VALUE_1);
-        bv.setBit(4, BitVector.VALUE_Z);
-        bv.setBit(3, BitVector.VALUE_0);
-        bv.setBit(2, BitVector.VALUE_1);
-        bv.setBit(1, BitVector.VALUE_X);
-        bv.setBit(0, BitVector.VALUE_1);
+        bv.setBit(7, BitValue.VALUE_1);
+        bv.setBit(6, BitValue.VALUE_0);
+        bv.setBit(5, BitValue.VALUE_1);
+        bv.setBit(4, BitValue.VALUE_Z);
+        bv.setBit(3, BitValue.VALUE_0);
+        bv.setBit(2, BitValue.VALUE_1);
+        bv.setBit(1, BitValue.VALUE_X);
+        bv.setBit(0, BitValue.VALUE_1);
         assertEquals("101z01x1", bv.toString(2));
     }
 
     @Test
     public void getBit() {
         BitVector bv = new BitVector("1x010z10", 2);
-        assertEquals(BitVector.VALUE_1, bv.getBit(7));
-        assertEquals(BitVector.VALUE_X, bv.getBit(6));
-        assertEquals(BitVector.VALUE_0, bv.getBit(5));
-        assertEquals(BitVector.VALUE_1, bv.getBit(4));
-        assertEquals(BitVector.VALUE_0, bv.getBit(3));
-        assertEquals(BitVector.VALUE_Z, bv.getBit(2));
-        assertEquals(BitVector.VALUE_1, bv.getBit(1));
-        assertEquals(BitVector.VALUE_0, bv.getBit(0));
+        assertEquals(BitValue.VALUE_1, bv.getBit(7));
+        assertEquals(BitValue.VALUE_X, bv.getBit(6));
+        assertEquals(BitValue.VALUE_0, bv.getBit(5));
+        assertEquals(BitValue.VALUE_1, bv.getBit(4));
+        assertEquals(BitValue.VALUE_0, bv.getBit(3));
+        assertEquals(BitValue.VALUE_Z, bv.getBit(2));
+        assertEquals(BitValue.VALUE_1, bv.getBit(1));
+        assertEquals(BitValue.VALUE_0, bv.getBit(0));
     }
 
     @Test
@@ -312,24 +313,6 @@ public class BitVectorTest {
         bv.parseString("10100011", 2);
         bv.parseString("ff", 16);
         bv.parseString("17", 10);
-    }
-
-    @Test
-    public void badSetBitValue() {
-        BitVector bv = new BitVector(8);
-        try {
-            bv.setBit(0, 5);
-            fail("did not throw exception");
-        } catch (NumberFormatException exc) {
-            assertEquals("invalid bit value", exc.getMessage());
-        }
-
-        try {
-            bv.setBit(0, -1);
-            fail("did not throw exception");
-        } catch (NumberFormatException exc) {
-            assertEquals("invalid bit value", exc.getMessage());
-        }
     }
 
     @Test

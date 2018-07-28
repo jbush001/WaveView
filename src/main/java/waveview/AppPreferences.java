@@ -20,10 +20,6 @@ import java.awt.Color;
 import java.io.File;
 import java.util.prefs.Preferences;
 
-///
-/// Global application preferences
-///
-
 class AppPreferences {
     private static AppPreferences instance;
     private final Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
@@ -51,8 +47,8 @@ class AppPreferences {
         readColors();
     }
 
-    // The initial waveform directory is the one the file chooser will open by
-    // default when opened when the user tries to open a waveform.
+    // The directory the file chooser will open intially when the user tries to open a
+    // waveform.
     void setInitialWaveformDirectory(File file) {
         prefs.put("initialWaveformDirectory", file.toString());
     }
@@ -61,8 +57,8 @@ class AppPreferences {
         return new File(prefs.get("initialWaveformDirectory", ""));
     }
 
-    // The initial enum directory is the one the file chooser will open by
-    // default when the user attempts to open an enum mapping file
+    // The directory the file chooser will open intially when the user tries to open
+    // an enum mapping file
     void setInitialEnumDirectory(File file) {
         prefs.put("initialEnumDirectory", file.toString());
     }

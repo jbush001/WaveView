@@ -42,7 +42,7 @@ public class MarkerTest {
 
     @Test
     public void findMarkerEmpty() {
-        assertEquals(0, model.getMarkerAtTime(1000));
+        assertEquals(0, model.findMarkerAtOrBeforeTime(1000));
     }
 
     // Ensure no crash when removing marker from empty set
@@ -58,7 +58,7 @@ public class MarkerTest {
 
         verify(listener).markerChanged(1000);
         verifyNoMoreInteractions(listener);
-        assertEquals(0, model.getMarkerAtTime(1000));
+        assertEquals(0, model.findMarkerAtOrBeforeTime(1000));
     }
 
     @Test

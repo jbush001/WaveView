@@ -51,10 +51,20 @@ public class WaveformLoadWorkerTest {
 
     class MockLoadFinishedHandler implements WaveformLoadWorker.LoadFinishedHandler {
         @Override
-        public void handleLoadFinished(WaveformDataModel newModel, String errorMessage) {
+        public void handleLoadError(String errorMessage) {
+            synchronized (WaveformLoadWorkerTest.this) {
+                WaveformLoadWorkerTest.this.newModel = null;
+                WaveformLoadWorkerTest.this.errorMessage = errorMessage;
+                loadFinished = true;
+                WaveformLoadWorkerTest.this.notifyAll();
+            }
+        }
+
+        @Override
+        public void handleLoadSuccess(WaveformDataModel newModel) {
             synchronized (WaveformLoadWorkerTest.this) {
                 WaveformLoadWorkerTest.this.newModel = newModel;
-                WaveformLoadWorkerTest.this.errorMessage = errorMessage;
+                WaveformLoadWorkerTest.this.errorMessage = null;
                 loadFinished = true;
                 WaveformLoadWorkerTest.this.notifyAll();
             }

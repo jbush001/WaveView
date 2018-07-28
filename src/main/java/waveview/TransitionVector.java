@@ -31,6 +31,8 @@ import java.util.NoSuchElementException;
 /// of the waveform.  They are assumed to have the value of the first transition.
 ///
 public class TransitionVector {
+    private static final BitValue[] VALUE_TABLE = BitValue.values();
+
     // Number of bits for this net
     private int width;
 
@@ -122,7 +124,7 @@ public class TransitionVector {
 
             // Copy values out of packed array
             for (int i = 0; i < width; i++) {
-                transition.setBit(width - i - 1, currentWord & 3);
+                transition.setBit(width - i - 1, VALUE_TABLE[currentWord & 3]);
                 bitOffset += 2;
                 if (bitOffset == 32) {
                     wordOffset++;
@@ -188,7 +190,7 @@ public class TransitionVector {
         // If the passed value is wider than the vector width, only copy the
         // low order bits of it.
         for (int i = Math.min(value.getWidth(), width) - 1; i >= 0; i--) {
-            packedValues[wordOffset] |= value.getBit(i) << bitOffset;
+            packedValues[wordOffset] |= value.getBit(i).ordinal() << bitOffset;
             bitOffset += 2;
             if (bitOffset == 32) {
                 wordOffset++;

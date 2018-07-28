@@ -25,14 +25,13 @@ public class RecentFiles {
     public void add(String path) {
         int index = files.indexOf(path);
         if (index == -1) {
-            // Need to add a new entry. Discard the oldest entry if
-            // necessary
+            // Need to add a new entry. Discard the oldest entry if necessary
             if (files.size() == MAX_FILES) {
                 files.remove(MAX_FILES - 1);
             }
         } else {
-            // Existing entry. Remove from old location. It will be
-            // added to the beginning of the list.
+            // Existing entry. Remove from old location. It will be added to the beginning
+            // of the list.
             files.remove(index);
         }
 
