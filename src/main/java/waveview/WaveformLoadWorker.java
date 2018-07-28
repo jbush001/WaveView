@@ -29,7 +29,6 @@ public class WaveformLoadWorker extends SwingWorker<Void, Void> {
         void handleLoadError(String errorMessage);
     }
 
-    private static final boolean MEASURE_MEMORY = false;
     private final File file;
     private final ProgressMonitor progressMonitor;
     private final WaveformDataModel newModel = new WaveformDataModel();
@@ -60,21 +59,12 @@ public class WaveformLoadWorker extends SwingWorker<Void, Void> {
                 }
             };
 
-            long memoryBefore;
-            Runtime runtime = Runtime.getRuntime();
-            if (MEASURE_MEMORY) {
-                System.gc();
-                memoryBefore = runtime.totalMemory() - runtime.freeMemory();
-            }
-
-            long startTime = System.currentTimeMillis();
+            Profiler profiler = new Profiler();
+            profiler.start();
             new VCDLoader().load(file, newModel.startBuilding(), progressListener);
-            System.out.println("Loaded in " + (System.currentTimeMillis() - startTime) + " ms");
-            if (MEASURE_MEMORY) {
-                System.gc();
-                long memoryUsed = (runtime.totalMemory() - runtime.freeMemory()) - memoryBefore;
-                System.out.println("Using " + memoryUsed + " bytes of memory");
-            }
+            profiler.finish();
+            System.out.println("Loaded in " + profiler.getExecutionTime() + " ms");
+            System.out.println("Allocated " + profiler.getMemoryAllocated() + " bytes of memory");
         } catch (Exception exc) {
             errorMessage = exc.getMessage();
         }
