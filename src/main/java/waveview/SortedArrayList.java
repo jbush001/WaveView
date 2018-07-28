@@ -24,17 +24,34 @@ import java.util.NoSuchElementException;
 /// ArrayList that allows sorted inserts and binary search lookup.
 ///
 
-public class SortedArrayList<T extends SortedArrayList.Keyed> extends ArrayList<T> {
+public class SortedArrayList<T extends SortedArrayList.Keyed> {
+    private final ArrayList<T> list = new ArrayList<>();
+
     public interface Keyed {
         long getKey();
     }
 
-    @Override
+    public int size() {
+        return list.size();
+    }
+
+    public void clear() {
+        list.clear();
+    }
+
+    public T get(int index) {
+        return list.get(index);
+    }
+
+    public void remove(int index) {
+        list.remove(index);
+    }
+
     public boolean add(T value) {
         long key = ((Keyed) value).getKey();
         for (int i = 0;; i++) {
             if (i == size() || ((Keyed) get(i)).getKey() > key) {
-                add(i, value);
+                list.add(i, value);
                 break;
             }
         }
