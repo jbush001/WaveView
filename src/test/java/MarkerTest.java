@@ -331,7 +331,7 @@ public class MarkerTest {
     // Ensure removeAllNets doesn't affect markers
     @Test
     public void removeAllNets() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector(1));
+        NetDataModel net1 = new NetDataModel("net1", "net1", new TransitionVector.Builder(1).getTransitionVector());
         model.addNet(net1);
         model.addMarker("a_marker", 1000);
         clearInvocations(listener);

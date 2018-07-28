@@ -45,7 +45,7 @@ public class NetSearchListModelAdapter implements ListModel<String>, DocumentLis
     /// @param pattern Only items that contain this pattern in some part of
     /// them will be displayed.
     public void setPattern(String pattern) {
-        if (pattern.equals("")) {
+        if (pattern.isEmpty()) {
             matches.clear();
             for (NetDataModel netDataModel : waveformDataModel) {
                 matches.add(netDataModel.getFullName());

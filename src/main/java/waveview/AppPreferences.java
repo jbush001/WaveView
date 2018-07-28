@@ -47,8 +47,6 @@ class AppPreferences {
         readColors();
     }
 
-    // The directory the file chooser will open intially when the user tries to open a
-    // waveform.
     void setInitialWaveformDirectory(File file) {
         prefs.put("initialWaveformDirectory", file.toString());
     }
@@ -57,8 +55,6 @@ class AppPreferences {
         return new File(prefs.get("initialWaveformDirectory", ""));
     }
 
-    // The directory the file chooser will open intially when the user tries to open
-    // an enum mapping file
     void setInitialEnumDirectory(File file) {
         prefs.put("initialEnumDirectory", file.toString());
     }

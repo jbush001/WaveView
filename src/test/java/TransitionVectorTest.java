@@ -35,65 +35,72 @@ public class TransitionVectorTest {
     }
 
     @Test
-    public void findTransition() {
-        TransitionVector vec = new TransitionVector(8);
-        vec.appendTransition(100, new BitVector("00000001", 2));
-        vec.appendTransition(110, new BitVector("00000010", 2));
-        vec.appendTransition(111, new BitVector("00001000", 2));
-        vec.appendTransition(112, new BitVector("00010000", 2));
-        vec.appendTransition(115, new BitVector("00010000", 2));
+    public void findBeforeFirstTransition() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .getTransitionVector();
 
         Transition t = vec.findTransition(99).next();
         assertEquals(t.getTimestamp(), 100);
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
-
-        t = vec.findTransition(100).next();
-        assertEquals(100, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00000001", 2)));
-
-        t = vec.findTransition(101).next();
-        assertEquals(100, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00000001", 2)));
-
-        t = vec.findTransition(105).next();
-        assertEquals(100, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00000001", 2)));
-
-        t = vec.findTransition(109).next();
-        assertEquals(100, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00000001", 2)));
-
-        t = vec.findTransition(110).next();
-        assertEquals(110, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00000010", 2)));
-
-        t = vec.findTransition(111).next();
-        assertEquals(111, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00001000", 2)));
-
-        t = vec.findTransition(112).next();
-        assertEquals(112, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00010000", 2)));
-
-        t = vec.findTransition(113).next();
-        assertEquals(112, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00010000", 2)));
-
-        t = vec.findTransition(116).next();
-        assertEquals(115, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00010000", 2)));
-
-        t = vec.findTransition(20000).next();
-        assertEquals(115, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00010000", 2)));
     }
 
     @Test
-    public void iterator() {
-        TransitionVector vec = new TransitionVector(8);
-        vec.appendTransition(100, new BitVector("00000001", 2));
-        vec.appendTransition(110, new BitVector("00000010", 2));
-        vec.appendTransition(111, new BitVector("00001000", 2));
+    public void findFirstTransition() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .getTransitionVector();
+
+        Transition t = vec.findTransition(100).next();
+        assertEquals(t.getTimestamp(), 100);
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+    }
+
+    @Test
+    public void findAfterFirstTransition() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .appendTransition(120, new BitVector("10101010", 2))
+                .getTransitionVector();
+
+        Transition t = vec.findTransition(101).next();
+        assertEquals(t.getTimestamp(), 100);
+        assertEquals(0, t.compare(new BitVector("00000001", 2)));
+    }
+
+    @Test
+    public void findLastTransition() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .getTransitionVector();
+
+        Transition t = vec.findTransition(110).next();
+        assertEquals(110, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000010", 2)));
+    }
+
+    @Test
+    public void findAfterLastTransition() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .getTransitionVector();
+
+        Transition t = vec.findTransition(20000).next();
+        assertEquals(110, t.getTimestamp());
+        assertEquals(0, t.compare(new BitVector("00000010", 2)));
+    }
+
+    @Test
+    public void iteratorFirst() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .getTransitionVector();
 
         Iterator<Transition> ti = vec.findTransition(99);
         assertTrue(ti.hasNext());
@@ -101,16 +108,36 @@ public class TransitionVectorTest {
         assertTrue(ti.hasNext());
         assertEquals(100, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000001", 2)));
+    }
 
-        t = ti.next();
+    @Test
+    public void iteratorSecond() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .appendTransition(111, new BitVector("00001000", 2))
+                .getTransitionVector();
+
+        Iterator<Transition> ti = vec.findTransition(99);
+        ti.next();
+        Transition t = ti.next();
         assertTrue(ti.hasNext());
         assertEquals(110, t.getTimestamp());
         assertEquals(0, t.compare(new BitVector("00000010", 2)));
+    }
 
-        t = ti.next();
+    @Test
+    public void iteratorEnd() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .appendTransition(111, new BitVector("00001000", 2))
+                .getTransitionVector();
+        Iterator<Transition> ti = vec.findTransition(99);
+        ti.next();
+        ti.next();
+        ti.next();
         assertFalse(ti.hasNext());
-        assertEquals(111, t.getTimestamp());
-        assertEquals(0, t.compare(new BitVector("00001000", 2)));
 
         try {
             ti.next();
@@ -118,6 +145,15 @@ public class TransitionVectorTest {
         } catch (NoSuchElementException exc) {
             // Should arrive here on success
         }
+    }
+
+    // Remove is not supported
+    @Test
+    public void iteratorRemove() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .getTransitionVector();
+        Iterator<Transition> ti = vec.findTransition(99);
 
         try {
             ti.remove();
@@ -131,18 +167,23 @@ public class TransitionVectorTest {
     /// Ensure it is truncated
     @Test
     public void truncateVector() {
-        TransitionVector vec = new TransitionVector(4);
-        vec.appendTransition(100, new BitVector("00001111", 2));
+        TransitionVector vec = new TransitionVector.Builder(4)
+            .appendTransition(100, new BitVector("00001111", 2))
+            .getTransitionVector();
+
         Iterator<Transition> ti = vec.findTransition(0);
         Transition t = ti.next();
+
         assertEquals("1111", t.toString(2));
     }
 
     /// The passed bitvector is smaller than the transition vector width
     @Test
     public void padVector() {
-        TransitionVector vec = new TransitionVector(16);
-        vec.appendTransition(100, new BitVector("101", 2));
+        TransitionVector vec = new TransitionVector.Builder(16)
+                .appendTransition(100, new BitVector("101", 2))
+                .getTransitionVector();
+
         Iterator<Transition> ti = vec.findTransition(0);
         Transition t = ti.next();
         assertEquals("0000000000000101", t.toString(2));
@@ -152,12 +193,14 @@ public class TransitionVectorTest {
     /// the array as it grows.
     @Test
     public void largeTransitionVector() {
-        TransitionVector tvec = new TransitionVector(16);
+        TransitionVector.Builder builder = new TransitionVector.Builder(16);
         BitVector bvec = new BitVector(16);
         for (int idx = 0; idx < 100000; idx++) {
             makeBitVectorFromInt(bvec, idx);
-            tvec.appendTransition(idx * 5, bvec);
+            builder.appendTransition(idx * 5, bvec);
         }
+
+        TransitionVector tvec = builder.getTransitionVector();
 
         Iterator<Transition> iter = tvec.findTransition(0);
         for (int idx = 0; idx < 100000; idx++) {
@@ -169,10 +212,18 @@ public class TransitionVectorTest {
     }
 
     @Test
-    public void getMaxTimestamp() {
-        TransitionVector tvec = new TransitionVector(1);
+    public void getMaxTimestampEmpty() {
+        TransitionVector.Builder builder = new TransitionVector.Builder(1);
+        TransitionVector tvec = builder.getTransitionVector();
+
         assertEquals(0, tvec.getMaxTimestamp());
-        tvec.appendTransition(100, new BitVector("1", 2));
+    }
+
+    @Test
+    public void getMaxTimestamp() {
+        TransitionVector tvec = new TransitionVector.Builder(1)
+                .appendTransition(100, new BitVector("1", 2))
+                .getTransitionVector();
         assertEquals(100, tvec.getMaxTimestamp());
     }
 }

@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 /// An ordered series of value changes on a single net (which may have
 /// one or more bits).  This is a convenience class used by WaveformDataModel.
 /// Allocating hundreds of thousands of Transition objects would be slow and
-/// inefficient, so this stores the values packed into a single array.
+/// use a lot more memory, so this packs the values into a single array.
 /// Because it is sorted, it supports efficient binary searches for values
 /// at specific timestamps.
 ///
@@ -45,7 +45,7 @@ public class TransitionVector {
     private int transitionCount;
     private int allocSize; // Used only while building
 
-    public TransitionVector(int width) {
+    private TransitionVector(int width) {
         assert width > 0;
         this.width = width;
     }
@@ -145,57 +145,71 @@ public class TransitionVector {
         }
     }
 
-    /// Called while the waveform is being loaded.
-    /// The timestamp must be after the last transition that was
-    /// appended
-    public void appendTransition(long timestamp, BitVector value) {
-        if (transitionCount == allocSize) {
-            // Grow the array
-            if (allocSize < 128) {
-                allocSize = 128;
-            } else {
-                allocSize *= 2;
+    public static class Builder {
+        private final TransitionVector vector;
+
+        public Builder(int width) {
+            vector = new TransitionVector(width);
+        }
+
+        public TransitionVector getTransitionVector() {
+            return vector;
+        }
+
+        /// Called while the waveform is being loaded.
+        /// The timestamp must be after the last transition that was
+        /// appended
+        public Builder appendTransition(long timestamp, BitVector value) {
+            if (vector.transitionCount == vector.allocSize) {
+                // Grow the array
+                if (vector.allocSize < 128) {
+                    vector.allocSize = 128;
+                } else {
+                    vector.allocSize *= 2;
+                }
+
+                long[] newTimestamps = new long[vector.allocSize];
+                int[] newPackedValues = new int[vector.allocSize * vector.width / 16];
+
+                if (vector.timestamps != null) {
+                    System.arraycopy(vector.timestamps, 0, newTimestamps, 0, vector.transitionCount);
+                    System.arraycopy(vector.packedValues, 0, newPackedValues, 0, vector.transitionCount
+                        * vector.width / 16);
+                }
+
+                vector.timestamps = newTimestamps;
+                vector.packedValues = newPackedValues;
             }
 
-            long[] newTimestamps = new long[allocSize];
-            int[] newPackedValues = new int[allocSize * width / 16];
-
-            if (timestamps != null) {
-                System.arraycopy(timestamps, 0, newTimestamps, 0, transitionCount);
-                System.arraycopy(packedValues, 0, newPackedValues, 0, transitionCount * width / 16);
+            if (vector.transitionCount > 0) {
+                assert timestamp >= vector.timestamps[vector.transitionCount - 1];
             }
 
-            timestamps = newTimestamps;
-            packedValues = newPackedValues;
-        }
+            vector.timestamps[vector.transitionCount] = timestamp;
 
-        if (transitionCount > 0) {
-            assert timestamp >= timestamps[transitionCount - 1];
-        }
+            int bitIndex = vector.transitionCount * vector.width;
 
-        timestamps[transitionCount] = timestamp;
-
-        int bitIndex = transitionCount * width;
-
-        // If the passed value is smaller than the vector width, pad with zeroes
-        if (width > value.getWidth()) {
-            bitIndex += width - value.getWidth();
-        }
-
-        int wordOffset = bitIndex / 16;
-        int bitOffset = (bitIndex * 2) % 32;
-
-        // If the passed value is wider than the vector width, only copy the
-        // low order bits of it.
-        for (int i = Math.min(value.getWidth(), width) - 1; i >= 0; i--) {
-            packedValues[wordOffset] |= value.getBit(i).ordinal() << bitOffset;
-            bitOffset += 2;
-            if (bitOffset == 32) {
-                wordOffset++;
-                bitOffset = 0;
+            // If the passed value is smaller than the vector width, pad with zeroes
+            if (vector.width > value.getWidth()) {
+                bitIndex += vector.width - value.getWidth();
             }
-        }
 
-        transitionCount++;
+            int wordOffset = bitIndex / 16;
+            int bitOffset = (bitIndex * 2) % 32;
+
+            // If the passed value is wider than the vector width, only copy the
+            // low order bits of it.
+            for (int i = Math.min(value.getWidth(), vector.width) - 1; i >= 0; i--) {
+                vector.packedValues[wordOffset] |= value.getBit(i).ordinal() << bitOffset;
+                bitOffset += 2;
+                if (bitOffset == 32) {
+                    wordOffset++;
+                    bitOffset = 0;
+                }
+            }
+
+            vector.transitionCount++;
+            return this;
+        }
     }
 }

@@ -221,7 +221,7 @@ public class MainWindow extends JPanel implements ActionListener {
     private void saveNetSet() {
         String name = (String) JOptionPane.showInputDialog(frame, "Net Set Name", "Save Net Set",
                 JOptionPane.PLAIN_MESSAGE, null, null, null);
-        if (!name.equals("")) {
+        if (!name.isEmpty()) {
             waveformPresentationModel.saveNetSet(name);
             buildNetMenu();
         }
@@ -355,8 +355,9 @@ public class MainWindow extends JPanel implements ActionListener {
 
     private void saveWaveformSettings() {
         try {
-            if (waveformSettingsFile != null)
+            if (waveformSettingsFile != null) {
                 waveformSettingsFile.write();
+            }
         } catch (Exception exc) {
             System.out.println("Error saving configuration file " + exc);
         }

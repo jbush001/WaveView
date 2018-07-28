@@ -18,9 +18,6 @@ package waveview;
 
 import java.math.BigInteger;
 
-///
-/// Arbitrary sized array of four-valued logic values.
-///
 public class BitVector {
     // Index 0 is least significant position
     private BitValue[] values;
@@ -260,8 +257,9 @@ public class BitVector {
         return result.toString();
     }
 
-    /// @bug will crash if the bit vector hasn't been assigned.
     private String toDecimalString() {
+        assert values != null;
+
         // Add one leading byte that is always zero so this will
         // be treated as unsigned.
         byte[] bytes = new byte[(values.length + 7) / 8 + 1];

@@ -90,7 +90,7 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
         private NetTreeModel.Builder treeBuilder = netTree.startBuilding();
 
         // This mirrors allNets in WaveformDataModel and must be kept in sync with it.
-        private final ArrayList<TransitionVector> transitionVectors = new ArrayList<>();
+        private final ArrayList<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
 
         @Override
         public void setTimescale(int timescale) {
@@ -119,7 +119,7 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
 
         @Override
         public void appendTransition(int id, long timestamp, BitVector values) {
-            transitionVectors.get(id).appendTransition(timestamp, values);
+            transitionBuilders.get(id).appendTransition(timestamp, values);
         }
 
         @Override
@@ -138,20 +138,19 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
             fullName.append(shortName);
 
             NetDataModel net;
-            TransitionVector transitionVector;
+            TransitionVector.Builder builder;
 
-            if (netId < transitionVectors.size()) {
+            if (netId < transitionBuilders.size()) {
                 // alias of existing net
-                transitionVector = transitionVectors.get(netId);
-                assert transitionVector.getWidth() == width;
+                builder = transitionBuilders.get(netId);
             } else {
                 // new net
-                assert netId == transitionVectors.size();
-                transitionVector = new TransitionVector(width);
-                transitionVectors.add(transitionVector);
+                assert netId == transitionBuilders.size();
+                builder = new TransitionVector.Builder(width);
+                transitionBuilders.add(builder);
             }
 
-            net = new NetDataModel(shortName, fullName.toString(), transitionVector);
+            net = new NetDataModel(shortName, fullName.toString(), builder.getTransitionVector());
             allNets.add(net);
             treeBuilder.addNet(net);
             fullNameToNetMap.put(fullName.toString(), net);
