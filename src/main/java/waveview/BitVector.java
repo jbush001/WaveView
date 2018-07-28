@@ -140,25 +140,9 @@ public class BitVector {
 
         // Compare remaining digits
         while (index >= 0) {
-            switch (other.values[index]) {
-            case VALUE_0:
-                if (values[index] == BitValue.VALUE_1) {
-                    return 1;
-                }
-
-                // If my value is Z or X, ignore
-                break;
-            case VALUE_1:
-                if (values[index] == BitValue.VALUE_0) {
-                    return -1;
-                }
-
-                // If my value is Z or X, ignore
-                break;
-            case VALUE_X:
-            case VALUE_Z:
-                // Ignore...
-                break;
+            int comp = values[index].compare(other.values[index]);
+            if (comp != 0) {
+                return comp;
             }
 
             index--;
@@ -174,9 +158,7 @@ public class BitVector {
 
         for (int index = getWidth() - 1; index >= 0; index--) {
             value <<= 1;
-            if (getBit(index) == BitValue.VALUE_1) {
-                value |= 1;
-            }
+            value |= getBit(index).toInt();
         }
 
         return value;
@@ -213,18 +195,7 @@ public class BitVector {
 
         int length = string.length();
         for (int index = 0; index < length; index++) {
-            char c = string.charAt(index);
-            if (c == '0') {
-                values[length - index - 1] = BitValue.VALUE_0;
-            } else if (c == '1') {
-                values[length - index - 1] = BitValue.VALUE_1;
-            } else if (c == 'x' || c == 'X') {
-                values[length - index - 1] = BitValue.VALUE_X;
-            } else if (c == 'z' || c == 'Z') {
-                values[length - index - 1] = BitValue.VALUE_Z;
-            } else {
-                throw new NumberFormatException("number format exception parsing " + string);
-            }
+            values[length - index - 1] = BitValue.fromChar(string.charAt(index));
         }
     }
 
@@ -238,8 +209,7 @@ public class BitVector {
         }
 
         for (int i = 0; i < totalBits; i++) {
-            values[i] = (bytes[bytes.length - (i / 8) - 1] & (1 << (i % 8))) == 0
-                    ? BitValue.VALUE_0 : BitValue.VALUE_1;
+            values[i] = BitValue.fromInt(bytes[bytes.length - (i / 8) - 1] & (1 << (i % 8)));
         }
     }
 
@@ -254,17 +224,17 @@ public class BitVector {
             if (c >= '0' && c <= '9') {
                 int digitVal = c - '0';
                 for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) == 0 ? BitValue.VALUE_0 : BitValue.VALUE_1;
+                    values[(index + 1) * 4 - offset - 1] = BitValue.fromInt(digitVal & (8 >> offset));
                 }
             } else if (c >= 'a' && c <= 'f') {
                 int digitVal = c - 'a' + 10;
                 for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) == 0 ? BitValue.VALUE_0 : BitValue.VALUE_1;
+                    values[(index + 1) * 4 - offset - 1] = BitValue.fromInt(digitVal & (8 >> offset));
                 }
             } else if (c >= 'A' && c <= 'F') {
                 int digitVal = c - 'A' + 10;
                 for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] = (digitVal & (8 >> offset)) == 0 ? BitValue.VALUE_0 : BitValue.VALUE_1;
+                    values[(index + 1) * 4 - offset - 1] = BitValue.fromInt(digitVal & (8 >> offset));
                 }
             } else if (c == 'X' || c == 'x') {
                 for (int offset = 0; offset < 4; offset++) {
@@ -284,20 +254,7 @@ public class BitVector {
         StringBuilder result = new StringBuilder();
 
         for (int index = getWidth() - 1; index >= 0; index--) {
-            switch (getBit(index)) {
-            case VALUE_0:
-                result.append('0');
-                break;
-            case VALUE_1:
-                result.append('1');
-                break;
-            case VALUE_Z:
-                result.append('z');
-                break;
-            case VALUE_X:
-                result.append('x');
-                break;
-            }
+            result.append(getBit(index).toChar());
         }
 
         return result.toString();

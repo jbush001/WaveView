@@ -29,8 +29,9 @@ import waveview.TransitionVector;
 
 public class TransitionVectorTest {
     private void makeBitVectorFromInt(BitVector vec, int value) {
-        for (int i = 0; i < vec.getWidth(); i++)
-            vec.setBit(i, BitValue.values()[(value >> i) & 1]);
+        for (int i = 0; i < vec.getWidth(); i++) {
+            vec.setBit(i, BitValue.fromOrdinal((value >> i) & 1));
+        }
     }
 
     @Test

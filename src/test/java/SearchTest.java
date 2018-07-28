@@ -59,7 +59,7 @@ public class SearchTest {
         for (int t = 0; t < 16; t++)
         {
             for (int bit = 0; bit < 4; bit++){
-                bv.setBit(0, BitValue.values()[(t >> (3 - bit)) & 1]);
+                bv.setBit(0, BitValue.fromOrdinal((t >> (3 - bit)) & 1));
                 builder.appendTransition(bit, t, bv);
                 System.out.println("builder.appendTransition(" + bit + ", " + t + ", " + bv + ")");
             }

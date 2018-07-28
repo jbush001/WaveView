@@ -297,29 +297,16 @@ public class VCDLoader implements WaveformLoader {
             // 18.2.1 value ::= 0 | 1 | x | X | z | Z
             int valueLength = value.length();
             int bitsToCopy = Math.min(valueLength, var.width);
-            int outBit = 0;
             BitValue bitValue = BitValue.VALUE_0;
-            while (outBit < bitsToCopy) {
-                switch (value.charAt(valueLength - outBit - 1)) {
-                case 'z':
-                case 'Z':
-                    bitValue = BitValue.VALUE_Z;
-                    break;
-                case 'x':
-                case 'X':
-                    bitValue = BitValue.VALUE_X;
-                    break;
-                case '1':
-                    bitValue = BitValue.VALUE_1;
-                    break;
-                case '0':
-                    bitValue = BitValue.VALUE_0;
-                    break;
-                default:
-                    throw new LoadException("line " + tokenizer.lineno() + ": invalid logic value");
+            int outBit = 0;
+            try {
+                // Reading from right to left
+                while (outBit < bitsToCopy) {
+                    bitValue = BitValue.fromChar(value.charAt(valueLength - outBit - 1));
+                    decodedValues.setBit(outBit++, bitValue);
                 }
-
-                decodedValues.setBit(outBit++, bitValue);
+            } catch (NumberFormatException exc) {
+                throw new LoadException("line " + tokenizer.lineno() + ": invalid logic value");
             }
 
             // Table 83: Rules for left-extending vector values
