@@ -17,6 +17,9 @@
 package waveview;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import javax.swing.ListModel;
 import javax.swing.text.Document;
 import javax.swing.event.DocumentListener;
@@ -32,7 +35,7 @@ import javax.swing.event.ListDataEvent;
 
 public class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     private ListDataListener listDataListener;
-    private final ArrayList<String> matches = new ArrayList<>();
+    private List<String> matches = new ArrayList<>();
     private final WaveformDataModel waveformDataModel;
 
     public NetSearchListModelAdapter(WaveformDataModel waveformDataModel) {
@@ -52,12 +55,10 @@ public class NetSearchListModelAdapter implements ListModel<String>, DocumentLis
             }
         } else {
             matches.clear();
-            for (NetDataModel netDataModel : waveformDataModel) {
-                String name = netDataModel.getFullName();
-                if (name.indexOf(pattern) != -1) {
-                    matches.add(name);
-                }
-            }
+            matches = StreamSupport.stream(waveformDataModel.spliterator(), false)
+                    .map(model -> model.getFullName())
+                    .filter(name -> name.contains(pattern))
+                    .collect(Collectors.toList());
         }
 
         if (listDataListener != null) {

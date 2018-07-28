@@ -18,6 +18,7 @@ package waveview;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 ///
@@ -25,7 +26,7 @@ import java.util.NoSuchElementException;
 ///
 
 public class SortedArrayList<T extends SortedArrayList.Keyed> {
-    private final ArrayList<T> list = new ArrayList<>();
+    private final List<T> list = new ArrayList<>();
 
     public interface Keyed {
         long getKey();

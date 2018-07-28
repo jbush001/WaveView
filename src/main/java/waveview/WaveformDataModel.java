@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 ///
 /// Contains information about nets and transitions. View state is contained
@@ -29,8 +31,8 @@ import java.util.Iterator;
 
 public class WaveformDataModel implements Iterable<NetDataModel> {
     private long maxTimestamp;
-    private HashMap<String, NetDataModel> fullNameToNetMap = new HashMap<>();
-    private ArrayList<NetDataModel> allNets = new ArrayList<>();
+    private Map<String, NetDataModel> fullNameToNetMap = new HashMap<>();
+    private List<NetDataModel> allNets = new ArrayList<>();
     private NetTreeModel netTree = new NetTreeModel();
     private int timescale;
 
@@ -90,7 +92,7 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
         private NetTreeModel.Builder treeBuilder = netTree.startBuilding();
 
         // This mirrors allNets in WaveformDataModel and must be kept in sync with it.
-        private final ArrayList<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
+        private final List<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
 
         @Override
         public void setTimescale(int timescale) {

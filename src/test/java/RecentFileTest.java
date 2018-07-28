@@ -17,6 +17,8 @@
 
 import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 import waveview.RecentFiles;
 
@@ -41,7 +43,7 @@ public class RecentFileTest {
         // item out.
         files.add("k");
 
-        ArrayList<String> list = files.getList();
+        List<String> list = files.getList();
         assertEquals(10, list.size());
         assertEquals("k", list.get(0));
         assertEquals("j", list.get(1));
@@ -72,7 +74,7 @@ public class RecentFileTest {
         // g is already in the list, should move to the front
         files.add("g");
 
-        ArrayList<String> list = files.getList();
+        List<String> list = files.getList();
         assertEquals(10, list.size());
         assertEquals("g", list.get(0));
         assertEquals("j", list.get(1));
@@ -108,7 +110,7 @@ public class RecentFileTest {
         RecentFiles files = new RecentFiles();
         files.unpack("jj;iii;hhhh;ggggg;ff/ffff;eeeee;dd/dd;ccc;bb;a");
 
-        ArrayList<String> list = files.getList();
+        List<String> list = files.getList();
         assertEquals("jj", list.get(0));
         assertEquals("iii", list.get(1));
         assertEquals("hhhh", list.get(2));

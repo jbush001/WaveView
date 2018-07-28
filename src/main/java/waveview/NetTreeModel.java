@@ -19,6 +19,8 @@ package waveview;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
+
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
@@ -63,7 +65,7 @@ public class NetTreeModel implements TreeModel {
     static class Node {
         private final String name;
         private final NetDataModel netDataModel;
-        private final ArrayList<Node> children = new ArrayList<>();
+        private final List<Node> children = new ArrayList<>();
 
         // Interior nodes (modules/interfaces) only
         Node(String name) {

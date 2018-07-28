@@ -17,15 +17,16 @@
 package waveview;
 
 import java.util.ArrayList;
+import java.util.List;
 
 ///
 /// Contains visible state for a waveform capture (e.g. Cursor position, scale, visible nets, etc.)
 ///
 
 public class WaveformPresentationModel {
-    private final ArrayList<Listener> listeners = new ArrayList<>();
-    private ArrayList<NetPresentationModel> visibleNets = new ArrayList<>();
-    private final ArrayList<NetSet> netSets = new ArrayList<>();
+    private final List<Listener> listeners = new ArrayList<>();
+    private List<NetPresentationModel> visibleNets = new ArrayList<>();
+    private final List<NetSet> netSets = new ArrayList<>();
     private long cursorPosition;
     private long selectionStart;
     private double horizontalScale; // Pixels per time units
@@ -373,9 +374,9 @@ public class WaveformPresentationModel {
 
     private static class NetSet {
         private final String name;
-        final ArrayList<NetPresentationModel> visibleNets;
+        final List<NetPresentationModel> visibleNets;
 
-        NetSet(String name, ArrayList<NetPresentationModel> visibleNets) {
+        NetSet(String name, List<NetPresentationModel> visibleNets) {
             this.name = name;
             this.visibleNets = new ArrayList<>(visibleNets);
         }

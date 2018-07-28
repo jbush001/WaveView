@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 import java.util.HashMap;
+import java.util.Map;
 
 ///
 /// Parse a value change dump (VCD) formatted text file and push the contents into a
@@ -33,7 +34,7 @@ public class VCDLoader implements WaveformLoader {
     private StreamTokenizer tokenizer;
     private WaveformBuilder waveformBuilder;
     private long currentTime;
-    private final HashMap<String, Var> varMap = new HashMap<>();
+    private final Map<String, Var> varMap = new HashMap<>();
     private int totalTransitions;
     private ProgressListener progressListener;
     private ProgressInputStream progressStream;

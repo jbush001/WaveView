@@ -29,6 +29,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -128,7 +130,7 @@ class NetNameView extends JList<Integer> implements WaveformPresentationModel.Li
     }
 
     private class ListModelAdapter implements ListModel<Integer>, WaveformPresentationModel.Listener {
-        private final ArrayList<ListDataListener> listeners = new ArrayList<>();
+        private final List<ListDataListener> listeners = new ArrayList<>();
 
         ListModelAdapter() {
             waveformPresentationModel.addListener(this);

@@ -17,10 +17,11 @@
 package waveview;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RecentFiles {
     private static final int MAX_FILES = 10;
-    private final ArrayList<String> files = new ArrayList<>();
+    private final List<String> files = new ArrayList<>();
 
     public void add(String path) {
         int index = files.indexOf(path);
@@ -57,7 +58,7 @@ public class RecentFiles {
         }
     }
 
-    public ArrayList<String> getList() {
+    public List<String> getList() {
         return files;
     }
 }
