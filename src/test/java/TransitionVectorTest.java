@@ -72,6 +72,18 @@ public class TransitionVectorTest {
     }
 
     @Test
+    public void findMiddleTransition() {
+        TransitionVector vec = new TransitionVector.Builder(8)
+                .appendTransition(100, new BitVector("00000001", 2))
+                .appendTransition(110, new BitVector("00000010", 2))
+                .appendTransition(120, new BitVector("10101010", 2))
+                .getTransitionVector();
+
+        Transition t = vec.findTransition(110).next();
+        assertEquals(t.getTimestamp(), 110);
+        assertEquals(0, t.compare(new BitVector("00000010", 2)));
+    }
+    @Test
     public void findLastTransition() {
         TransitionVector vec = new TransitionVector.Builder(8)
                 .appendTransition(100, new BitVector("00000001", 2))
@@ -189,8 +201,7 @@ public class TransitionVectorTest {
         assertEquals("0000000000000101", t.toString(2));
     }
 
-    /// Build a large transition vector, which will require reallocating
-    /// the array as it grows.
+    /// Build a large transition vector, which will require reallocating the data array.
     @Test
     public void largeTransitionVector() {
         TransitionVector.Builder builder = new TransitionVector.Builder(16);

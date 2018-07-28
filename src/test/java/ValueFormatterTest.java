@@ -27,13 +27,10 @@ import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
 
 public class ValueFormatterTest {
-    File getTestFile(String name) {
-        return new File("src/test/resources/enum_mapping/" + name);
-    }
-
     @Test
     public void enumValueFormatter() throws IOException {
-        EnumValueFormatter vf = new EnumValueFormatter(getTestFile("test1.txt"));
+        File mappingFile = new File("src/test/resources/enum_mapping/test1.txt");
+        EnumValueFormatter vf = new EnumValueFormatter(mappingFile);
         assertEquals("STATE_INIT", vf.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", vf.format(new BitVector("2", 10)));
         assertEquals("STATE_WAIT", vf.format(new BitVector("3", 10)));
