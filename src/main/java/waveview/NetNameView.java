@@ -328,27 +328,27 @@ class NetNameView extends JList<Integer> implements WaveformPresentationModel.Li
         ValueFormatter formatter = null;
 
         switch (e.getActionCommand()) {
-        case "Remove Net":
-            removeNets(indices);
-            break;
-        case "Enum":
-            formatter = createEnumFormatter();
-            break;
-        case "Hex":
-            formatter = new HexadecimalValueFormatter();
-            break;
-        case "Binary":
-            formatter = new BinaryValueFormatter();
-            break;
-        case "Decimal":
-            formatter = new DecimalValueFormatter();
-            break;
-        case "ASCII":
-            formatter = new ASCIIValueFormatter();
-            break;
-        default:
-            System.out.println("NetNameView: unknown action " + e.getActionCommand());
-            break;
+            case "Remove Net":
+                removeNets(indices);
+                break;
+            case "Enum":
+                formatter = createEnumFormatter();
+                break;
+            case "Hex":
+                formatter = new HexadecimalValueFormatter();
+                break;
+            case "Binary":
+                formatter = new BinaryValueFormatter();
+                break;
+            case "Decimal":
+                formatter = new DecimalValueFormatter();
+                break;
+            case "ASCII":
+                formatter = new ASCIIValueFormatter();
+                break;
+            default:
+                System.out.println("NetNameView: unknown action " + e.getActionCommand());
+                break;
         }
 
         if (formatter != null) {

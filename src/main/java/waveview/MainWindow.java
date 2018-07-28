@@ -88,72 +88,72 @@ public class MainWindow extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         switch (cmd) {
-        case "zoomin":
-            waveformContainer.zoomIn();
-            break;
-        case "zoomout":
-            waveformContainer.zoomOut();
-            break;
-        case "zoomselection":
-            waveformContainer.zoomToSelection();
-            break;
-        case "addnet":
-            addNet();
-            break;
-        case "openwaveform":
-            openWaveform();
-            break;
-        case "reloadwaveform":
-            loadWaveformFile(currentWaveformFile);
-            break;
-        case "quit":
-            frame.dispose();
-            break;
-        case "removeAllMarkers":
-            waveformPresentationModel.removeAllMarkers();
-            break;
-        case "removeAllNets":
-            waveformPresentationModel.removeAllNets();
-            break;
-        case "insertMarker":
-            insertMarker();
-            break;
-        case "showmarkerlist":
-            showMarkerList();
-            break;
-        case "nextMarker":
-            nextMarker(e);
-            break;
-        case "prevMarker":
-            prevMarker(e);
-            break;
-        case "removeMarker":
-            removeMarker();
-            break;
-        case "findbyvalue":
-            showFindDialog();
-            break;
-        case "findnext":
-            findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-            break;
-        case "findprev":
-            findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-            break;
-        case "saveNetSet":
-            saveNetSet();
-            break;
-        case "prefs":
-            showPrefs();
-            break;
-        default:
-            if (cmd.startsWith("netSet_")) {
-                int index = Integer.parseInt(cmd.substring(7));
-                waveformPresentationModel.selectNetSet(index);
-            } else if (cmd.startsWith("open ")) {
-                // Load from recents menu
-                loadWaveformFile(cmd.substring(5));
-            }
-            break;
+            case "zoomin":
+                waveformContainer.zoomIn();
+                break;
+            case "zoomout":
+                waveformContainer.zoomOut();
+                break;
+            case "zoomselection":
+                waveformContainer.zoomToSelection();
+                break;
+            case "addnet":
+                addNet();
+                break;
+            case "openwaveform":
+                openWaveform();
+                break;
+            case "reloadwaveform":
+                loadWaveformFile(currentWaveformFile);
+                break;
+            case "quit":
+                frame.dispose();
+                break;
+            case "removeAllMarkers":
+                waveformPresentationModel.removeAllMarkers();
+                break;
+            case "removeAllNets":
+                waveformPresentationModel.removeAllNets();
+                break;
+            case "insertMarker":
+                insertMarker();
+                break;
+            case "showmarkerlist":
+                showMarkerList();
+                break;
+            case "nextMarker":
+                nextMarker(e);
+                break;
+            case "prevMarker":
+                prevMarker(e);
+                break;
+            case "removeMarker":
+                removeMarker();
+                break;
+            case "findbyvalue":
+                showFindDialog();
+                break;
+            case "findnext":
+                findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+                break;
+            case "findprev":
+                findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+                break;
+            case "saveNetSet":
+                saveNetSet();
+                break;
+            case "prefs":
+                showPrefs();
+                break;
+            default:
+                if (cmd.startsWith("netSet_")) {
+                    int index = Integer.parseInt(cmd.substring(7));
+                    waveformPresentationModel.selectNetSet(index);
+                } else if (cmd.startsWith("open ")) {
+                    // Load from recents menu
+                    loadWaveformFile(cmd.substring(5));
+                }
+                break;
         }
     }
 

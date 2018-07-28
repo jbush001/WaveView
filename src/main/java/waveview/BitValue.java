@@ -26,18 +26,18 @@ public enum BitValue {
 
     public static BitValue fromChar(char c) {
         switch (c) {
-        case '0':
-            return VALUE_0;
-        case '1':
-            return VALUE_1;
-        case 'x':
-        case 'X':
-            return VALUE_X;
-        case 'z':
-        case 'Z':
-            return VALUE_Z;
-        default:
-            throw new NumberFormatException("unknown digit " + c);
+            case '0':
+                return VALUE_0;
+            case '1':
+                return VALUE_1;
+            case 'x':
+            case 'X':
+                return VALUE_X;
+            case 'z':
+            case 'Z':
+                return VALUE_Z;
+            default:
+                throw new NumberFormatException("unknown digit " + c);
         }
     }
 
@@ -70,14 +70,14 @@ public enum BitValue {
 
     public char toChar() {
         switch (this) {
-        case VALUE_0:
-            return '0';
-        case VALUE_1:
-            return '1';
-        case VALUE_X:
-            return 'x';
-        case VALUE_Z:
-            return 'z';
+            case VALUE_0:
+                return '0';
+            case VALUE_1:
+                return '1';
+            case VALUE_X:
+                return 'x';
+            case VALUE_Z:
+                return 'z';
         }
 
         return ' '; // Unreachable?

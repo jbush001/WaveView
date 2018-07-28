@@ -176,26 +176,26 @@ public class VCDLoader implements WaveformLoader {
 
         int order = 1;
         switch (unit) {
-        case "fs":
-            order = -15;
-            break;
-        case "ps":
-            order = -12;
-            break;
-        case "ns":
-            order = -9;
-            break;
-        case "us":
-            order = -6;
-            break;
-        case "ms":
-            order = -3;
-            break;
-        case "s":
-            order = 0;
-            break;
-        default:
-            throw new LoadException("line " + tokenizer.lineno() + ": unknown timescale value " + getTokenString());
+            case "fs":
+                order = -15;
+                break;
+            case "ps":
+                order = -12;
+                break;
+            case "ns":
+                order = -9;
+                break;
+            case "us":
+                order = -6;
+                break;
+            case "ms":
+                order = -3;
+                break;
+            case "s":
+                order = 0;
+                break;
+            default:
+                throw new LoadException("line " + tokenizer.lineno() + ": unknown timescale value " + getTokenString());
         }
 
         int timeNumber = Integer.parseInt(s.substring(0, unitStart));
@@ -215,31 +215,31 @@ public class VCDLoader implements WaveformLoader {
     /// the end of the definitions section
     private void parseDefinition() throws LoadException, IOException {
         switch (getTokenString()) {
-        case "$scope":
-            parseScope();
-            break;
-        case "$var":
-            parseVar();
-            break;
-        case "$upscope":
-            parseUpscope();
-            break;
-        case "$timescale":
-            parseTimescale();
-            break;
-        case "$enddefinitions":
-            match("$end");
-            break;
-        case "$dumpvars":
-        case "$end":
-            // ignore directive, but not what comes in-between
-            break;
-        default:
-            // Ignore everything inside this definition.
-            do {
-                nextToken(true);
-            } while (!getTokenString().equals("$end"));
-            break;
+            case "$scope":
+                parseScope();
+                break;
+            case "$var":
+                parseVar();
+                break;
+            case "$upscope":
+                parseUpscope();
+                break;
+            case "$timescale":
+                parseTimescale();
+                break;
+            case "$enddefinitions":
+                match("$end");
+                break;
+            case "$dumpvars":
+            case "$end":
+                // ignore directive, but not what comes in-between
+                break;
+            default:
+                // Ignore everything inside this definition.
+                do {
+                    nextToken(true);
+                } while (!getTokenString().equals("$end"));
+                break;
         }
     }
 
@@ -260,30 +260,30 @@ public class VCDLoader implements WaveformLoader {
 
             // @todo Does not support real types.
             switch (leadingVal) {
-            case '0':
-            case '1':
-            case 'z':
-            case 'Z':
-            case 'x':
-            case 'X':
-                // Single bit value
-                // 18.2.1 scalar_value_change ::= value identifier_code
-                // (no space)
-                value = getTokenString().substring(0, 1);
-                id = getTokenString().substring(1);
-                break;
-            case 'b':
-                // Multi bit value
-                // 18.2.1 vector_value_change ::= b binary_number identification_code
-                value = getTokenString().substring(1);
-                nextToken(true);
-                id = getTokenString();
-                break;
-            case 'r':
-            case 'R':
-                throw new LoadException("line " + tokenizer.lineno() + ": real values are not supported");
-            default:
-                throw new LoadException("line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
+                case '0':
+                case '1':
+                case 'z':
+                case 'Z':
+                case 'x':
+                case 'X':
+                    // Single bit value
+                    // 18.2.1 scalar_value_change ::= value identifier_code
+                    // (no space)
+                    value = getTokenString().substring(0, 1);
+                    id = getTokenString().substring(1);
+                    break;
+                case 'b':
+                    // Multi bit value
+                    // 18.2.1 vector_value_change ::= b binary_number identification_code
+                    value = getTokenString().substring(1);
+                    nextToken(true);
+                    id = getTokenString();
+                    break;
+                case 'r':
+                case 'R':
+                    throw new LoadException("line " + tokenizer.lineno() + ": real values are not supported");
+                default:
+                    throw new LoadException("line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
             }
 
             Var var = varMap.get(id);

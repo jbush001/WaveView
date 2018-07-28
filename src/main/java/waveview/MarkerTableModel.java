@@ -48,15 +48,15 @@ public class MarkerTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         switch (col) {
-        case 0:
-            return Integer.toString(waveformPresentationModel.getIdForMarker(row));
-        case 1:
-            // XXX add suffix with units here.
-            return Long.toString(waveformPresentationModel.getTimestampForMarker(row));
-        case 2:
-            return waveformPresentationModel.getDescriptionForMarker(row);
-        default:
-            return "";
+            case 0:
+                return Integer.toString(waveformPresentationModel.getIdForMarker(row));
+            case 1:
+                // XXX add suffix with units here.
+                return Long.toString(waveformPresentationModel.getTimestampForMarker(row));
+            case 2:
+                return waveformPresentationModel.getDescriptionForMarker(row);
+            default:
+                return "";
         }
     }
 

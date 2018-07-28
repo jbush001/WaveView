@@ -98,17 +98,17 @@ public class BitVector {
     /// @param radix May be 2, 10, or 16
     public void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
-        case 2:
-            parseBinaryValue(string);
-            break;
-        case 10:
-            parseDecimalValue(string);
-            break;
-        case 16:
-            parseHexadecimalValue(string);
-            break;
-        default:
-            throw new NumberFormatException("bad radix passed to parseString");
+            case 2:
+                parseBinaryValue(string);
+                break;
+            case 10:
+                parseDecimalValue(string);
+                break;
+            case 16:
+                parseHexadecimalValue(string);
+                break;
+            default:
+                throw new NumberFormatException("bad radix passed to parseString");
         }
     }
 
@@ -172,14 +172,14 @@ public class BitVector {
         }
 
         switch (radix) {
-        case 2:
-            return toBinaryString();
-        case 10:
-            return toDecimalString();
-        case 16:
-            return toHexString();
-        default:
-            throw new NumberFormatException("bad radix");
+            case 2:
+                return toBinaryString();
+            case 10:
+                return toDecimalString();
+            case 16:
+                return toHexString();
+            default:
+                throw new NumberFormatException("bad radix");
         }
     }
 
@@ -281,15 +281,15 @@ public class BitVector {
         for (int i = count - 1; i >= 0; i--) {
             value <<= 1;
             switch (getBit(i + offset)) {
-            case VALUE_0:
-                break;
-            case VALUE_1:
-                value |= 1;
-                break;
-            case VALUE_X:
-                return 'X';
-            case VALUE_Z: // @bug should only be Z if all bits are Z
-                return 'Z';
+                case VALUE_0:
+                    break;
+                case VALUE_1:
+                    value |= 1;
+                    break;
+                case VALUE_X:
+                    return 'X';
+                case VALUE_Z: // @bug should only be Z if all bits are Z
+                    return 'Z';
             }
         }
 

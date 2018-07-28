@@ -129,15 +129,15 @@ class FindView extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         parseSearchIfNeeded();
         switch (e.getActionCommand()) {
-        case "Prev":
-            mainWindow.findPrev(false);
-            break;
-        case "Next":
-            mainWindow.findNext(false);
-            break;
-        default:
-            System.out.println("FindPanel: unknown action " + e.getActionCommand());
-            break;
+            case "Prev":
+                mainWindow.findPrev(false);
+                break;
+            case "Next":
+                mainWindow.findNext(false);
+                break;
+            default:
+                System.out.println("FindPanel: unknown action " + e.getActionCommand());
+                break;
         }
     }
 }
