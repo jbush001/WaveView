@@ -331,7 +331,7 @@ public class MainWindow extends JPanel implements ActionListener {
         return Search.generateSearch(nets, cursorPosition);
     }
 
-    void setSearch(String searchString) throws Search.ParseException {
+    void setSearch(String searchString) throws SearchFormatException {
         currentSearch = new Search(waveformDataModel, searchString);
     }
 

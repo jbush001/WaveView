@@ -104,7 +104,7 @@ class FindView extends JPanel implements ActionListener {
         if (needToParseSearch) {
             try {
                 mainWindow.setSearch(searchExprTextArea.getText());
-            } catch (Search.ParseException exc) {
+            } catch (SearchFormatException exc) {
                 highlightErrorText(exc.getStartOffset(), exc.getEndOffset() + 1);
 
                 /// @todo Should this be displayed in the window somewhere?
