@@ -28,7 +28,6 @@ import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
 import waveview.NetDataModel;
-import waveview.WaveformBuilder;
 import waveview.WaveformDataModel;
 import waveview.WaveformPresentationModel;
 import waveview.WaveformSettingsFile;
@@ -42,22 +41,22 @@ public class WaveformSettingsFileTest {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
-        WaveformBuilder builder = dataModel.startBuilding();
-        builder.enterScope("mod1");
-        builder.newNet(0, "net1", 1);
-        builder.newNet(1, "net2", 1);
-        builder.enterScope("mod2");
-        builder.newNet(2, "net3", 1);
-        builder.newNet(3, "net4", 1);
-        builder.enterScope("mod3");
-        builder.newNet(4, "net5", 1);
-        builder.newNet(5, "net6", 1);
-        builder.exitScope();
-        builder.newNet(6, "net7", 1);
-        builder.exitScope();
-        builder.newNet(7, "net8", 1);
-        builder.exitScope();
-        builder.loadFinished();
+        dataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(1, "net2", 1)
+            .enterScope("mod2")
+            .newNet(2, "net3", 1)
+            .newNet(3, "net4", 1)
+            .enterScope("mod3")
+            .newNet(4, "net5", 1)
+            .newNet(5, "net6", 1)
+            .exitScope()
+            .newNet(6, "net7", 1)
+            .exitScope()
+            .newNet(7, "net8", 1)
+            .exitScope()
+            .loadFinished();
 
         NetDataModel netDataModels[] = new NetDataModel[8];
         int index = 0;
@@ -151,13 +150,13 @@ public class WaveformSettingsFileTest {
     public void dataModelChanged() throws Exception {
         WaveformDataModel sourceDataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
-        WaveformBuilder builder1 = sourceDataModel.startBuilding();
-        builder1.enterScope("mod1");
-        builder1.newNet(0, "net1", 1);
-        builder1.newNet(1, "net2", 1);
-        builder1.newNet(2, "net3", 1);
-        builder1.exitScope();
-        builder1.loadFinished();
+        sourceDataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(1, "net2", 1)
+            .newNet(2, "net3", 1)
+            .exitScope()
+            .loadFinished();
 
         sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(0));
         sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(1));
@@ -166,13 +165,13 @@ public class WaveformSettingsFileTest {
         WaveformDataModel destDataModel = new WaveformDataModel();
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
 
-        WaveformBuilder builder2 = destDataModel.startBuilding();
-        builder2.enterScope("mod1");
-        builder2.newNet(0, "net1", 1);
-        builder2.newNet(1, "net4", 1);
-        builder2.newNet(2, "net3", 1);
-        builder2.exitScope();
-        builder2.loadFinished();
+        destDataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(1, "net4", 1)
+            .newNet(2, "net3", 1)
+            .exitScope()
+            .loadFinished();
 
         File file = fTempFolder.newFile("test2.settings");
         (new WaveformSettingsFile(file, sourceDataModel, sourcePresentationModel)).write();
@@ -188,11 +187,11 @@ public class WaveformSettingsFileTest {
     public void badFormatter() throws Exception {
         File file = new File("src/test/resources/waveform_settings/bad_formatter.waveconfig");
         WaveformDataModel dataModel = new WaveformDataModel();
-        WaveformBuilder builder = dataModel.startBuilding();
-        builder.enterScope("foo");
-        builder.newNet(0, "bar", 1);
-        builder.exitScope();
-        builder.loadFinished();
+        dataModel.startBuilding()
+            .enterScope("foo")
+            .newNet(0, "bar", 1)
+            .exitScope()
+            .loadFinished();
 
         WaveformPresentationModel presentationModel = new WaveformPresentationModel();
         new WaveformSettingsFile(file, dataModel, presentationModel).read();

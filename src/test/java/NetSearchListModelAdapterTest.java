@@ -25,7 +25,6 @@ import javax.swing.event.ListDataListener;
 import org.junit.Before;
 import org.junit.Test;
 import waveview.NetSearchListModelAdapter;
-import waveview.WaveformBuilder;
 import waveview.WaveformDataModel;
 
 public class NetSearchListModelAdapterTest {
@@ -35,18 +34,18 @@ public class NetSearchListModelAdapterTest {
 
     @Before
     public void setUpTest() {
-        WaveformBuilder builder = model.startBuilding();
-        builder.enterScope("mod1");
-        builder.newNet(0, "fooxxx", 1);
-        builder.newNet(1, "xfooxx", 1);
-        builder.newNet(2, "xxfoox", 1);
-        builder.newNet(3, "xxxfoo", 1);
-        builder.newNet(4, "bbbbb", 1);
-        builder.newNet(5, "bbbb", 1);
-        builder.newNet(6, "bbb", 1);
-        builder.newNet(7, "bb", 1);
-        builder.newNet(8, "yyy", 1);
-        builder.exitScope();
+        model.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "fooxxx", 1)
+            .newNet(1, "xfooxx", 1)
+            .newNet(2, "xxfoox", 1)
+            .newNet(3, "xxxfoo", 1)
+            .newNet(4, "bbbbb", 1)
+            .newNet(5, "bbbb", 1)
+            .newNet(6, "bbb", 1)
+            .newNet(7, "bb", 1)
+            .newNet(8, "yyy", 1)
+            .exitScope();
 
         nslma = new NetSearchListModelAdapter(model);
         listener = mock(ListDataListener.class);

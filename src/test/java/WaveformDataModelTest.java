@@ -21,41 +21,35 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import java.util.Iterator;
-import org.junit.Before;
 import org.junit.Test;
 import waveview.BitVector;
 import waveview.NetDataModel;
 import waveview.NetTreeModel;
-import waveview.WaveformBuilder;
 import waveview.WaveformDataModel;
 import waveview.Transition;
 
 public class WaveformDataModelTest {
     private final WaveformDataModel model = new WaveformDataModel();
-    private WaveformBuilder builder;
-
-    @Before
-    public void initTest() {
-        builder = model.startBuilding();
-    }
 
     @Test
     public void buildWaveformDataModel() {
-        builder.setTimescale(-9);
-        builder.enterScope("mod1");
-        builder.newNet(0, "net1", 1);
-        builder.newNet(1, "net2", 3);
-        builder.enterScope("mod2");
-        builder.newNet(2, "net3", 2);
-        builder.exitScope();
-        builder.exitScope();
-        builder.appendTransition(0, 10, new BitVector("1", 2));
-        builder.appendTransition(0, 20, new BitVector("0", 2));
-        builder.appendTransition(1, 10, new BitVector("100", 2));
-        builder.appendTransition(1, 15, new BitVector("010", 2));
-        builder.appendTransition(2, 12, new BitVector("11", 2));
-        builder.appendTransition(2, 17, new BitVector("01", 2));
-        builder.loadFinished();
+
+        model.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(1, "net2", 3)
+            .enterScope("mod2")
+            .newNet(2, "net3", 2)
+            .exitScope()
+            .exitScope()
+            .appendTransition(0, 10, new BitVector("1", 2))
+            .appendTransition(0, 20, new BitVector("0", 2))
+            .appendTransition(1, 10, new BitVector("100", 2))
+            .appendTransition(1, 15, new BitVector("010", 2))
+            .appendTransition(2, 12, new BitVector("11", 2))
+            .appendTransition(2, 17, new BitVector("01", 2))
+            .loadFinished();
 
         NetTreeModel netTree = model.getNetTree();
         Object root = netTree.getRoot();
@@ -110,13 +104,14 @@ public class WaveformDataModelTest {
 
     @Test
     public void aliasNet() {
-        builder.setTimescale(-9);
-        builder.enterScope("mod1");
-        builder.newNet(0, "net1", 1);
-        builder.newNet(0, "net2", 1);    // aliases net1
-        builder.exitScope();
-        builder.appendTransition(0, 17, new BitVector("1", 2));
-        builder.loadFinished();
+        model.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(0, "net2", 1)    // aliases net1
+            .exitScope()
+            .appendTransition(0, 17, new BitVector("1", 2))
+            .loadFinished();
 
         NetTreeModel netTree = model.getNetTree();
         Object root = netTree.getRoot();
@@ -142,15 +137,16 @@ public class WaveformDataModelTest {
     // Make sure WaveformDataModel doesn't get out of sync.
     @Test
     public void netAfterAlias() {
-        builder.setTimescale(-9);
-        builder.enterScope("mod1");
-        builder.newNet(0, "net1", 1);
-        builder.newNet(0, "net2", 1);    // aliases net1
-        builder.newNet(1, "net3", 1);    // not alias
-        builder.exitScope();
-        builder.appendTransition(0, 17, new BitVector("1", 2));
-        builder.appendTransition(1, 21, new BitVector("0", 2));
-        builder.loadFinished();
+        model.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(0, "net2", 1)    // aliases net1
+            .newNet(1, "net3", 1)    // not alias
+            .exitScope()
+            .appendTransition(0, 17, new BitVector("1", 2))
+            .appendTransition(1, 21, new BitVector("0", 2))
+            .loadFinished();
 
         NetDataModel netData3 = model.getNetDataModel(2);
 
@@ -160,13 +156,14 @@ public class WaveformDataModelTest {
 
     @Test
     public void copyFrom() {
-        builder.setTimescale(-9);
-        builder.enterScope("mod1");
-        builder.newNet(0, "net1", 1);
-        builder.newNet(0, "net2", 1);
-        builder.exitScope();
-        builder.appendTransition(0, 17, new BitVector("1", 2));
-        builder.loadFinished();
+        model.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(0, "net2", 1)
+            .exitScope()
+            .appendTransition(0, 17, new BitVector("1", 2))
+            .loadFinished();
 
         WaveformDataModel model2 = new WaveformDataModel();
         model2.copyFrom(model);

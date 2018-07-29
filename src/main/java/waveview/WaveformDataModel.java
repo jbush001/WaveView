@@ -95,37 +95,43 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
         private final List<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
 
         @Override
-        public void setTimescale(int timescale) {
+        public WaveformBuilder setTimescale(int timescale) {
             WaveformDataModel.this.timescale = timescale;
+            return this;
         }
 
         @Override
-        public void enterScope(String name) {
+        public WaveformBuilder enterScope(String name) {
             treeBuilder.enterScope(name);
             scopeStack.addLast(name);
+            return this;
         }
 
         @Override
-        public void exitScope() {
+        public WaveformBuilder exitScope() {
             treeBuilder.leaveScope();
             scopeStack.removeLast();
+            return this;
         }
 
         @Override
-        public void loadFinished() {
+        public WaveformBuilder loadFinished() {
             maxTimestamp = 0;
             for (NetDataModel model : allNets) {
                 maxTimestamp = Math.max(maxTimestamp, model.getMaxTimestamp());
             }
+
+            return this;
         }
 
         @Override
-        public void appendTransition(int id, long timestamp, BitVector values) {
+        public WaveformBuilder appendTransition(int id, long timestamp, BitVector values) {
             transitionBuilders.get(id).appendTransition(timestamp, values);
+            return this;
         }
 
         @Override
-        public void newNet(int netId, String shortName, int width) {
+        public WaveformBuilder newNet(int netId, String shortName, int width) {
             // Build full path
             StringBuilder fullName = new StringBuilder();
             for (String scope : scopeStack) {
@@ -156,6 +162,7 @@ public class WaveformDataModel implements Iterable<NetDataModel> {
             allNets.add(net);
             treeBuilder.addNet(net);
             fullNameToNetMap.put(fullName.toString(), net);
+            return this;
         }
     }
 }
