@@ -30,7 +30,7 @@ public class Search {
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
     private final Lexer lexer;
     private final WaveformDataModel waveformDataModel;
-    private ExpressionNode searchExpression;
+    private BooleanExpressionNode searchExpression;
 
     /// Generate a search given a set of nets that matches at the given timestamp.
     public static String generateSearch(NetDataModel[] nets, long timestamp) {
@@ -63,8 +63,7 @@ public class Search {
     /// Mainly useful for unit testing
     /// @returns true if this search string matches at the passed timestamp
     public boolean matches(long timestamp) {
-        SearchHint hint = new SearchHint();
-        return searchExpression.evaluate(waveformDataModel, timestamp, hint);
+        return searchExpression.evaluate(waveformDataModel, timestamp);
     }
 
     ///
@@ -80,29 +79,28 @@ public class Search {
     /// timestamp of the next forward match otherwise
     ///
     public long getNextMatch(long startTimestamp) {
-        SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
+        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
 
         // If the start timestamp is already at a region that is true, scan
         // first to find a place where the expression is false.
         while (currentValue) {
-            if (hint.forwardTimestamp == Long.MAX_VALUE) {
+            if (searchExpression.forwardHint == Long.MAX_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = hint.forwardTimestamp;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
+            currentTime = searchExpression.forwardHint;
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         // Scan to find where the expression is true
         while (!currentValue) {
-            if (hint.forwardTimestamp == Long.MAX_VALUE) {
+            if (searchExpression.forwardHint == Long.MAX_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = hint.forwardTimestamp;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
+            currentTime = searchExpression.forwardHint;
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         return currentTime;
@@ -117,25 +115,24 @@ public class Search {
     /// timestamp of the next backward match otherwise
     ///
     public long getPreviousMatch(long startTimestamp) {
-        SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
+        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
         while (currentValue) {
-            if (hint.backwardTimestamp == Long.MIN_VALUE) {
+            if (searchExpression.backwardHint == Long.MIN_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = hint.backwardTimestamp;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
+            currentTime = searchExpression.backwardHint;
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         while (!currentValue) {
-            if (hint.backwardTimestamp == Long.MIN_VALUE) {
+            if (searchExpression.backwardHint == Long.MIN_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = hint.backwardTimestamp;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime, hint);
+            currentTime = searchExpression.backwardHint;
+            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         return currentTime;
@@ -400,12 +397,12 @@ public class Search {
         return true;
     }
 
-    private ExpressionNode parseExpression() throws ParseException {
+    private BooleanExpressionNode parseExpression() throws ParseException {
         return parseOr();
     }
 
-    private ExpressionNode parseOr() throws ParseException {
-        ExpressionNode left = parseAnd();
+    private BooleanExpressionNode parseOr() throws ParseException {
+        BooleanExpressionNode left = parseAnd();
         while (tryToMatch("or")) {
             left = new OrExpressionNode(left, parseAnd());
         }
@@ -413,8 +410,8 @@ public class Search {
         return left;
     }
 
-    private ExpressionNode parseAnd() throws ParseException {
-        ExpressionNode left = parseCondition();
+    private BooleanExpressionNode parseAnd() throws ParseException {
+        BooleanExpressionNode left = parseCondition();
         while (tryToMatch("and")) {
             left = new AndExpressionNode(left, parseCondition());
         }
@@ -422,10 +419,10 @@ public class Search {
         return left;
     }
 
-    private ExpressionNode parseCondition() throws ParseException {
+    private BooleanExpressionNode parseCondition() throws ParseException {
         int lookahead = lexer.nextToken();
         if (lookahead == '(') {
-            ExpressionNode node = parseExpression();
+            BooleanExpressionNode node = parseExpression();
             match(')');
             return node;
         }
@@ -470,62 +467,56 @@ public class Search {
         }
     }
 
-    private static class SearchHint {
-        long forwardTimestamp;
-        long backwardTimestamp;
-    }
-
     private abstract static class ExpressionNode {
-        /// Determine if this subexpression is true at the passed timestamp.
-        /// @param timestamp Timestamp and which to evaluate. If timestamp
-        /// is at a transition, the value after the transition will be used
-        /// @param outHint Contains the next timestamp where the value of the
-        /// expression may change. It is guaranteed that no transition will occur
-        /// sooner than this value.
-        /// @return
-        /// - true if the value at the timestamp makes this expression true
-        /// - false if the value at the timestamp makes this expression true
-        abstract boolean evaluate(WaveformDataModel model, long timestamp, SearchHint outHint);
+        // These are set as a side effect of evaluating the node at a specific time.
+        // They contain the next timestamp where the value of the expression may change.
+        // It is guaranteed that no transition will occur sooner than this value.
+        long forwardHint;
+        long backwardHint;
     }
 
     private abstract static class BooleanExpressionNode extends ExpressionNode {
-        protected final ExpressionNode leftChild;
-        protected final ExpressionNode rightChild;
+        /// Determine if this subexpression is true at the passed timestamp.
+        /// @param timestamp Timestamp and which to evaluate. If timestamp
+        /// is at a transition, the value after the transition will be used
+        /// @return
+        /// - true if the value at the timestamp makes this expression true
+        /// - false if the value at the timestamp makes this expression true
+        abstract boolean evaluate(WaveformDataModel model, long timestamp);
+    }
 
-        // These are preallocated for efficiency and aren't used outside
-        // the evaluate() call.
-        private final SearchHint leftHint = new SearchHint();
-        private final SearchHint rightHint = new SearchHint();
+    private abstract static class LogicalExpressionNode extends BooleanExpressionNode {
+        protected final BooleanExpressionNode leftChild;
+        protected final BooleanExpressionNode rightChild;
 
-        BooleanExpressionNode(ExpressionNode leftChild, ExpressionNode rightChild) {
+        LogicalExpressionNode(BooleanExpressionNode leftChild, BooleanExpressionNode rightChild) {
             this.leftChild = leftChild;
             this.rightChild = rightChild;
         }
 
         @Override
-        boolean evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
-            boolean leftResult = leftChild.evaluate(model, timestamp, leftHint);
-            boolean rightResult = rightChild.evaluate(model, timestamp, rightHint);
+        boolean evaluate(WaveformDataModel model, long timestamp) {
+            boolean leftResult = leftChild.evaluate(model, timestamp);
+            boolean rightResult = rightChild.evaluate(model, timestamp);
 
-            // Compute the hints, which are the soonest time this expression
-            // *could* change value. Call the subclassed methods.
-            outHint.forwardTimestamp = nextHint(leftResult, rightResult, leftHint.forwardTimestamp,
-                    rightHint.forwardTimestamp, false);
-            outHint.backwardTimestamp = nextHint(leftResult, rightResult, leftHint.backwardTimestamp,
-                    rightHint.backwardTimestamp, true);
+            forwardHint = nextForwardHint(leftResult, rightResult, leftChild.forwardHint,
+                    rightChild.forwardHint);
+            backwardHint = nextBackwardHint(leftResult, rightResult, leftChild.backwardHint,
+                    rightChild.backwardHint);
 
-            // Return the result at this time
             return compareResults(leftResult, rightResult);
         }
 
         protected abstract boolean compareResults(boolean value1, boolean value2);
 
-        protected abstract long nextHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
-                long nextRightTimestamp, boolean searchBackward);
+        protected abstract long nextForwardHint(boolean leftResult, boolean rightResult,
+                long nextLeftTimestamp, long nextRightTimestamp);
+        protected abstract long nextBackwardHint(boolean leftResult, boolean rightResult,
+                long nextLeftTimestamp, long nextRightTimestamp);
     }
 
-    private static class OrExpressionNode extends BooleanExpressionNode {
-        OrExpressionNode(ExpressionNode left, ExpressionNode right) {
+    private static class OrExpressionNode extends LogicalExpressionNode {
+        OrExpressionNode(BooleanExpressionNode left, BooleanExpressionNode right) {
             super(left, right);
         }
 
@@ -535,17 +526,12 @@ public class Search {
         }
 
         @Override
-        protected long nextHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
-                long nextRightTimestamp, boolean searchBackward) {
-
+        protected long nextForwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
+                long nextRightTimestamp) {
             if (leftResult && rightResult) {
                 // Both expressions are true. The only way for this to become
                 // false is if both change to false.
-                if (searchBackward) {
-                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
-                } else {
-                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
-                }
+                return Math.max(nextLeftTimestamp, nextRightTimestamp);
             } else if (leftResult) {
                 // Currently true. It can only become false when left result
                 // becomes false.
@@ -557,11 +543,22 @@ public class Search {
             } else {
                 // Both expressions are false. May become true if either subexpression
                 // changes.
-                if (searchBackward) {
-                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
-                } else {
-                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
-                }
+                return Math.min(nextLeftTimestamp, nextRightTimestamp);
+            }
+        }
+
+        // Mirror of above
+        @Override
+        protected long nextBackwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
+                long nextRightTimestamp) {
+            if (leftResult && rightResult) {
+                return Math.min(nextLeftTimestamp, nextRightTimestamp);
+            } else if (leftResult) {
+                return nextLeftTimestamp;
+            } else if (rightResult) {
+                return nextRightTimestamp;
+            } else {
+                return Math.max(nextLeftTimestamp, nextRightTimestamp);
             }
         }
 
@@ -571,8 +568,8 @@ public class Search {
         }
     }
 
-    private static class AndExpressionNode extends BooleanExpressionNode {
-        AndExpressionNode(ExpressionNode left, ExpressionNode right) {
+    private static class AndExpressionNode extends LogicalExpressionNode {
+        AndExpressionNode(BooleanExpressionNode left, BooleanExpressionNode right) {
             super(left, right);
         }
 
@@ -582,17 +579,12 @@ public class Search {
         }
 
         @Override
-        protected long nextHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
-                long nextRightTimestamp, boolean searchBackward) {
-
+        protected long nextForwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
+                long nextRightTimestamp) {
             if (leftResult && rightResult) {
                 // Both expressions are true. Either expression changing
                 // could make it false.
-                if (searchBackward) {
-                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
-                } else {
-                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
-                }
+                return Math.min(nextLeftTimestamp, nextRightTimestamp);
             } else if (leftResult) {
                 // Currently false. It can only become true when right result
                 // becomes true.
@@ -604,11 +596,22 @@ public class Search {
             } else {
                 // Both expressions are false. Both must change before this
                 // may become true.
-                if (searchBackward) {
-                    return Math.min(nextLeftTimestamp, nextRightTimestamp);
-                } else {
-                    return Math.max(nextLeftTimestamp, nextRightTimestamp);
-                }
+                return Math.max(nextLeftTimestamp, nextRightTimestamp);
+            }
+        }
+
+        // Mirror of above
+        @Override
+        protected long nextBackwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
+                long nextRightTimestamp) {
+            if (leftResult && rightResult) {
+                return Math.max(nextLeftTimestamp, nextRightTimestamp);
+            } else if (leftResult) {
+                return nextRightTimestamp;
+            } else if (rightResult) {
+                return nextLeftTimestamp;
+            } else {
+                return Math.min(nextLeftTimestamp, nextRightTimestamp);
             }
         }
 
@@ -618,37 +621,33 @@ public class Search {
         }
     }
 
-    private abstract static class ValueNode {
-        abstract BitVector evaluate(WaveformDataModel model, long timestamp, SearchHint outHint);
+    private abstract static class ValueNode extends ExpressionNode {
+        abstract BitVector evaluate(WaveformDataModel model, long timestamp);
     }
 
     private static class NetValueNode extends ValueNode {
         private final NetDataModel netDataModel;
 
-        // Preallocated for efficiency. This is returned by evaluate.
-        private BitVector value;
-
         NetValueNode(NetDataModel netDataModel) {
             this.netDataModel = netDataModel;
-            value = new BitVector(netDataModel.getWidth());
         }
 
         @Override
-        BitVector evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
+        BitVector evaluate(WaveformDataModel model, long timestamp) {
             Iterator<Transition> i = netDataModel.findTransition(timestamp);
             Transition t = i.next();
-            value.assign(t);
+            BitVector value = new BitVector(t);
             if (timestamp >= t.getTimestamp()) {
-                outHint.backwardTimestamp = t.getTimestamp() - 1;
+                backwardHint = t.getTimestamp() - 1;
             } else {
-                outHint.backwardTimestamp = Long.MIN_VALUE;
+                backwardHint = Long.MIN_VALUE;
             }
 
             if (i.hasNext()) {
                 t = i.next();
-                outHint.forwardTimestamp = t.getTimestamp();
+                forwardHint = t.getTimestamp();
             } else {
-                outHint.forwardTimestamp = Long.MAX_VALUE;
+                forwardHint = Long.MAX_VALUE;
             }
 
             return value;
@@ -661,16 +660,16 @@ public class Search {
     }
 
     private static class ConstValueNode extends ValueNode {
-        BitVector value;
+        private final BitVector value;
 
         ConstValueNode(BitVector constValue) {
             value = new BitVector(constValue);
         }
 
         @Override
-        BitVector evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
-            outHint.backwardTimestamp = Long.MIN_VALUE;
-            outHint.forwardTimestamp = Long.MAX_VALUE;
+        BitVector evaluate(WaveformDataModel model, long timestamp) {
+            backwardHint = Long.MIN_VALUE;
+            forwardHint = Long.MAX_VALUE;
             return value;
         }
 
@@ -680,27 +679,22 @@ public class Search {
         }
     }
 
-    private abstract static class ComparisonExpressionNode extends ExpressionNode {
-        protected final ValueNode leftNode;
-        protected final ValueNode rightNode;
-
-        // These are preallocated for efficiency and aren't used outside
-        // the evaluate() call.
-        private final SearchHint leftHint = new SearchHint();
-        private final SearchHint rightHint = new SearchHint();
+    private abstract static class ComparisonExpressionNode extends BooleanExpressionNode {
+        protected final ValueNode leftChild;
+        protected final ValueNode rightChild;
 
         protected ComparisonExpressionNode(ValueNode leftNode, ValueNode rightNode) {
-            this.leftNode = leftNode;
-            this.rightNode = rightNode;
+            this.leftChild = leftNode;
+            this.rightChild = rightNode;
         }
 
         @Override
-        boolean evaluate(WaveformDataModel model, long timestamp, SearchHint outHint) {
-            BitVector leftValue = leftNode.evaluate(model, timestamp, leftHint);
-            BitVector rightValue = rightNode.evaluate(model, timestamp, rightHint);
+        boolean evaluate(WaveformDataModel model, long timestamp) {
+            BitVector leftValue = leftChild.evaluate(model, timestamp);
+            BitVector rightValue = rightChild.evaluate(model, timestamp);
             boolean result = doCompare(leftValue, rightValue);
-            outHint.backwardTimestamp = Math.max(leftHint.backwardTimestamp, rightHint.backwardTimestamp);
-            outHint.forwardTimestamp = Math.min(leftHint.forwardTimestamp, rightHint.forwardTimestamp);
+            backwardHint = Math.max(leftChild.backwardHint, rightChild.backwardHint);
+            forwardHint = Math.min(leftChild.forwardHint, rightChild.forwardHint);
             return result;
         }
 
@@ -719,7 +713,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(eq " + leftNode + " " + rightNode + ")";
+            return "(eq " + leftChild + " " + rightChild + ")";
         }
     }
 
@@ -735,7 +729,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(ne " + leftNode + " " + rightNode + ")";
+            return "(ne " + leftChild + " " + rightChild + ")";
         }
     }
 
@@ -751,7 +745,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(gt " + leftNode + " " + rightNode + ")";
+            return "(gt " + leftChild + " " + rightChild + ")";
         }
     }
 
@@ -767,7 +761,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(ge " + leftNode + " " + rightNode + ")";
+            return "(ge " + leftChild + " " + rightChild + ")";
         }
     }
 
@@ -783,7 +777,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(lt " + leftNode + " " + rightNode + ")";
+            return "(lt " + leftChild + " " + rightChild + ")";
         }
     }
 
@@ -799,7 +793,7 @@ public class Search {
 
         @Override
         public String toString() {
-            return "(le " + leftNode + " " + rightNode + ")";
+            return "(le " + leftChild + " " + rightChild + ")";
         }
     }
 }
