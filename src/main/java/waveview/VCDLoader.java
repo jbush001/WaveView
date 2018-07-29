@@ -31,6 +31,16 @@ import java.util.Map;
 /// All section references are to IEEE 1364-2001.
 ///
 public class VCDLoader implements WaveformLoader {
+    private static class Var {
+        Var(int netIndex, int width) {
+            this.netIndex = netIndex;
+            this.width = width;
+        }
+
+        int netIndex;
+        int width;
+    }
+
     private StreamTokenizer tokenizer;
     private WaveformBuilder waveformBuilder;
     private long currentTime;
@@ -61,12 +71,7 @@ public class VCDLoader implements WaveformLoader {
             tokenizer.whitespaceChars(' ', ' ');
             tokenizer.whitespaceChars('\t', '\t');
 
-            while (nextToken(false)) {
-                if (getTokenString().charAt(0) == '$')
-                    parseDefinition();
-                else
-                    parseTransition();
-            }
+            parseFile();
 
             waveformBuilder.loadFinished();
         }
@@ -75,14 +80,63 @@ public class VCDLoader implements WaveformLoader {
         System.out.println(Integer.toString(varMap.size()) + " total nets");
     }
 
-    private static class Var {
-        Var(int netIndex, int width) {
-            this.netIndex = netIndex;
-            this.width = width;
+    private void parseFile() throws LoadException, IOException {
+        while (nextToken(false)) {
+            char leading = getTokenString().charAt(0);
+            if (leading == '$') {
+                parseDefinition();
+            } else if (leading == '#') {
+                parseTimestamp();
+            } else {
+                parseTransition();
+            }
         }
+    }
 
-        int netIndex;
-        int width;
+    /// @returns true if there are more definitions, false if it has hit
+    /// the end of the definitions section
+    private void parseDefinition() throws LoadException, IOException {
+        switch (getTokenString()) {
+            case "$scope":
+                parseScope();
+                break;
+            case "$var":
+                parseVar();
+                break;
+            case "$upscope":
+                parseUpscope();
+                break;
+            case "$timescale":
+                parseTimescale();
+                break;
+            case "$enddefinitions":
+                match("$end");
+                break;
+            case "$dumpvars":
+            case "$end":
+                // ignore directive, but not what comes in-between
+                break;
+            default:
+                ignoreUntilDollarEnd();
+                break;
+        }
+    }
+
+    // Unknown definition, throw away tokens until the end
+    private void ignoreUntilDollarEnd() throws LoadException, IOException {
+        do {
+            nextToken(true);
+        } while (!getTokenString().equals("$end"));
+    }
+
+    private void parseTimestamp() {
+        // If the line begins with a #, this is a timestamp.
+        long nextTimestamp = Long.parseLong(getTokenString().substring(1));
+        if (nextTimestamp >= currentTime) {
+            currentTime = nextTimestamp;
+        } else {
+            System.out.println("warning: timestamp out of order line " + tokenizer.lineno());
+        }
     }
 
     /// 18.2.3.4 $scope
@@ -212,121 +266,83 @@ public class VCDLoader implements WaveformLoader {
         waveformBuilder.setTimescale(order);
     }
 
-    /// @returns true if there are more definitions, false if it has hit
-    /// the end of the definitions section
-    private void parseDefinition() throws LoadException, IOException {
-        switch (getTokenString()) {
-            case "$scope":
-                parseScope();
-                break;
-            case "$var":
-                parseVar();
-                break;
-            case "$upscope":
-                parseUpscope();
-                break;
-            case "$timescale":
-                parseTimescale();
-                break;
-            case "$enddefinitions":
-                match("$end");
-                break;
-            case "$dumpvars":
-            case "$end":
-                // ignore directive, but not what comes in-between
-                break;
-            default:
-                // Ignore everything inside this definition.
-                do {
-                    nextToken(true);
-                } while (!getTokenString().equals("$end"));
-                break;
-        }
-    }
-
     private void parseTransition() throws LoadException, IOException {
         totalTransitions++;
         char leadingVal = getTokenString().charAt(0);
-        if (leadingVal == '#') {
-            // If the line begins with a #, this is a timestamp.
-            long nextTimestamp = Long.parseLong(getTokenString().substring(1));
-            if (nextTimestamp >= currentTime) {
-                currentTime = nextTimestamp;
-            } else {
-                System.out.println("warning: timestamp out of order line " + tokenizer.lineno());
-            }
-        } else {
-            String value;
-            String id;
+        String value;
+        String id;
 
-            // @todo Does not support real types.
-            switch (leadingVal) {
-                case '0':
-                case '1':
-                case 'z':
-                case 'Z':
-                case 'x':
-                case 'X':
-                    // Single bit value
-                    // 18.2.1 scalar_value_change ::= value identifier_code
-                    // (no space)
-                    value = getTokenString().substring(0, 1);
-                    id = getTokenString().substring(1);
-                    break;
-                case 'b':
-                    // Multi bit value
-                    // 18.2.1 vector_value_change ::= b binary_number identification_code
-                    value = getTokenString().substring(1);
-                    nextToken(true);
-                    id = getTokenString();
-                    break;
-                case 'r':
-                case 'R':
-                    throw new LoadException("line " + tokenizer.lineno() + ": real values are not supported");
-                default:
-                    throw new LoadException("line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
-            }
-
-            Var var = varMap.get(id);
-            if (var == null) {
-                throw new LoadException("line " + tokenizer.lineno() + ": Unknown var id " + id);
-            }
-
-            BitVector decodedValues = new BitVector(var.width);
-
-            // Decode and pad if necessary.
-            // 18.2.1 value ::= 0 | 1 | x | X | z | Z
-            int valueLength = value.length();
-            int bitsToCopy = Math.min(valueLength, var.width);
-            BitValue bitValue = BitValue.ZERO;
-            int outBit = 0;
-            try {
-                // Reading from right to left
-                while (outBit < bitsToCopy) {
-                    bitValue = BitValue.fromChar(value.charAt(valueLength - outBit - 1));
-                    decodedValues.setBit(outBit++, bitValue);
-                }
-            } catch (NumberFormatException exc) {
-                throw new LoadException("line " + tokenizer.lineno() + ": invalid logic value");
-            }
-
-            // Table 83: Rules for left-extending vector values
-            // 0 & 1 extend with 0. Z extends with Z, X extends with X.
-            BitValue padValue;
-            if (bitValue == BitValue.Z) {
-                padValue = BitValue.Z;
-            } else if (bitValue == BitValue.X) {
-                padValue = BitValue.X;
-            } else {
-                padValue = BitValue.ZERO;
-            }
-
-            while (outBit < var.width) {
-                decodedValues.setBit(outBit++, padValue);
-            }
-
-            waveformBuilder.appendTransition(var.netIndex, currentTime, decodedValues);
+        switch (leadingVal) {
+            case '0':
+            case '1':
+            case 'z':
+            case 'Z':
+            case 'x':
+            case 'X':
+                // Single bit value
+                // 18.2.1 scalar_value_change ::= value identifier_code
+                // (no space)
+                value = getTokenString().substring(0, 1);
+                id = getTokenString().substring(1);
+                break;
+            case 'b':
+                // Multi bit value
+                // 18.2.1 vector_value_change ::= b binary_number identification_code
+                value = getTokenString().substring(1);
+                nextToken(true);
+                id = getTokenString();
+                break;
+            case 'r':
+            case 'R':
+                throw new LoadException("line " + tokenizer.lineno() + ": real values are not supported");
+            default:
+                throw new LoadException("line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
         }
+
+        Var var = varMap.get(id);
+        if (var == null) {
+            throw new LoadException("line " + tokenizer.lineno() + ": Unknown var id " + id);
+        }
+
+        BitVector decodedValues = decodeBinaryValueString(value, var.width);
+        waveformBuilder.appendTransition(var.netIndex, currentTime, decodedValues);
+    }
+
+    private BitVector decodeBinaryValueString(String valueString, int width) throws LoadException {
+        BitVector value = new BitVector(width);
+
+        // Decode and pad if necessary.
+        // 18.2.1 value ::= 0 | 1 | x | X | z | Z
+        int valueLength = valueString.length();
+        int bitsToCopy = Math.min(valueLength, width);
+        BitValue bitValue = BitValue.ZERO;
+        int outBit = 0;
+        try {
+            // Reading from right to left
+            while (outBit < bitsToCopy) {
+                bitValue = BitValue.fromChar(valueString.charAt(valueLength - outBit - 1));
+                value.setBit(outBit++, bitValue);
+            }
+        } catch (NumberFormatException exc) {
+            throw new LoadException("line " + tokenizer.lineno() + ": invalid logic value");
+        }
+
+        // Table 83: Rules for left-extending vector values
+        // 0 & 1 extend with 0. Z extends with Z, X extends with X.
+        BitValue padValue;
+        if (bitValue == BitValue.Z) {
+            padValue = BitValue.Z;
+        } else if (bitValue == BitValue.X) {
+            padValue = BitValue.X;
+        } else {
+            padValue = BitValue.ZERO;
+        }
+
+        while (outBit < width) {
+            value.setBit(outBit++, padValue);
+        }
+
+        return value;
     }
 
     private void match(String value) throws LoadException, IOException {

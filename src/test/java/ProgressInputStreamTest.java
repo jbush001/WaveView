@@ -109,4 +109,6 @@ public class ProgressInputStreamTest {
         progressInputStream.close();
         verify(inputStream).close();
     }
+
+    // XXX return end of stream (negative count) from these methods, ensure the count is correct.
 }

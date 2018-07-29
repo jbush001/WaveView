@@ -76,10 +76,10 @@ public class WaveformLoadWorker extends SwingWorker<Void, Void> {
     @Override
     protected void done() {
         progressMonitor.close();
-        if (errorMessage != null) {
-            finishHandler.handleLoadError(errorMessage);
-        } else {
+        if (errorMessage == null) {
             finishHandler.handleLoadSuccess(newModel);
+        } else {
+            finishHandler.handleLoadError(errorMessage);
         }
     }
 }
