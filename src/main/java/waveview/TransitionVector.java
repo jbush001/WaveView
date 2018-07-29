@@ -31,9 +31,7 @@ import java.util.NoSuchElementException;
 /// of the waveform.  They are assumed to have the value of the first transition.
 ///
 public class TransitionVector {
-    // Number of bits for this net
-    private int width;
-
+    private int width; // Number of bits for this net
     private long[] timestamps;
 
     // Values are packed into this array. Each bit in the output requires two
@@ -43,7 +41,6 @@ public class TransitionVector {
     // entry. There is no padding between adjacent transitions.
     private int[] packedValues;
     private int transitionCount;
-    private int allocSize; // Used only while building
 
     private TransitionVector(int width) {
         assert width > 0;
@@ -51,10 +48,8 @@ public class TransitionVector {
     }
 
     /// @returns Iterator at transition. If there isn't a transition at this
-    /// transition,
-    /// returns the transition before it. If this is before the first transition,
-    /// returns
-    /// the first transition.
+    /// transition, returns the transition before it. If this is before the
+    /// first transition, returns the first transition.
     public Iterator<Transition> findTransition(long timestamp) {
         // Binary search
         int low = 0; // Lowest possible index
@@ -147,6 +142,7 @@ public class TransitionVector {
 
     public static class Builder {
         private final TransitionVector vector;
+        private int allocSize; // Used only while building
 
         public Builder(int width) {
             vector = new TransitionVector(width);
@@ -160,16 +156,16 @@ public class TransitionVector {
         /// The timestamp must be after the last transition that was
         /// appended
         public Builder appendTransition(long timestamp, BitVector value) {
-            if (vector.transitionCount == vector.allocSize) {
+            if (vector.transitionCount == allocSize) {
                 // Grow the array
-                if (vector.allocSize < 128) {
-                    vector.allocSize = 128;
+                if (allocSize < 128) {
+                    allocSize = 128;
                 } else {
-                    vector.allocSize *= 2;
+                    allocSize *= 2;
                 }
 
-                long[] newTimestamps = new long[vector.allocSize];
-                int[] newPackedValues = new int[vector.allocSize * vector.width / 16];
+                long[] newTimestamps = new long[allocSize];
+                int[] newPackedValues = new int[allocSize * vector.width / 16];
 
                 if (vector.timestamps != null) {
                     System.arraycopy(vector.timestamps, 0, newTimestamps, 0, vector.transitionCount);
