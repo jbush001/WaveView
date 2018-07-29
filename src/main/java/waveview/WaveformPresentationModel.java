@@ -25,7 +25,7 @@ import java.util.List;
 
 public class WaveformPresentationModel {
     private final List<Listener> listeners = new ArrayList<>();
-    private List<NetPresentationModel> visibleNets = new ArrayList<>();
+    private final List<NetPresentationModel> visibleNets = new ArrayList<>();
     private final List<NetSet> netSets = new ArrayList<>();
     private long cursorPosition;
     private long selectionStart;
@@ -174,8 +174,8 @@ public class WaveformPresentationModel {
 
     public void selectNetSet(int index) {
         int oldSize = visibleNets.size();
-
-        visibleNets = new ArrayList<>(netSets.get(index).visibleNets);
+        visibleNets.clear();
+        visibleNets.addAll(netSets.get(index).visibleNets);
 
         // @todo There is probably a more efficient way to do this
         for (Listener listener : listeners) {
