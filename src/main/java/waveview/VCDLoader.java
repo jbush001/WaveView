@@ -20,8 +20,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,40 +49,47 @@ public class VCDLoader implements WaveformLoader {
     private final Map<String, Var> varMap = new HashMap<>();
     private int totalTransitions;
     private ProgressListener progressListener;
-    private ProgressInputStream progressStream;
-    private long lastProgressUpdate;
     private long fileLength;
-    private long updateInterval;
     private int nextNetIndex;
 
     @Override
     public void load(File file, WaveformBuilder waveformBuilder, ProgressListener progressListener)
-            throws LoadException, IOException {
-        this.progressListener = progressListener;
+            throws IOException {
         this.waveformBuilder = waveformBuilder;
+        this.progressListener = progressListener;
+        fileLength = file.length();
 
-        try (FileInputStream inputStream = new FileInputStream(file))  {
-            progressStream = new ProgressInputStream(inputStream);
-            tokenizer = new StreamTokenizer(new BufferedReader(new InputStreamReader(progressStream, "UTF8")));
-            fileLength = file.length();
-            updateInterval = fileLength / 100;
-            tokenizer.resetSyntax();
-            tokenizer.wordChars(33, 126);
-            tokenizer.whitespaceChars('\r', '\r');
-            tokenizer.whitespaceChars('\n', '\n');
-            tokenizer.whitespaceChars(' ', ' ');
-            tokenizer.whitespaceChars('\t', '\t');
-
+        try (InputStream inputStream = new FileInputStream(file))  {
+            long updateInterval = fileLength / 100;
+            InputStream progressStream = new ProgressInputStream(inputStream,
+                    (totalRead) -> updateProgress(totalRead), updateInterval);
+            initTokenizer(progressStream);
             parseFile();
-
-            waveformBuilder.loadFinished();
         }
 
         System.out.println("parsed " + totalTransitions + " total transitions");
         System.out.println(Integer.toString(varMap.size()) + " total nets");
     }
 
-    private void parseFile() throws LoadException, IOException {
+    private void updateProgress(long totalRead) throws IOException {
+        if (progressListener != null &&
+                !progressListener.updateProgress((int) (totalRead * 100 / fileLength))) {
+            throw new LoadFormatException("load cancelled");
+        }
+    }
+
+    private void initTokenizer(InputStream inputStream) {
+        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        tokenizer = new StreamTokenizer(new BufferedReader(reader));
+        tokenizer.resetSyntax();
+        tokenizer.wordChars(33, 126);
+        tokenizer.whitespaceChars('\r', '\r');
+        tokenizer.whitespaceChars('\n', '\n');
+        tokenizer.whitespaceChars(' ', ' ');
+        tokenizer.whitespaceChars('\t', '\t');
+    }
+
+    private void parseFile() throws IOException {
         while (nextToken(false)) {
             char leading = getTokenString().charAt(0);
             if (leading == '$') {
@@ -91,11 +100,13 @@ public class VCDLoader implements WaveformLoader {
                 parseTransition();
             }
         }
+
+        waveformBuilder.loadFinished();
     }
 
     /// @returns true if there are more definitions, false if it has hit
     /// the end of the definitions section
-    private void parseDefinition() throws LoadException, IOException {
+    private void parseDefinition() throws IOException {
         switch (getTokenString()) {
             case "$scope":
                 parseScope();
@@ -123,7 +134,7 @@ public class VCDLoader implements WaveformLoader {
     }
 
     // Unknown definition, throw away tokens until the end
-    private void ignoreUntilDollarEnd() throws LoadException, IOException {
+    private void ignoreUntilDollarEnd() throws IOException {
         do {
             nextToken(true);
         } while (!getTokenString().equals("$end"));
@@ -143,7 +154,7 @@ public class VCDLoader implements WaveformLoader {
     /// var_declaration_scope ::= $scope scope_type scope_identifier $end
     /// scope_type ::= begin | fork | function | module | task
     /// @todo Record type and put into model
-    private void parseScope() throws LoadException, IOException {
+    private void parseScope() throws IOException {
         nextToken(true); // Scope type
         nextToken(true);
         String scopeIdentifier = getTokenString();
@@ -152,7 +163,7 @@ public class VCDLoader implements WaveformLoader {
     }
 
     // 18.2.3.6 $upscope
-    private void parseUpscope() throws LoadException, IOException {
+    private void parseUpscope() throws IOException {
         match("$end");
         waveformBuilder.exitScope();
     }
@@ -165,7 +176,7 @@ public class VCDLoader implements WaveformLoader {
     /// reference ::= identifier | identifier [bit_select_index]
     /// | identifier[msb_index:lsb_index]
     /// index := decimal_number
-    private void parseVar() throws LoadException, IOException {
+    private void parseVar() throws IOException {
         nextToken(true); // type (ignored)
         nextToken(true); // size
         int width = Integer.parseInt(getTokenString());
@@ -196,7 +207,7 @@ public class VCDLoader implements WaveformLoader {
             nextNetIndex++;
         } else {
             if (width != var.width) {
-                throw new LoadException("line " + tokenizer.lineno()
+                throw new LoadFormatException("line " + tokenizer.lineno()
                     + ": alias net does not match width of parent (" + width + " != " + var.width + ")");
             }
 
@@ -209,7 +220,7 @@ public class VCDLoader implements WaveformLoader {
     /// vcd_declaration_timescale ::= $timescale time_number time_unit $end
     /// time_number ::= 1 | 10 | 100
     /// time_unit ::= s | ms | us | ns | ps | fs
-    private void parseTimescale() throws LoadException, IOException {
+    private void parseTimescale() throws IOException {
         nextToken(true);
         String s = getTokenString();
 
@@ -250,7 +261,7 @@ public class VCDLoader implements WaveformLoader {
                 order = 0;
                 break;
             default:
-                throw new LoadException("line " + tokenizer.lineno() + ": unknown timescale value " + getTokenString());
+                throw new LoadFormatException("line " + tokenizer.lineno() + ": unknown timescale value " + getTokenString());
         }
 
         int timeNumber = Integer.parseInt(s.substring(0, unitStart));
@@ -259,14 +270,14 @@ public class VCDLoader implements WaveformLoader {
         } else if (timeNumber == 10) {
             order += 1;
         } else if (timeNumber != 1) {
-            throw new LoadException("line " + tokenizer.lineno() + ": bad timescale value " + getTokenString());
+            throw new LoadFormatException("line " + tokenizer.lineno() + ": bad timescale value " + getTokenString());
         }
 
         match("$end");
         waveformBuilder.setTimescale(order);
     }
 
-    private void parseTransition() throws LoadException, IOException {
+    private void parseTransition() throws IOException {
         totalTransitions++;
         char leadingVal = getTokenString().charAt(0);
         String value;
@@ -294,21 +305,21 @@ public class VCDLoader implements WaveformLoader {
                 break;
             case 'r':
             case 'R':
-                throw new LoadException("line " + tokenizer.lineno() + ": real values are not supported");
+                throw new LoadFormatException("line " + tokenizer.lineno() + ": real values are not supported");
             default:
-                throw new LoadException("line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
+                throw new LoadFormatException("line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
         }
 
         Var var = varMap.get(id);
         if (var == null) {
-            throw new LoadException("line " + tokenizer.lineno() + ": Unknown var id " + id);
+            throw new LoadFormatException("line " + tokenizer.lineno() + ": Unknown var id " + id);
         }
 
         BitVector decodedValues = decodeBinaryValueString(value, var.width);
         waveformBuilder.appendTransition(var.netIndex, currentTime, decodedValues);
     }
 
-    private BitVector decodeBinaryValueString(String valueString, int width) throws LoadException {
+    private BitVector decodeBinaryValueString(String valueString, int width) throws LoadFormatException {
         BitVector value = new BitVector(width);
 
         // Decode and pad if necessary.
@@ -324,7 +335,7 @@ public class VCDLoader implements WaveformLoader {
                 value.setBit(outBit++, bitValue);
             }
         } catch (NumberFormatException exc) {
-            throw new LoadException("line " + tokenizer.lineno() + ": invalid logic value");
+            throw new LoadFormatException("line " + tokenizer.lineno() + ": invalid logic value");
         }
 
         // Table 83: Rules for left-extending vector values
@@ -345,10 +356,10 @@ public class VCDLoader implements WaveformLoader {
         return value;
     }
 
-    private void match(String value) throws LoadException, IOException {
+    private void match(String value) throws IOException {
         nextToken(true);
         if (!getTokenString().equals(value)) {
-            throw new LoadException(
+            throw new LoadFormatException(
                     "line " + tokenizer.lineno() + ": parse error, expected " + value + " got " + getTokenString());
         }
     }
@@ -356,22 +367,10 @@ public class VCDLoader implements WaveformLoader {
     /// @param require If true and the next token is the end of file, this will
     /// throw an exception.
     /// @returns True if token was returned, false if not
-    private boolean nextToken(boolean require) throws LoadException, IOException {
-        if (progressListener != null) {
-            // Update periodically
-            long totalRead = progressStream.getTotalRead();
-            if (totalRead - lastProgressUpdate > updateInterval) {
-                if (!progressListener.updateProgress((int) (totalRead * 100 / fileLength))) {
-                    throw new LoadException("load cancelled");
-                }
-
-                lastProgressUpdate = totalRead;
-            }
-        }
-
+    private boolean nextToken(boolean require) throws IOException {
         if (tokenizer.nextToken() == StreamTokenizer.TT_EOF) {
             if (require) {
-                throw new LoadException("line " + tokenizer.lineno() + ": unexpected end of file");
+                throw new LoadFormatException("line " + tokenizer.lineno() + ": unexpected end of file");
             } else
                 return false;
         }

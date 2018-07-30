@@ -26,8 +26,14 @@ import java.io.IOException;
 public interface WaveformLoader {
     /// @todo Some kind of file detection APIs (register by extension, sniff, etc)
 
-    public class LoadException extends Exception {
-        LoadException(String description) {
+    public class LoadInterruptException extends IOException {
+        LoadInterruptException(String description) {
+            super(description);
+        }
+    }
+
+    public class LoadFormatException extends IOException {
+        LoadFormatException(String description) {
             super(description);
         }
     }
@@ -40,5 +46,5 @@ public interface WaveformLoader {
     }
 
     public void load(File file, WaveformBuilder builder, ProgressListener listener)
-        throws LoadException, IOException;
+        throws IOException;
 }

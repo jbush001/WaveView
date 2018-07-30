@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
@@ -31,13 +32,18 @@ import org.mockito.stubbing.Answer;
 import waveview.ProgressInputStream;
 
 public class ProgressInputStreamTest {
+    private static final int UPDATE_INTERVAL = 10;
+
     private final InputStream inputStream = mock(InputStream.class);
     private ProgressInputStream progressInputStream;
     private final Random random = new Random();
+    private long lastTotalReadUpdate;
 
     @Before
     public void initTest() {
-        progressInputStream = new ProgressInputStream(inputStream);
+        lastTotalReadUpdate = -1;
+        progressInputStream = new ProgressInputStream(inputStream,
+            (totalRead) -> this.lastTotalReadUpdate = totalRead, UPDATE_INTERVAL);
     }
 
     @Test
@@ -45,6 +51,20 @@ public class ProgressInputStreamTest {
         when(inputStream.read()).thenReturn(17);
         assertEquals(17, progressInputStream.read());
         assertEquals(1, progressInputStream.getTotalRead());
+    }
+
+    @Test
+    public void testReadByteProgress() throws IOException {
+        when(inputStream.read()).thenReturn(0);
+
+        progressInputStream.read();
+        assertEquals(-1, lastTotalReadUpdate);
+
+        for (int i = 0; i < UPDATE_INTERVAL; i++) {
+            progressInputStream.read();
+        }
+
+        assertEquals(UPDATE_INTERVAL, lastTotalReadUpdate);
     }
 
     @Test
@@ -75,6 +95,28 @@ public class ProgressInputStreamTest {
     }
 
     @Test
+    @SuppressFBWarnings({"RR_NOT_CHECKED"})
+    public void testReadArrayProgress() throws IOException {
+        when(inputStream.read(any(byte[].class))).thenAnswer(new Answer<Integer>() {
+            @Override
+            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Object[] args = invocationOnMock.getArguments();
+                return ((byte[]) args[0]).length;
+            }
+        });
+
+        byte[] tmp1 = new byte[1];
+        byte[] tmp2 = new byte[UPDATE_INTERVAL];
+
+        progressInputStream.read(tmp1);
+        assertEquals(-1, lastTotalReadUpdate);
+
+        progressInputStream.read(tmp2);
+
+        assertEquals(UPDATE_INTERVAL + 1, lastTotalReadUpdate);
+    }
+
+    @Test
     public void testReadArrayWithOffset() throws IOException {
         final int BYTES_REQUESTED = 13;
         final int BYTES_RETURNED = 10;
@@ -102,6 +144,28 @@ public class ProgressInputStreamTest {
         assertEquals(BYTES_RETURNED, progressInputStream.read(testDest, REQUEST_OFFSET, BYTES_REQUESTED));
         assertArrayEquals(expectedDest, testDest);
         assertEquals(BYTES_RETURNED, progressInputStream.getTotalRead());
+    }
+
+    @Test
+    @SuppressFBWarnings({"RR_NOT_CHECKED"})
+    public void testReadArrayWithOffsetProgress() throws IOException {
+        when(inputStream.read(any(byte[].class), anyInt(), anyInt())).thenAnswer(new Answer<Integer>() {
+            @Override
+            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
+                Object[] args = invocationOnMock.getArguments();
+                return (Integer) args[2];
+            }
+        });
+
+        byte[] tmp = new byte[UPDATE_INTERVAL];
+
+        progressInputStream.read(tmp, 0, 1);
+
+        assertEquals(-1, lastTotalReadUpdate);
+
+        progressInputStream.read(tmp, 0, UPDATE_INTERVAL);
+
+        assertEquals(UPDATE_INTERVAL + 1, lastTotalReadUpdate);
     }
 
     @Test

@@ -20,11 +20,20 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class ProgressInputStream extends InputStream {
-    private long totalRead;
-    private final InputStream wrapped;
+    public interface Listener {
+        void updateProgress(long totalRead) throws IOException;
+    }
 
-    public ProgressInputStream(InputStream wrapped) {
+    private long totalRead;
+    private long lastProgressUpdate;
+    private final long updateInterval;
+    private final InputStream wrapped;
+    private final Listener listener;
+
+    public ProgressInputStream(InputStream wrapped, Listener listener, long updateInterval) {
         this.wrapped = wrapped;
+        this.listener = listener;
+        this.updateInterval = updateInterval;
     }
 
     @Override
@@ -37,6 +46,7 @@ public class ProgressInputStream extends InputStream {
         int got = wrapped.read();
         if (got >= 0) {
             totalRead++;
+            maybeNotifyListener();
         }
 
         return got;
@@ -47,6 +57,7 @@ public class ProgressInputStream extends InputStream {
         int got = wrapped.read(b);
         if (got >= 0) {
             totalRead += got;
+            maybeNotifyListener();
         }
 
         return got;
@@ -57,6 +68,7 @@ public class ProgressInputStream extends InputStream {
         int got = wrapped.read(b, off, len);
         if (got >= 0) {
             totalRead += got;
+            maybeNotifyListener();
         }
 
         return got;
@@ -64,5 +76,14 @@ public class ProgressInputStream extends InputStream {
 
     public long getTotalRead() {
         return totalRead;
+    }
+
+    private void maybeNotifyListener() throws IOException{
+        if (listener != null) {
+            if (totalRead - lastProgressUpdate >= updateInterval) {
+                listener.updateProgress(totalRead);
+                lastProgressUpdate = totalRead;
+            }
+        }
     }
 }

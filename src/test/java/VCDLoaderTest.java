@@ -148,7 +148,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("unknown-timescale.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 2: unknown timescale value 1qs", exc.getMessage());
         }
     }
@@ -158,7 +158,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("timescale-missing-unit.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 3: unknown timescale value $end", exc.getMessage());
         }
     }
@@ -168,7 +168,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("timescale-bad-value.vcd"), builder, null);
             fail("didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 2: bad timescale value 17us", exc.getMessage());
         }
     }
@@ -284,7 +284,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("unknown-net-id.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 6: Unknown var id $", exc.getMessage());
         }
     }
@@ -294,7 +294,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("bad-transition-type.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 6: invalid value type 'q'", exc.getMessage());
         }
     }
@@ -304,7 +304,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("scope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 2: parse error, expected $end got $var", exc.getMessage());
         }
     }
@@ -314,7 +314,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("upscope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 4: parse error, expected $end got $enddefinitions", exc.getMessage());
         }
     }
@@ -324,7 +324,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("var-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 3: parse error, expected $end got $upscope", exc.getMessage());
         }
     }
@@ -334,7 +334,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("timescale-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 3: parse error, expected $end got $scope", exc.getMessage());
         }
     }
@@ -344,7 +344,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("invalid-logic-value.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 9: invalid logic value", exc.getMessage());
         }
     }
@@ -354,7 +354,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("truncated.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 2: unexpected end of file", exc.getMessage());
         }
     }
@@ -365,7 +365,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("real-value.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 6: real values are not supported", exc.getMessage());
         }
     }
@@ -375,7 +375,7 @@ public class VCDLoaderTest {
         try {
             new VCDLoader().load(testFile("alias-bad-width.vcd"), builder, null);
             fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("line 3: alias net does not match width of parent (15 != 16)", exc.getMessage());
         }
     }
@@ -451,7 +451,7 @@ public class VCDLoaderTest {
                 }
             });
             fail("Loader didn't throw exception");
-        } catch (WaveformLoader.LoadException exc) {
+        } catch (WaveformLoader.LoadFormatException exc) {
             assertEquals("load cancelled", exc.getMessage());
         }
     }
