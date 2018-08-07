@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 /// @bug This doesn't propertly handle nets that are uninitalized at the beginning
 /// of the waveform.  They are assumed to have the value of the first transition.
 ///
-public class TransitionVector {
+public final class TransitionVector {
     private int width; // Number of bits for this net
     private long[] timestamps;
 
@@ -142,7 +142,7 @@ public class TransitionVector {
 
     public static class Builder {
         private final TransitionVector vector;
-        private int allocSize; // Used only while building
+        private int allocSize;
 
         public Builder(int width) {
             vector = new TransitionVector(width);
@@ -152,9 +152,8 @@ public class TransitionVector {
             return vector;
         }
 
-        /// Called while the waveform is being loaded.
-        /// The timestamp must be after the last transition that was
-        /// appended
+        // The timestamp must be after the last transition that was appended
+        // (transitions must be appended in order)
         public Builder appendTransition(long timestamp, BitVector value) {
             if (vector.transitionCount == allocSize) {
                 // Grow the array

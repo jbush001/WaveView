@@ -28,7 +28,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 
-class WaveformView extends JPanel implements MouseListener, MouseMotionListener, WaveformPresentationModel.Listener {
+final class WaveformView extends JPanel implements MouseListener, MouseMotionListener, WaveformPresentationModel.Listener {
 
     private static final float DOT_DESCRIPTION[] = { 2.0f, 4.0f };
     private static final Stroke DOTTED_STROKE = new BasicStroke(1, 0, 0, 10, DOT_DESCRIPTION, 0);

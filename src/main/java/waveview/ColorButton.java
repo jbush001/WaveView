@@ -25,7 +25,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.JColorChooser;
 import javax.swing.JPanel;
 
-class ColorButton extends JPanel {
+final class ColorButton extends JPanel {
     private Color color;
     private final String label;
 

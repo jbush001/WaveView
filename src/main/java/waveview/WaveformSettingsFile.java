@@ -37,7 +37,7 @@ import org.xml.sax.SAXException;
 /// @bug If markers are past the end offset, this should probably drop them.
 ///
 
-public class WaveformSettingsFile {
+public final class WaveformSettingsFile {
     private final File settingsFile;
     private final WaveformDataModel waveformDataModel;
     private final WaveformPresentationModel waveformPresentationModel;

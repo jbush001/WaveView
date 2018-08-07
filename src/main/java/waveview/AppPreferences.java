@@ -20,7 +20,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.prefs.Preferences;
 
-class AppPreferences {
+final class AppPreferences {
     private static AppPreferences instance;
     private final Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
 

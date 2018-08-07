@@ -22,7 +22,7 @@ import javax.swing.table.AbstractTableModel;
 /// Used by MarkerListView to display all markers
 ///
 
-public class MarkerTableModel extends AbstractTableModel {
+public final class MarkerTableModel extends AbstractTableModel {
     private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
     private final WaveformPresentationModel waveformPresentationModel;
 

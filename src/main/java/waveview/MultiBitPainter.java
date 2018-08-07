@@ -25,7 +25,7 @@ import java.util.Iterator;
 /// Delegate that draws the waveform for a single net that has more than one
 /// bit in it.
 ///
-class MultiBitPainter implements WaveformPainter {
+final class MultiBitPainter implements WaveformPainter {
     private final int[] polygonXPoints = new int[3];
     private final int[] polygonYPoints = new int[3];
 

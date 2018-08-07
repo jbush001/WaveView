@@ -21,7 +21,7 @@ import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-public class WaveformLoadWorker extends SwingWorker<Void, Void> {
+public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
     public interface LoadFinishedHandler {
         // On success, error message will be null.
         // If an error occurs, errorMessage will be set.

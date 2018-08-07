@@ -55,7 +55,7 @@ public class BitVector {
     }
 
     /// @param index bit number, where 0 is least significant
-    /// @parma value of bit at position
+    /// @param value of bit at position
     public void setBit(int index, BitValue value) {
         values[index] = value;
     }

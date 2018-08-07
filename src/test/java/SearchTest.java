@@ -869,7 +869,7 @@ public class SearchTest {
             waveformDataModel.getNetDataModel(1)
         };
 
-        String searchString = Search.generateSearch(nets, 1);
+        String searchString = Search.generateFromValuesAt(nets, 1);
 
         assertEquals("mod1.a = 'h1 and mod1.b = 'h4", searchString);
     }

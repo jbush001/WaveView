@@ -29,7 +29,7 @@ import java.util.Map;
 /// Useful for encoding state variables.
 ///
 
-public class EnumValueFormatter implements ValueFormatter {
+public final class EnumValueFormatter implements ValueFormatter {
     private final Map<Integer, String> mappings = new HashMap<>();
     private final File mappingFile;
 

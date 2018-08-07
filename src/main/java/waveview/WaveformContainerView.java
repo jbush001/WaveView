@@ -30,7 +30,7 @@ import javax.swing.JViewport;
 ///
 /// Container for the timescale view, net names, and waveforms.
 ///
-class WaveformContainerView extends JPanel {
+final class WaveformContainerView extends JPanel {
     private final WaveformView waveformPanel;
     private final NetNameView netNameView;
     private final WaveformPresentationModel waveformPresentationModel;

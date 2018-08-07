@@ -49,7 +49,7 @@ import javax.swing.event.ListDataListener;
 ///
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
-class NetNameView extends JList<Integer> implements WaveformPresentationModel.Listener, ActionListener {
+final class NetNameView extends JList<Integer> implements WaveformPresentationModel.Listener, ActionListener {
     private final WaveformPresentationModel waveformPresentationModel;
     private final WaveformDataModel waveformDataModel;
     private JPopupMenu popupMenu;

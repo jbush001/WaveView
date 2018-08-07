@@ -39,7 +39,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ProgressMonitor;
 
 /// @todo Add menu item to jump to specific timestamp
-public class MainWindow extends JPanel implements ActionListener {
+public final class MainWindow extends JPanel implements ActionListener {
     private final WaveformContainerView waveformContainer;
     private final WaveformPresentationModel waveformPresentationModel = new WaveformPresentationModel();
     private final WaveformDataModel waveformDataModel = new WaveformDataModel();
@@ -328,7 +328,7 @@ public class MainWindow extends JPanel implements ActionListener {
         }
 
         long cursorPosition = waveformPresentationModel.getCursorPosition();
-        return Search.generateSearch(nets, cursorPosition);
+        return Search.generateFromValuesAt(nets, cursorPosition);
     }
 
     void setSearch(String searchString) throws SearchFormatException {

@@ -26,7 +26,7 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-class PreferenceWindow extends JDialog {
+final class PreferenceWindow extends JDialog {
     private final ColorButton waveformColorButton;
     private final ColorButton conflictColorButton;
     private final ColorButton selectionColorButton;

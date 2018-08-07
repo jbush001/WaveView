@@ -19,14 +19,14 @@ package waveview;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecentFiles {
+public final class RecentFiles {
     private static final int MAX_FILES = 10;
     private final List<String> files = new ArrayList<>();
 
     public void add(String path) {
         int index = files.indexOf(path);
         if (index == -1) {
-            // Need to add a new entry. Discard the oldest entry if necessary
+            // Need to add a new entry. Discard the oldest entry if necessary.
             if (files.size() == MAX_FILES) {
                 files.remove(MAX_FILES - 1);
             }

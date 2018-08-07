@@ -141,7 +141,6 @@ public class VCDLoader implements WaveformLoader {
     }
 
     private void parseTimestamp() {
-        // If the line begins with a #, this is a timestamp.
         long nextTimestamp = Long.parseLong(getTokenString().substring(1));
         if (nextTimestamp >= currentTime) {
             currentTime = nextTimestamp;
@@ -232,7 +231,7 @@ public class VCDLoader implements WaveformLoader {
 
         String unit;
         if (unitStart < s.length()) {
-            // Found unit inside token, split out
+            // Found unit inside token (no space), split out
             unit = s.substring(unitStart);
         } else {
             // Unit is next token (there's a space between number and unit)
@@ -240,30 +239,7 @@ public class VCDLoader implements WaveformLoader {
             unit = getTokenString();
         }
 
-        int order = 1;
-        switch (unit) {
-            case "fs":
-                order = -15;
-                break;
-            case "ps":
-                order = -12;
-                break;
-            case "ns":
-                order = -9;
-                break;
-            case "us":
-                order = -6;
-                break;
-            case "ms":
-                order = -3;
-                break;
-            case "s":
-                order = 0;
-                break;
-            default:
-                throw new LoadFormatException("line " + tokenizer.lineno() + ": unknown timescale value " + getTokenString());
-        }
-
+        int order = timeUnitToOrder(unit);
         int timeNumber = Integer.parseInt(s.substring(0, unitStart));
         if (timeNumber == 100) {
             order += 2;
@@ -275,6 +251,25 @@ public class VCDLoader implements WaveformLoader {
 
         match("$end");
         waveformBuilder.setTimescale(order);
+    }
+
+    private int timeUnitToOrder(String unit) throws LoadFormatException {
+        switch (unit) {
+            case "fs":
+                return -15;
+            case "ps":
+                return -12;
+            case "ns":
+                return -9;
+            case "us":
+                return -6;
+            case "ms":
+                return -3;
+            case "s":
+                return 0;
+            default:
+                throw new LoadFormatException("line " + tokenizer.lineno() + ": unknown timescale value " + getTokenString());
+        }
     }
 
     private void parseTransition() throws IOException {

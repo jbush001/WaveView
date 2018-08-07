@@ -24,7 +24,7 @@ import java.util.Iterator;
 /// Delegate that draws the waveform for a single net that has only one
 /// bit in it.
 ///
-class SingleBitPainter implements WaveformPainter {
+final class SingleBitPainter implements WaveformPainter {
     @Override
     public void paint(Graphics g, NetDataModel model, int topOffset, Rectangle visibleRect,
             double horizontalScale, ValueFormatter formatter) {
@@ -44,25 +44,7 @@ class SingleBitPainter implements WaveformPainter {
             drawSpan(g, lastValue, lastX, x, topOffset);
 
             // Draw transition line at beginning of interval
-            if (lastValue != value) {
-                if (lastValue == BitValue.Z && value != BitValue.X) {
-                    if (value == BitValue.ZERO) {
-                        g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x,
-                                topOffset + DrawMetrics.WAVEFORM_HEIGHT);
-                    } else {
-                        g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x, topOffset);
-                    }
-                } else if (value == BitValue.Z && lastValue != BitValue.X) {
-                    if (lastValue == BitValue.ZERO) {
-                        g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT, x,
-                                topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
-                    } else {
-                        g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
-                    }
-                } else {
-                    g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT);
-                }
-            }
+            drawTransition(g, value, lastValue, x, topOffset);
 
             if (x > visibleRect.x + visibleRect.width) {
                 break;
@@ -73,6 +55,28 @@ class SingleBitPainter implements WaveformPainter {
             if (!i.hasNext()) {
                 drawSpan(g, lastValue, x, visibleRect.x + visibleRect.width, topOffset);
                 break;
+            }
+        }
+    }
+
+    private void drawTransition(Graphics g, BitValue value, BitValue lastValue, int x, int topOffset) {
+        if (lastValue != value) {
+            if (lastValue == BitValue.Z && value != BitValue.X) {
+                if (value == BitValue.ZERO) {
+                    g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x,
+                            topOffset + DrawMetrics.WAVEFORM_HEIGHT);
+                } else {
+                    g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2, x, topOffset);
+                }
+            } else if (value == BitValue.Z && lastValue != BitValue.X) {
+                if (lastValue == BitValue.ZERO) {
+                    g.drawLine(x, topOffset + DrawMetrics.WAVEFORM_HEIGHT, x,
+                            topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
+                } else {
+                    g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
+                }
+            } else {
+                g.drawLine(x, topOffset, x, topOffset + DrawMetrics.WAVEFORM_HEIGHT);
             }
         }
     }

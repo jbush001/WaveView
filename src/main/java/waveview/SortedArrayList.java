@@ -25,7 +25,7 @@ import java.util.NoSuchElementException;
 /// ArrayList that allows sorted inserts and binary search lookup.
 ///
 
-public class SortedArrayList<T extends SortedArrayList.Keyed> {
+public final class SortedArrayList<T extends SortedArrayList.Keyed> {
     private final List<T> list = new ArrayList<>();
 
     public interface Keyed {

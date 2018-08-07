@@ -29,7 +29,7 @@ import javax.swing.tree.TreePath;
 /// Maintains module/net hieararchy, where leaf nodes are nets and interior nodes
 /// are modules.
 ///
-public class NetTreeModel implements TreeModel {
+public final class NetTreeModel implements TreeModel {
     private Node root;
 
     public class Builder {

@@ -28,14 +28,14 @@ import java.util.Iterator;
 /// XXX The term 'match' is overloaded here: it refers in some places to the act of searching,
 /// and others in parsing.
 ///
-public class Search {
+public final class Search {
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
     private final SearchLexer lexer;
     private final WaveformDataModel waveformDataModel;
     private BooleanExpressionNode searchExpression;
 
     /// Generate a search given a set of nets that matches at the given timestamp.
-    public static String generateSearch(NetDataModel[] nets, long timestamp) {
+    public static String generateFromValuesAt(NetDataModel[] nets, long timestamp) {
         StringBuilder searchExpr = new StringBuilder();
         boolean first = true;
         for (NetDataModel netDataModel : nets) {
@@ -289,7 +289,7 @@ public class Search {
                 long nextLeftTimestamp, long nextRightTimestamp);
     }
 
-    private static class OrExpressionNode extends LogicalExpressionNode {
+    private static final class OrExpressionNode extends LogicalExpressionNode {
         OrExpressionNode(BooleanExpressionNode left, BooleanExpressionNode right) {
             super(left, right);
         }
@@ -342,7 +342,7 @@ public class Search {
         }
     }
 
-    private static class AndExpressionNode extends LogicalExpressionNode {
+    private static final class AndExpressionNode extends LogicalExpressionNode {
         AndExpressionNode(BooleanExpressionNode left, BooleanExpressionNode right) {
             super(left, right);
         }
@@ -399,7 +399,7 @@ public class Search {
         abstract BitVector evaluate(WaveformDataModel model, long timestamp);
     }
 
-    private static class NetValueNode extends ValueNode {
+    private static final class NetValueNode extends ValueNode {
         private final NetDataModel netDataModel;
 
         NetValueNode(NetDataModel netDataModel) {
@@ -433,7 +433,7 @@ public class Search {
         }
     }
 
-    private static class ConstValueNode extends ValueNode {
+    private static final class ConstValueNode extends ValueNode {
         private final BitVector value;
 
         ConstValueNode(BitVector constValue) {
@@ -475,7 +475,7 @@ public class Search {
         protected abstract boolean doCompare(BitVector value1, BitVector value2);
     }
 
-    private static class EqualExpressionNode extends ComparisonExpressionNode {
+    private static final class EqualExpressionNode extends ComparisonExpressionNode {
         EqualExpressionNode(ValueNode left, ValueNode right) {
             super(left, right);
         }
@@ -491,7 +491,7 @@ public class Search {
         }
     }
 
-    private static class NotEqualExpressionNode extends ComparisonExpressionNode {
+    private static final class NotEqualExpressionNode extends ComparisonExpressionNode {
         NotEqualExpressionNode(ValueNode left, ValueNode right) {
             super(left, right);
         }
@@ -507,7 +507,7 @@ public class Search {
         }
     }
 
-    private static class GreaterThanExpressionNode extends ComparisonExpressionNode {
+    private static final class GreaterThanExpressionNode extends ComparisonExpressionNode {
         GreaterThanExpressionNode(ValueNode left, ValueNode right) {
             super(left, right);
         }
@@ -523,7 +523,7 @@ public class Search {
         }
     }
 
-    private static class GreaterEqualExpressionNode extends ComparisonExpressionNode {
+    private static final class GreaterEqualExpressionNode extends ComparisonExpressionNode {
         GreaterEqualExpressionNode(ValueNode left, ValueNode right) {
             super(left, right);
         }
@@ -539,7 +539,7 @@ public class Search {
         }
     }
 
-    private static class LessThanExpressionNode extends ComparisonExpressionNode {
+    private static final class LessThanExpressionNode extends ComparisonExpressionNode {
         LessThanExpressionNode(ValueNode left, ValueNode right) {
             super(left, right);
         }
@@ -555,7 +555,7 @@ public class Search {
         }
     }
 
-    private static class LessEqualExpressionNode extends ComparisonExpressionNode {
+    private static final class LessEqualExpressionNode extends ComparisonExpressionNode {
         LessEqualExpressionNode(ValueNode left, ValueNode right) {
             super(left, right);
         }

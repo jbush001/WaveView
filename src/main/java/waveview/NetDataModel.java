@@ -21,7 +21,7 @@ import java.util.Iterator;
 ///
 /// Transitions and information about a single net.
 ///
-public class NetDataModel {
+public final class NetDataModel {
     private final String shortName;
     private final String fullName;
     private final TransitionVector transitionVector;

@@ -30,7 +30,7 @@ import javax.swing.JTable;
 /// on them to jump to that point in the waveform.
 /// @todo Add a way to remove entries from this list
 ///
-class MarkerListView extends JPanel implements ActionListener, WaveformPresentationModel.Listener {
+final class MarkerListView extends JPanel implements ActionListener, WaveformPresentationModel.Listener {
     private final WaveformPresentationModel waveformPresentationModel;
     private final MarkerTableModel tableModel;
     private final JTable table;

@@ -16,7 +16,7 @@
 
 package waveview;
 
-class SearchLexer {
+final class SearchLexer {
     static final int TOK_IDENTIFIER = 1000;
     static final int TOK_END = 1001;
     static final int TOK_LITERAL = 1002;

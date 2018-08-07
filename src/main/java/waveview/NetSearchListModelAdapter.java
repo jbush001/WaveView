@@ -33,7 +33,7 @@ import javax.swing.event.ListDataEvent;
 /// itself as a listener on the text field where the user types a pattern.
 ///
 
-public class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
+public final class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     private ListDataListener listDataListener;
     private List<String> matches = new ArrayList<>();
     private final WaveformDataModel waveformDataModel;

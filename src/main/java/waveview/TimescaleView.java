@@ -27,7 +27,7 @@ import javax.swing.Timer;
 ///
 /// Draws the ruler with times at the top of the waveform view.
 ///
-class TimescaleView extends JPanel implements WaveformPresentationModel.Listener {
+final class TimescaleView extends JPanel implements WaveformPresentationModel.Listener {
     private static final int TIMESTAMP_DISAPPEAR_INTERVAL = 500;
 
     private boolean showTimestamp;

@@ -38,8 +38,8 @@ import javax.swing.tree.TreePath;
 /// Displays searchable lists of all nets in a design. Can be dragged onto
 /// the visible net view to see them.
 ///
-class NetSearchView extends JPanel {
-    private final JTree tree;
+final class NetSearchView extends JPanel {
+    private JTree tree;
     private final WaveformDataModel waveformDataModel;
     private final ImageIcon netIcon;
     private final ImageIcon moduleIcon;
@@ -98,24 +98,30 @@ class NetSearchView extends JPanel {
 
         JTabbedPane tabView = new JTabbedPane();
         add(tabView);
-
-        // Set up net hieararchy view
-        JPanel treeTab = new JPanel();
+        JPanel treeTab = createTreeTab();
         tabView.addTab("Tree", null, treeTab, "tree view");
-        treeTab.setLayout(new BorderLayout());
+        JPanel searchTab = createSearchTab();
+        tabView.addTab("Search", null, searchTab, "search");
+
+        netIcon = loadResourceIcon("tree-net.png");
+        moduleIcon = loadResourceIcon("tree-module.png");
+    }
+
+    JPanel createTreeTab() {
         tree = new JTree(waveformDataModel.getNetTree());
+
+        JPanel treeTab = new JPanel();
+        treeTab.setLayout(new BorderLayout());
         tree.setCellRenderer(new NetTreeCellRenderer());
         tree.setDragEnabled(true);
         tree.setTransferHandler(new NetTreeTransferHandler());
         JScrollPane scroller = new JScrollPane(tree);
         treeTab.add(scroller, BorderLayout.CENTER);
+        return treeTab;
+    }
 
-        netIcon = loadResourceIcon("tree-net.png");
-        moduleIcon = loadResourceIcon("tree-module.png");
-
-        // Set up net search view
+    JPanel createSearchTab() {
         JPanel searchTab = new JPanel();
-        tabView.addTab("Search", null, searchTab, "search");
         searchTab.setLayout(new BorderLayout());
         JTextField searchField = new JTextField();
         searchTab.add(searchField, BorderLayout.NORTH);
@@ -126,6 +132,7 @@ class NetSearchView extends JPanel {
         JScrollPane listScroller = new JScrollPane(netList);
         searchTab.add(listScroller, BorderLayout.CENTER);
         listScroller.add(new JTextArea());
+        return searchTab;
     }
 
     private class NetTreeCellRenderer extends DefaultTreeCellRenderer {
