@@ -16,7 +16,7 @@
 
 package waveview;
 
-class Profiler {
+final class Profiler {
     private long initialMemoryUsage;
     private long startTime;
     private long executionTime;

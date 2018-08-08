@@ -32,7 +32,7 @@ import java.util.Map;
 /// provided waveform model
 /// All section references are to IEEE 1364-2001.
 ///
-public class VCDLoader implements WaveformLoader {
+public final class VCDLoader implements WaveformLoader {
     private static class Var {
         Var(int netIndex, int width) {
             this.netIndex = netIndex;

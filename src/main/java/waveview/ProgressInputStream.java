@@ -19,7 +19,7 @@ package waveview;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ProgressInputStream extends InputStream {
+public final class ProgressInputStream extends InputStream {
     public interface Listener {
         void updateProgress(long totalRead) throws IOException;
     }

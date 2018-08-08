@@ -29,7 +29,7 @@ import java.util.Map;
 /// in WaveformPresentationModel.
 ///
 
-public class WaveformDataModel implements Iterable<NetDataModel> {
+public final class WaveformDataModel implements Iterable<NetDataModel> {
     private long maxTimestamp;
     private Map<String, NetDataModel> fullNameToNetMap = new HashMap<>();
     private List<NetDataModel> allNets = new ArrayList<>();

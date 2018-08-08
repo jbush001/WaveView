@@ -84,7 +84,7 @@ public final class TransitionVector {
         return width;
     }
 
-    private class TransitionVectorIterator implements Iterator<Transition> {
+    private final class TransitionVectorIterator implements Iterator<Transition> {
         private int index;
 
         // Reuse the same Transition/BitVector so we don't have to keep
@@ -140,7 +140,7 @@ public final class TransitionVector {
         }
     }
 
-    public static class Builder {
+    public static final class Builder {
         private final TransitionVector vector;
         private int allocSize;
 

@@ -372,7 +372,7 @@ public final class WaveformPresentationModel {
         }
     }
 
-    private static class NetSet {
+    private final static class NetSet {
         private final String name;
         final List<NetPresentationModel> visibleNets;
 
@@ -382,7 +382,7 @@ public final class WaveformPresentationModel {
         }
     }
 
-    private static class NetPresentationModel {
+    private static final class NetPresentationModel {
         private final NetDataModel netDataModel;
         private ValueFormatter formatter = new HexadecimalValueFormatter();
 
