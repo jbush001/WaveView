@@ -77,6 +77,7 @@ public class SortedArrayListTest {
     }
 
     @Test
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void iterator() {
         SortedArrayList<KeyedElement> vec = new SortedArrayList<>();
         vec.add(new KeyedElement(140));
@@ -99,6 +100,7 @@ public class SortedArrayListTest {
             kei.next();
             fail("didn't throw exception");
         } catch (NoSuchElementException exc) {
+            // Expected
         }
     }
 }

@@ -79,11 +79,9 @@ public final class ProgressInputStream extends InputStream {
     }
 
     private void maybeNotifyListener() throws IOException{
-        if (listener != null) {
-            if (totalRead - lastProgressUpdate >= updateInterval) {
-                listener.updateProgress(totalRead);
-                lastProgressUpdate = totalRead;
-            }
+        if (listener != null && totalRead - lastProgressUpdate >= updateInterval) {
+            listener.updateProgress(totalRead);
+            lastProgressUpdate = totalRead;
         }
     }
 }

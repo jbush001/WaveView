@@ -115,6 +115,7 @@ public class BitVectorTest {
         assertEquals("zzzzzzzz", bv.toString(2));
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void numberFormatException() {
         // Digits other than 0/1 in binary
@@ -122,6 +123,7 @@ public class BitVectorTest {
             new BitVector("0110102", 2);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         //

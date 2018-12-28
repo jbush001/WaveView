@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
+import java.io.IOException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -174,8 +175,8 @@ public class WaveformSettingsFileTest {
             .loadFinished();
 
         File file = fTempFolder.newFile("test2.settings");
-        (new WaveformSettingsFile(file, sourceDataModel, sourcePresentationModel)).write();
-        (new WaveformSettingsFile(file, destDataModel, destPresentationModel)).read();
+        new WaveformSettingsFile(file, sourceDataModel, sourcePresentationModel).write();
+        new WaveformSettingsFile(file, destDataModel, destPresentationModel).read();
 
         assertEquals(2, destPresentationModel.getVisibleNetCount());
         assertSame(destDataModel.getNetDataModel(0), destPresentationModel.getVisibleNet(0));
@@ -200,7 +201,7 @@ public class WaveformSettingsFileTest {
 
     // Test generating config file name for subdirectory
     @Test
-    public void configFileName1() throws Exception {
+    public void configFileName1() throws IOException {
         assertEquals("foo/bar/.dumpfile.vcd.waveconfig",
                 WaveformSettingsFile.settingsFileName(new File("foo/bar/dumpfile.vcd")).toString());
     }
@@ -208,7 +209,7 @@ public class WaveformSettingsFileTest {
     /// Regression test. In this case, the full path isn't passed.
     /// It was putting 'null' inside the filename.
     @Test
-    public void configFileName2() throws Exception {
+    public void configFileName2() throws IOException {
         assertEquals(".dumpfile.vcd.waveconfig", WaveformSettingsFile.settingsFileName(new File("dumpfile.vcd")).toString());
     }
 }

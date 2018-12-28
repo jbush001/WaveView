@@ -44,7 +44,7 @@ public class WaveformLoadWorkerTest {
     @Rule
     public final TemporaryFolder tempFolder = new TemporaryFolder();
 
-    private boolean loadFinished = false;
+    private boolean loadFinished;
     private File tempFile;
     private WaveformDataModel newModel;
     private String errorMessage;
@@ -72,12 +72,14 @@ public class WaveformLoadWorkerTest {
     }
 
     @After
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     public void cleanUpTest() {
         if (tempFile != null && tempFile.exists()) {
             try {
                 tempFile.delete();
             } catch (SecurityException exc) {
-                // Nothing to do...
+                // This shouldn't happen, but, if it does, would probably be OS specific and
+                // unrelated to the code under test.
             }
         }
     }

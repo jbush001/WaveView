@@ -91,6 +91,7 @@ public class NetTreeModelTest {
     }
 
     // This method is not implemented (nor needed).
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void valueForPathChanged() {
         NetTreeModel model = new NetTreeModel();
@@ -98,6 +99,7 @@ public class NetTreeModelTest {
             model.valueForPathChanged(null, null);
             fail("Didn't throw exception");
         } catch (UnsupportedOperationException exc) {
+            // Expected
         }
     }
 

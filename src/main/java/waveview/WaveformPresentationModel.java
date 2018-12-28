@@ -372,7 +372,7 @@ public final class WaveformPresentationModel {
         }
     }
 
-    private final static class NetSet {
+    private static final class NetSet {
         private final String name;
         final List<NetPresentationModel> visibleNets;
 
