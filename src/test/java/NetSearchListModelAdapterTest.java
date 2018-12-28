@@ -17,6 +17,7 @@
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -97,5 +98,24 @@ public class NetSearchListModelAdapterTest {
                 ListDataEvent.CONTENTS_CHANGED, 0, 0)));
         verifyNoMoreInteractions(listener);
         assertEquals(0, nslma.getSize());
+    }
+
+    // When starting this test, there is already a data listener registered
+    // Ensure the second one works correctly.
+    @Test
+    public void testAdd2ndDataListener() {
+        ListDataListener listener2 = mock(ListDataListener.class);
+        nslma.addListDataListener(listener2);
+        nslma.setPattern("z");
+        verify(listener2).contentsChanged(any(ListDataEvent.class));
+    }
+
+    @Test
+    public void testRemoveDataListener() {
+        ListDataListener listener2 = mock(ListDataListener.class);
+        nslma.addListDataListener(listener2);
+        nslma.removeListDataListener(listener2);
+        nslma.setPattern("z");
+        verifyNoMoreInteractions(listener2);
     }
 }

@@ -35,7 +35,7 @@ import javax.swing.event.ListDataEvent;
 ///
 
 public final class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
-    private ListDataListener listDataListener;
+    private List<ListDataListener> listeners = new ArrayList<>();
     private List<String> matches = new ArrayList<>();
     private final WaveformDataModel waveformDataModel;
 
@@ -62,10 +62,9 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
                     .collect(Collectors.toList());
         }
 
-        if (listDataListener != null) {
-            ListDataEvent event = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size());
-            listDataListener.contentsChanged(event);
-        }
+        ListDataEvent event = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size());
+        for (ListDataListener listener : listeners)
+            listener.contentsChanged(event);
     }
 
     private void filter(Document doc) {
@@ -95,16 +94,12 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
 
     @Override
     public void addListDataListener(ListDataListener listener) {
-        assert listDataListener == null;
-
-        listDataListener = listener;
+        listeners.add(listener);
     }
 
     @Override
-    public void removeListDataListener(ListDataListener l) {
-        assert listDataListener != null;
-
-        listDataListener = null;
+    public void removeListDataListener(ListDataListener listener) {
+        listeners.remove(listener);
     }
 
     @Override
