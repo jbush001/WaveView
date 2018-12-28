@@ -54,18 +54,7 @@ final class SearchLexer {
         currentTokenValue.setLength(0);
 
         for (;;) {
-            int c;
-
-            if (pushBackChar == -1) {
-                if (lexerOffset == searchString.length()) {
-                    c = -1;
-                } else {
-                    c = searchString.charAt(lexerOffset++);
-                }
-            } else {
-                c = pushBackChar;
-                pushBackChar = -1;
-            }
+            int c = nextChar();
 
             switch (state) {
                 case SCAN_INIT:
@@ -180,6 +169,26 @@ final class SearchLexer {
         }
     }
 
+    int nextChar() {
+        int c;
+        if (pushBackChar == -1) {
+            if (lexerOffset == searchString.length()) {
+                c = -1;
+            } else {
+                c = searchString.charAt(lexerOffset++);
+            }
+        } else {
+            c = pushBackChar;
+            pushBackChar = -1;
+        }
+
+        return c;
+    }
+
+    void pushBackToken(int tok) {
+        pushBackToken = tok;
+    }
+
     private static boolean isAlpha(int value) {
         return (value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z');
     }
@@ -198,10 +207,6 @@ final class SearchLexer {
 
     private static boolean isSpace(int value) {
         return value == ' ' || value == '\t' || value == '\n' || value == '\r';
-    }
-
-    void pushBackToken(int tok) {
-        pushBackToken = tok;
     }
 
     String getTokenString() {

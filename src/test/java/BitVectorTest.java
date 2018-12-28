@@ -117,7 +117,7 @@ public class BitVectorTest {
 
     @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
-    public void numberFormatException() {
+    public void binaryNumberFormatException() {
         // Digits other than 0/1 in binary
         try {
             new BitVector("0110102", 2);
@@ -125,7 +125,11 @@ public class BitVectorTest {
         } catch (NumberFormatException exc) {
             // Expected
         }
+    }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void hexNumberFormatException() {
         //
         // Invalid hex digits (I picked the invalid characters ASCII codes
         // to hit various conditions in the chain of if statements in
@@ -162,8 +166,12 @@ public class BitVectorTest {
         } catch (NumberFormatException exc) {
             // Expected
         }
+    }
 
-        // Hex digits in decimal format
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void decimalNumberFormatException() {
+        // Hex digits
         try {
             new BitVector("1234a", 10);
             fail("Did not throw exception");
@@ -186,8 +194,11 @@ public class BitVectorTest {
         } catch (NumberFormatException exc) {
             // Expected
         }
+    }
 
-        // Bad radix
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void badRadix() {
         try {
             new BitVector("1", 12);
             fail("Did not throw exception");

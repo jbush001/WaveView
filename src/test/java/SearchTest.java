@@ -497,11 +497,9 @@ public class SearchTest {
     }
 
     @Test
-    public void precedence() throws SearchFormatException {
+    public void precedenceAndAndAnd() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
-        Search search;
-
-        search = new Search(waveformDataModel, "m.a and m.b and m.c and m.d");
+        Search search = new Search(waveformDataModel, "m.a and m.b and m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -518,8 +516,12 @@ public class SearchTest {
         assertFalse(search.matches(13));
         assertFalse(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a and m.b and m.c or m.d");
+    @Test
+    public void precedenceAndAndOr() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a and m.b and m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertFalse(search.matches(2));
@@ -536,8 +538,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a and m.b or m.c and m.d");
+    @Test
+    public void precedenceAndOrAnd() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a and m.b or m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -554,8 +560,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a and m.b or m.c or m.d");
+    @Test
+    public void precedenceAndOrOr() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a and m.b or m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertTrue(search.matches(2));
@@ -572,8 +582,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a or m.b and m.c and m.d");
+    @Test
+    public void precedenceOrAndAnd() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a or m.b and m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -590,8 +604,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a or m.b and m.c or m.d");
+    @Test
+    public void precedenceOrAndOr() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search =  new Search(waveformDataModel, "m.a or m.b and m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertFalse(search.matches(2));
@@ -608,8 +626,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a or m.b or m.c and m.d");
+    @Test
+    public void precedenceOrOrAnd() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a or m.b or m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -626,8 +648,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a or m.b or m.c or m.d");
+    @Test
+    public void precedenceOrOrOr() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a or m.b or m.c or m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertTrue(search.matches(2));
@@ -644,9 +670,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        // Parentheses
-        search = new Search(waveformDataModel, "m.a and (m.b or m.c) and m.d");
+    @Test
+    public void precedenceParen1() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a and (m.b or m.c) and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -663,8 +692,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertFalse(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "m.a and m.b and (m.c or m.d)");
+    @Test
+    public void precedenceParen2() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "m.a and m.b and (m.c or m.d)");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -681,8 +714,12 @@ public class SearchTest {
         assertTrue(search.matches(13));
         assertTrue(search.matches(14));
         assertTrue(search.matches(15));
+    }
 
-        search = new Search(waveformDataModel, "(m.a or m.b) and m.c and m.d");
+    @Test
+    public void precedenceParen3() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = makeFourBitModel();
+        Search search = new Search(waveformDataModel, "(m.a or m.b) and m.c and m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
