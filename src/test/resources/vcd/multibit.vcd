@@ -2,7 +2,7 @@ $timescale
    1ns
 $end
 $scope module mod1 $end
-$var wire 16 A addr [15:0] $end
+$var wire 16 A addr[15:0] $end
 $var wire 3 B data[2:0] $end
 $var wire 1 C enable $end
 $upscope $end
@@ -21,4 +21,3 @@ b01zxxz10zxzx1010 A
 #15
 bz A
 bx B
-

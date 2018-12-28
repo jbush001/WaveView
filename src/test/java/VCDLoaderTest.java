@@ -241,6 +241,30 @@ public class VCDLoaderTest {
     }
 
     @Test
+    public void bitSelectNoSpace() throws Exception {
+        new VCDLoader().load(testFile("bit-select-no-space.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet(0, "addr", 16);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
+    }
+
+    @Test
+    public void bitSelectSpace() throws Exception {
+        new VCDLoader().load(testFile("bit-select-space.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet(0, "addr", 16);
+        ord.verify(builder).exitScope();
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
+    }
+
+    @Test
     public void padding() throws Exception {
         new VCDLoader().load(testFile("padding.vcd"), builder, null);
 

@@ -35,3 +35,15 @@ a new JAR file:
 # Running
 
     java -jar build/libs/WaveView.jar [waveform file]
+
+# Debugging Unit Test Failures
+
+For Mockito failures, you can do enable verbose logging as follows:
+
+At the top of the file, import the following:
+
+    import static org.mockito.Mockito.withSettings;
+
+Then modify the place where the mock is created to add verbose logging parameter, e.g.
+
+    WaveformBuilder builder = mock(WaveformBuilder.class, withSettings().verboseLogging());

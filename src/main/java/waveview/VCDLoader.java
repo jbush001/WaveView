@@ -185,17 +185,20 @@ public final class VCDLoader implements WaveformLoader {
         nextToken(true);
         String netName = getTokenString();
 
-        // Bit select index (ignore)
+        // If there is a space between the net name and bit select index, it
+        // will appear as a separate token. Consume it if so.
         nextToken(true);
-        if (getTokenString().charAt(0) != '[')
-            tokenizer.pushBack();
+        if (getTokenString().charAt(0) != '[') {
+            tokenizer.pushBack();   // There wasn't, don't consume token.
+        }
 
         match("$end");
 
         Var var = varMap.get(id);
         if (var == null) {
             // We've never seen this var before
-            // Strip off the width declaration
+            // If there is a width declaration (which wasn't consumed above
+            // because there was no space), strip it off.
             int openBracket = netName.indexOf('[');
             if (openBracket != -1) {
                 netName = netName.substring(0, openBracket);
