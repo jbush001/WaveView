@@ -16,6 +16,7 @@
 //
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Test;
@@ -35,6 +36,17 @@ public class ValueFormatterTest {
         assertEquals("STATE_LOAD", vf.format(new BitVector("2", 10)));
         assertEquals("STATE_WAIT", vf.format(new BitVector("3", 10)));
         assertEquals("??? (4)", vf.format(new BitVector("4", 10)));
+    }
+
+    @Test
+    public void enumValueFormatterBadFile() {
+        File mappingFile = new File("askfkalsd8unskdgsdfghsdfkgsdfkghsdfgksdfuzxcjk");
+        try {
+            new EnumValueFormatter(mappingFile);
+            fail("didn't throw exception");
+        } catch (IOException exc) {
+            // Expected
+        }
     }
 
     @Test
