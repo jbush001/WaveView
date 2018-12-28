@@ -136,6 +136,7 @@ public class BitVectorTest {
             new BitVector("ABCDEFG/", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         try {
@@ -143,6 +144,7 @@ public class BitVectorTest {
             new BitVector("ABCDEFG:", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         try {
@@ -150,6 +152,7 @@ public class BitVectorTest {
             new BitVector("ABCDEFG", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         try {
@@ -157,6 +160,7 @@ public class BitVectorTest {
             new BitVector("ABCDEFG~", 16);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         // Hex digits in decimal format
@@ -164,6 +168,7 @@ public class BitVectorTest {
             new BitVector("1234a", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         // z not legal in decimal format
@@ -171,6 +176,7 @@ public class BitVectorTest {
             new BitVector("z", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         // x not legal in decimal format
@@ -178,6 +184,7 @@ public class BitVectorTest {
             new BitVector("x", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
 
         // Bad radix
@@ -185,6 +192,7 @@ public class BitVectorTest {
             new BitVector("1", 12);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
         }
     }
 

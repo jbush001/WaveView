@@ -41,7 +41,23 @@ public class WaveformSettingsFileTest {
     public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
-    public void saveLoad() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+    public void saveLoadScale() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+        WaveformDataModel dataModel = new WaveformDataModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
+        sourcePresentationModel.setHorizontalScale(123.0);
+
+        // Save and reload contents
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
+        File file = fTempFolder.newFile("test1.settings");
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
+        new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
+
+        // Check destPresentationModel
+        assertEquals(123.0, sourcePresentationModel.getHorizontalScale(), 0.001);
+    }
+
+    @Test
+    public void saveLoadNetSets() throws IOException, ParserConfigurationException, TransformerException, SAXException {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
@@ -54,35 +70,76 @@ public class WaveformSettingsFileTest {
             .newNet(3, "net4", 1)
             .enterScope("mod3")
             .newNet(4, "net5", 1)
-            .newNet(5, "net6", 1)
             .exitScope()
-            .newNet(6, "net7", 1)
             .exitScope()
-            .newNet(7, "net8", 1)
             .exitScope()
             .loadFinished();
 
-        NetDataModel netDataModels[] = new NetDataModel[8];
+        NetDataModel netDataModels[] = new NetDataModel[5];
         int index = 0;
         for (NetDataModel model : dataModel) {
             netDataModels[index++] = model;
         }
 
         // Populate sourcePresentationModel
+        sourcePresentationModel.addNet(netDataModels[0]);
         sourcePresentationModel.addNet(netDataModels[1]);
-        sourcePresentationModel.addNet(netDataModels[2]);
         sourcePresentationModel.saveNetSet("set1");
 
         sourcePresentationModel.removeAllNets();
-        sourcePresentationModel.addNet(netDataModels[6]);
-        sourcePresentationModel.addNet(netDataModels[7]);
+        sourcePresentationModel.addNet(netDataModels[2]);
+        sourcePresentationModel.addNet(netDataModels[3]);
+        sourcePresentationModel.addNet(netDataModels[4]);
         sourcePresentationModel.saveNetSet("set2");
 
-        sourcePresentationModel.removeAllNets();
+        // Save and reload contents
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
+        File file = fTempFolder.newFile("test1.settings");
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
+        new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
+
+        // Check destPresentationModel
+        assertEquals(2, destPresentationModel.getNetSetCount());
+        assertEquals("set1", destPresentationModel.getNetSetName(0));
+        assertEquals("set2", destPresentationModel.getNetSetName(1));
+
+        destPresentationModel.selectNetSet(0);
+        assertEquals(2, destPresentationModel.getVisibleNetCount());
+        assertSame(netDataModels[0], destPresentationModel.getVisibleNet(0));
+        assertSame(netDataModels[1], destPresentationModel.getVisibleNet(1));
+
+        destPresentationModel.selectNetSet(1);
+        assertEquals(3, destPresentationModel.getVisibleNetCount());
+        assertSame(netDataModels[2], destPresentationModel.getVisibleNet(0));
+        assertSame(netDataModels[3], destPresentationModel.getVisibleNet(1));
+        assertSame(netDataModels[4], destPresentationModel.getVisibleNet(2));
+    }
+
+    @Test
+    public void saveLoadValueFormatters() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+        WaveformDataModel dataModel = new WaveformDataModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
+
+        dataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(1, "net2", 1)
+            .newNet(1, "net3", 1)
+            .newNet(1, "net4", 1)
+            .exitScope()
+            .loadFinished();
+
+        NetDataModel netDataModels[] = new NetDataModel[4];
+        int index = 0;
+        for (NetDataModel model : dataModel) {
+            netDataModels[index++] = model;
+        }
+
+        // Populate sourcePresentationModel
         sourcePresentationModel.addNet(netDataModels[0]);
+        sourcePresentationModel.addNet(netDataModels[1]);
         sourcePresentationModel.addNet(netDataModels[2]);
-        sourcePresentationModel.addNet(netDataModels[4]);
-        sourcePresentationModel.addNet(netDataModels[5]);
+        sourcePresentationModel.addNet(netDataModels[3]);
 
         sourcePresentationModel.setValueFormatter(0, new BinaryValueFormatter());
         sourcePresentationModel.setValueFormatter(1, new DecimalValueFormatter());
@@ -90,13 +147,6 @@ public class WaveformSettingsFileTest {
         EnumValueFormatter enumFormatter = new EnumValueFormatter(
                 new File("src/test/resources/enum_mapping/test1.txt"));
         sourcePresentationModel.setValueFormatter(3, enumFormatter);
-
-        sourcePresentationModel.addMarker("marker1", 1234);
-        sourcePresentationModel.addMarker("marker2", 5678);
-        assertEquals(1, sourcePresentationModel.getIdForMarker(0));
-        assertEquals(2, sourcePresentationModel.getIdForMarker(1));
-
-        sourcePresentationModel.setHorizontalScale(123.0);
 
         // Save and reload contents
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
@@ -107,9 +157,9 @@ public class WaveformSettingsFileTest {
         // Check destPresentationModel
         assertEquals(4, destPresentationModel.getVisibleNetCount());
         assertSame(netDataModels[0], destPresentationModel.getVisibleNet(0));
-        assertSame(netDataModels[2], destPresentationModel.getVisibleNet(1));
-        assertSame(netDataModels[4], destPresentationModel.getVisibleNet(2));
-        assertSame(netDataModels[5], destPresentationModel.getVisibleNet(3));
+        assertSame(netDataModels[1], destPresentationModel.getVisibleNet(1));
+        assertSame(netDataModels[2], destPresentationModel.getVisibleNet(2));
+        assertSame(netDataModels[3], destPresentationModel.getVisibleNet(3));
 
         assertTrue(destPresentationModel.getValueFormatter(0) instanceof BinaryValueFormatter);
         assertTrue(destPresentationModel.getValueFormatter(1) instanceof DecimalValueFormatter);
@@ -119,21 +169,29 @@ public class WaveformSettingsFileTest {
         assertEquals("STATE_INIT", enumFormatter.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", enumFormatter.format(new BitVector("2", 10)));
         assertEquals("STATE_WAIT", enumFormatter.format(new BitVector("3", 10)));
+    }
 
-        assertEquals(2, destPresentationModel.getNetSetCount());
-        assertEquals("set1", destPresentationModel.getNetSetName(0));
-        assertEquals("set2", destPresentationModel.getNetSetName(1));
+    @Test
+    public void saveLoadMarkers() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+        WaveformDataModel dataModel = new WaveformDataModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
-        destPresentationModel.selectNetSet(0);
-        assertEquals(2, destPresentationModel.getVisibleNetCount());
-        assertSame(netDataModels[1], destPresentationModel.getVisibleNet(0));
-        assertSame(netDataModels[2], destPresentationModel.getVisibleNet(1));
+        dataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .exitScope()
+            .loadFinished();
 
-        destPresentationModel.selectNetSet(1);
-        assertEquals(2, destPresentationModel.getVisibleNetCount());
-        assertSame(netDataModels[6], destPresentationModel.getVisibleNet(0));
-        assertSame(netDataModels[7], destPresentationModel.getVisibleNet(1));
+        sourcePresentationModel.addMarker("marker1", 1234);
+        sourcePresentationModel.addMarker("marker2", 5678);
 
+        // Save and reload contents
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
+        File file = fTempFolder.newFile("test1.settings");
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
+        new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
+
+        // Check destPresentationModel
         assertEquals(2, destPresentationModel.getMarkerCount());
         assertEquals("marker1", destPresentationModel.getDescriptionForMarker(0));
         assertEquals("marker2", destPresentationModel.getDescriptionForMarker(1));
@@ -141,8 +199,6 @@ public class WaveformSettingsFileTest {
         assertEquals(5678, destPresentationModel.getTimestampForMarker(1));
         assertEquals(1, destPresentationModel.getIdForMarker(0));
         assertEquals(2, destPresentationModel.getIdForMarker(1));
-
-        assertEquals(123.0, sourcePresentationModel.getHorizontalScale(), 0.001);
     }
 
     // When the data model changes on disk between the time the settings file was saved and
