@@ -121,6 +121,7 @@ class FindView extends JPanel implements ActionListener {
         try {
             errorHighlighter.addHighlight(start, end, highlightPainter);
         } catch (BadLocationException ble) {
+            // This shouldn't happen unless there is a logic bug.
             System.out.println("highlightErrorText: exception " + ble);
         }
     }

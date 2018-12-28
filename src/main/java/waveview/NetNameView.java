@@ -223,7 +223,8 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
             try {
                 data = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
             } catch (IOException | UnsupportedFlavorException exc) {
-                System.out.println(exc.toString());
+                JOptionPane.showMessageDialog(null, exc.getMessage(),
+                    "Error handling drop data", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 

@@ -283,8 +283,9 @@ public final class MainWindow extends JPanel implements ActionListener {
                 waveformSettingsFile.read();
             }
         } catch (IOException exc) {
-            System.out.println("caught exception while reading settings " + exc);
-            // XXX Display an error dialog?
+            JOptionPane.showMessageDialog(null, exc.getMessage(),
+              "Error reading waveform settings. The waveform has loaded, but previous view configuration was not restored",
+              JOptionPane.ERROR_MESSAGE);
         }
 
         buildRecentFilesMenu();
@@ -360,7 +361,9 @@ public final class MainWindow extends JPanel implements ActionListener {
                 waveformSettingsFile.write();
             }
         } catch (IOException exc) {
-            System.out.println("Error saving configuration file " + exc);
+            JOptionPane.showMessageDialog(null, exc.getMessage(),
+                "Error writing waveform settings. The view configuration will not be restored the next time this is loaded",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 

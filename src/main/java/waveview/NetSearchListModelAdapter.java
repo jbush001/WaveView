@@ -35,9 +35,9 @@ import javax.swing.event.ListDataEvent;
 ///
 
 public final class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
-    private List<ListDataListener> listeners = new ArrayList<>();
-    private List<String> matches = new ArrayList<>();
+    private final List<ListDataListener> listeners = new ArrayList<>();
     private final WaveformDataModel waveformDataModel;
+    private List<String> matches = new ArrayList<>();
 
     public NetSearchListModelAdapter(WaveformDataModel waveformDataModel) {
         this.waveformDataModel = waveformDataModel;
@@ -55,7 +55,6 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
                 matches.add(netDataModel.getFullName());
             }
         } else {
-            matches.clear();
             matches = StreamSupport.stream(waveformDataModel.spliterator(), false)
                     .map(model -> model.getFullName())
                     .filter(name -> name.contains(pattern))
@@ -71,7 +70,7 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
         try {
             setPattern(doc.getText(0, doc.getEndPosition().getOffset()).trim());
         } catch (BadLocationException exc) {
-            // TThis shouldn't happen unless there is a logic bug.
+            // This shouldn't happen unless there is a logic bug.
             System.out.println("filter: bad location exception " + exc);
         }
     }
