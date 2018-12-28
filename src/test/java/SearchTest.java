@@ -207,6 +207,7 @@ public class SearchTest {
             new Search(makeSingleBitModel(), "mod1.stall_pipeline = 2");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
+            // Expected
             assertEquals("unknown net \"mod1.stall_pipeline\"", exc.getMessage());
             assertEquals(0, exc.getStartOffset());
             assertEquals(18, exc.getEndOffset());
@@ -219,6 +220,7 @@ public class SearchTest {
             new Search(makeSingleBitModel(), "mod1.clk = 'h2 foo");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
+            // Expected
             assertEquals("unexpected value", exc.getMessage());
             assertEquals(15, exc.getStartOffset());
             assertEquals(17, exc.getEndOffset());
@@ -231,6 +233,7 @@ public class SearchTest {
             new Search(makeSingleBitModel(), "mod1.clk = ");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
+            // Expected
             assertEquals("unexpected end of string", exc.getMessage());
             assertEquals(10, exc.getStartOffset());
             assertEquals(10, exc.getEndOffset());
@@ -243,6 +246,7 @@ public class SearchTest {
             new Search(makeSingleBitModel(), "mod1.clk = >");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
+            // Expected
             assertEquals("unexpected value", exc.getMessage());
             assertEquals(11, exc.getStartOffset());
             assertEquals(11, exc.getEndOffset());
@@ -255,6 +259,7 @@ public class SearchTest {
             new Search(makeSingleBitModel(), "mod1.clk = 'q3z");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
+            // Expected
             assertEquals("unknown type q", exc.getMessage());
             assertEquals(11, exc.getStartOffset());
             assertEquals(11, exc.getEndOffset());
@@ -267,6 +272,7 @@ public class SearchTest {
             new Search(makeSingleBitModel(), "(mod1.clk = 'h3 foo");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
+            // Expected
             assertEquals("unexpected value", exc.getMessage());
             assertEquals(16, exc.getStartOffset());
             assertEquals(18, exc.getEndOffset());
@@ -279,6 +285,7 @@ public class SearchTest {
             new Search(makeSingleBitModel(), "> 'h12");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
+            // Expected
             assertEquals("unexpected value", exc.getMessage());
             assertEquals(0, exc.getStartOffset());
             assertEquals(0, exc.getEndOffset());

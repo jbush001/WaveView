@@ -49,6 +49,7 @@ public class VCDLoaderTest {
             fos.close();
             return f;
         } catch (IOException exc) {
+            // Expected
             fail("Caught I/O exception trying to create temporary file");
             return null;
         }
@@ -140,7 +141,7 @@ public class VCDLoaderTest {
             new VCDLoader().load(testFile("invalid_file_shasdjkfhaldkfhadfhadsjkfhadsf.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (IOException exc) {
-            // expected
+            // Expected
         }
     }
 

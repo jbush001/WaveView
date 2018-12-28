@@ -291,6 +291,7 @@ public class BitVectorTest {
             bv1.toString(12);
             fail("did not throw exception");
         } catch (NumberFormatException exc) {
+            // Expected
             assertEquals("bad radix", exc.getMessage());
         }
     }
