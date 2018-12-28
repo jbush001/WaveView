@@ -26,13 +26,13 @@ import java.io.IOException;
 public interface WaveformLoader {
     /// @todo Some kind of file detection APIs (register by extension, sniff, etc)
 
-    static class LoadInterruptException extends IOException {
+    class LoadInterruptException extends IOException {
         LoadInterruptException(String description) {
             super(description);
         }
     }
 
-    static class LoadFormatException extends IOException {
+    class LoadFormatException extends IOException {
         LoadFormatException(String description) {
             super(description);
         }

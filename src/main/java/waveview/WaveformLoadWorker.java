@@ -17,6 +17,7 @@
 package waveview;
 
 import java.io.File;
+import java.io.IOException;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -65,7 +66,7 @@ public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
             profiler.finish();
             System.out.println("Loaded in " + profiler.getExecutionTime() + " ms");
             System.out.println("Allocated " + profiler.getMemoryAllocated() + " bytes of memory");
-        } catch (Exception exc) {
+        } catch (IOException exc) {
             errorMessage = exc.getMessage();
         }
 

@@ -18,7 +18,6 @@ package waveview;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.ExceptionInInitializerError;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;

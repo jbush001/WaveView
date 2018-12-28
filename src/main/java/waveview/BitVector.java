@@ -36,7 +36,7 @@ public class BitVector {
         assign(from);
     }
 
-    public void assign(BitVector from) {
+    public final void assign(BitVector from) {
         if (from.values == null) {
             values = null;
         } else {
@@ -72,8 +72,8 @@ public class BitVector {
 
     /// @returns true if this is all Zs
     public boolean isZ() {
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] != BitValue.Z) {
+        for (BitValue value : values) {
+            if (value != BitValue.Z) {
                 return false;
             }
         }
