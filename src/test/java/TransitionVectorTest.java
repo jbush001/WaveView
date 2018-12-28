@@ -138,6 +138,7 @@ public class TransitionVectorTest {
         assertEquals(0, t.compare(new BitVector("00000010", 2)));
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void iteratorEnd() {
         TransitionVector vec = new TransitionVector.Builder(8)
@@ -155,11 +156,12 @@ public class TransitionVectorTest {
             ti.next();
             fail("next didn't throw exception");
         } catch (NoSuchElementException exc) {
-            // Should arrive here on success
+            // Expected
         }
     }
 
     // Remove is not supported
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void iteratorRemove() {
         TransitionVector vec = new TransitionVector.Builder(8)
@@ -171,7 +173,7 @@ public class TransitionVectorTest {
             ti.remove();
             fail("remove didn't throw exception");
         } catch (UnsupportedOperationException exc) {
-            // Should arrive here on success
+            // Expected
         }
     }
 

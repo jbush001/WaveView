@@ -104,7 +104,7 @@ public class WaveformLoadWorkerTest {
     }
 
     @Test
-    public void testLoadSuccess() throws Exception {
+    public void testLoadSuccess() throws IOException, TimeoutException {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(false);
         doAnswer(new Answer<Void>() {
@@ -132,7 +132,7 @@ public class WaveformLoadWorkerTest {
     }
 
     @Test
-    public void testLoadError() throws Exception {
+    public void testLoadError() throws TimeoutException {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(false);
         File loadFile = new File("adsfhadkjhfakldshfasdfadsf"); // Shouldn't exist
@@ -144,7 +144,7 @@ public class WaveformLoadWorkerTest {
     }
 
     @Test
-    public void testLoadCancelled() throws Exception {
+    public void testLoadCancelled() throws IOException, TimeoutException {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(true);
         File loadFile = makeVcdFile();

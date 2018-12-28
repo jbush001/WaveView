@@ -133,6 +133,7 @@ public class VCDLoaderTest {
         verifyNoMoreInteractions(builder);
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void invalidFile() throws IOException {
         try {
@@ -143,32 +144,38 @@ public class VCDLoaderTest {
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void unknownTimescale() throws IOException {
         try {
             new VCDLoader().load(testFile("unknown-timescale.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 2: unknown timescale value 1qs", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void timescaleMissingUnit() throws IOException {
         try {
             new VCDLoader().load(testFile("timescale-missing-unit.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 3: unknown timescale value $end", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void timescaleBadValue() throws IOException {
         try {
             new VCDLoader().load(testFile("timescale-bad-value.vcd"), builder, null);
             fail("didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 2: bad timescale value 17us", exc.getMessage());
         }
     }
@@ -303,103 +310,123 @@ public class VCDLoaderTest {
         verifyNoMoreInteractions(builder);
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void unknownNetId() throws IOException {
         try {
             new VCDLoader().load(testFile("unknown-net-id.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 6: Unknown var id $", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void invalidValueType() throws IOException {
         try {
             new VCDLoader().load(testFile("bad-transition-type.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 6: invalid value type 'q'", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void invalidScope() throws IOException {
         try {
             new VCDLoader().load(testFile("scope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 2: parse error, expected $end got $var", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void invalidUpscope() throws IOException {
         try {
             new VCDLoader().load(testFile("upscope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 4: parse error, expected $end got $enddefinitions", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void varParseError() throws IOException {
         try {
             new VCDLoader().load(testFile("var-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 3: parse error, expected $end got $upscope", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void timescaleParseError() throws IOException {
         try {
             new VCDLoader().load(testFile("timescale-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 3: parse error, expected $end got $scope", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void invalidLogicValue() throws IOException {
         try {
             new VCDLoader().load(testFile("invalid-logic-value.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 9: invalid logic value", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void truncatedFile() throws IOException {
         try {
             new VCDLoader().load(testFile("truncated.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 2: unexpected end of file", exc.getMessage());
         }
     }
 
     // This file is spec compliant, but we don't support real values
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void realValueType() throws IOException {
         try {
             new VCDLoader().load(testFile("real-value.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 6: real values are not supported", exc.getMessage());
         }
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void aliasWidthMismatch() throws IOException {
         try {
             new VCDLoader().load(testFile("alias-bad-width.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("line 3: alias net does not match width of parent (15 != 16)", exc.getMessage());
         }
     }
@@ -455,6 +482,7 @@ public class VCDLoaderTest {
 
     // If the user clicks cancel, the progress listener update
     // method will return false. Ensure this aborts the load.
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void interruptedLoad() throws IOException {
         StringBuilder vcdContents = new StringBuilder();
@@ -476,6 +504,7 @@ public class VCDLoaderTest {
             });
             fail("Loader didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
             assertEquals("load cancelled", exc.getMessage());
         }
     }

@@ -20,9 +20,12 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.IOException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.xml.sax.SAXException;
 import waveview.BinaryValueFormatter;
 import waveview.BitVector;
 import waveview.DecimalValueFormatter;
@@ -38,7 +41,7 @@ public class WaveformSettingsFileTest {
     public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
-    public void saveLoad() throws Exception {
+    public void saveLoad() throws IOException, ParserConfigurationException, TransformerException, SAXException {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
@@ -148,7 +151,7 @@ public class WaveformSettingsFileTest {
     // @todo Does not test when markers are put in past the end time.
     // (not currently implemented in loader)
     @Test
-    public void dataModelChanged() throws Exception {
+    public void dataModelChanged() throws IOException, ParserConfigurationException, SAXException, TransformerException {
         WaveformDataModel sourceDataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
         sourceDataModel.startBuilding()
@@ -185,7 +188,7 @@ public class WaveformSettingsFileTest {
 
     // If the formatter class name is unknown, fall back to binary
     @Test
-    public void badFormatter() throws Exception {
+    public void badFormatter() throws IOException, ParserConfigurationException, SAXException {
         File file = new File("src/test/resources/waveform_settings/bad_formatter.waveconfig");
         WaveformDataModel dataModel = new WaveformDataModel();
         dataModel.startBuilding()

@@ -148,6 +148,7 @@ public class SearchTest {
     /// @bug This doesn't match correctly yet: Xes are ignored for
     /// matching.
     /// Verify it at least parses the search.
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void matchXZ() throws SearchFormatException {
         WaveformDataModel waveformDataModel = new WaveformDataModel();
@@ -175,28 +176,28 @@ public class SearchTest {
             new Search(waveformDataModel, "mod1.value = 'dx");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
-            // Should throw this
+            // Expected
         }
 
         try {
             new Search(waveformDataModel, "mod1.value = 'dX");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
-            // Should throw this
+            // Expected
         }
 
         try {
             new Search(waveformDataModel, "mod1.value = 'dz");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
-            // Should throw this
+            // Expected
         }
 
         try {
             new Search(waveformDataModel, "mod1.value = 'dZ");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
-            // Should throw this
+             // Expected
         }
     }
 
