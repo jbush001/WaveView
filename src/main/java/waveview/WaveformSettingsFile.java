@@ -18,6 +18,7 @@ package waveview;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ExceptionInInitializerError;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -42,6 +43,12 @@ public final class WaveformSettingsFile {
     private final WaveformDataModel waveformDataModel;
     private final WaveformPresentationModel waveformPresentationModel;
 
+    public static class SettingsFileException extends IOException {
+        SettingsFileException(String description) {
+            super(description);
+        }
+    }
+
     /// @param file Name of a waveform file
     /// @returns configuration file for this (a .dotfile in the same
     /// directory)
@@ -63,57 +70,61 @@ public final class WaveformSettingsFile {
         this.waveformPresentationModel = waveformPresentationModel;
     }
 
-    public void write() throws ParserConfigurationException, TransformerException {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document document = builder.newDocument();
+    public void write() throws IOException {
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.newDocument();
 
-        Element configuration = document.createElement("configuration");
-        document.appendChild(configuration);
+            Element configuration = document.createElement("configuration");
+            document.appendChild(configuration);
 
-        Element scale = document.createElement("scale");
-        configuration.appendChild(scale);
-        scale.appendChild(document.createTextNode(Double.toString(waveformPresentationModel.getHorizontalScale())));
+            Element scale = document.createElement("scale");
+            configuration.appendChild(scale);
+            scale.appendChild(document.createTextNode(Double.toString(waveformPresentationModel.getHorizontalScale())));
 
-        Element netSetsElement = document.createElement("netsets");
-        configuration.appendChild(netSetsElement);
+            Element netSetsElement = document.createElement("netsets");
+            configuration.appendChild(netSetsElement);
 
-        // Set 0 is the currently visible set of nets
-        Element netSetElement = makeVisibleNetList(document);
-        netSetElement.setAttribute("name", "_default");
-        netSetsElement.appendChild(netSetElement);
-
-        // Write out all of our saved net sets
-        for (int i = 0; i < waveformPresentationModel.getNetSetCount(); i++) {
-            waveformPresentationModel.selectNetSet(i);
-            netSetElement = makeVisibleNetList(document);
-            netSetElement.setAttribute("name", waveformPresentationModel.getNetSetName(i));
+            // Set 0 is the currently visible set of nets
+            Element netSetElement = makeVisibleNetList(document);
+            netSetElement.setAttribute("name", "_default");
             netSetsElement.appendChild(netSetElement);
+
+            // Write out all of our saved net sets
+            for (int i = 0; i < waveformPresentationModel.getNetSetCount(); i++) {
+                waveformPresentationModel.selectNetSet(i);
+                netSetElement = makeVisibleNetList(document);
+                netSetElement.setAttribute("name", waveformPresentationModel.getNetSetName(i));
+                netSetsElement.appendChild(netSetElement);
+            }
+
+            Element markers = document.createElement("markers");
+            configuration.appendChild(markers);
+
+            for (int i = 0; i < waveformPresentationModel.getMarkerCount(); i++) {
+                Element markerElement = document.createElement("marker");
+                markers.appendChild(markerElement);
+
+                Element id = document.createElement("id");
+                markerElement.appendChild(id);
+                id.appendChild(document.createTextNode(Integer.toString(i)));
+
+                Element timestamp = document.createElement("timestamp");
+                markerElement.appendChild(timestamp);
+                timestamp.appendChild(document.createTextNode(Long.toString(waveformPresentationModel.getTimestampForMarker(i))));
+
+                Element description = document.createElement("description");
+                markerElement.appendChild(description);
+                description.appendChild(document.createTextNode(waveformPresentationModel.getDescriptionForMarker(i)));
+            }
+
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
+            DOMSource source = new DOMSource(document);
+            StreamResult result = new StreamResult(settingsFile);
+            transformer.transform(source, result);
+        } catch (ParserConfigurationException | TransformerException exc) {
+            throw new SettingsFileException(exc.getMessage());
         }
-
-        Element markers = document.createElement("markers");
-        configuration.appendChild(markers);
-
-        for (int i = 0; i < waveformPresentationModel.getMarkerCount(); i++) {
-            Element markerElement = document.createElement("marker");
-            markers.appendChild(markerElement);
-
-            Element id = document.createElement("id");
-            markerElement.appendChild(id);
-            id.appendChild(document.createTextNode(Integer.toString(i)));
-
-            Element timestamp = document.createElement("timestamp");
-            markerElement.appendChild(timestamp);
-            timestamp.appendChild(document.createTextNode(Long.toString(waveformPresentationModel.getTimestampForMarker(i))));
-
-            Element description = document.createElement("description");
-            markerElement.appendChild(description);
-            description.appendChild(document.createTextNode(waveformPresentationModel.getDescriptionForMarker(i)));
-        }
-
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        DOMSource source = new DOMSource(document);
-        StreamResult result = new StreamResult(settingsFile);
-        transformer.transform(source, result);
     }
 
     private Element makeVisibleNetList(Document document) {
@@ -183,9 +194,7 @@ public final class WaveformSettingsFile {
                 } else {
                     formatter = (ValueFormatter) c.getConstructor().newInstance();
                 }
-            } catch (Exception exc) {
-                // Can be: LinkageError, ExceptionInInitializerError, ClassNotFoundException,
-                // InstantiationException. Fall back to a binary value formatter.
+            } catch (LinkageError | ReflectiveOperationException exc) {
                 System.out.println("unable to instantiate value formatter " + formatStr + ": " + exc);
                 formatter = new BinaryValueFormatter();
             }
@@ -200,33 +209,37 @@ public final class WaveformSettingsFile {
         }
     }
 
-    public void read() throws ParserConfigurationException, SAXException, IOException {
-        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-        Document document = builder.parse(settingsFile);
+    public void read() throws IOException {
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(settingsFile);
 
-        waveformPresentationModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
+            waveformPresentationModel.setHorizontalScale(Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
-        NodeList netSets = document.getElementsByTagName("netset");
-        for (int i = 1; i < netSets.getLength(); i++) {
-            Element netSet = (Element) netSets.item(i);
-            readNetSet(netSet);
-            waveformPresentationModel.saveNetSet(netSet.getAttribute("name"));
-        }
+            NodeList netSets = document.getElementsByTagName("netset");
+            for (int i = 1; i < netSets.getLength(); i++) {
+                Element netSet = (Element) netSets.item(i);
+                readNetSet(netSet);
+                waveformPresentationModel.saveNetSet(netSet.getAttribute("name"));
+            }
 
-        // Index zero represents the current state (which isn't saved as a named net set)
-        if (netSets.getLength() > 0) {
-            readNetSet((Element) netSets.item(0));
-        }
+            // Index zero represents the current state (which isn't saved as a named net set)
+            if (netSets.getLength() > 0) {
+                readNetSet((Element) netSets.item(0));
+            }
 
-        NodeList markers = document.getElementsByTagName("marker");
-        for (int j = 0; j < markers.getLength(); j++) {
-            Element markerElem = (Element) markers.item(j);
+            NodeList markers = document.getElementsByTagName("marker");
+            for (int j = 0; j < markers.getLength(); j++) {
+                Element markerElem = (Element) markers.item(j);
 
-            /// @bug we ignore the ID and assume these are in order
-            /// This will renumber markers if there are gaps. Is that okay?
-            // Integer.parseInt(getSubTag(markerElem, "id"));
-            waveformPresentationModel.addMarker(getSubTag(markerElem, "description"),
-                    Long.parseLong(getSubTag(markerElem, "timestamp")));
+                /// @bug we ignore the ID and assume these are in order
+                /// This will renumber markers if there are gaps. Is that okay?
+                // Integer.parseInt(getSubTag(markerElem, "id"));
+                waveformPresentationModel.addMarker(getSubTag(markerElem, "description"),
+                        Long.parseLong(getSubTag(markerElem, "timestamp")));
+            }
+        } catch (ParserConfigurationException | SAXException exc) {
+            throw new SettingsFileException(exc.getMessage());
         }
     }
 }

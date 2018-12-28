@@ -116,7 +116,7 @@ public class WaveformSettingsFileTest {
     }
 
     @Test
-    public void saveLoadValueFormatters() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+    public void saveLoadValueFormatters() throws IOException {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
@@ -172,7 +172,7 @@ public class WaveformSettingsFileTest {
     }
 
     @Test
-    public void saveLoadMarkers() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+    public void saveLoadMarkers() throws IOException {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
@@ -207,7 +207,7 @@ public class WaveformSettingsFileTest {
     // @todo Does not test when markers are put in past the end time.
     // (not currently implemented in loader)
     @Test
-    public void dataModelChanged() throws IOException, ParserConfigurationException, SAXException, TransformerException {
+    public void dataModelChanged() throws IOException {
         WaveformDataModel sourceDataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
         sourceDataModel.startBuilding()
@@ -244,7 +244,7 @@ public class WaveformSettingsFileTest {
 
     // If the formatter class name is unknown, fall back to binary
     @Test
-    public void badFormatter() throws IOException, ParserConfigurationException, SAXException {
+    public void badFormatter() throws IOException {
         File file = new File("src/test/resources/waveform_settings/bad_formatter.waveconfig");
         WaveformDataModel dataModel = new WaveformDataModel();
         dataModel.startBuilding()

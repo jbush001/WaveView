@@ -30,7 +30,7 @@ import waveview.WaveformPresentationModel;
 
 public class MarkerTest {
     private final WaveformPresentationModel model = new WaveformPresentationModel();
-    private WaveformPresentationModel.Listener listener = mock(WaveformPresentationModel.Listener.class);
+    private final WaveformPresentationModel.Listener listener = mock(WaveformPresentationModel.Listener.class);
 
     @Before
     public void setUpTest() {

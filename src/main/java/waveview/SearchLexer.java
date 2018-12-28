@@ -33,8 +33,8 @@ final class SearchLexer {
 
     private int lexerOffset;
     private final StringBuilder currentTokenValue = new StringBuilder();
-    private int pushBackChar = -1;
-    private int pushBackToken = -1;
+    private int pushedBackChar = -1;
+    private int pushedBackToken = -1;
     private int tokenStart;
     private BitVector literalValue;
     private final String searchString;
@@ -44,9 +44,9 @@ final class SearchLexer {
     }
 
     int nextToken() throws SearchFormatException {
-        if (pushBackToken != -1) {
-            int token = pushBackToken;
-            pushBackToken = -1;
+        if (pushedBackToken != -1) {
+            int token = pushedBackToken;
+            pushedBackToken = -1;
             return token;
         }
 
@@ -64,10 +64,10 @@ final class SearchLexer {
                     } else if (c == '\'') {
                         state = State.SCAN_LITERAL_TYPE;
                     } else if (isAlpha(c)) {
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         state = State.SCAN_IDENTIFIER;
                     } else if (isNum(c)) {
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         state = State.SCAN_DECIMAL;
                     } else if (c == '>') {
                         state = State.SCAN_GREATER;
@@ -85,7 +85,7 @@ final class SearchLexer {
                     } else if (c == '=') {
                         return TOK_GREATER_EQUAL;
                     } else {
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         return TOK_GREATER;
                     }
 
@@ -95,7 +95,7 @@ final class SearchLexer {
                     } else if (c == '=') {
                         return TOK_LESS_EQUAL;
                     } else {
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         return TOK_LESS_THAN;
                     }
 
@@ -106,7 +106,7 @@ final class SearchLexer {
                         currentTokenValue.append((char) c);
                         state = State.SCAN_GEN_NUM;
                     } else {
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         return TOK_IDENTIFIER;
                     }
 
@@ -138,7 +138,7 @@ final class SearchLexer {
                         currentTokenValue.append((char) c);
                     } else {
                         literalValue = new BitVector(getTokenString(), 2);
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         return TOK_LITERAL;
                     }
 
@@ -149,7 +149,7 @@ final class SearchLexer {
                         currentTokenValue.append((char) c);
                     } else {
                         literalValue = new BitVector(getTokenString(), 10);
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         return TOK_LITERAL;
                     }
 
@@ -160,7 +160,7 @@ final class SearchLexer {
                         currentTokenValue.append((char) c);
                     } else {
                         literalValue = new BitVector(getTokenString(), 16);
-                        pushBackChar = c;
+                        pushedBackChar = c;
                         return TOK_LITERAL;
                     }
 
@@ -171,22 +171,22 @@ final class SearchLexer {
 
     int nextChar() {
         int c;
-        if (pushBackChar == -1) {
+        if (pushedBackChar == -1) {
             if (lexerOffset == searchString.length()) {
                 c = -1;
             } else {
                 c = searchString.charAt(lexerOffset++);
             }
         } else {
-            c = pushBackChar;
-            pushBackChar = -1;
+            c = pushedBackChar;
+            pushedBackChar = -1;
         }
 
         return c;
     }
 
     void pushBackToken(int tok) {
-        pushBackToken = tok;
+        pushedBackToken = tok;
     }
 
     private static boolean isAlpha(int value) {

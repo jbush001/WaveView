@@ -227,7 +227,7 @@ public class WaveformPresentationModelTest {
 
         verify(listener).formatChanged(1);
         verifyNoMoreInteractions(listener);
-        assertTrue(model.getValueFormatter(1) == dvf);
+        assertSame(model.getValueFormatter(1), dvf);
     }
 
     // Ensure the minor tick interval is initialized when WaveformPresentationModel

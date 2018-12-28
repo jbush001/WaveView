@@ -24,10 +24,12 @@ import java.awt.Graphics;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,7 +54,7 @@ import javax.swing.event.ListDataListener;
 final class NetNameView extends JList<Integer> implements WaveformPresentationModel.Listener, ActionListener {
     private final WaveformPresentationModel waveformPresentationModel;
     private final WaveformDataModel waveformDataModel;
-    private JPopupMenu popupMenu;
+    private final JPopupMenu popupMenu;
 
     private class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
         private int currentNet;
@@ -220,7 +222,7 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
             String data;
             try {
                 data = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
-            } catch (Exception exc) {
+            } catch (IOException | UnsupportedFlavorException exc) {
                 System.out.println(exc.toString());
                 return false;
             }
@@ -378,7 +380,7 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
             AppPreferences.getInstance().setInitialEnumDirectory(chooser.getSelectedFile().getParentFile());
             try {
                 formatter = new EnumValueFormatter(chooser.getSelectedFile());
-            } catch (Exception exc) {
+            } catch (IOException exc) {
                 JOptionPane.showMessageDialog(this, "Error opening enum mapping file");
                 formatter = null;
             }

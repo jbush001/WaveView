@@ -83,8 +83,8 @@ public class BitVector {
 
     /// @returns true if this contains any Z or X values in any positions
     public boolean isX() {
-        for (int i = 0; i < values.length; i++) {
-            if (values[i] == BitValue.Z || values[i] == BitValue.X) {
+        for (BitValue val : values) {
+            if (val == BitValue.Z || val == BitValue.X) {
                 return true;
             }
         }

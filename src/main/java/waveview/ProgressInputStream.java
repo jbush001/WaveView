@@ -20,15 +20,15 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public final class ProgressInputStream extends InputStream {
-    public interface Listener {
-        void updateProgress(long totalRead) throws IOException;
-    }
-
     private long totalRead;
     private long lastProgressUpdate;
     private final long updateInterval;
     private final InputStream wrapped;
     private final Listener listener;
+
+    public interface Listener {
+        void updateProgress(long totalRead) throws IOException;
+    }
 
     public ProgressInputStream(InputStream wrapped, Listener listener, long updateInterval) {
         this.wrapped = wrapped;

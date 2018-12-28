@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StreamTokenizer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +60,7 @@ public final class VCDLoader implements WaveformLoader {
         this.progressListener = progressListener;
         fileLength = file.length();
 
-        try (InputStream inputStream = new FileInputStream(file))  {
+        try (InputStream inputStream = Files.newInputStream(file.toPath()))  {
             long updateInterval = fileLength / 100;
             InputStream progressStream = new ProgressInputStream(inputStream,
                     (totalRead) -> updateProgress(totalRead), updateInterval);

@@ -142,8 +142,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
                 fullName.append(scope);
             }
 
-            fullName.append('.');
-            fullName.append(shortName);
+            fullName.append('.').append(shortName);
 
             NetDataModel net;
             TransitionVector.Builder builder;

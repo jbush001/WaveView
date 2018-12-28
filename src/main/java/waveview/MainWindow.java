@@ -24,6 +24,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -281,7 +282,7 @@ public final class MainWindow extends JPanel implements ActionListener {
             if (settingsFile.exists()) {
                 waveformSettingsFile.read();
             }
-        } catch (Exception exc) {
+        } catch (IOException exc) {
             System.out.println("caught exception while reading settings " + exc);
             // XXX Display an error dialog?
         }
@@ -358,7 +359,7 @@ public final class MainWindow extends JPanel implements ActionListener {
             if (waveformSettingsFile != null) {
                 waveformSettingsFile.write();
             }
-        } catch (Exception exc) {
+        } catch (IOException exc) {
             System.out.println("Error saving configuration file " + exc);
         }
     }

@@ -103,7 +103,6 @@ final class WaveformContainerView extends JPanel {
 
     void zoomToSelection() {
         // Determine what the new size of the selection window should be.
-        double oldScale = waveformPresentationModel.getHorizontalScale();
         long selectionStartTimestamp = waveformPresentationModel.getSelectionStart();
         long cursorPositionTimestamp = waveformPresentationModel.getCursorPosition();
 
@@ -113,6 +112,7 @@ final class WaveformContainerView extends JPanel {
 
         long lowTimestamp = Math.min(selectionStartTimestamp, cursorPositionTimestamp);
         long highTimestamp = Math.max(selectionStartTimestamp, cursorPositionTimestamp);
+        double oldScale = waveformPresentationModel.getHorizontalScale();
         int left = (int) (lowTimestamp * oldScale);
         int right = (int) (highTimestamp * oldScale);
         int selectionWidth = right - left;

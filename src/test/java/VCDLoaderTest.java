@@ -467,7 +467,7 @@ public class VCDLoaderTest {
     public void progressListener() throws IOException {
         // Need to append enough data to cause at least one progress
         // update
-        StringBuilder vcdContents = new StringBuilder();
+        StringBuilder vcdContents = new StringBuilder(0x20000);
         vcdContents.append("$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
         for (int i = 0; i < 10000; i++) {
             vcdContents.append('#');
