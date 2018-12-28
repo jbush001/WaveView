@@ -1,3 +1,5 @@
+# WaveView
+
 [![Build Status](https://travis-ci.org/jbush001/WaveView.svg?branch=master)](https://travis-ci.org/jbush001/WaveView)
 [![codecov](https://codecov.io/gh/jbush001/WaveView/branch/master/graph/badge.svg)](https://codecov.io/gh/jbush001/WaveView)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8d0a3f5b493d4f548706c2890566ebce)](https://www.codacy.com/app/jbush001/WaveView?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jbush001/WaveView&amp;utm_campaign=Badge_Grade)
@@ -8,18 +10,18 @@ and [Icarus Verilog](http://iverilog.icarus.com/).
 
 ![screenshot](https://raw.githubusercontent.com/wiki/jbush001/WaveView/screenshot.png)
 
-# Development Setup
-## MacOS
+## Development Setup
+### MacOS
 
 Install JDK from:
 
-  http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+  <http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html>
 
-## Linux (Ubuntu)
+### Linux (Ubuntu)
 
     sudo apt-get install openjdk-8-jdk
 
-# Building
+## Building
 
 This project uses 'gradle' as its build system. The gradle wrapper and class
 files are checked into this repository, so you don't need to install it
@@ -32,11 +34,11 @@ a new JAR file:
 
     ./gradlew assemble
 
-# Running
+## Running
 
     java -jar build/libs/WaveView.jar [waveform file]
 
-# Debugging Unit Test Failures
+## Debugging Unit Test Failures
 
 For Mockito failures, you can do enable verbose logging as follows:
 

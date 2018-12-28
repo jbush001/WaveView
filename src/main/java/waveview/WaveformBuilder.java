@@ -24,13 +24,13 @@ public interface WaveformBuilder {
     /// Set timescale.
     /// @param order 10 raised to this number is the number of seconds per
     /// time unit.
-    public WaveformBuilder setTimescale(int order);
+    WaveformBuilder setTimescale(int order);
 
     /// Adds another module to the path of any nets that are added via newNet.
-    public WaveformBuilder enterScope(String name);
+    WaveformBuilder enterScope(String name);
 
     /// Pops previous module pushed by enterScope.
-    public WaveformBuilder exitScope();
+    WaveformBuilder exitScope();
 
     /// Create a new net
     /// @param netIndex This will either be the next sequential integer if this is a
@@ -39,16 +39,16 @@ public interface WaveformBuilder {
     /// @param shortName Name of the signal. It's called 'short' to distinguish
     ///   it from a dotted name that includes the full hiearchy of containing modules.
     /// @param width Number of bits in this signal.
-    public WaveformBuilder newNet(int netIndex, String shortName, int width);
+    WaveformBuilder newNet(int netIndex, String shortName, int width);
 
     /// Add a new transition
     /// @param netId Identifier of the net for which the transition takes place. This
     ///    is the value that was returned by newNet.
     /// @param timestamp timestamp of the transition, in time units from start.
     /// @param values New values the signal will take after the transition.
-    public WaveformBuilder appendTransition(int netIndex, long timestamp, BitVector values);
+    WaveformBuilder appendTransition(int netIndex, long timestamp, BitVector values);
 
     /// Called when all nets and transitions have been added. No other methods
     /// in WaveformBuilder will be called after this.
-    public WaveformBuilder loadFinished();
+    WaveformBuilder loadFinished();
 }

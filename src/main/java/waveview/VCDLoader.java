@@ -33,16 +33,6 @@ import java.util.Map;
 /// All section references are to IEEE 1364-2001.
 ///
 public final class VCDLoader implements WaveformLoader {
-    private static class Var {
-        Var(int netIndex, int width) {
-            this.netIndex = netIndex;
-            this.width = width;
-        }
-
-        int netIndex;
-        int width;
-    }
-
     private StreamTokenizer tokenizer;
     private WaveformBuilder waveformBuilder;
     private long currentTime;
@@ -51,6 +41,16 @@ public final class VCDLoader implements WaveformLoader {
     private ProgressListener progressListener;
     private long fileLength;
     private int nextNetIndex;
+
+    private static class Var {
+        int netIndex;
+        int width;
+
+        Var(int netIndex, int width) {
+            this.netIndex = netIndex;
+            this.width = width;
+        }
+    }
 
     @Override
     public void load(File file, WaveformBuilder waveformBuilder, ProgressListener progressListener)

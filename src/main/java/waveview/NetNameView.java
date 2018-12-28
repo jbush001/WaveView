@@ -354,8 +354,8 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
         }
 
         if (formatter != null) {
-            for (int i = 0; i < indices.length; i++) {
-                waveformPresentationModel.setValueFormatter(indices[i], formatter);
+            for (int index : indices) {
+                waveformPresentationModel.setValueFormatter(index, formatter);
             }
         }
     }

@@ -240,7 +240,7 @@ public final class MainWindow extends JPanel implements ActionListener {
 
     private void loadWaveformFile(File file) {
         saveWaveformSettings();
-        ProgressMonitor monitor = new ProgressMonitor(MainWindow.this, "Loading...", "", 0, 100);
+        ProgressMonitor monitor = new ProgressMonitor(this, "Loading...", "", 0, 100);
         WaveformLoadWorker.LoadFinishedHandler handler = new WaveformLoadWorker.LoadFinishedHandler() {
             @Override
             public void handleLoadSuccess(WaveformDataModel newModel) {

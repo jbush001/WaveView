@@ -183,8 +183,6 @@ public final class WaveformSettingsFile {
                 } else {
                     formatter = (ValueFormatter) c.getConstructor().newInstance();
                 }
-            } catch (RuntimeException exc) {
-                throw exc;
             } catch (Exception exc) {
                 // Can be: LinkageError, ExceptionInInitializerError, ClassNotFoundException,
                 // InstantiationException. Fall back to a binary value formatter.

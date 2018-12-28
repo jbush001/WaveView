@@ -28,6 +28,7 @@ import java.util.Iterator;
 final class MultiBitPainter implements WaveformPainter {
     private final int[] polygonXPoints = new int[3];
     private final int[] polygonYPoints = new int[3];
+    private final static String ELLIPSIS = "\u2026";
 
     @Override
     public void paint(Graphics g, NetDataModel model, int topOffset, Rectangle visibleRect,
@@ -140,8 +141,7 @@ final class MultiBitPainter implements WaveformPainter {
                 g.drawString(label, fontX, fontBaseline);
             } else {
                 // Try to squeeze in an ellipsis
-                String ellipsis = "\u2026";
-                stringWidth = metrics.stringWidth(ellipsis);
+                stringWidth = metrics.stringWidth(ELLIPSIS);
                 if (stringWidth < visibleWidth) {
                     // At least this fits
                     int fontX = (visibleWidth - stringWidth) / 2 + left;

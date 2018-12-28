@@ -32,7 +32,7 @@ public final class Search {
     private static final BitVector ZERO_VEC = new BitVector("0", 2);
     private final SearchLexer lexer;
     private final WaveformDataModel waveformDataModel;
-    private BooleanExpressionNode searchExpression;
+    private final BooleanExpressionNode searchExpression;
 
     /// Generate a search given a set of nets that matches at the given timestamp.
     public static String generateFromValuesAt(NetDataModel[] nets, long timestamp) {
@@ -241,12 +241,14 @@ public final class Search {
         }
     }
 
-    private abstract static class ExpressionNode {
+    private static class ExpressionNode {
         // These are set as a side effect of evaluating the node at a specific time.
         // They contain the next timestamp where the value of the expression may change.
         // It is guaranteed that no transition will occur sooner than this value.
         long forwardHint;
         long backwardHint;
+
+        protected ExpressionNode() {}
     }
 
     private abstract static class BooleanExpressionNode extends ExpressionNode {

@@ -89,7 +89,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
 
     private class ConcreteWaveformBuilder implements WaveformBuilder {
         private final Deque<String> scopeStack = new ArrayDeque<>();
-        private NetTreeModel.Builder treeBuilder = netTree.startBuilding();
+        private final NetTreeModel.Builder treeBuilder = netTree.startBuilding();
 
         // This mirrors allNets in WaveformDataModel and must be kept in sync with it.
         private final List<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
@@ -154,7 +154,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
             } else {
                 // new net
                 assert netId == transitionBuilders.size();
-                builder = new TransitionVector.Builder(width);
+                builder = TransitionVector.Builder.createBuilder(width);
                 transitionBuilders.add(builder);
             }
 

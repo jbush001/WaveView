@@ -24,9 +24,10 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.concurrent.TimeoutException;
 import javax.swing.ProgressMonitor;
 import org.junit.After;
@@ -87,7 +88,7 @@ public class WaveformLoadWorkerTest {
     private File makeVcdFile() throws IOException {
         assert tempFile == null;
 
-        StringBuilder vcdContents = new StringBuilder();
+        StringBuilder vcdContents = new StringBuilder(0x20000);
         vcdContents.append("$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
         for (int i = 0; i < 10000; i++) {
             vcdContents.append('#');
@@ -96,7 +97,7 @@ public class WaveformLoadWorkerTest {
         }
 
         tempFile = tempFolder.newFile("test.vcd");
-        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+        try (OutputStream fos = Files.newOutputStream(tempFile.toPath())) {
             fos.write(vcdContents.toString().getBytes(StandardCharsets.US_ASCII));
         }
 

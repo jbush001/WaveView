@@ -38,13 +38,13 @@ public interface WaveformLoader {
         }
     }
 
-    public interface ProgressListener {
+    interface ProgressListener {
         /// @param percentRead amount of file loaded 0-100
         /// @returns true if it should continue loading, false if the load
         ///  has been cancelled and it should stop.
         boolean updateProgress(int percentRead);
     }
 
-    public void load(File file, WaveformBuilder builder, ProgressListener listener)
+    void load(File file, WaveformBuilder builder, ProgressListener listener)
         throws IOException;
 }

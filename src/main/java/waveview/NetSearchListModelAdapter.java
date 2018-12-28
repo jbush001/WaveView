@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.swing.text.BadLocationException;
 import javax.swing.ListModel;
 import javax.swing.text.Document;
 import javax.swing.event.DocumentListener;
@@ -70,8 +71,9 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
     private void filter(Document doc) {
         try {
             setPattern(doc.getText(0, doc.getEndPosition().getOffset()).trim());
-        } catch (Exception exc) {
-            System.out.println("caught exception " + exc);
+        } catch (BadLocationException exc) {
+            // TThis shouldn't happen unless there is a logic bug.
+            System.out.println("filter: bad location exception " + exc);
         }
     }
 

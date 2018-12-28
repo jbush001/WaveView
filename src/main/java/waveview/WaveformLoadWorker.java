@@ -22,18 +22,18 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
+    private final File file;
+    private final ProgressMonitor progressMonitor;
+    private final WaveformDataModel newModel = new WaveformDataModel();
+    private final LoadFinishedHandler finishHandler;
+    private String errorMessage;
+
     public interface LoadFinishedHandler {
         // On success, error message will be null.
         // If an error occurs, errorMessage will be set.
         void handleLoadSuccess(WaveformDataModel newModel);
         void handleLoadError(String errorMessage);
     }
-
-    private final File file;
-    private final ProgressMonitor progressMonitor;
-    private final WaveformDataModel newModel = new WaveformDataModel();
-    private String errorMessage;
-    private LoadFinishedHandler finishHandler;
 
     public WaveformLoadWorker(File file, ProgressMonitor progressMonitor, LoadFinishedHandler finishHandler) {
         this.file = file;

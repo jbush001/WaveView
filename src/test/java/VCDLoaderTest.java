@@ -24,9 +24,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -44,9 +45,9 @@ public class VCDLoaderTest {
     File tempFileFrom(String contents) {
         try {
             File f = tempFolder.newFile("test.vcd");
-            FileOutputStream fos = new FileOutputStream(f);
-            fos.write(contents.getBytes(StandardCharsets.US_ASCII));
-            fos.close();
+            OutputStream os = Files.newOutputStream(f.toPath());
+            os.write(contents.getBytes(StandardCharsets.US_ASCII));
+            os.close();
             return f;
         } catch (IOException exc) {
             // Expected
@@ -486,7 +487,7 @@ public class VCDLoaderTest {
     @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void interruptedLoad() throws IOException {
-        StringBuilder vcdContents = new StringBuilder();
+        StringBuilder vcdContents = new StringBuilder(0x20000);
         vcdContents.append("$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
         for (int i = 0; i < 10000; i++) {
             vcdContents.append('#');

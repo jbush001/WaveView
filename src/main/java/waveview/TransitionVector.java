@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
 /// of the waveform.  They are assumed to have the value of the first transition.
 ///
 public final class TransitionVector {
-    private int width; // Number of bits for this net
+    private final int width; // Number of bits for this net
     private long[] timestamps;
 
     // Values are packed into this array. Each bit in the output requires two
@@ -117,15 +117,15 @@ public final class TransitionVector {
 
             // Copy values out of packed array
             for (int i = 0; i < width; i++) {
-                transition.setBit(width - i - 1, BitValue.fromOrdinal(currentWord & 3));
-                bitOffset += 2;
                 if (bitOffset == 32) {
                     wordOffset++;
                     currentWord = packedValues[wordOffset];
                     bitOffset = 0;
-                } else {
-                    currentWord >>= 2;
                 }
+
+                transition.setBit(width - i - 1, BitValue.fromOrdinal(currentWord & 3));
+                bitOffset += 2;
+                currentWord >>= 2;
             }
 
             transition.setTimestamp(timestamps[index]);
@@ -144,8 +144,12 @@ public final class TransitionVector {
         private final TransitionVector vector;
         private int allocSize;
 
-        public Builder(int width) {
-            vector = new TransitionVector(width);
+        public static Builder createBuilder(int width) {
+            return new Builder(new TransitionVector(width));
+        }
+
+        private Builder(TransitionVector vector) {
+            this.vector = vector;
         }
 
         public TransitionVector getTransitionVector() {

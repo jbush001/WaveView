@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public final class EnumValueFormatter implements ValueFormatter {
 
     public EnumValueFormatter(File mappingFile) throws IOException {
         this.mappingFile = mappingFile;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(mappingFile), "UTF8"))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(mappingFile.toPath()), "UTF8"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.split(" ", 0);
