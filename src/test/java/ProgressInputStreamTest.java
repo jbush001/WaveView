@@ -54,6 +54,14 @@ public class ProgressInputStreamTest {
     }
 
     @Test
+    public void testReadByteEnd() throws IOException {
+        when(inputStream.read()).thenReturn(-1);
+        assertEquals(-1, progressInputStream.read());
+        assertEquals(0, progressInputStream.getTotalRead());
+    }
+
+
+    @Test
     public void testReadByteProgress() throws IOException {
         when(inputStream.read()).thenReturn(0);
 
@@ -117,6 +125,14 @@ public class ProgressInputStreamTest {
     }
 
     @Test
+    public void testReadArrayEnd() throws IOException {
+        when(inputStream.read(any(byte[].class))).thenReturn(-1);
+        byte[] tmp1 = new byte[1];
+        assertEquals(-1, progressInputStream.read(tmp1));
+        assertEquals(0, progressInputStream.getTotalRead());
+    }
+
+    @Test
     public void testReadArrayWithOffset() throws IOException {
         final int BYTES_REQUESTED = 13;
         final int BYTES_RETURNED = 10;
@@ -169,10 +185,16 @@ public class ProgressInputStreamTest {
     }
 
     @Test
+    public void testReadArrayOffsetEnd() throws IOException {
+        when(inputStream.read(any(byte[].class), anyInt(), anyInt())).thenReturn(-1);
+        byte[] tmp1 = new byte[3];
+        assertEquals(-1, progressInputStream.read(tmp1, 1, 1));
+        assertEquals(0, progressInputStream.getTotalRead());
+    }
+
+    @Test
     public void close() throws IOException {
         progressInputStream.close();
         verify(inputStream).close();
     }
-
-    // XXX return end of stream (negative count) from these methods, ensure the count is correct.
 }

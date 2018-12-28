@@ -44,7 +44,7 @@ public final class ProgressInputStream extends InputStream {
     @Override
     public int read() throws IOException {
         int got = wrapped.read();
-        if (got >= 0) {
+        if (got != -1) {
             totalRead++;
             maybeNotifyListener();
         }
@@ -55,7 +55,7 @@ public final class ProgressInputStream extends InputStream {
     @Override
     public int read(byte[] b) throws IOException {
         int got = wrapped.read(b);
-        if (got >= 0) {
+        if (got != -1) {
             totalRead += got;
             maybeNotifyListener();
         }
@@ -66,7 +66,7 @@ public final class ProgressInputStream extends InputStream {
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         int got = wrapped.read(b, off, len);
-        if (got >= 0) {
+        if (got != -1) {
             totalRead += got;
             maybeNotifyListener();
         }
@@ -79,7 +79,7 @@ public final class ProgressInputStream extends InputStream {
     }
 
     private void maybeNotifyListener() throws IOException{
-        if (listener != null && totalRead - lastProgressUpdate >= updateInterval) {
+        if (totalRead - lastProgressUpdate >= updateInterval) {
             listener.updateProgress(totalRead);
             lastProgressUpdate = totalRead;
         }
