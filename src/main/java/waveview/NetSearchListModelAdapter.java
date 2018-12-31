@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
+import javax.swing.ListModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import javax.swing.ListModel;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 
 ///
 /// This is the data model for the list of all nets. The user may type in
