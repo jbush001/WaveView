@@ -284,8 +284,8 @@ public final class MainWindow extends JPanel implements ActionListener {
             }
         } catch (IOException exc) {
             JOptionPane.showMessageDialog(null, exc.getMessage(),
-              "Error reading waveform settings. The waveform has loaded, but previous view configuration was not restored",
-              JOptionPane.ERROR_MESSAGE);
+                "Error reading waveform settings. The waveform has loaded, but previous view configuration was not restored",
+                JOptionPane.ERROR_MESSAGE);
         }
 
         buildRecentFilesMenu();

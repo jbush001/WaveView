@@ -20,7 +20,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import org.junit.Test;
-import waveview.ASCIIValueFormatter;
+import waveview.AsciiValueFormatter;
 import waveview.BinaryValueFormatter;
 import waveview.BitVector;
 import waveview.DecimalValueFormatter;
@@ -57,7 +57,7 @@ public class ValueFormatterTest {
 
     @Test
     public void asciiValueFormatter() {
-        ASCIIValueFormatter bf = new ASCIIValueFormatter();
+        AsciiValueFormatter bf = new AsciiValueFormatter();
         assertEquals("A", bf.format(new BitVector("01000001", 2)));
         assertEquals("!", bf.format(new BitVector("00100001", 2)));
         assertEquals("{", bf.format(new BitVector("01111011", 2)));

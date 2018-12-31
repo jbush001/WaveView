@@ -30,7 +30,7 @@ import javax.swing.JPanel;
 
 final class WaveformView extends JPanel implements MouseListener, MouseMotionListener, WaveformPresentationModel.Listener {
 
-    private static final float DOT_DESCRIPTION[] = { 2.0f, 4.0f };
+    private static final float[] DOT_DESCRIPTION = { 2.0f, 4.0f };
     private static final Stroke DOTTED_STROKE = new BasicStroke(1, 0, 0, 10, DOT_DESCRIPTION, 0);
     private static final Stroke SOLID_STROKE = new BasicStroke(1);
     private final SingleBitPainter singleBitPainter = new SingleBitPainter();

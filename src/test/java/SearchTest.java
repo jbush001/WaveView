@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import org.junit.Test;
 import waveview.BitValue;
 import waveview.BitVector;
@@ -59,9 +60,9 @@ public class SearchTest {
         BitVector bv = new BitVector(1);
         for (int t = 0; t < 16; t++)
         {
-            for (int bit = 0; bit < 4; bit++){
+            for (int bit = 0; bit < 4; bit++) {
                 bv.setBit(0, BitValue.fromOrdinal((t >> (3 - bit)) & 1));
-                    builder.appendTransition(bit, t, bv);
+                builder.appendTransition(bit, t, bv);
                 System.out.println("    .appendTransition(" + bit + ", " + t + ", " + bv + ")");
             }
         }

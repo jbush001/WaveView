@@ -62,7 +62,7 @@ public final class VCDLoader implements WaveformLoader {
         try (InputStream inputStream = Files.newInputStream(file.toPath()))  {
             long updateInterval = fileLength / 100;
             InputStream progressStream = new ProgressInputStream(inputStream,
-                    (totalRead) -> updateProgress(totalRead), updateInterval);
+                (totalRead) -> updateProgress(totalRead), updateInterval);
             initTokenizer(progressStream);
             parseFile();
         }

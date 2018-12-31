@@ -23,9 +23,10 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import java.io.File;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.Rule;
@@ -56,13 +57,13 @@ public class VCDLoaderTest {
         }
     }
 
-    File testFile(String name) {
+    File getTestFile(String name) {
         return new File("src/test/resources/vcd/" + name);
     }
 
     @Test
     public void timescaleFs() throws IOException {
-        new VCDLoader().load(testFile("timescale-fs.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-fs.vcd"), builder, null);
         verify(builder).setTimescale(-15);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -70,7 +71,7 @@ public class VCDLoaderTest {
 
     @Test
     public void timescalePs() throws IOException {
-        new VCDLoader().load(testFile("timescale-ps.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-ps.vcd"), builder, null);
         verify(builder).setTimescale(-12);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -78,7 +79,7 @@ public class VCDLoaderTest {
 
     @Test
     public void timescaleNs() throws IOException {
-        new VCDLoader().load(testFile("timescale-ns.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-ns.vcd"), builder, null);
         verify(builder).setTimescale(-9);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -86,7 +87,7 @@ public class VCDLoaderTest {
 
     @Test
     public void timescaleUs() throws IOException {
-        new VCDLoader().load(testFile("timescale-us.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-us.vcd"), builder, null);
         verify(builder).setTimescale(-6);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -94,7 +95,7 @@ public class VCDLoaderTest {
 
     @Test
     public void timescaleMs() throws IOException {
-        new VCDLoader().load(testFile("timescale-ms.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-ms.vcd"), builder, null);
         verify(builder).setTimescale(-3);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -102,7 +103,7 @@ public class VCDLoaderTest {
 
     @Test
     public void timescaleS() throws IOException {
-        new VCDLoader().load(testFile("timescale-s.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-s.vcd"), builder, null);
         verify(builder).setTimescale(0);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -111,7 +112,7 @@ public class VCDLoaderTest {
     // Ensure it handles both the unit and the number correctly.
     @Test
     public void timescale10Us() throws IOException {
-        new VCDLoader().load(testFile("timescale-10us.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-10us.vcd"), builder, null);
         verify(builder).setTimescale(-5);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -119,7 +120,7 @@ public class VCDLoaderTest {
 
     @Test
     public void timescale100Us() throws IOException {
-        new VCDLoader().load(testFile("timescale-100us.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-100us.vcd"), builder, null);
         verify(builder).setTimescale(-4);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -129,7 +130,7 @@ public class VCDLoaderTest {
     // the timescale definition.
     @Test
     public void timescaleSpace() throws IOException {
-        new VCDLoader().load(testFile("timescale-space.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timescale-space.vcd"), builder, null);
         verify(builder).setTimescale(-12);
         verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
@@ -139,7 +140,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidFile() throws IOException {
         try {
-            new VCDLoader().load(testFile("invalid_file_shasdjkfhaldkfhadfhadsjkfhadsf.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("invalid_file_shasdjkfhaldkfhadfhadsjkfhadsf.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (IOException exc) {
             // Expected
@@ -150,7 +151,7 @@ public class VCDLoaderTest {
     @Test
     public void unknownTimescale() throws IOException {
         try {
-            new VCDLoader().load(testFile("unknown-timescale.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("unknown-timescale.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -162,7 +163,7 @@ public class VCDLoaderTest {
     @Test
     public void timescaleMissingUnit() throws IOException {
         try {
-            new VCDLoader().load(testFile("timescale-missing-unit.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("timescale-missing-unit.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -174,7 +175,7 @@ public class VCDLoaderTest {
     @Test
     public void timescaleBadValue() throws IOException {
         try {
-            new VCDLoader().load(testFile("timescale-bad-value.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("timescale-bad-value.vcd"), builder, null);
             fail("didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -186,7 +187,7 @@ public class VCDLoaderTest {
     // (for example $date, $version)
     @Test
     public void unknownHeaderFields() throws IOException {
-        new VCDLoader().load(testFile("unknown-header-fields.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("unknown-header-fields.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-6);
@@ -203,7 +204,7 @@ public class VCDLoaderTest {
     // last value silently.
     @Test
     public void timestampOutOfOrder() throws IOException {
-        new VCDLoader().load(testFile("timestamp-out-of-order.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timestamp-out-of-order.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
@@ -226,7 +227,7 @@ public class VCDLoaderTest {
     // $var wire 3 B data[2:0] $end
     @Test
     public void multibit() throws IOException {
-        new VCDLoader().load(testFile("multibit.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("multibit.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
@@ -251,7 +252,7 @@ public class VCDLoaderTest {
 
     @Test
     public void bitSelectNoSpace() throws IOException {
-        new VCDLoader().load(testFile("bit-select-no-space.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("bit-select-no-space.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).enterScope("mod1");
@@ -263,7 +264,7 @@ public class VCDLoaderTest {
 
     @Test
     public void bitSelectSpace() throws IOException {
-        new VCDLoader().load(testFile("bit-select-space.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("bit-select-space.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).enterScope("mod1");
@@ -275,7 +276,7 @@ public class VCDLoaderTest {
 
     @Test
     public void padding() throws IOException {
-        new VCDLoader().load(testFile("padding.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("padding.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
@@ -293,7 +294,7 @@ public class VCDLoaderTest {
     // Test that $dumpvars is handled correctly
     @Test
     public void dumpvars() throws IOException {
-        new VCDLoader().load(testFile("dumpvars.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("dumpvars.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
@@ -316,7 +317,7 @@ public class VCDLoaderTest {
     @Test
     public void unknownNetId() throws IOException {
         try {
-            new VCDLoader().load(testFile("unknown-net-id.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("unknown-net-id.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -328,7 +329,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidValueType() throws IOException {
         try {
-            new VCDLoader().load(testFile("bad-transition-type.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("bad-transition-type.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -340,7 +341,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidScope() throws IOException {
         try {
-            new VCDLoader().load(testFile("scope-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("scope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -352,7 +353,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidUpscope() throws IOException {
         try {
-            new VCDLoader().load(testFile("upscope-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("upscope-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -364,7 +365,7 @@ public class VCDLoaderTest {
     @Test
     public void varParseError() throws IOException {
         try {
-            new VCDLoader().load(testFile("var-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("var-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -376,7 +377,7 @@ public class VCDLoaderTest {
     @Test
     public void timescaleParseError() throws IOException {
         try {
-            new VCDLoader().load(testFile("timescale-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("timescale-parse-error.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -388,7 +389,7 @@ public class VCDLoaderTest {
     @Test
     public void invalidLogicValue() throws IOException {
         try {
-            new VCDLoader().load(testFile("invalid-logic-value.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("invalid-logic-value.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -400,7 +401,7 @@ public class VCDLoaderTest {
     @Test
     public void truncatedFile() throws IOException {
         try {
-            new VCDLoader().load(testFile("truncated.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("truncated.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -413,7 +414,7 @@ public class VCDLoaderTest {
     @Test
     public void realValueType() throws IOException {
         try {
-            new VCDLoader().load(testFile("real-value.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("real-value.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -425,7 +426,7 @@ public class VCDLoaderTest {
     @Test
     public void aliasWidthMismatch() throws IOException {
         try {
-            new VCDLoader().load(testFile("alias-bad-width.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("alias-bad-width.vcd"), builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -435,7 +436,7 @@ public class VCDLoaderTest {
 
     @Test
     public void waveformAlias() throws IOException {
-        new VCDLoader().load(testFile("waveform-alias.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("waveform-alias.vcd"), builder, null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).enterScope("mod1");
@@ -516,7 +517,7 @@ public class VCDLoaderTest {
     public void accellera() throws IOException {
         InOrder ord = inOrder(builder);
 
-        new VCDLoader().load(testFile("accellera.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("accellera.vcd"), builder, null);
 
         ord.verify(builder).setTimescale(-12);
         ord.verify(builder).enterScope("SystemC");

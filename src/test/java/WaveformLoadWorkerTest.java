@@ -15,14 +15,15 @@
 //
 
 import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
+
 import java.io.File;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class WaveformLoadWorkerTest {
     }
 
     @Test
-    public void testLoadSuccess() throws IOException, TimeoutException {
+    public void loadSuccess() throws IOException, TimeoutException {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(false);
         doAnswer(new Answer<Void>() {
@@ -133,7 +134,7 @@ public class WaveformLoadWorkerTest {
     }
 
     @Test
-    public void testLoadError() throws TimeoutException {
+    public void loadError() throws TimeoutException {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(false);
         File loadFile = new File("adsfhadkjhfakldshfasdfadsf"); // Shouldn't exist
@@ -145,7 +146,7 @@ public class WaveformLoadWorkerTest {
     }
 
     @Test
-    public void testLoadCancelled() throws IOException, TimeoutException {
+    public void loadCancelled() throws IOException, TimeoutException {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(true);
         File loadFile = makeVcdFile();

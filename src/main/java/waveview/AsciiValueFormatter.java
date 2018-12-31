@@ -16,7 +16,7 @@
 
 package waveview;
 
-public final class ASCIIValueFormatter implements ValueFormatter {
+public final class AsciiValueFormatter implements ValueFormatter {
     @Override
     public String format(BitVector bits) {
         return Character.toString((char) bits.intValue());

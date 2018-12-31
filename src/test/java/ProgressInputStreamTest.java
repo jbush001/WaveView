@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,14 +48,14 @@ public class ProgressInputStreamTest {
     }
 
     @Test
-    public void testReadByte() throws IOException {
+    public void readByte() throws IOException {
         when(inputStream.read()).thenReturn(17);
         assertEquals(17, progressInputStream.read());
         assertEquals(1, progressInputStream.getTotalRead());
     }
 
     @Test
-    public void testReadByteEnd() throws IOException {
+    public void readByteEnd() throws IOException {
         when(inputStream.read()).thenReturn(-1);
         assertEquals(-1, progressInputStream.read());
         assertEquals(0, progressInputStream.getTotalRead());
@@ -62,7 +63,7 @@ public class ProgressInputStreamTest {
 
 
     @Test
-    public void testReadByteProgress() throws IOException {
+    public void readByteProgress() throws IOException {
         when(inputStream.read()).thenReturn(0);
 
         progressInputStream.read();
@@ -76,7 +77,7 @@ public class ProgressInputStreamTest {
     }
 
     @Test
-    public void testReadArray() throws IOException {
+    public void readArray() throws IOException {
         final int BYTES_REQUESTED = 15;
         final int BYTES_RETURNED = 12;
 
@@ -104,7 +105,7 @@ public class ProgressInputStreamTest {
 
     @Test
     @SuppressFBWarnings({"RR_NOT_CHECKED"})
-    public void testReadArrayProgress() throws IOException {
+    public void readArrayProgress() throws IOException {
         when(inputStream.read(any(byte[].class))).thenAnswer(new Answer<Integer>() {
             @Override
             public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -125,7 +126,7 @@ public class ProgressInputStreamTest {
     }
 
     @Test
-    public void testReadArrayEnd() throws IOException {
+    public void readArrayEnd() throws IOException {
         when(inputStream.read(any(byte[].class))).thenReturn(-1);
         byte[] tmp1 = new byte[1];
         assertEquals(-1, progressInputStream.read(tmp1));
@@ -133,7 +134,7 @@ public class ProgressInputStreamTest {
     }
 
     @Test
-    public void testReadArrayWithOffset() throws IOException {
+    public void readArrayWithOffset() throws IOException {
         final int BYTES_REQUESTED = 13;
         final int BYTES_RETURNED = 10;
         final int REQUEST_OFFSET = 7;
@@ -164,7 +165,7 @@ public class ProgressInputStreamTest {
 
     @Test
     @SuppressFBWarnings({"RR_NOT_CHECKED"})
-    public void testReadArrayWithOffsetProgress() throws IOException {
+    public void readArrayWithOffsetProgress() throws IOException {
         when(inputStream.read(any(byte[].class), anyInt(), anyInt())).thenAnswer(new Answer<Integer>() {
             @Override
             public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
@@ -185,7 +186,7 @@ public class ProgressInputStreamTest {
     }
 
     @Test
-    public void testReadArrayOffsetEnd() throws IOException {
+    public void readArrayOffsetEnd() throws IOException {
         when(inputStream.read(any(byte[].class), anyInt(), anyInt())).thenReturn(-1);
         byte[] tmp1 = new byte[3];
         assertEquals(-1, progressInputStream.read(tmp1, 1, 1));

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import org.junit.Before;
@@ -68,7 +69,7 @@ public class NetSearchListModelAdapterTest {
     }
 
     @Test
-    public void testPartialMatch1() {
+    public void partialMatch1() {
         nslma.setPattern("foo");
         verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
                 ListDataEvent.CONTENTS_CHANGED, 0, 4)));
@@ -81,7 +82,7 @@ public class NetSearchListModelAdapterTest {
     }
 
     @Test
-    public void testPartialMatch2() {
+    public void partialMatch2() {
         nslma.setPattern("bbbb");
         verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
                 ListDataEvent.CONTENTS_CHANGED, 0, 2)));
@@ -92,7 +93,7 @@ public class NetSearchListModelAdapterTest {
     }
 
     @Test
-    public void testNoMatch() {
+    public void noMatch() {
         nslma.setPattern("z");
         verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
                 ListDataEvent.CONTENTS_CHANGED, 0, 0)));
@@ -103,7 +104,7 @@ public class NetSearchListModelAdapterTest {
     // When starting this test, there is already a data listener registered
     // Ensure the second one works correctly.
     @Test
-    public void testAdd2ndDataListener() {
+    public void add2ndDataListener() {
         ListDataListener listener2 = mock(ListDataListener.class);
         nslma.addListDataListener(listener2);
         nslma.setPattern("z");
@@ -111,7 +112,7 @@ public class NetSearchListModelAdapterTest {
     }
 
     @Test
-    public void testRemoveDataListener() {
+    public void removeDataListener() {
         ListDataListener listener2 = mock(ListDataListener.class);
         nslma.addListDataListener(listener2);
         nslma.removeListDataListener(listener2);

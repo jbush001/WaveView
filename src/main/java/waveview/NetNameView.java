@@ -32,7 +32,6 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -349,7 +348,7 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
                 formatter = new DecimalValueFormatter();
                 break;
             case "ASCII":
-                formatter = new ASCIIValueFormatter();
+                formatter = new AsciiValueFormatter();
                 break;
             default:
                 System.out.println("NetNameView: unknown action " + e.getActionCommand());

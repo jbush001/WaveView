@@ -18,6 +18,7 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -75,7 +76,7 @@ public class WaveformSettingsFileTest {
             .exitScope()
             .loadFinished();
 
-        NetDataModel netDataModels[] = new NetDataModel[5];
+        NetDataModel[] netDataModels = new NetDataModel[5];
         int index = 0;
         for (NetDataModel model : dataModel) {
             netDataModels[index++] = model;
@@ -129,7 +130,7 @@ public class WaveformSettingsFileTest {
             .exitScope()
             .loadFinished();
 
-        NetDataModel netDataModels[] = new NetDataModel[4];
+        NetDataModel[] netDataModels = new NetDataModel[4];
         int index = 0;
         for (NetDataModel model : dataModel) {
             netDataModels[index++] = model;

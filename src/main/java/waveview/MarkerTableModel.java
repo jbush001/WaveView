@@ -23,7 +23,7 @@ import javax.swing.table.AbstractTableModel;
 ///
 
 public final class MarkerTableModel extends AbstractTableModel {
-    private static final String COLUMN_NAMES[] = { "ID", "Timestamp", "Comment" };
+    private static final String[] COLUMN_NAMES = { "ID", "Timestamp", "Comment" };
     private final WaveformPresentationModel waveformPresentationModel;
 
     public MarkerTableModel(WaveformPresentationModel waveformPresentationModel) {

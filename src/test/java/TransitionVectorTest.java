@@ -19,6 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import org.junit.Test;
@@ -245,7 +246,7 @@ public class TransitionVectorTest {
     // this will hit the end of the allocated array even if the allocator
     // changes (I'm assuming power of two)
     @Test
-    public void lastTransition() {
+    public void transitionAtArrayEnd() {
         final int NUM_BITS = 1024 * 32;
         TransitionVector.Builder builder = TransitionVector.Builder.createBuilder(1);
         for (int i = 0; i < NUM_BITS; i++) {

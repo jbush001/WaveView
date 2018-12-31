@@ -20,13 +20,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+
 import java.util.Iterator;
 import org.junit.Test;
 import waveview.BitVector;
 import waveview.NetDataModel;
 import waveview.NetTreeModel;
-import waveview.WaveformDataModel;
 import waveview.Transition;
+import waveview.WaveformDataModel;
 
 public class WaveformDataModelTest {
     private final WaveformDataModel model = new WaveformDataModel();
