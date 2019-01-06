@@ -16,7 +16,6 @@
 
 package waveview.search;
 
-import waveview.BitVector;
 import waveview.NetDataModel;
 import waveview.Transition;
 import waveview.WaveformDataModel;
@@ -28,8 +27,6 @@ import waveview.WaveformDataModel;
 /// for fast searching, skipping events that cannot meet the criteria.
 ///
 /// @todo Support slice multi-net matches
-/// XXX The term 'match' is overloaded here: it refers in some places to the act of searching,
-/// and others in parsing.
 ///
 public final class Search {
     private final WaveformDataModel waveformDataModel;
