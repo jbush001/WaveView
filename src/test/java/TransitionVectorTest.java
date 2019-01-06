@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Random;
 import org.junit.Test;
 import waveview.BitValue;
 import waveview.BitVector;
@@ -29,10 +30,13 @@ import waveview.Transition;
 import waveview.TransitionVector;
 
 public class TransitionVectorTest {
-    private void makeBitVectorFromInt(BitVector vec, int value) {
+    private BitVector makeBitVectorFromInt(int width, int value) {
+        BitVector vec = new BitVector(width);
         for (int i = 0; i < vec.getWidth(); i++) {
             vec.setBit(i, BitValue.fromOrdinal((value >> i) & 1));
         }
+
+        return vec;
     }
 
     @Test
@@ -208,9 +212,8 @@ public class TransitionVectorTest {
     @Test
     public void largeTransitionVector() {
         TransitionVector.Builder builder = TransitionVector.Builder.createBuilder(16);
-        BitVector bvec = new BitVector(16);
         for (int idx = 0; idx < 100000; idx++) {
-            makeBitVectorFromInt(bvec, idx);
+            BitVector bvec = makeBitVectorFromInt(16, idx);
             builder.appendTransition(idx * 5, bvec);
         }
 
@@ -218,11 +221,43 @@ public class TransitionVectorTest {
 
         Iterator<Transition> iter = tvec.findTransition(0);
         for (int idx = 0; idx < 100000; idx++) {
-            makeBitVectorFromInt(bvec, idx);
+            BitVector bvec = makeBitVectorFromInt(16, idx);
             Transition t = iter.next();
             assertEquals(idx * 5, t.getTimestamp());
             assertEquals(0, t.compare(bvec));
         }
+    }
+
+    // Each value in the vector is larger than a word (the underlying storage size)
+    // This validates logic within the iterator that increments to the next word.
+    @Test
+    public void wideValue() {
+        final int VEC_WIDTH = 65;
+
+        TransitionVector.Builder builder = TransitionVector.Builder.createBuilder(VEC_WIDTH);
+        BitVector bvec1 = new BitVector(VEC_WIDTH);
+        BitVector bvec2 = new BitVector(VEC_WIDTH);
+        BitVector bvec3 = new BitVector(VEC_WIDTH);
+        Random random = new Random();
+
+        for (int i = 0; i < VEC_WIDTH; i++) {
+            bvec1.setBit(i, random.nextBoolean() ? BitValue.ONE : BitValue.ZERO);
+            bvec2.setBit(i, random.nextBoolean() ? BitValue.ONE : BitValue.ZERO);
+            bvec3.setBit(i, random.nextBoolean() ? BitValue.ONE : BitValue.ZERO);
+        }
+
+        builder.appendTransition(10, bvec1);
+        builder.appendTransition(20, bvec2);
+        builder.appendTransition(30, bvec3);
+
+        TransitionVector tvec = builder.getTransitionVector();
+        Iterator<Transition> iter = tvec.findTransition(0);
+        Transition t = iter.next();
+        assertEquals(0, t.compare(bvec1));
+        t = iter.next();
+        assertEquals(0, t.compare(bvec2));
+        t = iter.next();
+        assertEquals(0, t.compare(bvec3));
     }
 
     @Test
@@ -242,9 +277,9 @@ public class TransitionVectorTest {
     }
 
     // Regression test: array out of bounds exception was thrown when reading last
-    // transition if it was word aligned. I allocate a large buffer to ensure
+    // transition if it was word aligned. Allocate a large buffer to ensure
     // this will hit the end of the allocated array even if the allocator
-    // changes (I'm assuming power of two)
+    // changes (assuming power of two)
     @Test
     public void transitionAtArrayEnd() {
         final int NUM_BITS = 1024 * 32;
