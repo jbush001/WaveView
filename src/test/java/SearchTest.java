@@ -236,8 +236,8 @@ public class SearchTest {
         } catch (SearchFormatException exc) {
             // Expected
             assertEquals("unexpected end of string", exc.getMessage());
-            assertEquals(10, exc.getStartOffset());
-            assertEquals(10, exc.getEndOffset());
+            assertEquals(11, exc.getStartOffset());
+            assertEquals(11, exc.getEndOffset());
         }
     }
 
@@ -263,7 +263,7 @@ public class SearchTest {
             // Expected
             assertEquals("unknown type q", exc.getMessage());
             assertEquals(11, exc.getStartOffset());
-            assertEquals(11, exc.getEndOffset());
+            assertEquals(12, exc.getEndOffset());
         }
     }
 

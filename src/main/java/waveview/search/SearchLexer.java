@@ -1,5 +1,5 @@
 //
-// Copyright 2011-2012 Jeff Bush
+// Copyright 2011-2019 Jeff Bush
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,86 +19,92 @@ package waveview.search;
 import waveview.BitVector;
 
 final class SearchLexer {
-    static final int TOK_IDENTIFIER = 1000;
-    static final int TOK_END = 1001;
-    static final int TOK_LITERAL = 1002;
-    static final int TOK_GREATER = 1003;
-    static final int TOK_GREATER_EQUAL = 1004;
-    static final int TOK_LESS_THAN = 1005;
-    static final int TOK_LESS_EQUAL = 1006;
-    static final int TOK_NOT_EQUAL = 1007;
-
     private enum State {
         SCAN_INIT, SCAN_IDENTIFIER, SCAN_LITERAL_TYPE, SCAN_GEN_NUM, SCAN_GREATER, SCAN_LESS, SCAN_BINARY,
         SCAN_DECIMAL, SCAN_HEXADECIMAL
     }
 
     private int lexerOffset;
-    private final StringBuilder currentTokenValue = new StringBuilder();
-    private int pushedBackChar = -1;
-    private int pushedBackToken = -1;
-    private int tokenStart;
-    private BitVector literalValue;
+    private boolean pushedBackToken = false;
+    private Token lastToken;
     private final String searchString;
 
     SearchLexer(String searchString) {
         this.searchString = searchString;
     }
 
-    int nextToken() throws SearchFormatException {
-        if (pushedBackToken != -1) {
-            int token = pushedBackToken;
-            pushedBackToken = -1;
-            return token;
+    Token nextToken() throws SearchFormatException {
+        if (pushedBackToken) {
+            pushedBackToken = false;
+            return lastToken;
         }
 
+        lastToken = scanNextToken();
+        return lastToken;
+    }
+
+    void pushBackToken() {
+        assert !pushedBackToken;
+
+        pushedBackToken = true;
+    }
+
+    private Token scanNextToken() throws SearchFormatException {
+        StringBuilder currentTokenValue = new StringBuilder();
+        int tokenStart = lexerOffset;
         State state = State.SCAN_INIT;
-        currentTokenValue.setLength(0);
 
         for (;;) {
             int c = nextChar();
 
+            System.out.println("state " + state.toString() + " offset " + lexerOffset + " char " + (char) c);
             switch (state) {
                 case SCAN_INIT:
                     tokenStart = lexerOffset - 1;
                     if (c == -1) {
-                        return TOK_END;
+                        return new Token(Token.Type.END, lexerOffset - 1, c);
                     } else if (c == '\'') {
                         state = State.SCAN_LITERAL_TYPE;
                     } else if (isAlpha(c)) {
-                        pushedBackChar = c;
+                        pushBackChar();
                         state = State.SCAN_IDENTIFIER;
                     } else if (isNum(c)) {
-                        pushedBackChar = c;
+                        pushBackChar();
                         state = State.SCAN_DECIMAL;
                     } else if (c == '>') {
                         state = State.SCAN_GREATER;
                     } else if (c == '<') {
                         state = State.SCAN_LESS;
+                    } else if (c == '(') {
+                        return new Token(Token.Type.LPAREN, lexerOffset - 1, c);
+                    } else if (c == ')') {
+                        return new Token(Token.Type.RPAREN, lexerOffset - 1, c);
+                    } else if (c == '=') {
+                        return new Token(Token.Type.EQUAL, lexerOffset - 1, c);
                     } else if (!isSpace(c)) {
-                        return c;
+                        throw new SearchFormatException("unknown character " + (char) c, lexerOffset - 1, lexerOffset - 1);
                     }
 
                     break;
 
                 case SCAN_GREATER:
                     if (c == '<') {
-                        return TOK_NOT_EQUAL;
+                        return new Token(Token.Type.NOT_EQUAL, tokenStart, c);
                     } else if (c == '=') {
-                        return TOK_GREATER_EQUAL;
+                        return new Token(Token.Type.GREATER_EQUAL, tokenStart, c);
                     } else {
-                        pushedBackChar = c;
-                        return TOK_GREATER;
+                        pushBackChar();
+                        return new Token(Token.Type.GREATER, tokenStart, c);
                     }
 
                 case SCAN_LESS:
                     if (c == '>') {
-                        return TOK_NOT_EQUAL;
+                        return new Token(Token.Type.NOT_EQUAL, tokenStart, c);
                     } else if (c == '=') {
-                        return TOK_LESS_EQUAL;
+                        return new Token(Token.Type.LESS_EQUAL, tokenStart, c);
                     } else {
-                        pushedBackChar = c;
-                        return TOK_LESS_THAN;
+                        pushBackChar();
+                        return new Token(Token.Type.LESS_THAN, tokenStart, c);
                     }
 
                 case SCAN_IDENTIFIER:
@@ -108,8 +114,9 @@ final class SearchLexer {
                         currentTokenValue.append((char) c);
                         state = State.SCAN_GEN_NUM;
                     } else {
-                        pushedBackChar = c;
-                        return TOK_IDENTIFIER;
+                        pushBackChar();
+                        return new Token(Token.Type.IDENTIFIER, tokenStart, lexerOffset - 1,
+                            currentTokenValue.toString(), null);
                     }
 
                     break;
@@ -130,7 +137,7 @@ final class SearchLexer {
                     } else if (c == 'd') {
                         state = State.SCAN_DECIMAL;
                     } else {
-                        throw new SearchFormatException("unknown type " + (char) c, getTokenStart(), getTokenEnd());
+                        throw new SearchFormatException("unknown type " + (char) c, tokenStart, lexerOffset - 1);
                     }
 
                     break;
@@ -139,9 +146,10 @@ final class SearchLexer {
                     if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z') {
                         currentTokenValue.append((char) c);
                     } else {
-                        literalValue = new BitVector(getTokenString(), 2);
-                        pushedBackChar = c;
-                        return TOK_LITERAL;
+                        BitVector literalValue = new BitVector(currentTokenValue.toString(), 2);
+                        pushBackChar();
+                        return new Token(Token.Type.LITERAL, tokenStart, lexerOffset - 1,
+                                currentTokenValue.toString(), literalValue);
                     }
 
                     break;
@@ -150,9 +158,10 @@ final class SearchLexer {
                     if (c >= '0' && c <= '9') {
                         currentTokenValue.append((char) c);
                     } else {
-                        literalValue = new BitVector(getTokenString(), 10);
-                        pushedBackChar = c;
-                        return TOK_LITERAL;
+                        BitVector literalValue = new BitVector(currentTokenValue.toString(), 10);
+                        pushBackChar();
+                        return new Token(Token.Type.LITERAL, tokenStart, lexerOffset - 1,
+                                currentTokenValue.toString(), literalValue);
                     }
 
                     break;
@@ -161,9 +170,10 @@ final class SearchLexer {
                     if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z') {
                         currentTokenValue.append((char) c);
                     } else {
-                        literalValue = new BitVector(getTokenString(), 16);
-                        pushedBackChar = c;
-                        return TOK_LITERAL;
+                        BitVector literalValue = new BitVector(currentTokenValue.toString(), 16);
+                        pushBackChar();
+                        return new Token(Token.Type.LITERAL, tokenStart, lexerOffset - 1,
+                                currentTokenValue.toString(), literalValue);
                     }
 
                     break;
@@ -171,24 +181,19 @@ final class SearchLexer {
         }
     }
 
-    int nextChar() {
-        int c;
-        if (pushedBackChar == -1) {
-            if (lexerOffset == searchString.length()) {
-                c = -1;
-            } else {
-                c = searchString.charAt(lexerOffset++);
-            }
-        } else {
-            c = pushedBackChar;
-            pushedBackChar = -1;
+    private int nextChar() {
+        assert lexerOffset <= searchString.length() + 1;
+
+        if (lexerOffset == searchString.length()) {
+            lexerOffset++;
+            return -1;
         }
 
-        return c;
+        return searchString.charAt(lexerOffset++);
     }
 
-    void pushBackToken(int tok) {
-        pushedBackToken = tok;
+    private void pushBackChar() {
+        lexerOffset--;
     }
 
     private static boolean isAlpha(int value) {
@@ -209,25 +214,5 @@ final class SearchLexer {
 
     private static boolean isSpace(int value) {
         return value == ' ' || value == '\t' || value == '\n' || value == '\r';
-    }
-
-    String getTokenString() {
-        return currentTokenValue.toString();
-    }
-
-    BitVector getLiteralValue() {
-        return literalValue;
-    }
-
-    int getTokenStart() {
-        return tokenStart;
-    }
-
-    int getTokenEnd() {
-        if (currentTokenValue.length() == 0) {
-            return tokenStart;
-        } else {
-            return tokenStart + currentTokenValue.length() - 1;
-        }
     }
 }
