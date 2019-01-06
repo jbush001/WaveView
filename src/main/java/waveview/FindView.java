@@ -32,6 +32,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
+import waveview.search.Search;
+import waveview.search.SearchFormatException;
 
 class FindView extends JPanel implements ActionListener {
     private final MainWindow mainWindow;

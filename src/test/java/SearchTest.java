@@ -23,10 +23,10 @@ import org.junit.Test;
 import waveview.BitValue;
 import waveview.BitVector;
 import waveview.NetDataModel;
-import waveview.Search;
-import waveview.SearchFormatException;
 import waveview.WaveformBuilder;
 import waveview.WaveformDataModel;
+import waveview.search.Search;
+import waveview.search.SearchFormatException;
 
 public class SearchTest {
     /// Utility function to create a sample waveform with a clock signal

@@ -14,7 +14,9 @@
 // limitations under the License.
 //
 
-package waveview;
+package waveview.search;
+
+import waveview.BitVector;
 
 final class SearchLexer {
     static final int TOK_IDENTIFIER = 1000;

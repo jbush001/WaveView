@@ -38,6 +38,8 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.ProgressMonitor;
+import waveview.search.Search;
+import waveview.search.SearchFormatException;
 
 /// @todo Add menu item to jump to specific timestamp
 public final class MainWindow extends JPanel implements ActionListener {

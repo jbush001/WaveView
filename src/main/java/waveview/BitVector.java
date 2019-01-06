@@ -21,6 +21,7 @@ import java.math.BigInteger;
 public class BitVector {
     // Index 0 is least significant position
     private BitValue[] values;
+    public static final BitVector ZERO = new BitVector("0", 2);
 
     public BitVector() {}
 

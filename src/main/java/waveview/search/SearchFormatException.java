@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package waveview;
+package waveview.search;
 
 public class SearchFormatException extends Exception {
     private final int startOffset;
