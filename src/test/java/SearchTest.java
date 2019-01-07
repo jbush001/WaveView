@@ -151,7 +151,7 @@ public class SearchTest {
     /// Verify it at least parses the search.
     @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
-    public void matchXZ() throws SearchFormatException {
+    public void matchX() throws SearchFormatException {
         WaveformDataModel waveformDataModel = new WaveformDataModel();
         waveformDataModel.startBuilding()
             .enterScope("mod1")
@@ -161,16 +161,12 @@ public class SearchTest {
             .appendTransition(0, 23, new BitVector("xxxx", 2))
             .loadFinished();
 
-        // Try upper and lower case versions of X and Z for hex and decimal
+        // Try upper and lower case versions of X for hex and decimal
         // bases. Ensure this doesn't throw an exception.
         new Search(waveformDataModel, "mod1.value = 'bxxxx");
         new Search(waveformDataModel, "mod1.value = 'bXXXX");
         new Search(waveformDataModel, "mod1.value = 'hx");
         new Search(waveformDataModel, "mod1.value = 'hX");
-        new Search(waveformDataModel, "mod1.value = 'bzzzz");
-        new Search(waveformDataModel, "mod1.value = 'bZZZZ");
-        new Search(waveformDataModel, "mod1.value = 'hz");
-        new Search(waveformDataModel, "mod1.value = 'hZ");
 
         // X and Z with decimal values should fail
         try {
@@ -186,6 +182,26 @@ public class SearchTest {
         } catch (NumberFormatException exc) {
             // Expected
         }
+    }
+
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void matchZ() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "value", 4)
+            .exitScope()
+            .appendTransition(0, 17, new BitVector("1111", 2))
+            .appendTransition(0, 23, new BitVector("xxxx", 2))
+            .loadFinished();
+
+        // Try upper and lower case versions of Z for hex and decimal
+        // bases. Ensure this doesn't throw an exception.
+        new Search(waveformDataModel, "mod1.value = 'bzzzz");
+        new Search(waveformDataModel, "mod1.value = 'bZZZZ");
+        new Search(waveformDataModel, "mod1.value = 'hz");
+        new Search(waveformDataModel, "mod1.value = 'hZ");
 
         try {
             new Search(waveformDataModel, "mod1.value = 'dz");
@@ -290,6 +306,19 @@ public class SearchTest {
             assertEquals("unexpected value", exc.getMessage());
             assertEquals(0, exc.getStartOffset());
             assertEquals(0, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void invalidCharacter() {
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk # 'h12");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("unknown character #", exc.getMessage());
+            assertEquals(9, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
         }
     }
 

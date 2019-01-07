@@ -18,6 +18,7 @@
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,7 +27,6 @@ import javax.xml.transform.TransformerException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.xml.sax.SAXException;
 import waveview.BinaryValueFormatter;
 import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
@@ -42,7 +42,7 @@ public class WaveformSettingsFileTest {
     public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
-    public void saveLoadScale() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+    public void saveLoadScale() throws IOException, WaveformSettingsFile.SettingsFileException {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
         sourcePresentationModel.setHorizontalScale(123.0);
@@ -58,7 +58,7 @@ public class WaveformSettingsFileTest {
     }
 
     @Test
-    public void saveLoadNetSets() throws IOException, ParserConfigurationException, TransformerException, SAXException {
+    public void saveLoadNetSets() throws IOException, WaveformSettingsFile.SettingsFileException {
         WaveformDataModel dataModel = new WaveformDataModel();
         WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
@@ -271,5 +271,18 @@ public class WaveformSettingsFileTest {
     @Test
     public void configFileName2() throws IOException {
         assertEquals(".dumpfile.vcd.waveconfig", WaveformSettingsFile.settingsFileName(new File("dumpfile.vcd")).toString());
+    }
+
+    @Test
+    public void invalidFile() throws IOException {
+        try {
+            WaveformDataModel dataModel = new WaveformDataModel();
+            WaveformPresentationModel presentationModel = new WaveformPresentationModel();
+            File file = new File("src/test/resources/waveform_settings/invalid.waveconfig");
+            new WaveformSettingsFile(file, dataModel, presentationModel).read();
+            fail("didn't throw exception");
+        } catch (WaveformSettingsFile.SettingsFileException exc) {
+            // Expected
+        }
     }
 }

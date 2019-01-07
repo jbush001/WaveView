@@ -33,11 +33,11 @@ final class Token {
         EQUAL
     };
 
-    private Type type;
-    private int start;
-    private int end;
+    private final Type type;
+    private final int start;
+    private final int end;
     private BitVector literalValue;
-    private String stringValue;
+    private final String stringValue;
 
     Token(Type type, int start, int end, String stringValue, BitVector literalValue) {
         this.type = type;
