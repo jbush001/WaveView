@@ -70,7 +70,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
     }
 
     public NetDataModel getNetFromTreeObject(Object o) {
-        return netTree.getNetFromTreeObject(o);
+        return netTree.getNetFromTreeObject((NetTreeModel.Node) o);
     }
 
     public int getTotalNetCount() {

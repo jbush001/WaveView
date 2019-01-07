@@ -44,15 +44,15 @@ public class NetTreeModelTest {
         builder.leaveScope();
         builder.addNet(child5);
 
-        Object root = model.getRoot();
+        NetTreeModel.Node root = model.getRoot();
         assertEquals(4, model.getChildCount(root));
-        Object kid0 = model.getChild(root, 0);
-        Object kid1 = model.getChild(root, 1);
-        Object kid2 = model.getChild(root, 2);
-        Object kid3 = model.getChild(root, 3);
+        NetTreeModel.Node kid0 = model.getChild(root, 0);
+        NetTreeModel.Node kid1 = model.getChild(root, 1);
+        NetTreeModel.Node kid2 = model.getChild(root, 2);
+        NetTreeModel.Node kid3 = model.getChild(root, 3);
 
-        Object grandkid0 = model.getChild(kid2, 0);
-        Object grandkid1 = model.getChild(kid2, 1);
+        NetTreeModel.Node grandkid0 = model.getChild(kid2, 0);
+        NetTreeModel.Node grandkid1 = model.getChild(kid2, 1);
 
         assertEquals("child1", kid0.toString());
         assertEquals(0, model.getChildCount(kid0));
@@ -90,19 +90,6 @@ public class NetTreeModelTest {
         assertSame(child4, model.getNetFromTreeObject(grandkid1));
     }
 
-    // This method is not implemented (nor needed).
-    @SuppressWarnings("PMD.EmptyCatchBlock")
-    @Test
-    public void valueForPathChanged() {
-        NetTreeModel model = new NetTreeModel();
-        try {
-            model.valueForPathChanged(null, null);
-            fail("Didn't throw exception");
-        } catch (UnsupportedOperationException exc) {
-            // Expected
-        }
-    }
-
     // If you call $dumpvars more than once in iverilog, it will
     // exit the root node and re-push it. Ensure this is handled properly.
     @Test
@@ -116,9 +103,9 @@ public class NetTreeModelTest {
         builder.addNet(child1);
         builder.leaveScope();
 
-        Object root = model.getRoot();
+        NetTreeModel.Node root = model.getRoot();
         assertEquals(1, model.getChildCount(root));
-        Object kid0 = model.getChild(root, 0);
+        NetTreeModel.Node kid0 = model.getChild(root, 0);
         assertEquals("child1", kid0.toString());
     }
 }

@@ -32,6 +32,8 @@ import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeModel;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreePath;
 import waveview.wavedata.NetTreeModel;
 import waveview.wavedata.WaveformDataModel;
@@ -55,14 +57,15 @@ final class NetSearchView extends JPanel {
         }
 
         private void buildNetListRecursive(Object node, StringBuilder indexList) {
-            if (tree.getModel().isLeaf(node)) {
+            TreeModel model = tree.getModel();
+            if (model.isLeaf(node)) {
                 indexList.append(waveformDataModel.getNetFromTreeObject(node).getFullName());
                 indexList.append('\n');
                 return;
             }
 
-            for (int i = 0; i < tree.getModel().getChildCount(node); i++) {
-                buildNetListRecursive(tree.getModel().getChild(node, i), indexList);
+            for (int i = 0; i < model.getChildCount(node); i++) {
+                buildNetListRecursive(model.getChild(node, i), indexList);
             }
         }
 
@@ -70,7 +73,7 @@ final class NetSearchView extends JPanel {
         public Transferable createTransferable(JComponent component) {
             StringBuilder indexList = new StringBuilder();
             for (TreePath selectedPath : tree.getSelectionPaths()) {
-                buildNetListRecursive(selectedPath.getLastPathComponent(), indexList);
+                buildNetListRecursive((NetTreeModel.Node) selectedPath.getLastPathComponent(), indexList);
             }
 
             return new StringSelection(indexList.toString());
@@ -109,8 +112,56 @@ final class NetSearchView extends JPanel {
         moduleIcon = loadResourceIcon("tree-module.png");
     }
 
+    private static class TreeModelWrapper implements TreeModel {
+        private final NetTreeModel wrapped;
+
+        TreeModelWrapper(NetTreeModel wrapped) {
+            this.wrapped = wrapped;
+        }
+
+        // Tree model methods. Listeners are unimplemented because the tree is
+        // immutable.
+        @Override
+        public void addTreeModelListener(TreeModelListener l) {
+        }
+
+        @Override
+        public void removeTreeModelListener(TreeModelListener l) {
+        }
+
+        @Override
+        public Object getChild(Object parent, int index) {
+            return wrapped.getChild((NetTreeModel.Node) parent, index);
+        }
+
+        @Override
+        public int getChildCount(Object parent) {
+            return wrapped.getChildCount((NetTreeModel.Node) parent);
+        }
+
+        @Override
+        public int getIndexOfChild(Object parent, Object child) {
+            return wrapped.getIndexOfChild((NetTreeModel.Node) parent, (NetTreeModel.Node) child);
+        }
+
+        @Override
+        public Object getRoot() {
+            return wrapped.getRoot();
+        }
+
+        @Override
+        public boolean isLeaf(Object node) {
+            return wrapped.isLeaf((NetTreeModel.Node) node);
+        }
+
+        @Override
+        public void valueForPathChanged(TreePath path, Object newValue) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     JPanel createTreeTab() {
-        tree = new JTree(waveformDataModel.getNetTree());
+        tree = new JTree(new TreeModelWrapper(waveformDataModel.getNetTree()));
 
         JPanel treeTab = new JPanel();
         treeTab.setLayout(new BorderLayout());

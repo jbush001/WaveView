@@ -20,15 +20,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import javax.swing.event.TreeModelListener;
-import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreePath;
 
 ///
 /// Maintains module/net hieararchy, where leaf nodes are nets and interior nodes
 /// are modules.
 ///
-public final class NetTreeModel implements TreeModel {
+public final class NetTreeModel {
     private Node root;
 
     public class Builder {
@@ -96,52 +93,31 @@ public final class NetTreeModel implements TreeModel {
         root = null;
     }
 
-    public NetDataModel getNetFromTreeObject(Object o) {
-        return ((Node) o).netDataModel;
+    public NetDataModel getNetFromTreeObject(Node o) {
+        return o.netDataModel;
     }
 
-    // Tree model methods. Listeners are unimplemented because the tree is
-    // immutable.
-    @Override
-    public void addTreeModelListener(TreeModelListener l) {
+    public Node getChild(Node parent, int index) {
+        return parent.children.get(index);
     }
 
-    @Override
-    public void removeTreeModelListener(TreeModelListener l) {
-    }
-
-    @Override
-    public Object getChild(Object parent, int index) {
-        return ((Node) parent).children.get(index);
-    }
-
-    @Override
-    public int getChildCount(Object parent) {
-        Node n = (Node) parent;
-        if (n.isLeaf()) {
+    public int getChildCount(Node parent) {
+        if (parent.isLeaf()) {
             return 0;
         } else {
-            return n.children.size();
+            return parent.children.size();
         }
     }
 
-    @Override
-    public int getIndexOfChild(Object parent, Object child) {
-        return ((Node) parent).children.indexOf(child);
+    public int getIndexOfChild(Node parent, Node child) {
+        return parent.children.indexOf(child);
     }
 
-    @Override
-    public Object getRoot() {
+    public Node getRoot() {
         return root;
     }
 
-    @Override
     public boolean isLeaf(Object node) {
         return ((Node) node).isLeaf();
-    }
-
-    @Override
-    public void valueForPathChanged(TreePath path, Object newValue) {
-        throw new UnsupportedOperationException();
     }
 }
