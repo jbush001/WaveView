@@ -25,7 +25,7 @@ final class SearchLexer {
     }
 
     private int lexerOffset;
-    private boolean pushedBackToken = false;
+    private boolean pushedBackToken;
     private Token lastToken;
     private final String searchString;
 
