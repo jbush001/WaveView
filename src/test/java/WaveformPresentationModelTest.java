@@ -29,9 +29,9 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import org.junit.Before;
 import org.junit.Test;
 import waveview.DecimalValueFormatter;
-import waveview.NetDataModel;
-import waveview.TransitionVector;
 import waveview.WaveformPresentationModel;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.TransitionVector;
 
 public class WaveformPresentationModelTest {
     private final WaveformPresentationModel model = new WaveformPresentationModel();

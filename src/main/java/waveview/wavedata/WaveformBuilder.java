@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package waveview;
+package waveview.wavedata;
 
 ///
 /// Loader calls this to copy information from a waveform into the model.

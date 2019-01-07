@@ -16,8 +16,8 @@
 
 package waveview.search;
 
-import waveview.BitVector;
-import waveview.WaveformDataModel;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.WaveformDataModel;
 
 final class ConstValueNode extends ValueNode {
     private final BitVector value;

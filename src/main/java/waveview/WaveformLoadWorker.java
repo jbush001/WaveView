@@ -21,6 +21,9 @@ import java.io.IOException;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import waveview.wavedata.VCDLoader;
+import waveview.wavedata.WaveformDataModel;
+import waveview.wavedata.WaveformLoader;
 
 public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
     private final File file;

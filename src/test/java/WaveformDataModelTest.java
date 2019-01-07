@@ -23,11 +23,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Iterator;
 import org.junit.Test;
-import waveview.BitVector;
-import waveview.NetDataModel;
-import waveview.NetTreeModel;
-import waveview.Transition;
-import waveview.WaveformDataModel;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.NetTreeModel;
+import waveview.wavedata.Transition;
+import waveview.wavedata.WaveformDataModel;
 
 public class WaveformDataModelTest {
     private final WaveformDataModel model = new WaveformDataModel();

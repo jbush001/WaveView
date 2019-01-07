@@ -20,9 +20,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import org.junit.Test;
-import waveview.NetDataModel;
-import waveview.NetTreeModel;
-import waveview.TransitionVector;
+import waveview.wavedata.NetTreeModel;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.TransitionVector;
 
 public class NetTreeModelTest {
     @Test

@@ -25,8 +25,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
-import waveview.NetDataModel;
-import waveview.TransitionVector;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.TransitionVector;
 import waveview.WaveformPresentationModel;
 
 public class MarkerTest {

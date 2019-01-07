@@ -18,6 +18,7 @@ package waveview;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import waveview.wavedata.NetDataModel;
 
 ///
 /// Delegate used to draw a waveform for a single net

@@ -46,6 +46,9 @@ import javax.swing.ListModel;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import waveview.wavedata.Transition;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.WaveformDataModel;
 
 ///
 /// Displays names of nets next to waveforms, along with value at cursor

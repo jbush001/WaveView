@@ -23,6 +23,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import waveview.wavedata.BitVector;
 
 ///
 /// Converts a bitvector to one of a set of strings from an enumeration.

@@ -37,8 +37,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import waveview.WaveformDataModel;
 import waveview.WaveformLoadWorker;
+import waveview.wavedata.WaveformDataModel;
 
 public class WaveformLoadWorkerTest {
     private static final int FINISH_TIMEOUT = 10000;

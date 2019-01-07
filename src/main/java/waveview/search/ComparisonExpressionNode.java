@@ -16,8 +16,8 @@
 
 package waveview.search;
 
-import waveview.BitVector;
-import waveview.WaveformDataModel;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.WaveformDataModel;
 
 abstract class ComparisonExpressionNode extends BooleanExpressionNode {
     protected final ValueNode leftChild;

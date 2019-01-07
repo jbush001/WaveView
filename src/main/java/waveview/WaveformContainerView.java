@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JViewport;
+import waveview.wavedata.WaveformDataModel;
 
 ///
 /// Container for the timescale view, net names, and waveforms.

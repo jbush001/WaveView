@@ -19,6 +19,9 @@ package waveview;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Iterator;
+import waveview.wavedata.BitValue;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.Transition;
 
 ///
 /// Delegate that draws the waveform for a single net that has only one

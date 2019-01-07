@@ -18,6 +18,8 @@ package waveview;
 
 import java.util.ArrayList;
 import java.util.List;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.SortedArrayList;
 
 ///
 /// Contains visible state for a waveform capture (e.g. Cursor position, scale, visible nets, etc.)

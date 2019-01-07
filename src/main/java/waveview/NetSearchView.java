@@ -33,6 +33,8 @@ import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
+import waveview.wavedata.NetTreeModel;
+import waveview.wavedata.WaveformDataModel;
 
 ///
 /// Displays searchable lists of all nets in a design. Can be dragged onto

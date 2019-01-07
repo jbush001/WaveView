@@ -23,6 +23,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import waveview.wavedata.WaveformDataModel;
 
 ///
 /// Draws the ruler with times at the top of the waveform view.

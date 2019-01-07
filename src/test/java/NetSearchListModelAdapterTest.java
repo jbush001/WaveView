@@ -27,7 +27,7 @@ import javax.swing.event.ListDataListener;
 import org.junit.Before;
 import org.junit.Test;
 import waveview.NetSearchListModelAdapter;
-import waveview.WaveformDataModel;
+import waveview.wavedata.WaveformDataModel;
 
 public class NetSearchListModelAdapterTest {
     private final WaveformDataModel model = new WaveformDataModel();

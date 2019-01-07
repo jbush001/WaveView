@@ -20,13 +20,13 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import waveview.BitValue;
-import waveview.BitVector;
-import waveview.NetDataModel;
-import waveview.WaveformBuilder;
-import waveview.WaveformDataModel;
 import waveview.search.Search;
 import waveview.search.SearchFormatException;
+import waveview.wavedata.BitValue;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.WaveformBuilder;
+import waveview.wavedata.WaveformDataModel;
 
 public class SearchTest {
     /// Utility function to create a sample waveform with a clock signal

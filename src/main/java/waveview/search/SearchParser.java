@@ -16,9 +16,9 @@
 
 package waveview.search;
 
-import waveview.BitVector;
-import waveview.NetDataModel;
-import waveview.WaveformDataModel;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.WaveformDataModel;
 
 public final class SearchParser {
     private final SearchLexer lexer;

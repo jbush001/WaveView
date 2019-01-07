@@ -27,6 +27,8 @@ import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.WaveformDataModel;
 
 ///
 /// This is the data model for the list of all nets. The user may type in

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package waveview;
+package waveview.wavedata;
 
 ///
 /// Represents a change in a single net (which may have multiple bits)

@@ -16,7 +16,7 @@
 
 package waveview.search;
 
-import waveview.BitVector;
+import waveview.wavedata.BitVector;
 
 final class SearchLexer {
     private enum State {

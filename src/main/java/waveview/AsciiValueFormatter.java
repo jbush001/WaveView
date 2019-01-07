@@ -16,6 +16,8 @@
 
 package waveview;
 
+import waveview.wavedata.BitVector;
+
 public final class AsciiValueFormatter implements ValueFormatter {
     @Override
     public String format(BitVector bits) {

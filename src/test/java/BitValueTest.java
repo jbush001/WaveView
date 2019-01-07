@@ -17,7 +17,7 @@
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
-import waveview.BitValue;
+import waveview.wavedata.BitValue;
 
 public class BitValueTest {
     @Test

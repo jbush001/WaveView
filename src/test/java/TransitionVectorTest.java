@@ -24,10 +24,10 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import org.junit.Test;
-import waveview.BitValue;
-import waveview.BitVector;
-import waveview.Transition;
-import waveview.TransitionVector;
+import waveview.wavedata.BitValue;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.Transition;
+import waveview.wavedata.TransitionVector;
 
 public class TransitionVectorTest {
     private BitVector makeBitVectorFromInt(int width, int value) {

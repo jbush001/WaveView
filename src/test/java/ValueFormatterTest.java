@@ -22,10 +22,10 @@ import java.io.IOException;
 import org.junit.Test;
 import waveview.AsciiValueFormatter;
 import waveview.BinaryValueFormatter;
-import waveview.BitVector;
 import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
+import waveview.wavedata.BitVector;
 
 public class ValueFormatterTest {
     @Test

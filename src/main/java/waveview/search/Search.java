@@ -16,9 +16,9 @@
 
 package waveview.search;
 
-import waveview.NetDataModel;
-import waveview.Transition;
-import waveview.WaveformDataModel;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.Transition;
+import waveview.wavedata.WaveformDataModel;
 
 ///
 /// The Search class allows searching for logic conditions using complex boolean expressions

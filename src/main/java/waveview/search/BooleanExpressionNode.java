@@ -16,7 +16,7 @@
 
 package waveview.search;
 
-import waveview.WaveformDataModel;
+import waveview.wavedata.WaveformDataModel;
 
 abstract class BooleanExpressionNode extends ExpressionNode {
     /// Determine if this subexpression is true at the passed timestamp.

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package waveview;
+package waveview.wavedata;
 
 import java.util.ArrayList;
 import java.util.Iterator;

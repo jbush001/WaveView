@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package waveview;
+package waveview.wavedata;
 
 import java.io.IOException;
 import java.io.InputStream;

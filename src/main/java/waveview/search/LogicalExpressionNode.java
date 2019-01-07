@@ -16,7 +16,7 @@
 
 package waveview.search;
 
-import waveview.WaveformDataModel;
+import waveview.wavedata.WaveformDataModel;
 
 abstract class LogicalExpressionNode extends BooleanExpressionNode {
     protected final BooleanExpressionNode leftChild;

@@ -21,8 +21,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
-import waveview.BitValue;
-import waveview.BitVector;
+import waveview.wavedata.BitValue;
+import waveview.wavedata.BitVector;
 
 public class BitVectorTest {
     @Test

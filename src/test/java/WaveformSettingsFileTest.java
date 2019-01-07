@@ -28,14 +28,14 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.xml.sax.SAXException;
 import waveview.BinaryValueFormatter;
-import waveview.BitVector;
 import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
-import waveview.NetDataModel;
-import waveview.WaveformDataModel;
 import waveview.WaveformPresentationModel;
 import waveview.WaveformSettingsFile;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.WaveformDataModel;
 
 public class WaveformSettingsFileTest {
     @Rule

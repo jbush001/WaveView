@@ -33,9 +33,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.InOrder;
-import waveview.VCDLoader;
-import waveview.WaveformBuilder;
-import waveview.WaveformLoader;
+import waveview.wavedata.VCDLoader;
+import waveview.wavedata.WaveformBuilder;
+import waveview.wavedata.WaveformLoader;
 
 public class VCDLoaderTest {
     @Rule

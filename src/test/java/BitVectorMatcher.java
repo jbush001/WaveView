@@ -16,7 +16,7 @@
 //
 
 import org.mockito.ArgumentMatcher;
-import waveview.BitVector;
+import waveview.wavedata.BitVector;
 
 ///
 /// Matcher for Mockito mock objects that take a BitVector parameter

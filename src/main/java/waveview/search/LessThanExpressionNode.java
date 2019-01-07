@@ -16,7 +16,7 @@
 
 package waveview.search;
 
-import waveview.BitVector;
+import waveview.wavedata.BitVector;
 
 final class LessThanExpressionNode extends ComparisonExpressionNode {
     LessThanExpressionNode(ValueNode left, ValueNode right) {

@@ -14,7 +14,7 @@
 // limitations under the License.
 //
 
-package waveview;
+package waveview.wavedata;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public final class NetTreeModel implements TreeModel {
         }
     }
 
-    static class Node {
+    public static class Node {
         private final String name;
         private final NetDataModel netDataModel;
         private final List<Node> children = new ArrayList<>();
@@ -83,7 +83,7 @@ public final class NetTreeModel implements TreeModel {
             return name;
         }
 
-        boolean isLeaf() {
+        public boolean isLeaf() {
             return children.isEmpty();
         }
     }

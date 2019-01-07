@@ -17,10 +17,10 @@
 package waveview.search;
 
 import java.util.Iterator;
-import waveview.BitVector;
-import waveview.NetDataModel;
-import waveview.Transition;
-import waveview.WaveformDataModel;
+import waveview.wavedata.BitVector;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.Transition;
+import waveview.wavedata.WaveformDataModel;
 
 final class NetValueNode extends ValueNode {
     private final NetDataModel netDataModel;
