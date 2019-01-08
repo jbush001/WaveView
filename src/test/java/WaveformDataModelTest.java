@@ -25,7 +25,7 @@ import java.util.Iterator;
 import org.junit.Test;
 import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
-import waveview.wavedata.NetTreeModel;
+import waveview.wavedata.NetTreeNode;
 import waveview.wavedata.Transition;
 import waveview.wavedata.WaveformDataModel;
 
@@ -52,22 +52,21 @@ public class WaveformDataModelTest {
             .appendTransition(2, 17, new BitVector("01", 2))
             .loadFinished();
 
-        NetTreeModel netTree = model.getNetTree();
-        NetTreeModel.Node root = netTree.getRoot();
-        assertEquals(3, netTree.getChildCount(root));
-        NetTreeModel.Node kid0 = netTree.getChild(root, 0);
-        NetTreeModel.Node kid1 = netTree.getChild(root, 1);
-        NetTreeModel.Node kid2 = netTree.getChild(root, 2);
-        NetTreeModel.Node grandkid0 = netTree.getChild(kid2, 0);
+        NetTreeNode root = model.getNetTree();
+        assertEquals(3, root.getChildCount());
+        NetTreeNode kid0 = root.getChild(0);
+        NetTreeNode kid1 = root.getChild(1);
+        NetTreeNode kid2 = root.getChild(2);
+        NetTreeNode grandkid0 = kid2.getChild(0);
 
         assertEquals("net1", kid0.toString());
-        assertTrue(netTree.isLeaf(kid0));
+        assertTrue(kid0.isLeaf());
         assertEquals("net2", kid1.toString());
-        assertTrue(netTree.isLeaf(kid1));
+        assertTrue(kid1.isLeaf());
         assertEquals("mod2", kid2.toString());
-        assertFalse(netTree.isLeaf(kid2));
+        assertFalse(kid2.isLeaf());
         assertEquals("net3", grandkid0.toString());
-        assertTrue(netTree.isLeaf(grandkid0));
+        assertTrue(grandkid0.isLeaf());
 
         assertEquals(3, model.getTotalNetCount());
         assertEquals(20, model.getMaxTimestamp());
@@ -83,9 +82,9 @@ public class WaveformDataModelTest {
         assertSame(netData3, model.getNetDataModel(2));
 
         // Make sure the nets in the tree match what was given during building
-        assertSame(netData1, model.getNetFromTreeObject(kid0));
-        assertSame(netData2, model.getNetFromTreeObject(kid1));
-        assertSame(netData3, model.getNetFromTreeObject(grandkid0));
+        assertSame(netData1, kid0.getNetDataModel());
+        assertSame(netData2, kid1.getNetDataModel());
+        assertSame(netData3, grandkid0.getNetDataModel());
 
         assertEquals("net1", netData1.getShortName());
         assertEquals("net2", netData2.getShortName());
@@ -114,17 +113,16 @@ public class WaveformDataModelTest {
             .appendTransition(0, 17, new BitVector("1", 2))
             .loadFinished();
 
-        NetTreeModel netTree = model.getNetTree();
-        NetTreeModel.Node root = netTree.getRoot();
-        assertEquals(2, netTree.getChildCount(root));
-        NetTreeModel.Node kid0 = netTree.getChild(root, 0);
-        NetTreeModel.Node kid1 = netTree.getChild(root, 1);
+        NetTreeNode root = model.getNetTree();
+        assertEquals(2, root.getChildCount());
+        NetTreeNode kid0 = root.getChild(0);
+        NetTreeNode kid1 = root.getChild(1);
 
         NetDataModel netData1 = model.getNetDataModel(0);
         NetDataModel netData2 = model.getNetDataModel(1);
 
-        assertSame(netData1, model.getNetFromTreeObject(kid0));
-        assertSame(netData2, model.getNetFromTreeObject(kid1));
+        assertSame(netData1, kid0.getNetDataModel());
+        assertSame(netData2, kid1.getNetDataModel());
 
         Iterator<Transition> ati = netData1.findTransition(0);
         assertEquals(17, ati.next().getTimestamp());
@@ -184,12 +182,11 @@ public class WaveformDataModelTest {
         assertSame(model.getNetDataModel(1), model2.findNet("mod1.net2"));
 
         // Ensure net tree was copied
-        NetTreeModel netTree = model2.getNetTree();
-        NetTreeModel.Node root = netTree.getRoot();
-        assertEquals(2, netTree.getChildCount(root));
-        NetTreeModel.Node kid0 = netTree.getChild(root, 0);
-        NetTreeModel.Node kid1 = netTree.getChild(root, 1);
-        assertSame(model.getNetDataModel(0), model2.getNetFromTreeObject(kid0));
-        assertSame(model.getNetDataModel(1), model2.getNetFromTreeObject(kid1));
+        NetTreeNode root = model2.getNetTree();
+        assertEquals(2, root.getChildCount());
+        NetTreeNode kid0 = root.getChild(0);
+        NetTreeNode kid1 = root.getChild(1);
+        assertSame(model.getNetDataModel(0), kid0.getNetDataModel());
+        assertSame(model.getNetDataModel(1), kid1.getNetDataModel());
     }
 }

@@ -33,10 +33,10 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
     private long maxTimestamp;
     private Map<String, NetDataModel> fullNameToNetMap = new HashMap<>();
     private List<NetDataModel> allNets = new ArrayList<>();
-    private NetTreeModel netTree = new NetTreeModel();
+    private NetTreeNode netTree;
     private int timescale;
 
-    public NetTreeModel getNetTree() {
+    public NetTreeNode getNetTree() {
         return netTree;
     }
 
@@ -52,7 +52,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
     public WaveformBuilder startBuilding() {
         allNets.clear();
         fullNameToNetMap.clear();
-        netTree.clear();
+        netTree = null;
 
         return new ConcreteWaveformBuilder();
     }
@@ -67,10 +67,6 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
 
     public int getTimescale() {
         return timescale;
-    }
-
-    public NetDataModel getNetFromTreeObject(Object o) {
-        return netTree.getNetFromTreeObject((NetTreeModel.Node) o);
     }
 
     public int getTotalNetCount() {
@@ -89,7 +85,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
 
     private class ConcreteWaveformBuilder implements WaveformBuilder {
         private final Deque<String> scopeStack = new ArrayDeque<>();
-        private final NetTreeModel.Builder treeBuilder = netTree.startBuilding();
+        private final NetTreeNode.Builder treeBuilder = new NetTreeNode.Builder();
 
         // This mirrors allNets in WaveformDataModel and must be kept in sync with it.
         private final List<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
@@ -120,6 +116,8 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
             for (NetDataModel model : allNets) {
                 maxTimestamp = Math.max(maxTimestamp, model.getMaxTimestamp());
             }
+
+            netTree = treeBuilder.getRoot();
 
             return this;
         }
