@@ -36,22 +36,29 @@ final class WaveformContainerView extends JPanel {
     private final NetNameView netNameView;
     private final WaveformPresentationModel waveformPresentationModel;
 
-    WaveformContainerView(WaveformPresentationModel waveformPresentationModel, WaveformDataModel waveformDataModel) {
+    WaveformContainerView(WaveformPresentationModel waveformPresentationModel,
+                          WaveformDataModel waveformDataModel) {
         super(new BorderLayout());
 
         this.waveformPresentationModel = waveformPresentationModel;
-        waveformPanel = new WaveformView(waveformPresentationModel, waveformDataModel);
-        TimescaleView timescaleView = new TimescaleView(waveformPresentationModel, waveformDataModel);
+        waveformPanel =
+            new WaveformView(waveformPresentationModel, waveformDataModel);
+        TimescaleView timescaleView =
+            new TimescaleView(waveformPresentationModel, waveformDataModel);
         JScrollPane scrollPane = new JScrollPane(waveformPanel);
         scrollPane.setColumnHeaderView(timescaleView);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(DrawMetrics.WAVEFORM_HEIGHT);
-        scrollPane.getHorizontalScrollBar().setUnitIncrement(DrawMetrics.MIN_MINOR_TICK_H_SPACE);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(
+            DrawMetrics.WAVEFORM_HEIGHT);
+        scrollPane.getHorizontalScrollBar().setUnitIncrement(
+            DrawMetrics.MIN_MINOR_TICK_H_SPACE);
 
         // Always keep the horizontal scroll bar. In 99% of cases, we need it,
         // and it simplifies the net name layout if we don't need to worry about
         // the wave view changing size.
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        netNameView = new NetNameView(waveformPresentationModel, waveformDataModel);
+        scrollPane.setHorizontalScrollBarPolicy(
+            JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        netNameView =
+            new NetNameView(waveformPresentationModel, waveformDataModel);
 
         JViewport netNameViewport = new JViewport();
         netNameViewport.setView(netNameView);
@@ -59,44 +66,56 @@ final class WaveformContainerView extends JPanel {
         netNameBorder.setBorder(BorderFactory.createLineBorder(Color.black));
         netNameBorder.add(netNameViewport, BorderLayout.CENTER);
 
-        // Need to make sure the net name view is the same size as the waveform view
-        // so scrolling will work correctly (otherwise they will be out of sync).
+        // Need to make sure the net name view is the same size as the waveform
+        // view so scrolling will work correctly (otherwise they will be out of
+        // sync).
         JPanel netNameContainer = new JPanel(new BorderLayout());
-        netNameContainer.add(Box.createVerticalStrut(timescaleView.getPreferredSize().height), BorderLayout.NORTH);
+        netNameContainer.add(
+            Box.createVerticalStrut(timescaleView.getPreferredSize().height),
+            BorderLayout.NORTH);
         netNameContainer.add(netNameBorder, BorderLayout.CENTER);
-        netNameContainer.add(Box.createVerticalStrut(scrollPane.getHorizontalScrollBar().getPreferredSize().height),
-                BorderLayout.SOUTH);
+        netNameContainer.add(
+            Box.createVerticalStrut(
+                scrollPane.getHorizontalScrollBar().getPreferredSize().height),
+            BorderLayout.SOUTH);
 
-        // To allow resizing the net name view, put it in the left half of a split pane
-        // rather than setting it as the scroll pane's row header. Add a listener for
-        // the vertical scrollbar that also controls the net name view.
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, netNameContainer, scrollPane);
+        // To allow resizing the net name view, put it in the left half of a
+        // split pane rather than setting it as the scroll pane's row header.
+        // Add a listener for the vertical scrollbar that also controls the net
+        // name view.
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                                              netNameContainer, scrollPane);
         add(splitPane, BorderLayout.CENTER);
-        scrollPane.getVerticalScrollBar().addAdjustmentListener((ae) ->
-                netNameViewport.setViewPosition(new Point(0, ae.getValue())));
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(
+            (ae)
+                -> netNameViewport.setViewPosition(
+                    new Point(0, ae.getValue())));
 
         // Need to repaint when scrolling because values on partially visible
         // nets will be centered.
-        scrollPane.getHorizontalScrollBar().addAdjustmentListener((ae) ->
-                waveformPanel.repaint());
+        scrollPane.getHorizontalScrollBar().addAdjustmentListener(
+            (ae) -> waveformPanel.repaint());
     }
 
     void zoomIn() {
-        setScaleKeepCentered(waveformPresentationModel.getHorizontalScale() * 1.25);
+        setScaleKeepCentered(waveformPresentationModel.getHorizontalScale() *
+                             1.25);
     }
 
     void zoomOut() {
-        setScaleKeepCentered(waveformPresentationModel.getHorizontalScale() * 0.8);
+        setScaleKeepCentered(waveformPresentationModel.getHorizontalScale() *
+                             0.8);
     }
 
     void setScaleKeepCentered(double newScale) {
         Rectangle oldVisibleRect = waveformPanel.getVisibleRect();
-        long centerTimestamp = (long) ((oldVisibleRect.x + oldVisibleRect.width / 2)
-                / waveformPresentationModel.getHorizontalScale());
+        long centerTimestamp =
+            (long)((oldVisibleRect.x + oldVisibleRect.width / 2) /
+                   waveformPresentationModel.getHorizontalScale());
 
         waveformPresentationModel.setHorizontalScale(newScale);
 
-        int centerX = (int) (centerTimestamp * newScale);
+        int centerX = (int)(centerTimestamp * newScale);
         Rectangle newVisibleRect = waveformPanel.getVisibleRect();
         newVisibleRect.x = centerX - newVisibleRect.width / 2;
         waveformPanel.scrollRectToVisible(newVisibleRect);
@@ -104,31 +123,33 @@ final class WaveformContainerView extends JPanel {
 
     void zoomToSelection() {
         // Determine what the new size of the selection window should be.
-        long selectionStartTimestamp = waveformPresentationModel.getSelectionStart();
-        long cursorPositionTimestamp = waveformPresentationModel.getCursorPosition();
+        long selectionStartTimestamp =
+            waveformPresentationModel.getSelectionStart();
+        long cursorPositionTimestamp =
+            waveformPresentationModel.getCursorPosition();
 
         // If the selection has a size of zero, can't zoom to it.
         if (selectionStartTimestamp == cursorPositionTimestamp)
             return;
 
-        long lowTimestamp = Math.min(selectionStartTimestamp, cursorPositionTimestamp);
-        long highTimestamp = Math.max(selectionStartTimestamp, cursorPositionTimestamp);
+        long lowTimestamp =
+            Math.min(selectionStartTimestamp, cursorPositionTimestamp);
+        long highTimestamp =
+            Math.max(selectionStartTimestamp, cursorPositionTimestamp);
         double oldScale = waveformPresentationModel.getHorizontalScale();
-        int left = (int) (lowTimestamp * oldScale);
-        int right = (int) (highTimestamp * oldScale);
+        int left = (int)(lowTimestamp * oldScale);
+        int right = (int)(highTimestamp * oldScale);
         int selectionWidth = right - left;
         int windowWidth = waveformPanel.getVisibleRect().width;
 
-        double newScale = oldScale * ((double) windowWidth / selectionWidth);
+        double newScale = oldScale * ((double)windowWidth / selectionWidth);
         waveformPresentationModel.setHorizontalScale(newScale);
 
         Rectangle newRect = waveformPanel.getVisibleRect();
-        newRect.x = (int) (lowTimestamp * newScale);
-        newRect.width = (int) (highTimestamp * newScale) - newRect.x;
+        newRect.x = (int)(lowTimestamp * newScale);
+        newRect.width = (int)(highTimestamp * newScale) - newRect.x;
         waveformPanel.scrollRectToVisible(newRect);
     }
 
-    int[] getSelectedNets() {
-        return netNameView.getSelectedIndices();
-    }
+    int[] getSelectedNets() { return netNameView.getSelectedIndices(); }
 }

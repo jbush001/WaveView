@@ -24,12 +24,11 @@ import java.io.IOException;
 // from a file.
 //
 public interface WaveformLoader {
-    /// @todo Some kind of file detection APIs (register by extension, sniff, etc)
+    /// @todo Some kind of file detection APIs (register by extension, sniff,
+    /// etc)
 
     class LoadFormatException extends IOException {
-        LoadFormatException(String description) {
-            super(description);
-        }
+        LoadFormatException(String description) { super(description); }
     }
 
     interface ProgressListener {

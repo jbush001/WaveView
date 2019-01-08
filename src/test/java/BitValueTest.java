@@ -31,6 +31,14 @@ public class BitValueTest {
     }
 
     @Test
+    public void toChar() {
+        assertEquals('0', BitValue.ZERO.toChar());
+        assertEquals('1', BitValue.ONE.toChar());
+        assertEquals('x', BitValue.X.toChar());
+        assertEquals('z', BitValue.Z.toChar());
+    }
+
+    @Test
     public void fromInt() {
         assertEquals(BitValue.ZERO, BitValue.fromInt(0));
         assertEquals(BitValue.ONE, BitValue.fromInt(1));
@@ -38,9 +46,19 @@ public class BitValueTest {
     }
 
     @Test
+    public void toInt() {
+        assertEquals(1, BitValue.ONE.toInt());
+        assertEquals(0, BitValue.ZERO.toInt());
+        assertEquals(0, BitValue.X.toInt());
+        assertEquals(0, BitValue.Z.toInt());
+    }
+
+    @Test
     public void fromOrdinal() {
-        assertEquals(BitValue.ZERO, BitValue.fromOrdinal(BitValue.ZERO.ordinal()));
-        assertEquals(BitValue.ONE, BitValue.fromOrdinal(BitValue.ONE.ordinal()));
+        assertEquals(BitValue.ZERO,
+                     BitValue.fromOrdinal(BitValue.ZERO.ordinal()));
+        assertEquals(BitValue.ONE,
+                     BitValue.fromOrdinal(BitValue.ONE.ordinal()));
         assertEquals(BitValue.X, BitValue.fromOrdinal(BitValue.X.ordinal()));
         assertEquals(BitValue.Z, BitValue.fromOrdinal(BitValue.Z.ordinal()));
     }
@@ -66,13 +84,5 @@ public class BitValueTest {
         assertEquals(0, BitValue.ONE.compare(BitValue.Z));
         assertEquals(0, BitValue.X.compare(BitValue.Z));
         assertEquals(0, BitValue.Z.compare(BitValue.Z));
-    }
-
-    @Test
-    public void toChar() {
-        assertEquals('0', BitValue.ZERO.toChar());
-        assertEquals('1', BitValue.ONE.toChar());
-        assertEquals('x', BitValue.X.toChar());
-        assertEquals('z', BitValue.Z.toChar());
     }
 }

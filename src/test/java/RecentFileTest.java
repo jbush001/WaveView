@@ -101,7 +101,8 @@ public class RecentFileTest {
         files.add("iii");
         files.add("jj");
 
-        assertEquals("jj;iii;hhhh;ggggg;ff/ffff;eeeee;dd/dd;ccc;bb;a", files.pack());
+        assertEquals("jj;iii;hhhh;ggggg;ff/ffff;eeeee;dd/dd;ccc;bb;a",
+                     files.pack());
     }
 
     @Test

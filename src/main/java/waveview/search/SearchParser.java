@@ -25,16 +25,15 @@ public final class SearchParser {
     private final WaveformDataModel waveformDataModel;
     private final BooleanExpressionNode searchExpression;
 
-    public SearchParser(WaveformDataModel waveformDataModel, String searchString) throws SearchFormatException {
+    public SearchParser(WaveformDataModel waveformDataModel,
+                        String searchString) throws SearchFormatException {
         this.waveformDataModel = waveformDataModel;
         lexer = new SearchLexer(searchString);
         searchExpression = parseExpression();
         matchToken(Token.Type.END);
     }
 
-    BooleanExpressionNode getExpression() {
-        return searchExpression;
-    }
+    BooleanExpressionNode getExpression() { return searchExpression; }
 
     /// Read the next token and throw an exception if the type does
     /// not match the parameter.
@@ -42,9 +41,12 @@ public final class SearchParser {
         Token token = lexer.nextToken();
         if (token.getType() != tokenType) {
             if (token.getType() == Token.Type.END) {
-                throw new SearchFormatException("unexpected end of string", token.getStart(), token.getEnd());
+                throw new SearchFormatException("unexpected end of string",
+                                                token.getStart(),
+                                                token.getEnd());
             } else {
-                throw new SearchFormatException("unexpected value", token.getStart(), token.getEnd());
+                throw new SearchFormatException(
+                    "unexpected value", token.getStart(), token.getEnd());
             }
         }
     }
@@ -54,8 +56,8 @@ public final class SearchParser {
     /// @note this is case insensitive
     private boolean tryToMatchToken(String value) throws SearchFormatException {
         Token lookahead = lexer.nextToken();
-        if (lookahead.getType() != Token.Type.IDENTIFIER
-                || !lookahead.toString().equalsIgnoreCase(value)) {
+        if (lookahead.getType() != Token.Type.IDENTIFIER ||
+            !lookahead.toString().equalsIgnoreCase(value)) {
             lexer.pushBackToken();
             return false;
         }
@@ -63,7 +65,8 @@ public final class SearchParser {
         return true;
     }
 
-    private BooleanExpressionNode parseExpression() throws SearchFormatException {
+    private BooleanExpressionNode parseExpression()
+        throws SearchFormatException {
         return parseOr();
     }
 
@@ -85,7 +88,8 @@ public final class SearchParser {
         return left;
     }
 
-    private BooleanExpressionNode parseCondition() throws SearchFormatException {
+    private BooleanExpressionNode parseCondition()
+        throws SearchFormatException {
         Token lookahead = lexer.nextToken();
         if (lookahead.getType() == Token.Type.LPAREN) {
             BooleanExpressionNode node = parseExpression();
@@ -97,32 +101,35 @@ public final class SearchParser {
         ValueNode left = parseValue();
         lookahead = lexer.nextToken();
         switch (lookahead.getType()) {
-            case GREATER:
-                return new GreaterThanExpressionNode(left, parseValue());
-            case GREATER_EQUAL:
-                return new GreaterEqualExpressionNode(left, parseValue());
-            case LESS_THAN:
-                return new LessThanExpressionNode(left, parseValue());
-            case LESS_EQUAL:
-                return new LessEqualExpressionNode(left, parseValue());
-            case NOT_EQUAL:
-                return new NotEqualExpressionNode(left, parseValue());
-            case EQUAL:
-                return new EqualExpressionNode(left, parseValue());
-            default:
-                // If there's not an operator, treat as != 0
-                lexer.pushBackToken();
-                return new NotEqualExpressionNode(left, new ConstValueNode(BitVector.ZERO));
+        case GREATER:
+            return new GreaterThanExpressionNode(left, parseValue());
+        case GREATER_EQUAL:
+            return new GreaterEqualExpressionNode(left, parseValue());
+        case LESS_THAN:
+            return new LessThanExpressionNode(left, parseValue());
+        case LESS_EQUAL:
+            return new LessEqualExpressionNode(left, parseValue());
+        case NOT_EQUAL:
+            return new NotEqualExpressionNode(left, parseValue());
+        case EQUAL:
+            return new EqualExpressionNode(left, parseValue());
+        default:
+            // If there's not an operator, treat as != 0
+            lexer.pushBackToken();
+            return new NotEqualExpressionNode(
+                left, new ConstValueNode(BitVector.ZERO));
         }
     }
 
     private ValueNode parseValue() throws SearchFormatException {
         Token lookahead = lexer.nextToken();
         if (lookahead.getType() == Token.Type.IDENTIFIER) {
-            NetDataModel netDataModel = waveformDataModel.findNet(lookahead.toString());
+            NetDataModel netDataModel =
+                waveformDataModel.findNet(lookahead.toString());
             if (netDataModel == null) {
-                throw new SearchFormatException("unknown net \"" + lookahead.toString() + "\"",
-                        lookahead.getStart(), lookahead.getEnd());
+                throw new SearchFormatException(
+                    "unknown net \"" + lookahead.toString() + "\"",
+                    lookahead.getStart(), lookahead.getEnd());
             }
 
             return new NetValueNode(netDataModel);

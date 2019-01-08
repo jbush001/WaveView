@@ -36,7 +36,8 @@ public final class EnumValueFormatter implements ValueFormatter {
 
     public EnumValueFormatter(File mappingFile) throws IOException {
         this.mappingFile = mappingFile;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(mappingFile.toPath()), "UTF8"))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+                 Files.newInputStream(mappingFile.toPath()), "UTF8"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] tokens = line.split(" ", 0);
@@ -47,9 +48,7 @@ public final class EnumValueFormatter implements ValueFormatter {
         }
     }
 
-    public File getFile() {
-        return mappingFile;
-    }
+    public File getFile() { return mappingFile; }
 
     @Override
     public String format(BitVector bits) {

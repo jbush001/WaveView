@@ -31,8 +31,8 @@ public final class RecentFiles {
                 files.remove(MAX_FILES - 1);
             }
         } else {
-            // Existing entry. Remove from old location. It will be added to the beginning
-            // of the list.
+            // Existing entry. Remove from old location. It will be added to the
+            // beginning of the list.
             files.remove(index);
         }
 
@@ -58,7 +58,5 @@ public final class RecentFiles {
         }
     }
 
-    public List<String> getList() {
-        return files;
-    }
+    public List<String> getList() { return files; }
 }

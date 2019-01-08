@@ -30,7 +30,8 @@ import javax.swing.JTable;
 /// on them to jump to that point in the waveform.
 /// @todo Add a way to remove entries from this list
 ///
-final class MarkerListView extends JPanel implements ActionListener, WaveformPresentationModel.Listener {
+final class MarkerListView extends JPanel
+    implements ActionListener, WaveformPresentationModel.Listener {
     private final WaveformPresentationModel waveformPresentationModel;
     private final MarkerTableModel tableModel;
     private final JTable table;
@@ -64,32 +65,27 @@ final class MarkerListView extends JPanel implements ActionListener, WaveformPre
     }
 
     private void select(boolean extendSelection) {
-        waveformPresentationModel.jumpToMarker(table.getSelectedRow(), extendSelection);
+        waveformPresentationModel.jumpToMarker(table.getSelectedRow(),
+                                               extendSelection);
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-    }
+    public void actionPerformed(ActionEvent e) {}
 
     @Override
-    public void cursorChanged(long oldTimestamp, long newTimestamp) {
-    }
+    public void cursorChanged(long oldTimestamp, long newTimestamp) {}
 
     @Override
-    public void netsAdded(int firstIndex, int lastIndex) {
-    }
+    public void netsAdded(int firstIndex, int lastIndex) {}
 
     @Override
-    public void netsRemoved(int firstIndex, int lastIndex) {
-    }
+    public void netsRemoved(int firstIndex, int lastIndex) {}
 
     @Override
-    public void scaleChanged(double newScale) {
-    }
+    public void scaleChanged(double newScale) {}
 
     @Override
-    public void formatChanged(int index) {
-    }
+    public void formatChanged(int index) {}
 
     @Override
     public void markerChanged(long timestamp) {

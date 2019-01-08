@@ -14,8 +14,8 @@
 // limitations under the License.
 //
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
@@ -43,8 +43,11 @@ public class ProgressInputStreamTest {
     @Before
     public void initTest() {
         lastTotalReadUpdate = -1;
-        progressInputStream = new ProgressInputStream(inputStream,
-            (totalRead) -> this.lastTotalReadUpdate = totalRead, UPDATE_INTERVAL);
+        progressInputStream =
+            new ProgressInputStream(inputStream,
+                                    (totalRead)
+                                        -> this.lastTotalReadUpdate = totalRead,
+                                    UPDATE_INTERVAL);
     }
 
     @Test
@@ -60,7 +63,6 @@ public class ProgressInputStreamTest {
         assertEquals(-1, progressInputStream.read());
         assertEquals(0, progressInputStream.getTotalRead());
     }
-
 
     @Test
     public void readByteProgress() throws IOException {
@@ -84,16 +86,19 @@ public class ProgressInputStreamTest {
         byte[] testSource = new byte[BYTES_REQUESTED];
         random.nextBytes(testSource);
 
-        when(inputStream.read(any(byte[].class))).thenAnswer(new Answer<Integer>() {
-            @Override
-            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Object[] args = invocationOnMock.getArguments();
+        when(inputStream.read(any(byte[].class)))
+            .thenAnswer(new Answer<Integer>() {
+                @Override
+                public Integer answer(InvocationOnMock invocationOnMock)
+                    throws Throwable {
+                    Object[] args = invocationOnMock.getArguments();
 
-                // This will return less data than requested.
-                System.arraycopy(testSource, 0, (byte[]) args[0], 0, BYTES_RETURNED);
-                return BYTES_RETURNED;
-            }
-        });
+                    // This will return less data than requested.
+                    System.arraycopy(testSource, 0, (byte[])args[0], 0,
+                                     BYTES_RETURNED);
+                    return BYTES_RETURNED;
+                }
+            });
 
         byte[] expected = new byte[testSource.length];
         System.arraycopy(testSource, 0, expected, 0, BYTES_RETURNED);
@@ -106,13 +111,15 @@ public class ProgressInputStreamTest {
     @Test
     @SuppressFBWarnings({"RR_NOT_CHECKED"})
     public void readArrayProgress() throws IOException {
-        when(inputStream.read(any(byte[].class))).thenAnswer(new Answer<Integer>() {
-            @Override
-            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Object[] args = invocationOnMock.getArguments();
-                return ((byte[]) args[0]).length;
-            }
-        });
+        when(inputStream.read(any(byte[].class)))
+            .thenAnswer(new Answer<Integer>() {
+                @Override
+                public Integer answer(InvocationOnMock invocationOnMock)
+                    throws Throwable {
+                    Object[] args = invocationOnMock.getArguments();
+                    return ((byte[])args[0]).length;
+                }
+            });
 
         byte[] tmp1 = new byte[1];
         byte[] tmp2 = new byte[UPDATE_INTERVAL];
@@ -142,23 +149,30 @@ public class ProgressInputStreamTest {
         byte[] testSource = new byte[64];
         random.nextBytes(testSource);
 
-        when(inputStream.read(any(byte[].class), anyInt(), anyInt())).thenAnswer(new Answer<Integer>() {
-            @Override
-            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Object[] args = invocationOnMock.getArguments();
-                assertEquals(REQUEST_OFFSET, args[1]);   // Offset, see below
-                assertEquals(BYTES_REQUESTED, args[2]);  // Length, also below
+        when(inputStream.read(any(byte[].class), anyInt(), anyInt()))
+            .thenAnswer(new Answer<Integer>() {
+                @Override
+                public Integer answer(InvocationOnMock invocationOnMock)
+                    throws Throwable {
+                    Object[] args = invocationOnMock.getArguments();
+                    assertEquals(REQUEST_OFFSET, args[1]); // Offset, see below
+                    assertEquals(BYTES_REQUESTED,
+                                 args[2]); // Length, also below
 
-                // This will return less data than requested.
-                System.arraycopy(testSource, 0, (byte[]) args[0], REQUEST_OFFSET, BYTES_RETURNED);
-                return BYTES_RETURNED;
-            }
-        });
+                    // This will return less data than requested.
+                    System.arraycopy(testSource, 0, (byte[])args[0],
+                                     REQUEST_OFFSET, BYTES_RETURNED);
+                    return BYTES_RETURNED;
+                }
+            });
 
         byte[] expectedDest = new byte[REQUEST_OFFSET + BYTES_RETURNED];
-        System.arraycopy(testSource, 0, expectedDest, REQUEST_OFFSET, BYTES_RETURNED);
+        System.arraycopy(testSource, 0, expectedDest, REQUEST_OFFSET,
+                         BYTES_RETURNED);
         byte[] testDest = new byte[REQUEST_OFFSET + BYTES_RETURNED];
-        assertEquals(BYTES_RETURNED, progressInputStream.read(testDest, REQUEST_OFFSET, BYTES_REQUESTED));
+        assertEquals(BYTES_RETURNED,
+                     progressInputStream.read(testDest, REQUEST_OFFSET,
+                                              BYTES_REQUESTED));
         assertArrayEquals(expectedDest, testDest);
         assertEquals(BYTES_RETURNED, progressInputStream.getTotalRead());
     }
@@ -166,13 +180,15 @@ public class ProgressInputStreamTest {
     @Test
     @SuppressFBWarnings({"RR_NOT_CHECKED"})
     public void readArrayWithOffsetProgress() throws IOException {
-        when(inputStream.read(any(byte[].class), anyInt(), anyInt())).thenAnswer(new Answer<Integer>() {
-            @Override
-            public Integer answer(InvocationOnMock invocationOnMock) throws Throwable {
-                Object[] args = invocationOnMock.getArguments();
-                return (Integer) args[2];
-            }
-        });
+        when(inputStream.read(any(byte[].class), anyInt(), anyInt()))
+            .thenAnswer(new Answer<Integer>() {
+                @Override
+                public Integer answer(InvocationOnMock invocationOnMock)
+                    throws Throwable {
+                    Object[] args = invocationOnMock.getArguments();
+                    return (Integer)args[2];
+                }
+            });
 
         byte[] tmp = new byte[UPDATE_INTERVAL];
 
@@ -187,7 +203,8 @@ public class ProgressInputStreamTest {
 
     @Test
     public void readArrayOffsetEnd() throws IOException {
-        when(inputStream.read(any(byte[].class), anyInt(), anyInt())).thenReturn(-1);
+        when(inputStream.read(any(byte[].class), anyInt(), anyInt()))
+            .thenReturn(-1);
         byte[] tmp1 = new byte[3];
         assertEquals(-1, progressInputStream.read(tmp1, 1, 1));
         assertEquals(0, progressInputStream.getTotalRead());

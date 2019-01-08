@@ -28,30 +28,20 @@ import java.util.NoSuchElementException;
 public final class SortedArrayList<T extends SortedArrayList.Keyed> {
     private final List<T> list = new ArrayList<>();
 
-    public interface Keyed {
-        long getKey();
-    }
+    public interface Keyed { long getKey(); }
 
-    public int size() {
-        return list.size();
-    }
+    public int size() { return list.size(); }
 
-    public void clear() {
-        list.clear();
-    }
+    public void clear() { list.clear(); }
 
-    public T get(int index) {
-        return list.get(index);
-    }
+    public T get(int index) { return list.get(index); }
 
-    public void remove(int index) {
-        list.remove(index);
-    }
+    public void remove(int index) { list.remove(index); }
 
     public boolean add(T value) {
-        long key = ((Keyed) value).getKey();
+        long key = ((Keyed)value).getKey();
         for (int i = 0;; i++) {
-            if (i == size() || ((Keyed) get(i)).getKey() > key) {
+            if (i == size() || ((Keyed)get(i)).getKey() > key) {
                 list.add(i, value);
                 break;
             }
@@ -70,12 +60,12 @@ public final class SortedArrayList<T extends SortedArrayList.Keyed> {
     /// timestamp. If the key is before the first element, return 0.
     public int findIndex(long key) {
         // Binary search
-        int low = 0; // Lowest possible index
+        int low = 0;           // Lowest possible index
         int high = size() - 1; // Highest possible index
 
         while (low <= high) {
             int mid = (low + high) >>> 1;
-            long midKey = ((Keyed) get(mid)).getKey();
+            long midKey = ((Keyed)get(mid)).getKey();
             if (key < midKey) {
                 high = mid - 1;
             } else if (key > midKey) {
@@ -99,9 +89,7 @@ public final class SortedArrayList<T extends SortedArrayList.Keyed> {
     private class SortedArrayListIterator implements Iterator<T> {
         private int index;
 
-        SortedArrayListIterator(int index) {
-            this.index = index;
-        }
+        SortedArrayListIterator(int index) { this.index = index; }
 
         @Override
         public boolean hasNext() {

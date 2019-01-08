@@ -30,7 +30,8 @@ public final class ProgressInputStream extends InputStream {
         void updateProgress(long totalRead) throws IOException;
     }
 
-    public ProgressInputStream(InputStream wrapped, Listener listener, long updateInterval) {
+    public ProgressInputStream(InputStream wrapped, Listener listener,
+                               long updateInterval) {
         this.wrapped = wrapped;
         this.listener = listener;
         this.updateInterval = updateInterval;
@@ -74,11 +75,9 @@ public final class ProgressInputStream extends InputStream {
         return got;
     }
 
-    public long getTotalRead() {
-        return totalRead;
-    }
+    public long getTotalRead() { return totalRead; }
 
-    private void maybeNotifyListener() throws IOException{
+    private void maybeNotifyListener() throws IOException {
         if (totalRead - lastProgressUpdate >= updateInterval) {
             listener.updateProgress(totalRead);
             lastProgressUpdate = totalRead;

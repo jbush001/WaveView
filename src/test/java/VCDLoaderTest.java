@@ -38,8 +38,7 @@ import waveview.wavedata.WaveformBuilder;
 import waveview.wavedata.WaveformLoader;
 
 public class VCDLoaderTest {
-    @Rule
-    public final TemporaryFolder tempFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder tempFolder = new TemporaryFolder();
 
     WaveformBuilder builder = mock(WaveformBuilder.class);
 
@@ -136,65 +135,20 @@ public class VCDLoaderTest {
         verifyNoMoreInteractions(builder);
     }
 
-    @SuppressWarnings("PMD.EmptyCatchBlock")
-    @Test
-    public void invalidFile() throws IOException {
-        try {
-            new VCDLoader().load(getTestFile("invalid_file_shasdjkfhaldkfhadfhadsjkfhadsf.vcd"), builder, null);
-            fail("Didn't throw exception");
-        } catch (IOException exc) {
-            // Expected
-        }
-    }
-
-    @SuppressWarnings("PMD.EmptyCatchBlock")
-    @Test
-    public void unknownTimescale() throws IOException {
-        try {
-            new VCDLoader().load(getTestFile("unknown-timescale.vcd"), builder, null);
-            fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadFormatException exc) {
-            // Expected
-            assertEquals("line 2: unknown timescale value 1qs", exc.getMessage());
-        }
-    }
-
-    @SuppressWarnings("PMD.EmptyCatchBlock")
-    @Test
-    public void timescaleMissingUnit() throws IOException {
-        try {
-            new VCDLoader().load(getTestFile("timescale-missing-unit.vcd"), builder, null);
-            fail("Didn't throw exception");
-        } catch (WaveformLoader.LoadFormatException exc) {
-            // Expected
-            assertEquals("line 3: unknown timescale value $end", exc.getMessage());
-        }
-    }
-
-    @SuppressWarnings("PMD.EmptyCatchBlock")
-    @Test
-    public void timescaleBadValue() throws IOException {
-        try {
-            new VCDLoader().load(getTestFile("timescale-bad-value.vcd"), builder, null);
-            fail("didn't throw exception");
-        } catch (WaveformLoader.LoadFormatException exc) {
-            // Expected
-            assertEquals("line 2: bad timescale value 17us", exc.getMessage());
-        }
-    }
-
     // Ensure it doesn't choke when it gets types it doesn't recognize
     // (for example $date, $version)
     @Test
     public void unknownHeaderFields() throws IOException {
-        new VCDLoader().load(getTestFile("unknown-header-fields.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("unknown-header-fields.vcd"), builder,
+                             null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-6);
         ord.verify(builder).enterScope("mod1");
         ord.verify(builder).newNet(0, "clk", 1);
         ord.verify(builder).exitScope();
-        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
         ord.verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
     }
@@ -204,17 +158,22 @@ public class VCDLoaderTest {
     // last value silently.
     @Test
     public void timestampOutOfOrder() throws IOException {
-        new VCDLoader().load(getTestFile("timestamp-out-of-order.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("timestamp-out-of-order.vcd"), builder,
+                             null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).setTimescale(-9);
         ord.verify(builder).enterScope("mod1");
         ord.verify(builder).newNet(0, "foo", 1);
         ord.verify(builder).exitScope();
-        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
-        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("0")));
-        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("1")));
-        ord.verify(builder).appendTransition(eq(0), eq(6L), argThat(new BitVectorMatcher("0")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(0L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(5L), argThat(new BitVectorMatcher("0")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(5L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(6L), argThat(new BitVectorMatcher("0")));
         ord.verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
     }
@@ -236,23 +195,34 @@ public class VCDLoaderTest {
         ord.verify(builder).newNet(1, "data", 3);
         ord.verify(builder).newNet(2, "enable", 1);
         ord.verify(builder).exitScope();
-        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
-        ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
-        ord.verify(builder).appendTransition(eq(2), eq(0L), argThat(new BitVectorMatcher("z")));
-        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("1101010010100010")));
-        ord.verify(builder).appendTransition(eq(1), eq(5L), argThat(new BitVectorMatcher("100")));
-        ord.verify(builder).appendTransition(eq(2), eq(5L), argThat(new BitVectorMatcher("x")));
-        ord.verify(builder).appendTransition(eq(0), eq(10L), argThat(new BitVectorMatcher("01zxxz10zxzx1010")));
-        ord.verify(builder).appendTransition(eq(2), eq(10L), argThat(new BitVectorMatcher("1")));
-        ord.verify(builder).appendTransition(eq(0), eq(15L), argThat(new BitVectorMatcher("zzzzzzzzzzzzzzzz")));
-        ord.verify(builder).appendTransition(eq(1), eq(15L), argThat(new BitVectorMatcher("xxx")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
+        ord.verify(builder).appendTransition(
+            eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
+        ord.verify(builder).appendTransition(
+            eq(2), eq(0L), argThat(new BitVectorMatcher("z")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(5L), argThat(new BitVectorMatcher("1101010010100010")));
+        ord.verify(builder).appendTransition(
+            eq(1), eq(5L), argThat(new BitVectorMatcher("100")));
+        ord.verify(builder).appendTransition(
+            eq(2), eq(5L), argThat(new BitVectorMatcher("x")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(10L), argThat(new BitVectorMatcher("01zxxz10zxzx1010")));
+        ord.verify(builder).appendTransition(
+            eq(2), eq(10L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(15L), argThat(new BitVectorMatcher("zzzzzzzzzzzzzzzz")));
+        ord.verify(builder).appendTransition(
+            eq(1), eq(15L), argThat(new BitVectorMatcher("xxx")));
         ord.verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
     }
 
     @Test
     public void bitSelectNoSpace() throws IOException {
-        new VCDLoader().load(getTestFile("bit-select-no-space.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("bit-select-no-space.vcd"), builder,
+                             null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).enterScope("mod1");
@@ -264,7 +234,8 @@ public class VCDLoaderTest {
 
     @Test
     public void bitSelectSpace() throws IOException {
-        new VCDLoader().load(getTestFile("bit-select-space.vcd"), builder, null);
+        new VCDLoader().load(getTestFile("bit-select-space.vcd"), builder,
+                             null);
 
         InOrder ord = inOrder(builder);
         ord.verify(builder).enterScope("mod1");
@@ -283,10 +254,14 @@ public class VCDLoaderTest {
         ord.verify(builder).enterScope("mod1");
         ord.verify(builder).newNet(0, "value", 16);
         ord.verify(builder).exitScope();
-        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("zzzzzzzzzzzx1010")));
-        ord.verify(builder).appendTransition(eq(0), eq(1L), argThat(new BitVectorMatcher("xxxxxxxxxxxz1010")));
-        ord.verify(builder).appendTransition(eq(0), eq(2L), argThat(new BitVectorMatcher("0000000000001101")));
-        ord.verify(builder).appendTransition(eq(0), eq(3L), argThat(new BitVectorMatcher("0000000000000010")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(0L), argThat(new BitVectorMatcher("zzzzzzzzzzzx1010")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(1L), argThat(new BitVectorMatcher("xxxxxxxxxxxz1010")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(2L), argThat(new BitVectorMatcher("0000000000001101")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(3L), argThat(new BitVectorMatcher("0000000000000010")));
         ord.verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
     }
@@ -303,12 +278,121 @@ public class VCDLoaderTest {
         ord.verify(builder).newNet(1, "data", 3);
         ord.verify(builder).newNet(2, "enable", 1);
         ord.verify(builder).exitScope();
-        ord.verify(builder).appendTransition(eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
-        ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
-        ord.verify(builder).appendTransition(eq(2), eq(0L), argThat(new BitVectorMatcher("z")));
-        ord.verify(builder).appendTransition(eq(0), eq(5L), argThat(new BitVectorMatcher("1101010010100010")));
-        ord.verify(builder).appendTransition(eq(1), eq(5L), argThat(new BitVectorMatcher("100")));
-        ord.verify(builder).appendTransition(eq(2), eq(5L), argThat(new BitVectorMatcher("x")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(0L), argThat(new BitVectorMatcher("1010111000101011")));
+        ord.verify(builder).appendTransition(
+            eq(1), eq(0L), argThat(new BitVectorMatcher("011")));
+        ord.verify(builder).appendTransition(
+            eq(2), eq(0L), argThat(new BitVectorMatcher("z")));
+        ord.verify(builder).appendTransition(
+            eq(0), eq(5L), argThat(new BitVectorMatcher("1101010010100010")));
+        ord.verify(builder).appendTransition(
+            eq(1), eq(5L), argThat(new BitVectorMatcher("100")));
+        ord.verify(builder).appendTransition(
+            eq(2), eq(5L), argThat(new BitVectorMatcher("x")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
+    }
+
+    @Test
+    public void waveformAlias() throws IOException {
+        new VCDLoader().load(getTestFile("waveform-alias.vcd"), builder, null);
+
+        InOrder ord = inOrder(builder);
+        ord.verify(builder).enterScope("mod1");
+        ord.verify(builder).newNet(0, "foo", 1);
+        ord.verify(builder).newNet(1, "source", 1);
+        ord.verify(builder).newNet(1, "alias", 1);
+        ord.verify(builder).newNet(2, "bar",
+                                   1); // Ensure index incremented properly
+        ord.verify(builder).exitScope();
+        ord.verify(builder).appendTransition(
+            eq(1), eq(0L), argThat(new BitVectorMatcher("1")));
+        ord.verify(builder).loadFinished();
+        verifyNoMoreInteractions(builder);
+    }
+
+    static class MockProgressListener
+        implements WaveformLoader.ProgressListener {
+        int lastUpdate = -1;
+
+        @Override
+        public boolean updateProgress(int percentRead) {
+            assertTrue(percentRead >= lastUpdate);
+            assertTrue(percentRead >= 0);
+            assertTrue(percentRead <= 100);
+            lastUpdate = percentRead;
+            return true;
+        }
+    }
+
+    // Write a bunch of data, make sure we get callbacks
+    @Test
+    public void progressListener() throws IOException {
+        // Need to append enough data to cause at least one progress
+        // update
+        StringBuilder vcdContents = new StringBuilder(0x20000);
+        vcdContents.append(
+            "$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
+        for (int i = 0; i < 10000; i++) {
+            vcdContents.append('#');
+            vcdContents.append(i * 5);
+            vcdContents.append("\n1A\n");
+        }
+
+        File vcdFile = tempFileFrom(vcdContents.toString());
+        MockProgressListener progressListener = new MockProgressListener();
+        VCDLoader loader = new VCDLoader();
+        loader.load(vcdFile, builder, progressListener);
+        assertTrue(progressListener.lastUpdate > 90);
+    }
+
+    // If the user clicks cancel, the progress listener update
+    // method will return false. Ensure this aborts the load.
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void interruptedLoad() throws IOException {
+        StringBuilder vcdContents = new StringBuilder(0x20000);
+        vcdContents.append(
+            "$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
+        for (int i = 0; i < 10000; i++) {
+            vcdContents.append('#');
+            vcdContents.append(i * 5);
+            vcdContents.append("\n1A\n");
+        }
+
+        File vcdFile = tempFileFrom(vcdContents.toString());
+
+        try {
+            new VCDLoader().load(
+                vcdFile, builder, new VCDLoader.ProgressListener() {
+                    @Override
+                    public boolean updateProgress(int percentRead) {
+                        return false;
+                    }
+                });
+            fail("Loader didn't throw exception");
+        } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
+            assertEquals("load cancelled", exc.getMessage());
+        }
+    }
+
+    // File produced by Accellera SystemC. Regression test, this used to have
+    // issues loading.
+    @Test
+    public void accellera() throws IOException {
+        InOrder ord = inOrder(builder);
+
+        new VCDLoader().load(getTestFile("accellera.vcd"), builder, null);
+
+        ord.verify(builder).setTimescale(-12);
+        ord.verify(builder).enterScope("SystemC");
+        ord.verify(builder).newNet(0, "int_val", 32);
+        ord.verify(builder).newNet(1, "float_val", 1);
+        ord.verify(builder).newNet(2, "clk", 1);
+        ord.verify(builder).newNet(3, "rstn", 1);
+        ord.verify(builder).exitScope();
         ord.verify(builder).loadFinished();
         verifyNoMoreInteractions(builder);
     }
@@ -317,7 +401,8 @@ public class VCDLoaderTest {
     @Test
     public void unknownNetId() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("unknown-net-id.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("unknown-net-id.vcd"), builder,
+                                 null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -329,7 +414,8 @@ public class VCDLoaderTest {
     @Test
     public void invalidValueType() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("bad-transition-type.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("bad-transition-type.vcd"),
+                                 builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -341,11 +427,13 @@ public class VCDLoaderTest {
     @Test
     public void invalidScope() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("scope-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("scope-parse-error.vcd"), builder,
+                                 null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
-            assertEquals("line 2: parse error, expected $end got $var", exc.getMessage());
+            assertEquals("line 2: parse error, expected $end got $var",
+                         exc.getMessage());
         }
     }
 
@@ -353,11 +441,14 @@ public class VCDLoaderTest {
     @Test
     public void invalidUpscope() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("upscope-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("upscope-parse-error.vcd"),
+                                 builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
-            assertEquals("line 4: parse error, expected $end got $enddefinitions", exc.getMessage());
+            assertEquals(
+                "line 4: parse error, expected $end got $enddefinitions",
+                exc.getMessage());
         }
     }
 
@@ -365,11 +456,13 @@ public class VCDLoaderTest {
     @Test
     public void varParseError() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("var-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("var-parse-error.vcd"), builder,
+                                 null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
-            assertEquals("line 3: parse error, expected $end got $upscope", exc.getMessage());
+            assertEquals("line 3: parse error, expected $end got $upscope",
+                         exc.getMessage());
         }
     }
 
@@ -377,11 +470,13 @@ public class VCDLoaderTest {
     @Test
     public void timescaleParseError() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("timescale-parse-error.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("timescale-parse-error.vcd"),
+                                 builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
-            assertEquals("line 3: parse error, expected $end got $scope", exc.getMessage());
+            assertEquals("line 3: parse error, expected $end got $scope",
+                         exc.getMessage());
         }
     }
 
@@ -389,7 +484,8 @@ public class VCDLoaderTest {
     @Test
     public void invalidLogicValue() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("invalid-logic-value.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("invalid-logic-value.vcd"),
+                                 builder, null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
@@ -418,7 +514,8 @@ public class VCDLoaderTest {
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
-            assertEquals("line 6: real values are not supported", exc.getMessage());
+            assertEquals("line 6: real values are not supported",
+                         exc.getMessage());
         }
     }
 
@@ -426,107 +523,68 @@ public class VCDLoaderTest {
     @Test
     public void aliasWidthMismatch() throws IOException {
         try {
-            new VCDLoader().load(getTestFile("alias-bad-width.vcd"), builder, null);
+            new VCDLoader().load(getTestFile("alias-bad-width.vcd"), builder,
+                                 null);
             fail("Didn't throw exception");
         } catch (WaveformLoader.LoadFormatException exc) {
             // Expected
-            assertEquals("line 3: alias net does not match width of parent (15 != 16)", exc.getMessage());
+            assertEquals(
+                "line 3: alias net does not match width of parent (15 != 16)",
+                exc.getMessage());
         }
     }
 
-    @Test
-    public void waveformAlias() throws IOException {
-        new VCDLoader().load(getTestFile("waveform-alias.vcd"), builder, null);
-
-        InOrder ord = inOrder(builder);
-        ord.verify(builder).enterScope("mod1");
-        ord.verify(builder).newNet(0, "foo", 1);
-        ord.verify(builder).newNet(1, "source", 1);
-        ord.verify(builder).newNet(1, "alias", 1);
-        ord.verify(builder).newNet(2, "bar", 1);    // Ensure index incremented properly
-        ord.verify(builder).exitScope();
-        ord.verify(builder).appendTransition(eq(1), eq(0L), argThat(new BitVectorMatcher("1")));
-        ord.verify(builder).loadFinished();
-        verifyNoMoreInteractions(builder);
-    }
-
-    static class MockProgressListener implements WaveformLoader.ProgressListener {
-        int lastUpdate = -1;
-
-        @Override
-        public boolean updateProgress(int percentRead) {
-            assertTrue(percentRead >= lastUpdate);
-            assertTrue(percentRead >= 0);
-            assertTrue(percentRead <= 100);
-            lastUpdate = percentRead;
-            return true;
-        }
-    }
-
-    // Write a bunch of data, make sure we get callbacks
-    @Test
-    public void progressListener() throws IOException {
-        // Need to append enough data to cause at least one progress
-        // update
-        StringBuilder vcdContents = new StringBuilder(0x20000);
-        vcdContents.append("$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
-        for (int i = 0; i < 10000; i++) {
-            vcdContents.append('#');
-            vcdContents.append(i * 5);
-            vcdContents.append("\n1A\n");
-        }
-
-        File vcdFile = tempFileFrom(vcdContents.toString());
-        MockProgressListener progressListener = new MockProgressListener();
-        VCDLoader loader = new VCDLoader();
-        loader.load(vcdFile, builder, progressListener);
-        assertTrue(progressListener.lastUpdate > 90);
-    }
-
-    // If the user clicks cancel, the progress listener update
-    // method will return false. Ensure this aborts the load.
     @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
-    public void interruptedLoad() throws IOException {
-        StringBuilder vcdContents = new StringBuilder(0x20000);
-        vcdContents.append("$timescale 1ns $end $scope module mod1 $end $var wire 1 A data $end $upscope $end $enddefinitions $end\n");
-        for (int i = 0; i < 10000; i++) {
-            vcdContents.append('#');
-            vcdContents.append(i * 5);
-            vcdContents.append("\n1A\n");
-        }
-
-        File vcdFile = tempFileFrom(vcdContents.toString());
-
+    public void invalidFile() throws IOException {
         try {
-            new VCDLoader().load(vcdFile, builder, new VCDLoader.ProgressListener() {
-                @Override
-                public boolean updateProgress(int percentRead) {
-                    return false;
-                }
-            });
-            fail("Loader didn't throw exception");
-        } catch (WaveformLoader.LoadFormatException exc) {
+            new VCDLoader().load(
+                getTestFile("invalid_file_shasdjkfhaldkfhadfhadsjkfhadsf.vcd"),
+                builder, null);
+            fail("Didn't throw exception");
+        } catch (IOException exc) {
             // Expected
-            assertEquals("load cancelled", exc.getMessage());
         }
     }
 
-    // File produced by Accellera SystemC. Regression test, this used to have issues loading.
+    @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
-    public void accellera() throws IOException {
-        InOrder ord = inOrder(builder);
+    public void unknownTimescale() throws IOException {
+        try {
+            new VCDLoader().load(getTestFile("unknown-timescale.vcd"), builder,
+                                 null);
+            fail("Didn't throw exception");
+        } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
+            assertEquals("line 2: unknown timescale value 1qs",
+                         exc.getMessage());
+        }
+    }
 
-        new VCDLoader().load(getTestFile("accellera.vcd"), builder, null);
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void timescaleMissingUnit() throws IOException {
+        try {
+            new VCDLoader().load(getTestFile("timescale-missing-unit.vcd"),
+                                 builder, null);
+            fail("Didn't throw exception");
+        } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
+            assertEquals("line 3: unknown timescale value $end",
+                         exc.getMessage());
+        }
+    }
 
-        ord.verify(builder).setTimescale(-12);
-        ord.verify(builder).enterScope("SystemC");
-        ord.verify(builder).newNet(0, "int_val", 32);
-        ord.verify(builder).newNet(1, "float_val", 1);
-        ord.verify(builder).newNet(2, "clk", 1);
-        ord.verify(builder).newNet(3, "rstn", 1);
-        ord.verify(builder).exitScope();
-        ord.verify(builder).loadFinished();
-        verifyNoMoreInteractions(builder);
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void timescaleBadValue() throws IOException {
+        try {
+            new VCDLoader().load(getTestFile("timescale-bad-value.vcd"),
+                                 builder, null);
+            fail("didn't throw exception");
+        } catch (WaveformLoader.LoadFormatException exc) {
+            // Expected
+            assertEquals("line 2: bad timescale value 17us", exc.getMessage());
+        }
     }
 }

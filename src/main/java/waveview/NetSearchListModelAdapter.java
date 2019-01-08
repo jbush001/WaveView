@@ -36,7 +36,8 @@ import waveview.wavedata.WaveformDataModel;
 /// itself as a listener on the text field where the user types a pattern.
 ///
 
-public final class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
+public final class NetSearchListModelAdapter
+    implements ListModel<String>, DocumentListener {
     private final List<ListDataListener> listeners = new ArrayList<>();
     private final WaveformDataModel waveformDataModel;
     private List<String> matches = new ArrayList<>();
@@ -57,13 +58,15 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
                 matches.add(netDataModel.getFullName());
             }
         } else {
-            matches = StreamSupport.stream(waveformDataModel.spliterator(), false)
+            matches =
+                StreamSupport.stream(waveformDataModel.spliterator(), false)
                     .map(model -> model.getFullName())
                     .filter(name -> name.contains(pattern))
                     .collect(Collectors.toList());
         }
 
-        ListDataEvent event = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size());
+        ListDataEvent event = new ListDataEvent(
+            this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size());
         for (ListDataListener listener : listeners)
             listener.contentsChanged(event);
     }
@@ -90,8 +93,7 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
     }
 
     @Override
-    public void changedUpdate(DocumentEvent ev) {
-    }
+    public void changedUpdate(DocumentEvent ev) {}
 
     @Override
     public void addListDataListener(ListDataListener listener) {

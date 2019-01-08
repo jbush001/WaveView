@@ -31,7 +31,8 @@ final class Token {
         LPAREN,
         RPAREN,
         EQUAL
-    };
+    }
+    ;
 
     private final Type type;
     private final int start;
@@ -39,7 +40,8 @@ final class Token {
     private BitVector literalValue;
     private final String stringValue;
 
-    Token(Type type, int start, int end, String stringValue, BitVector literalValue) {
+    Token(Type type, int start, int end, String stringValue,
+          BitVector literalValue) {
         this.type = type;
         this.start = start;
         this.end = end;
@@ -51,24 +53,16 @@ final class Token {
         this.type = type;
         this.start = start;
         this.end = start;
-        this.stringValue = Character.toString((char) c);
+        this.stringValue = Character.toString((char)c);
     }
 
-    Type getType() {
-        return type;
-    }
+    Type getType() { return type; }
 
-    int getStart() {
-        return start;
-    }
+    int getStart() { return start; }
 
-    int getEnd() {
-        return end;
-    }
+    int getEnd() { return end; }
 
-    BitVector getLiteralValue() {
-        return literalValue;
-    }
+    BitVector getLiteralValue() { return literalValue; }
 
     @Override
     public String toString() {

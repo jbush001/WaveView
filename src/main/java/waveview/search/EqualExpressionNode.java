@@ -19,9 +19,7 @@ package waveview.search;
 import waveview.wavedata.BitVector;
 
 final class EqualExpressionNode extends ComparisonExpressionNode {
-    EqualExpressionNode(ValueNode left, ValueNode right) {
-        super(left, right);
-    }
+    EqualExpressionNode(ValueNode left, ValueNode right) { super(left, right); }
 
     @Override
     protected boolean doCompare(BitVector value1, BitVector value2) {

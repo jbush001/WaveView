@@ -36,11 +36,7 @@ final class Profiler {
         memoryAllocated = memoryAfter - initialMemoryUsage;
     }
 
-    long getExecutionTime() {
-        return executionTime;
-    }
+    long getExecutionTime() { return executionTime; }
 
-    long getMemoryAllocated() {
-        return memoryAllocated;
-    }
+    long getMemoryAllocated() { return memoryAllocated; }
 }

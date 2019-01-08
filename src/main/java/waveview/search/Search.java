@@ -21,9 +21,9 @@ import waveview.wavedata.Transition;
 import waveview.wavedata.WaveformDataModel;
 
 ///
-/// The Search class allows searching for logic conditions using complex boolean expressions
-/// For example: (ena = 1 and (addr = 'h1000 or addr = 'h2000))
-/// It builds an expression tree to represent the search criteria. It is optimized
+/// The Search class allows searching for logic conditions using complex boolean
+/// expressions For example: (ena = 1 and (addr = 'h1000 or addr = 'h2000)) It
+/// builds an expression tree to represent the search criteria. It is optimized
 /// for fast searching, skipping events that cannot meet the criteria.
 ///
 /// @todo Support slice multi-net matches
@@ -32,8 +32,10 @@ public final class Search {
     private final WaveformDataModel waveformDataModel;
     private final BooleanExpressionNode searchExpression;
 
-    /// Generate a search given a set of nets that matches at the given timestamp.
-    public static String generateFromValuesAt(NetDataModel[] nets, long timestamp) {
+    /// Generate a search given a set of nets that matches at the given
+    /// timestamp.
+    public static String generateFromValuesAt(NetDataModel[] nets,
+                                              long timestamp) {
         StringBuilder searchExpr = new StringBuilder();
         boolean first = true;
         for (NetDataModel netDataModel : nets) {
@@ -53,7 +55,8 @@ public final class Search {
         return searchExpr.toString();
     }
 
-    public Search(WaveformDataModel waveformDataModel, String searchString) throws SearchFormatException {
+    public Search(WaveformDataModel waveformDataModel, String searchString)
+        throws SearchFormatException {
         this.waveformDataModel = waveformDataModel;
         SearchParser parser = new SearchParser(waveformDataModel, searchString);
         searchExpression = parser.getExpression();
@@ -68,8 +71,8 @@ public final class Search {
     ///
     /// Scan forward to find the next timestamp that matches this search's
     /// expression
-    /// If the startTimestamp is already a match, it will not be returned. This will
-    /// instead scan to the next transition
+    /// If the startTimestamp is already a match, it will not be returned. This
+    /// will instead scan to the next transition
     /// @bug If startTimestamp is before the first event, and the first event
     /// matches,
     /// this will not return it.
@@ -79,7 +82,8 @@ public final class Search {
     ///
     public long getNextMatch(long startTimestamp) {
         long currentTime = startTimestamp;
-        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
+        boolean currentValue =
+            searchExpression.evaluate(waveformDataModel, currentTime);
 
         // If the start timestamp is already at a region that is true, scan
         // first to find a place where the expression is false.
@@ -89,7 +93,8 @@ public final class Search {
             }
 
             currentTime = searchExpression.forwardHint;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
+            currentValue =
+                searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         // Scan to find where the expression is true
@@ -99,7 +104,8 @@ public final class Search {
             }
 
             currentTime = searchExpression.forwardHint;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
+            currentValue =
+                searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         return currentTime;
@@ -115,14 +121,16 @@ public final class Search {
     ///
     public long getPreviousMatch(long startTimestamp) {
         long currentTime = startTimestamp;
-        boolean currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
+        boolean currentValue =
+            searchExpression.evaluate(waveformDataModel, currentTime);
         while (currentValue) {
             if (searchExpression.backwardHint == Long.MIN_VALUE) {
                 return -1; // End of waveform
             }
 
             currentTime = searchExpression.backwardHint;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
+            currentValue =
+                searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         while (!currentValue) {
@@ -131,7 +139,8 @@ public final class Search {
             }
 
             currentTime = searchExpression.backwardHint;
-            currentValue = searchExpression.evaluate(waveformDataModel, currentTime);
+            currentValue =
+                searchExpression.evaluate(waveformDataModel, currentTime);
         }
 
         return currentTime;

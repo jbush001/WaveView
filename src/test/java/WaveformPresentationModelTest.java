@@ -34,8 +34,10 @@ import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 
 public class WaveformPresentationModelTest {
-    private final WaveformPresentationModel model = new WaveformPresentationModel();
-    private final WaveformPresentationModel.Listener listener = mock(WaveformPresentationModel.Listener.class);
+    private final WaveformPresentationModel model =
+        new WaveformPresentationModel();
+    private final WaveformPresentationModel.Listener listener =
+        mock(WaveformPresentationModel.Listener.class);
 
     @Before
     public void setUpTest() {
@@ -62,7 +64,9 @@ public class WaveformPresentationModelTest {
 
     @Test
     public void addNet() {
-        NetDataModel newNet = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel newNet = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(newNet);
 
         verify(listener).netsAdded(0, 0);
@@ -76,7 +80,9 @@ public class WaveformPresentationModelTest {
         NetDataModel[] nets = new NetDataModel[6];
         for (int i = 0; i < nets.length; i++) {
             String name = "net" + i;
-            nets[i] = new NetDataModel(name, name, TransitionVector.Builder.createBuilder(1).getTransitionVector());
+            nets[i] = new NetDataModel(name, name,
+                                       TransitionVector.Builder.createBuilder(1)
+                                           .getTransitionVector());
             model.addNet(nets[i]);
         }
 
@@ -86,7 +92,7 @@ public class WaveformPresentationModelTest {
         // it adjusts properly.
         // original: 0 1 2 3 4 5
         // after: 0 2 1 4 3 5
-        int[] indices = { 1, 4 };
+        int[] indices = {1, 4};
         model.moveNets(indices, 3);
 
         verify(listener).netsRemoved(1, 1);
@@ -104,9 +110,15 @@ public class WaveformPresentationModelTest {
 
     @Test
     public void removeNet() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net2 = new NetDataModel("net2", "net2", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net3 = new NetDataModel("net3", "net3", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net1 = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net2 = new NetDataModel(
+            "net2", "net2",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net3 = new NetDataModel(
+            "net3", "net3",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addNet(net2);
         model.addNet(net3);
@@ -123,9 +135,15 @@ public class WaveformPresentationModelTest {
 
     @Test
     public void removeAllNets() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net2 = new NetDataModel("net2", "net2", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net3 = new NetDataModel("net3", "net3", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net1 = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net2 = new NetDataModel(
+            "net2", "net2",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net3 = new NetDataModel(
+            "net3", "net3",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addNet(net2);
         model.addNet(net3);
@@ -149,8 +167,12 @@ public class WaveformPresentationModelTest {
 
     @Test
     public void clear() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net2 = new NetDataModel("net2", "net2", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net1 = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net2 = new NetDataModel(
+            "net2", "net2",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addNet(net2);
         clearInvocations(listener);
@@ -164,11 +186,21 @@ public class WaveformPresentationModelTest {
 
     @Test
     public void saveRestoreNetSet() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net2 = new NetDataModel("net2", "net2", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net3 = new NetDataModel("net3", "net3", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net4 = new NetDataModel("net4", "net4", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net5 = new NetDataModel("net5", "net5", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net1 = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net2 = new NetDataModel(
+            "net2", "net2",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net3 = new NetDataModel(
+            "net3", "net3",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net4 = new NetDataModel(
+            "net4", "net4",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net5 = new NetDataModel(
+            "net5", "net5",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addNet(net2);
         model.saveNetSet("set1");
@@ -191,9 +223,15 @@ public class WaveformPresentationModelTest {
 
     @Test
     public void updateNetSet() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net2 = new NetDataModel("net2", "net2", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net3 = new NetDataModel("net3", "net3", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net1 = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net2 = new NetDataModel(
+            "net2", "net2",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net3 = new NetDataModel(
+            "net3", "net3",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addNet(net2);
         model.saveNetSet("set2");
@@ -217,8 +255,12 @@ public class WaveformPresentationModelTest {
 
     @Test
     public void setGetValueFormatter() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel net2 = new NetDataModel("net2", "net2", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net1 = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net2 = new NetDataModel(
+            "net2", "net2",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addNet(net2);
         clearInvocations(listener);
@@ -231,8 +273,8 @@ public class WaveformPresentationModelTest {
         assertSame(model.getValueFormatter(1), dvf);
     }
 
-    // Ensure the minor tick interval is initialized when WaveformPresentationModel
-    // is created.
+    // Ensure the minor tick interval is initialized when
+    // WaveformPresentationModel is created.
     @Test
     public void minorTickInit() {
         assertNotEquals(0, model.getMinorTickInterval(), 0);
@@ -242,7 +284,8 @@ public class WaveformPresentationModelTest {
     // that all notification types will notify all listeners.
     @Test
     public void multipleListeners() {
-        WaveformPresentationModel.Listener listener2 = mock(WaveformPresentationModel.Listener.class);
+        WaveformPresentationModel.Listener listener2 =
+            mock(WaveformPresentationModel.Listener.class);
         model.addListener(listener2);
         model.setHorizontalScale(1);
         verify(listener).scaleChanged(1);

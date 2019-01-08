@@ -23,10 +23,11 @@ import javax.swing.table.AbstractTableModel;
 ///
 
 public final class MarkerTableModel extends AbstractTableModel {
-    private static final String[] COLUMN_NAMES = { "ID", "Timestamp", "Comment" };
+    private static final String[] COLUMN_NAMES = {"ID", "Timestamp", "Comment"};
     private final WaveformPresentationModel waveformPresentationModel;
 
-    public MarkerTableModel(WaveformPresentationModel waveformPresentationModel) {
+    public MarkerTableModel(
+        WaveformPresentationModel waveformPresentationModel) {
         this.waveformPresentationModel = waveformPresentationModel;
     }
 
@@ -48,15 +49,17 @@ public final class MarkerTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int row, int col) {
         switch (col) {
-            case 0:
-                return Integer.toString(waveformPresentationModel.getIdForMarker(row));
-            case 1:
-                // XXX add suffix with units here.
-                return Long.toString(waveformPresentationModel.getTimestampForMarker(row));
-            case 2:
-                return waveformPresentationModel.getDescriptionForMarker(row);
-            default:
-                return "";
+        case 0:
+            return Integer.toString(
+                waveformPresentationModel.getIdForMarker(row));
+        case 1:
+            // XXX add suffix with units here.
+            return Long.toString(
+                waveformPresentationModel.getTimestampForMarker(row));
+        case 2:
+            return waveformPresentationModel.getDescriptionForMarker(row);
+        default:
+            return "";
         }
     }
 
@@ -67,6 +70,6 @@ public final class MarkerTableModel extends AbstractTableModel {
 
     @Override
     public void setValueAt(Object value, int row, int col) {
-        waveformPresentationModel.setDescriptionForMarker(row, (String) value);
+        waveformPresentationModel.setDescriptionForMarker(row, (String)value);
     }
 }

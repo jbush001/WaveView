@@ -26,6 +26,27 @@ import waveview.wavedata.BitVector;
 
 public class BitVectorTest {
     @Test
+    public void parseBinary() {
+        BitVector bv =
+            new BitVector("110111010100100100101100101001001010001001", 2);
+        assertFalse(bv.isZ());
+        assertFalse(bv.isX());
+        assertEquals(42, bv.getWidth());
+        assertEquals("110111010100100100101100101001001010001001",
+                     bv.toString(2));
+    }
+
+    @Test
+    public void parseDecimal() {
+        BitVector bv =
+            new BitVector("3492343343482759676947735281634934371324", 10);
+        assertFalse(bv.isZ());
+        assertFalse(bv.isX());
+        assertEquals("3492343343482759676947735281634934371324",
+                     bv.toString(10));
+    }
+
+    @Test
     public void parseHex() {
         assertEquals(0, new BitVector("0", 16).intValue());
         assertEquals(1, new BitVector("1", 16).intValue());
@@ -43,23 +64,6 @@ public class BitVectorTest {
         assertFalse(bv.isX());
         assertEquals(88, bv.getWidth());
         assertEquals("1234567890ABCDEFABCDEF", bv.toString(16));
-    }
-
-    @Test
-    public void parseBinary() {
-        BitVector bv = new BitVector("110111010100100100101100101001001010001001", 2);
-        assertFalse(bv.isZ());
-        assertFalse(bv.isX());
-        assertEquals(42, bv.getWidth());
-        assertEquals("110111010100100100101100101001001010001001", bv.toString(2));
-    }
-
-    @Test
-    public void parseDecimal() {
-        BitVector bv = new BitVector("3492343343482759676947735281634934371324", 10);
-        assertFalse(bv.isZ());
-        assertFalse(bv.isX());
-        assertEquals("3492343343482759676947735281634934371324", bv.toString(10));
     }
 
     @Test
@@ -130,6 +134,34 @@ public class BitVectorTest {
 
     @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
+    public void decimalNumberFormatException() {
+        // Hex digits
+        try {
+            new BitVector("1234a", 10);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
+
+        // z not legal in decimal format
+        try {
+            new BitVector("z", 10);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
+
+        // x not legal in decimal format
+        try {
+            new BitVector("x", 10);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
+    }
+
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
     public void hexNumberFormatException() {
         //
         // Invalid hex digits (I picked the invalid characters ASCII codes
@@ -163,34 +195,6 @@ public class BitVectorTest {
         try {
             // '~' is > 'f'
             new BitVector("ABCDEFG~", 16);
-            fail("Did not throw exception");
-        } catch (NumberFormatException exc) {
-            // Expected
-        }
-    }
-
-    @SuppressWarnings("PMD.EmptyCatchBlock")
-    @Test
-    public void decimalNumberFormatException() {
-        // Hex digits
-        try {
-            new BitVector("1234a", 10);
-            fail("Did not throw exception");
-        } catch (NumberFormatException exc) {
-            // Expected
-        }
-
-        // z not legal in decimal format
-        try {
-            new BitVector("z", 10);
-            fail("Did not throw exception");
-        } catch (NumberFormatException exc) {
-            // Expected
-        }
-
-        // x not legal in decimal format
-        try {
-            new BitVector("x", 10);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Expected
@@ -237,10 +241,11 @@ public class BitVectorTest {
 
     @Test
     public void compare() {
-        BitVector bv1 = new BitVector("1", 2); // Shorter than others
+        BitVector bv1 = new BitVector("1", 2);     // Shorter than others
         BitVector bv2 = new BitVector("01001", 2); // Has leading zeros
         BitVector bv3 = new BitVector("10100", 2);
-        BitVector bv4 = new BitVector("10101", 2); // Same length as last, trailing 1
+        BitVector bv4 =
+            new BitVector("10101", 2); // Same length as last, trailing 1
         BitVector bv5 = new BitVector("000000", 2); // Wider, but zeroes
 
         assertEquals(0, bv1.compare(bv1));
@@ -288,7 +293,8 @@ public class BitVectorTest {
 
     @Test
     public void convertToString() {
-        BitVector bv1 = new BitVector("1010001001", 2); // Length is not multiple of 4
+        BitVector bv1 =
+            new BitVector("1010001001", 2); // Length is not multiple of 4
         BitVector bv2 = new BitVector("1z01xxxx11110000", 2);
 
         assertEquals("1010001001", bv1.toString());

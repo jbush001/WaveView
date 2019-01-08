@@ -46,19 +46,21 @@ import javax.swing.ListModel;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
-import waveview.wavedata.Transition;
 import waveview.wavedata.NetDataModel;
+import waveview.wavedata.Transition;
 import waveview.wavedata.WaveformDataModel;
 
 ///
 /// Displays names of nets next to waveforms, along with value at cursor
 ///
-final class NetNameView extends JList<Integer> implements WaveformPresentationModel.Listener, ActionListener {
+final class NetNameView extends JList<Integer>
+    implements WaveformPresentationModel.Listener, ActionListener {
     private final WaveformPresentationModel waveformPresentationModel;
     private final WaveformDataModel waveformDataModel;
     private final JPopupMenu popupMenu;
 
-    private class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
+    private class NetNameRenderer
+        extends JPanel implements ListCellRenderer<Integer> {
         private int currentNet;
         private boolean currentNetIsSelected;
         private int labelBaseline = -1;
@@ -66,13 +68,13 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
         private final Font labelFont = new Font("SansSerif", Font.BOLD, 10);
         private final Font valueFont = new Font("SansSerif", Font.PLAIN, 8);
 
-        NetNameRenderer() {
-            setOpaque(true);
-        }
+        NetNameRenderer() { setOpaque(true); }
 
         @Override
-        public Component getListCellRendererComponent(JList<? extends Integer> list, Integer value, int index,
-                boolean isSelected, boolean cellHasFocus) {
+        public Component
+        getListCellRendererComponent(JList<? extends Integer> list,
+                                     Integer value, int index,
+                                     boolean isSelected, boolean cellHasFocus) {
             currentNet = value.intValue();
             currentNetIsSelected = isSelected;
             return this;
@@ -102,30 +104,41 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
 
             g.fillRect(0, 0, getWidth(), DrawMetrics.WAVEFORM_V_SPACING);
             g.setFont(labelFont);
-            g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor : prefs.waveformColor);
+            g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor
+                                            : prefs.waveformColor);
 
-            NetDataModel netDataModel = waveformPresentationModel.getVisibleNet(currentNet);
+            NetDataModel netDataModel =
+                waveformPresentationModel.getVisibleNet(currentNet);
             String name = netDataModel.getShortName();
             g.drawString(name, 1, labelBaseline);
 
-            g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor : prefs.valueColor);
+            g.setColor(currentNetIsSelected ? prefs.listSelectionFgColor
+                                            : prefs.valueColor);
             g.setFont(valueFont);
 
-            Transition t = netDataModel.findTransition(waveformPresentationModel.getCursorPosition()).next();
-            g.drawString(waveformPresentationModel.getValueFormatter(currentNet).format(t), 1, valueBaseline);
+            Transition t =
+                netDataModel
+                    .findTransition(
+                        waveformPresentationModel.getCursorPosition())
+                    .next();
+            g.drawString(waveformPresentationModel.getValueFormatter(currentNet)
+                             .format(t),
+                         1, valueBaseline);
         }
 
         @Override
         public String getToolTipText(MouseEvent event) {
-            return waveformPresentationModel.getVisibleNet(currentNet).getFullName();
+            return waveformPresentationModel.getVisibleNet(currentNet)
+                .getFullName();
         }
 
         private void computeFontPositioning(Graphics g) {
             FontMetrics labelMetrics = g.getFontMetrics(labelFont);
             FontMetrics valueMetrics = g.getFontMetrics(valueFont);
             labelBaseline = labelMetrics.getAscent();
-            valueBaseline = labelBaseline + labelMetrics.getDescent() + labelMetrics.getLeading()
-                    + valueMetrics.getAscent();
+            valueBaseline = labelBaseline + labelMetrics.getDescent() +
+                            labelMetrics.getLeading() +
+                            valueMetrics.getAscent();
             int totalHeight = valueBaseline + valueMetrics.getDescent();
             int border = (DrawMetrics.WAVEFORM_V_SPACING - totalHeight) / 2;
             labelBaseline += border;
@@ -133,12 +146,11 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
         }
     }
 
-    private class ListModelAdapter implements ListModel<Integer>, WaveformPresentationModel.Listener {
+    private class ListModelAdapter
+        implements ListModel<Integer>, WaveformPresentationModel.Listener {
         private final List<ListDataListener> listeners = new ArrayList<>();
 
-        ListModelAdapter() {
-            waveformPresentationModel.addListener(this);
-        }
+        ListModelAdapter() { waveformPresentationModel.addListener(this); }
 
         @Override
         public void addListDataListener(ListDataListener listener) {
@@ -161,34 +173,33 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
         }
 
         @Override
-        public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        }
+        public void cursorChanged(long oldTimestamp, long newTimestamp) {}
 
         @Override
         public void netsAdded(int firstIndex, int lastIndex) {
             for (ListDataListener l : listeners) {
-                l.intervalAdded(new ListDataEvent(this, ListDataEvent.INTERVAL_ADDED, firstIndex, lastIndex));
+                l.intervalAdded(new ListDataEvent(
+                    this, ListDataEvent.INTERVAL_ADDED, firstIndex, lastIndex));
             }
         }
 
         @Override
         public void netsRemoved(int firstIndex, int lastIndex) {
             for (ListDataListener l : listeners) {
-                l.intervalRemoved(new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED, firstIndex, lastIndex));
+                l.intervalRemoved(
+                    new ListDataEvent(this, ListDataEvent.INTERVAL_REMOVED,
+                                      firstIndex, lastIndex));
             }
         }
 
         @Override
-        public void markerChanged(long timestamp) {
-        }
+        public void markerChanged(long timestamp) {}
 
         @Override
-        public void scaleChanged(double newScale) {
-        }
+        public void scaleChanged(double newScale) {}
 
         @Override
-        public void formatChanged(int index) {
-        }
+        public void formatChanged(int index) {}
     }
 
     /// Handles lists of signals dropped onto this view
@@ -203,13 +214,14 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
 
         @Override
         public Transferable createTransferable(JComponent component) {
-            localIndices = ((JList) component).getSelectedIndices();
+            localIndices = ((JList)component).getSelectedIndices();
             isLocalDrop = true;
             return new StringSelection("");
         }
 
         @Override
-        public void exportDone(JComponent component, Transferable transfer, int action) {
+        public void exportDone(JComponent component, Transferable transfer,
+                               int action) {
             isLocalDrop = false;
             // XXX do nothing
         }
@@ -223,32 +235,39 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
         public boolean importData(TransferHandler.TransferSupport support) {
             String data;
             try {
-                data = (String) support.getTransferable().getTransferData(DataFlavor.stringFlavor);
+                data = (String)support.getTransferable().getTransferData(
+                    DataFlavor.stringFlavor);
             } catch (IOException | UnsupportedFlavorException exc) {
                 JOptionPane.showMessageDialog(null, exc.getMessage(),
-                    "Error handling drop data", JOptionPane.ERROR_MESSAGE);
+                                              "Error handling drop data",
+                                              JOptionPane.ERROR_MESSAGE);
                 return false;
             }
 
-            JList.DropLocation location = (JList.DropLocation) support.getDropLocation();
+            JList.DropLocation location =
+                (JList.DropLocation)support.getDropLocation();
             int insertionPoint = location.getIndex();
             if (isLocalDrop) {
-                waveformPresentationModel.moveNets(localIndices, insertionPoint);
+                waveformPresentationModel.moveNets(localIndices,
+                                                   insertionPoint);
             } else {
                 // Drag from another window (for example, net tree)
                 String[] values = data.split("\n", 0);
                 for (String value : values) {
-                    waveformPresentationModel.addNet(insertionPoint++, waveformDataModel.findNet(value));
+                    waveformPresentationModel.addNet(
+                        insertionPoint++, waveformDataModel.findNet(value));
                 }
             }
 
-            // @todo Deal with selection changes. Should probably just clear the selection.
+            // @todo Deal with selection changes. Should probably just clear the
+            // selection.
 
             return true;
         }
     }
 
-    NetNameView(WaveformPresentationModel waveformPresentationModel, WaveformDataModel waveformDataModel) {
+    NetNameView(WaveformPresentationModel waveformPresentationModel,
+                WaveformDataModel waveformDataModel) {
         this.waveformPresentationModel = waveformPresentationModel;
         this.waveformDataModel = waveformDataModel;
         waveformPresentationModel.addListener(this);
@@ -268,7 +287,8 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
         JMenuItem formatMenu = new JMenu("Format");
         popupMenu.add(formatMenu);
 
-        final String[] FORMAT_MENU_ITEMS = { "Hex", "Binary", "Decimal", "ASCII", "Enum" };
+        final String[] FORMAT_MENU_ITEMS = {"Hex", "Binary", "Decimal", "ASCII",
+                                            "Enum"};
         for (String itemName : FORMAT_MENU_ITEMS) {
             JMenuItem subItem = new JMenuItem(itemName);
             formatMenu.add(subItem);
@@ -286,7 +306,8 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
     }
 
     private void computeBounds() {
-        int preferredHeight = waveformPresentationModel.getVisibleNetCount() * DrawMetrics.WAVEFORM_V_SPACING;
+        int preferredHeight = waveformPresentationModel.getVisibleNetCount() *
+                              DrawMetrics.WAVEFORM_V_SPACING;
         Dimension preferredSize = new Dimension(200, preferredHeight);
         setPreferredSize(preferredSize);
         validate();
@@ -302,8 +323,7 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
     }
 
     @Override
-    public void scaleChanged(double newScale) {
-    }
+    public void scaleChanged(double newScale) {}
 
     @Override
     public void netsAdded(int firstIndex, int lastIndex) {
@@ -316,8 +336,7 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
     }
 
     @Override
-    public void markerChanged(long timestamp) {
-    }
+    public void markerChanged(long timestamp) {}
 
     @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
@@ -335,27 +354,28 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
         ValueFormatter formatter = null;
 
         switch (e.getActionCommand()) {
-            case "Remove Net":
-                removeNets(indices);
-                break;
-            case "Enum":
-                formatter = createEnumFormatter();
-                break;
-            case "Hex":
-                formatter = new HexadecimalValueFormatter();
-                break;
-            case "Binary":
-                formatter = new BinaryValueFormatter();
-                break;
-            case "Decimal":
-                formatter = new DecimalValueFormatter();
-                break;
-            case "ASCII":
-                formatter = new AsciiValueFormatter();
-                break;
-            default:
-                System.out.println("NetNameView: unknown action " + e.getActionCommand());
-                break;
+        case "Remove Net":
+            removeNets(indices);
+            break;
+        case "Enum":
+            formatter = createEnumFormatter();
+            break;
+        case "Hex":
+            formatter = new HexadecimalValueFormatter();
+            break;
+        case "Binary":
+            formatter = new BinaryValueFormatter();
+            break;
+        case "Decimal":
+            formatter = new DecimalValueFormatter();
+            break;
+        case "ASCII":
+            formatter = new AsciiValueFormatter();
+            break;
+        default:
+            System.out.println("NetNameView: unknown action " +
+                               e.getActionCommand());
+            break;
         }
 
         if (formatter != null) {
@@ -375,16 +395,19 @@ final class NetNameView extends JList<Integer> implements WaveformPresentationMo
 
     private ValueFormatter createEnumFormatter() {
         ValueFormatter formatter = null;
-        JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialEnumDirectory());
+        JFileChooser chooser = new JFileChooser(
+            AppPreferences.getInstance().getInitialEnumDirectory());
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
         int returnValue = chooser.showOpenDialog(this);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            AppPreferences.getInstance().setInitialEnumDirectory(chooser.getSelectedFile().getParentFile());
+            AppPreferences.getInstance().setInitialEnumDirectory(
+                chooser.getSelectedFile().getParentFile());
             try {
                 formatter = new EnumValueFormatter(chooser.getSelectedFile());
             } catch (IOException exc) {
-                JOptionPane.showMessageDialog(this, "Error opening enum mapping file");
+                JOptionPane.showMessageDialog(
+                    this, "Error opening enum mapping file");
                 formatter = null;
             }
         }

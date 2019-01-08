@@ -23,7 +23,8 @@ abstract class ComparisonExpressionNode extends BooleanExpressionNode {
     protected final ValueNode leftChild;
     protected final ValueNode rightChild;
 
-    protected ComparisonExpressionNode(ValueNode leftNode, ValueNode rightNode) {
+    protected ComparisonExpressionNode(ValueNode leftNode,
+                                       ValueNode rightNode) {
         this.leftChild = leftNode;
         this.rightChild = rightNode;
     }
@@ -33,7 +34,8 @@ abstract class ComparisonExpressionNode extends BooleanExpressionNode {
         BitVector leftValue = leftChild.evaluate(model, timestamp);
         BitVector rightValue = rightChild.evaluate(model, timestamp);
         boolean result = doCompare(leftValue, rightValue);
-        backwardHint = Math.max(leftChild.backwardHint, rightChild.backwardHint);
+        backwardHint =
+            Math.max(leftChild.backwardHint, rightChild.backwardHint);
         forwardHint = Math.min(leftChild.forwardHint, rightChild.forwardHint);
         return result;
     }

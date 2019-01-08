@@ -22,9 +22,7 @@ import waveview.wavedata.WaveformDataModel;
 final class ConstValueNode extends ValueNode {
     private final BitVector value;
 
-    ConstValueNode(BitVector constValue) {
-        value = new BitVector(constValue);
-    }
+    ConstValueNode(BitVector constValue) { value = new BitVector(constValue); }
 
     @Override
     BitVector evaluate(WaveformDataModel model, long timestamp) {

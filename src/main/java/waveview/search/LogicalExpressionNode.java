@@ -22,7 +22,8 @@ abstract class LogicalExpressionNode extends BooleanExpressionNode {
     protected final BooleanExpressionNode leftChild;
     protected final BooleanExpressionNode rightChild;
 
-    LogicalExpressionNode(BooleanExpressionNode leftChild, BooleanExpressionNode rightChild) {
+    LogicalExpressionNode(BooleanExpressionNode leftChild,
+                          BooleanExpressionNode rightChild) {
         this.leftChild = leftChild;
         this.rightChild = rightChild;
     }
@@ -32,18 +33,24 @@ abstract class LogicalExpressionNode extends BooleanExpressionNode {
         boolean leftResult = leftChild.evaluate(model, timestamp);
         boolean rightResult = rightChild.evaluate(model, timestamp);
 
-        forwardHint = nextForwardHint(leftResult, rightResult, leftChild.forwardHint,
-                rightChild.forwardHint);
-        backwardHint = nextBackwardHint(leftResult, rightResult, leftChild.backwardHint,
-                rightChild.backwardHint);
+        forwardHint =
+            nextForwardHint(leftResult, rightResult, leftChild.forwardHint,
+                            rightChild.forwardHint);
+        backwardHint =
+            nextBackwardHint(leftResult, rightResult, leftChild.backwardHint,
+                             rightChild.backwardHint);
 
         return compareResults(leftResult, rightResult);
     }
 
     protected abstract boolean compareResults(boolean value1, boolean value2);
 
-    protected abstract long nextForwardHint(boolean leftResult, boolean rightResult,
-            long nextLeftTimestamp, long nextRightTimestamp);
-    protected abstract long nextBackwardHint(boolean leftResult, boolean rightResult,
-            long nextLeftTimestamp, long nextRightTimestamp);
+    protected abstract long nextForwardHint(boolean leftResult,
+                                            boolean rightResult,
+                                            long nextLeftTimestamp,
+                                            long nextRightTimestamp);
+    protected abstract long nextBackwardHint(boolean leftResult,
+                                             boolean rightResult,
+                                             long nextLeftTimestamp,
+                                             long nextRightTimestamp);
 }

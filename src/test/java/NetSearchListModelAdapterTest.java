@@ -71,8 +71,8 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void partialMatch1() {
         nslma.setPattern("foo");
-        verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
-                ListDataEvent.CONTENTS_CHANGED, 0, 4)));
+        verify(listener).contentsChanged(refEq(
+            new ListDataEvent(nslma, ListDataEvent.CONTENTS_CHANGED, 0, 4)));
         verifyNoMoreInteractions(listener);
         assertEquals(4, nslma.getSize());
         assertEquals("mod1.fooxxx", nslma.getElementAt(0));
@@ -84,8 +84,8 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void partialMatch2() {
         nslma.setPattern("bbbb");
-        verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
-                ListDataEvent.CONTENTS_CHANGED, 0, 2)));
+        verify(listener).contentsChanged(refEq(
+            new ListDataEvent(nslma, ListDataEvent.CONTENTS_CHANGED, 0, 2)));
         verifyNoMoreInteractions(listener);
         assertEquals(2, nslma.getSize());
         assertEquals("mod1.bbbbb", nslma.getElementAt(0));
@@ -95,8 +95,8 @@ public class NetSearchListModelAdapterTest {
     @Test
     public void noMatch() {
         nslma.setPattern("z");
-        verify(listener).contentsChanged(refEq(new ListDataEvent(nslma,
-                ListDataEvent.CONTENTS_CHANGED, 0, 0)));
+        verify(listener).contentsChanged(refEq(
+            new ListDataEvent(nslma, ListDataEvent.CONTENTS_CHANGED, 0, 0)));
         verifyNoMoreInteractions(listener);
         assertEquals(0, nslma.getSize());
     }

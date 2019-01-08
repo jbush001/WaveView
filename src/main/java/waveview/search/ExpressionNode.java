@@ -18,8 +18,9 @@ package waveview.search;
 
 class ExpressionNode {
     // These are set as a side effect of evaluating the node at a specific time.
-    // They contain the next timestamp where the value of the expression may change.
-    // It is guaranteed that no transition will occur sooner than this value.
+    // They contain the next timestamp where the value of the expression may
+    // change. It is guaranteed that no transition will occur sooner than this
+    // value.
     long forwardHint;
     long backwardHint;
 

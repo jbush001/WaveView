@@ -46,7 +46,8 @@ import waveview.wavedata.WaveformDataModel;
 /// @todo Add menu item to jump to specific timestamp
 public final class MainWindow extends JPanel implements ActionListener {
     private final WaveformContainerView waveformContainer;
-    private final WaveformPresentationModel waveformPresentationModel = new WaveformPresentationModel();
+    private final WaveformPresentationModel waveformPresentationModel =
+        new WaveformPresentationModel();
     private final WaveformDataModel waveformDataModel = new WaveformDataModel();
     private Search currentSearch;
     private JMenu netMenu;
@@ -65,11 +66,15 @@ public final class MainWindow extends JPanel implements ActionListener {
         toolBar.add(createButton("net-search.png", "Add Nets", "addnet"));
         toolBar.add(createButton("zoom-in.png", "Zoom In", "zoomin"));
         toolBar.add(createButton("zoom-out.png", "Zoom Out", "zoomout"));
-        toolBar.add(createButton("zoom-selection.png", "Zoom to selected region", "zoomselection"));
-        toolBar.add(createButton("add-marker.png", "Insert Marker", "insertMarker"));
-        toolBar.add(createButton("remove-marker.png", "Remove Marker", "removeMarker"));
+        toolBar.add(createButton("zoom-selection.png",
+                                 "Zoom to selected region", "zoomselection"));
+        toolBar.add(
+            createButton("add-marker.png", "Insert Marker", "insertMarker"));
+        toolBar.add(
+            createButton("remove-marker.png", "Remove Marker", "removeMarker"));
 
-        waveformContainer = new WaveformContainerView(waveformPresentationModel, waveformDataModel);
+        waveformContainer = new WaveformContainerView(waveformPresentationModel,
+                                                      waveformDataModel);
         add(waveformContainer, BorderLayout.CENTER);
 
         recentFiles.unpack(AppPreferences.getInstance().getRecentList());
@@ -77,7 +82,8 @@ public final class MainWindow extends JPanel implements ActionListener {
         setPreferredSize(new Dimension(900, 600));
     }
 
-    private JButton createButton(String iconName, String toolTipText, String command) {
+    private JButton createButton(String iconName, String toolTipText,
+                                 String command) {
         JButton button = new JButton(loadResourceIcon(iconName));
         button.setActionCommand(command);
         button.addActionListener(this);
@@ -86,79 +92,80 @@ public final class MainWindow extends JPanel implements ActionListener {
     }
 
     private ImageIcon loadResourceIcon(String name) {
-        return new ImageIcon(this.getClass().getClassLoader().getResource(name));
+        return new ImageIcon(
+            this.getClass().getClassLoader().getResource(name));
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         switch (cmd) {
-            case "zoomin":
-                waveformContainer.zoomIn();
-                break;
-            case "zoomout":
-                waveformContainer.zoomOut();
-                break;
-            case "zoomselection":
-                waveformContainer.zoomToSelection();
-                break;
-            case "addnet":
-                addNet();
-                break;
-            case "openwaveform":
-                openWaveform();
-                break;
-            case "reloadwaveform":
-                loadWaveformFile(currentWaveformFile);
-                break;
-            case "quit":
-                frame.dispose();
-                break;
-            case "removeAllMarkers":
-                waveformPresentationModel.removeAllMarkers();
-                break;
-            case "removeAllNets":
-                waveformPresentationModel.removeAllNets();
-                break;
-            case "insertMarker":
-                insertMarker();
-                break;
-            case "showmarkerlist":
-                showMarkerList();
-                break;
-            case "nextMarker":
-                nextMarker(e);
-                break;
-            case "prevMarker":
-                prevMarker(e);
-                break;
-            case "removeMarker":
-                removeMarker();
-                break;
-            case "findbyvalue":
-                showFindDialog();
-                break;
-            case "findnext":
-                findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-                break;
-            case "findprev":
-                findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
-                break;
-            case "saveNetSet":
-                saveNetSet();
-                break;
-            case "prefs":
-                showPrefs();
-                break;
-            default:
-                if (cmd.startsWith("netSet_")) {
-                    int index = Integer.parseInt(cmd.substring(7));
-                    waveformPresentationModel.selectNetSet(index);
-                } else if (cmd.startsWith("open ")) {
-                    // Load from recents menu
-                    loadWaveformFile(cmd.substring(5));
-                }
-                break;
+        case "zoomin":
+            waveformContainer.zoomIn();
+            break;
+        case "zoomout":
+            waveformContainer.zoomOut();
+            break;
+        case "zoomselection":
+            waveformContainer.zoomToSelection();
+            break;
+        case "addnet":
+            addNet();
+            break;
+        case "openwaveform":
+            openWaveform();
+            break;
+        case "reloadwaveform":
+            loadWaveformFile(currentWaveformFile);
+            break;
+        case "quit":
+            frame.dispose();
+            break;
+        case "removeAllMarkers":
+            waveformPresentationModel.removeAllMarkers();
+            break;
+        case "removeAllNets":
+            waveformPresentationModel.removeAllNets();
+            break;
+        case "insertMarker":
+            insertMarker();
+            break;
+        case "showmarkerlist":
+            showMarkerList();
+            break;
+        case "nextMarker":
+            nextMarker(e);
+            break;
+        case "prevMarker":
+            prevMarker(e);
+            break;
+        case "removeMarker":
+            removeMarker();
+            break;
+        case "findbyvalue":
+            showFindDialog();
+            break;
+        case "findnext":
+            findNext((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+            break;
+        case "findprev":
+            findPrev((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+            break;
+        case "saveNetSet":
+            saveNetSet();
+            break;
+        case "prefs":
+            showPrefs();
+            break;
+        default:
+            if (cmd.startsWith("netSet_")) {
+                int index = Integer.parseInt(cmd.substring(7));
+                waveformPresentationModel.selectNetSet(index);
+            } else if (cmd.startsWith("open ")) {
+                // Load from recents menu
+                loadWaveformFile(cmd.substring(5));
+            }
+            break;
         }
     }
 
@@ -180,18 +187,20 @@ public final class MainWindow extends JPanel implements ActionListener {
     }
 
     private void insertMarker() {
-        String description = (String) JOptionPane.showInputDialog(frame, "Description for this marker",
-                "New Marker", JOptionPane.PLAIN_MESSAGE, null, null, null);
+        String description = (String)JOptionPane.showInputDialog(
+            frame, "Description for this marker", "New Marker",
+            JOptionPane.PLAIN_MESSAGE, null, null, null);
         if (description != null) {
-            waveformPresentationModel.addMarker(description,
-                    waveformPresentationModel.getCursorPosition());
+            waveformPresentationModel.addMarker(
+                description, waveformPresentationModel.getCursorPosition());
         }
     }
 
     private void showMarkerList() {
         JDialog markersWindow = new JDialog(frame, "Markers", true);
         markersWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        MarkerListView contentPane = new MarkerListView(waveformPresentationModel);
+        MarkerListView contentPane =
+            new MarkerListView(waveformPresentationModel);
         contentPane.setOpaque(true);
         markersWindow.setPreferredSize(new Dimension(400, 300));
         markersWindow.setContentPane(contentPane);
@@ -201,31 +210,37 @@ public final class MainWindow extends JPanel implements ActionListener {
     }
 
     private void nextMarker(ActionEvent e) {
-        waveformPresentationModel.nextMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+        waveformPresentationModel.nextMarker(
+            (e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     }
 
     private void prevMarker(ActionEvent e) {
-        waveformPresentationModel.prevMarker((e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
+        waveformPresentationModel.prevMarker(
+            (e.getModifiers() & ActionEvent.SHIFT_MASK) != 0);
     }
 
     private void removeMarker() {
-        waveformPresentationModel.removeMarkerAtTime(waveformPresentationModel.getCursorPosition());
+        waveformPresentationModel.removeMarkerAtTime(
+            waveformPresentationModel.getCursorPosition());
     }
 
     private void openWaveform() {
-        JFileChooser chooser = new JFileChooser(AppPreferences.getInstance().getInitialWaveformDirectory());
+        JFileChooser chooser = new JFileChooser(
+            AppPreferences.getInstance().getInitialWaveformDirectory());
         chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         chooser.setMultiSelectionEnabled(false);
         int returnValue = chooser.showOpenDialog(this);
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            AppPreferences.getInstance().setInitialWaveformDirectory(chooser.getSelectedFile().getParentFile());
+            AppPreferences.getInstance().setInitialWaveformDirectory(
+                chooser.getSelectedFile().getParentFile());
             loadWaveformFile(chooser.getSelectedFile());
         }
     }
 
     private void saveNetSet() {
-        String name = (String) JOptionPane.showInputDialog(frame, "Net Set Name", "Save Net Set",
-                JOptionPane.PLAIN_MESSAGE, null, null, null);
+        String name = (String)JOptionPane.showInputDialog(
+            frame, "Net Set Name", "Save Net Set", JOptionPane.PLAIN_MESSAGE,
+            null, null, null);
         if (!name.isEmpty()) {
             waveformPresentationModel.saveNetSet(name);
             buildNetMenu();
@@ -245,19 +260,22 @@ public final class MainWindow extends JPanel implements ActionListener {
 
     private void loadWaveformFile(File file) {
         saveWaveformSettings();
-        ProgressMonitor monitor = new ProgressMonitor(this, "Loading...", "", 0, 100);
-        WaveformLoadWorker.LoadFinishedHandler handler = new WaveformLoadWorker.LoadFinishedHandler() {
-            @Override
-            public void handleLoadSuccess(WaveformDataModel newModel) {
-                MainWindow.this.handleLoadSuccess(file, newModel);
-            }
+        ProgressMonitor monitor =
+            new ProgressMonitor(this, "Loading...", "", 0, 100);
+        WaveformLoadWorker.LoadFinishedHandler handler =
+            new WaveformLoadWorker.LoadFinishedHandler() {
+                @Override
+                public void handleLoadSuccess(WaveformDataModel newModel) {
+                    MainWindow.this.handleLoadSuccess(file, newModel);
+                }
 
-            @Override
-            public void handleLoadError(String errorMessage) {
-                JOptionPane.showMessageDialog(MainWindow.this, "Error opening waveform file: "
-                    + errorMessage);
-            }
-        };
+                @Override
+                public void handleLoadError(String errorMessage) {
+                    JOptionPane.showMessageDialog(
+                        MainWindow.this,
+                        "Error opening waveform file: " + errorMessage);
+                }
+            };
 
         new WaveformLoadWorker(file, monitor, handler).execute();
     }
@@ -267,12 +285,12 @@ public final class MainWindow extends JPanel implements ActionListener {
         waveformPresentationModel.clear();
 
         // XXX hack
-        // Because the load ran on a separate thread, and I didn't want to add locking
-        // everywhere, this loaded into a new copy of a data model. However, there are
-        // references to the waveform data model scattered all over the place. Rather
-        // than try to update all pointers to the new model, this just copies data from
-        // the new object to the old one. Since this runs on the main window thread now,
-        // this is safe.
+        // Because the load ran on a separate thread, and I didn't want to add
+        // locking everywhere, this loaded into a new copy of a data model.
+        // However, there are references to the waveform data model scattered
+        // all over the place. Rather than try to update all pointers to the new
+        // model, this just copies data from the new object to the old one.
+        // Since this runs on the main window thread now, this is safe.
         waveformDataModel.copyFrom(newModel);
 
         frame.setTitle("Waveform Viewer [" + file.getName() + "]");
@@ -282,12 +300,14 @@ public final class MainWindow extends JPanel implements ActionListener {
             AppPreferences.getInstance().setRecentList(recentFiles.pack());
 
             File settingsFile = WaveformSettingsFile.settingsFileName(file);
-            waveformSettingsFile = new WaveformSettingsFile(settingsFile, waveformDataModel, waveformPresentationModel);
+            waveformSettingsFile = new WaveformSettingsFile(
+                settingsFile, waveformDataModel, waveformPresentationModel);
             if (settingsFile.exists()) {
                 waveformSettingsFile.read();
             }
         } catch (IOException exc) {
-            JOptionPane.showMessageDialog(null, exc.getMessage(),
+            JOptionPane.showMessageDialog(
+                null, exc.getMessage(),
                 "Error reading waveform settings. The waveform has loaded, but previous view configuration was not restored",
                 JOptionPane.ERROR_MESSAGE);
         }
@@ -330,7 +350,8 @@ public final class MainWindow extends JPanel implements ActionListener {
         NetDataModel[] nets = new NetDataModel[selectedIndices.length];
         int netIndex = 0;
         for (int visibleIndex : selectedIndices) {
-            nets[netIndex++] = waveformPresentationModel.getVisibleNet(visibleIndex);
+            nets[netIndex++] =
+                waveformPresentationModel.getVisibleNet(visibleIndex);
         }
 
         long cursorPosition = waveformPresentationModel.getCursorPosition();
@@ -343,18 +364,22 @@ public final class MainWindow extends JPanel implements ActionListener {
 
     void findNext(boolean extendSelection) {
         if (currentSearch != null) {
-            long newTimestamp = currentSearch.getNextMatch(waveformPresentationModel.getCursorPosition());
+            long newTimestamp = currentSearch.getNextMatch(
+                waveformPresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                waveformPresentationModel.setCursorPosition(newTimestamp, extendSelection);
+                waveformPresentationModel.setCursorPosition(newTimestamp,
+                                                            extendSelection);
             }
         }
     }
 
     void findPrev(boolean extendSelection) {
         if (currentSearch != null) {
-            long newTimestamp = currentSearch.getPreviousMatch(waveformPresentationModel.getCursorPosition());
+            long newTimestamp = currentSearch.getPreviousMatch(
+                waveformPresentationModel.getCursorPosition());
             if (newTimestamp >= 0) {
-                waveformPresentationModel.setCursorPosition(newTimestamp, extendSelection);
+                waveformPresentationModel.setCursorPosition(newTimestamp,
+                                                            extendSelection);
             }
         }
     }
@@ -365,7 +390,8 @@ public final class MainWindow extends JPanel implements ActionListener {
                 waveformSettingsFile.write();
             }
         } catch (IOException exc) {
-            JOptionPane.showMessageDialog(null, exc.getMessage(),
+            JOptionPane.showMessageDialog(
+                null, exc.getMessage(),
                 "Error writing waveform settings. The view configuration will not be restored the next time this is loaded",
                 JOptionPane.ERROR_MESSAGE);
         }
@@ -391,8 +417,10 @@ public final class MainWindow extends JPanel implements ActionListener {
 
         if (waveformPresentationModel.getNetSetCount() > 0) {
             netMenu.addSeparator();
-            for (int i = 0; i < waveformPresentationModel.getNetSetCount(); i++) {
-                item = new JMenuItem(waveformPresentationModel.getNetSetName(i));
+            for (int i = 0; i < waveformPresentationModel.getNetSetCount();
+                 i++) {
+                item =
+                    new JMenuItem(waveformPresentationModel.getNetSetName(i));
                 item.setActionCommand("netSet_" + i);
                 item.addActionListener(this);
                 netMenu.add(item);
@@ -406,8 +434,9 @@ public final class MainWindow extends JPanel implements ActionListener {
 
         JMenu fileMenu = new JMenu("File");
         menuBar.add(fileMenu);
-        fileMenu.add(createMenuItem("Open Waveform...", "openwaveform",
-                KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.META_DOWN_MASK)));
+        fileMenu.add(createMenuItem(
+            "Open Waveform...", "openwaveform",
+            KeyStroke.getKeyStroke(KeyEvent.VK_O, KeyEvent.META_DOWN_MASK)));
 
         recentFilesMenu = new JMenu("Open Recent");
         fileMenu.add(recentFilesMenu);
@@ -415,23 +444,37 @@ public final class MainWindow extends JPanel implements ActionListener {
 
         fileMenu.add(createMenuItem("Reload Waveform", "reloadwaveform", null));
         fileMenu.add(createMenuItem("Preferences...", "prefs", null));
-        fileMenu.add(createMenuItem("Quit", "quit", KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.META_DOWN_MASK)));
+        fileMenu.add(createMenuItem(
+            "Quit", "quit",
+            KeyStroke.getKeyStroke(KeyEvent.VK_Q, KeyEvent.META_DOWN_MASK)));
 
         JMenu editMenu = new JMenu("Edit");
         menuBar.add(editMenu);
-        editMenu.add(createMenuItem("Find...", "findbyvalue", KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK)));
-        editMenu.add(createMenuItem("Find next", "findnext", KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK)));
-        editMenu.add(createMenuItem("Find prev", "findprev",
-                KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK | KeyEvent.SHIFT_DOWN_MASK)));
+        editMenu.add(createMenuItem(
+            "Find...", "findbyvalue",
+            KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.META_DOWN_MASK)));
+        editMenu.add(createMenuItem(
+            "Find next", "findnext",
+            KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.META_DOWN_MASK)));
+        editMenu.add(
+            createMenuItem("Find prev", "findprev",
+                           KeyStroke.getKeyStroke(
+                               KeyEvent.VK_G, KeyEvent.META_DOWN_MASK |
+                                                  KeyEvent.SHIFT_DOWN_MASK)));
 
         // XXX go to timestamp
 
         JMenu viewMenu = new JMenu("View");
         menuBar.add(viewMenu);
-        viewMenu.add(createMenuItem("Zoom In", "zoomin", KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, KeyEvent.META_DOWN_MASK)));
-        viewMenu.add(createMenuItem("Zoom Out", "zoomout",
-                KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.META_DOWN_MASK)));
-        viewMenu.add(createMenuItem("Zoom To Selection", "zoomselection", null));
+        viewMenu.add(createMenuItem(
+            "Zoom In", "zoomin",
+            KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, KeyEvent.META_DOWN_MASK)));
+        viewMenu.add(
+            createMenuItem("Zoom Out", "zoomout",
+                           KeyStroke.getKeyStroke(KeyEvent.VK_MINUS,
+                                                  KeyEvent.META_DOWN_MASK)));
+        viewMenu.add(
+            createMenuItem("Zoom To Selection", "zoomselection", null));
 
         netMenu = new JMenu("Net");
         menuBar.add(netMenu);
@@ -439,19 +482,24 @@ public final class MainWindow extends JPanel implements ActionListener {
 
         JMenu markerMenu = new JMenu("Marker");
         menuBar.add(markerMenu);
-        markerMenu.add(createMenuItem("Insert Marker...", "insertMarker",
-                KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.META_DOWN_MASK)));
-        markerMenu.add(createMenuItem("Next Marker", "nextMarker",
-                KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.META_DOWN_MASK)));
-        markerMenu.add(createMenuItem("Prev Marker", "prevMarker",
-                KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.META_DOWN_MASK)));
+        markerMenu.add(createMenuItem(
+            "Insert Marker...", "insertMarker",
+            KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.META_DOWN_MASK)));
+        markerMenu.add(createMenuItem(
+            "Next Marker", "nextMarker",
+            KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.META_DOWN_MASK)));
+        markerMenu.add(createMenuItem(
+            "Prev Marker", "prevMarker",
+            KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.META_DOWN_MASK)));
         markerMenu.add(createMenuItem("Remove Marker", "removeMarker", null));
-        markerMenu.add(createMenuItem("Remove all markers", "removeAllMarkers", null));
-        markerMenu.add(createMenuItem("Show marker list", "showmarkerlist", null));
+        markerMenu.add(
+            createMenuItem("Remove all markers", "removeAllMarkers", null));
+        markerMenu.add(
+            createMenuItem("Show marker list", "showmarkerlist", null));
     }
 
     private JMenuItem createMenuItem(String text, String actionCommand,
-            KeyStroke accelerator) {
+                                     KeyStroke accelerator) {
         JMenuItem item = new JMenuItem(text);
         item.setActionCommand(actionCommand);
         item.addActionListener(this);

@@ -27,8 +27,9 @@ final class AndExpressionNode extends LogicalExpressionNode {
     }
 
     @Override
-    protected long nextForwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
-            long nextRightTimestamp) {
+    protected long nextForwardHint(boolean leftResult, boolean rightResult,
+                                   long nextLeftTimestamp,
+                                   long nextRightTimestamp) {
         if (leftResult && rightResult) {
             // Both expressions are true. Either expression changing
             // could make it false.
@@ -50,8 +51,9 @@ final class AndExpressionNode extends LogicalExpressionNode {
 
     // Mirror of above
     @Override
-    protected long nextBackwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
-            long nextRightTimestamp) {
+    protected long nextBackwardHint(boolean leftResult, boolean rightResult,
+                                    long nextLeftTimestamp,
+                                    long nextRightTimestamp) {
         if (leftResult && rightResult) {
             return Math.max(nextLeftTimestamp, nextRightTimestamp);
         } else if (leftResult) {

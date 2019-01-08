@@ -36,9 +36,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
     private NetTreeNode netTree;
     private int timescale;
 
-    public NetTreeNode getNetTree() {
-        return netTree;
-    }
+    public NetTreeNode getNetTree() { return netTree; }
 
     /// A bit of a kludge. Used when loading a new model.
     public void copyFrom(WaveformDataModel from) {
@@ -61,17 +59,11 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
         return allNets.get(netId);
     }
 
-    public long getMaxTimestamp() {
-        return maxTimestamp;
-    }
+    public long getMaxTimestamp() { return maxTimestamp; }
 
-    public int getTimescale() {
-        return timescale;
-    }
+    public int getTimescale() { return timescale; }
 
-    public int getTotalNetCount() {
-        return allNets.size();
-    }
+    public int getTotalNetCount() { return allNets.size(); }
 
     /// Look up net by full path
     public NetDataModel findNet(String name) {
@@ -85,10 +77,13 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
 
     private class ConcreteWaveformBuilder implements WaveformBuilder {
         private final Deque<String> scopeStack = new ArrayDeque<>();
-        private final NetTreeNode.Builder treeBuilder = new NetTreeNode.Builder();
+        private final NetTreeNode.Builder treeBuilder =
+            new NetTreeNode.Builder();
 
-        // This mirrors allNets in WaveformDataModel and must be kept in sync with it.
-        private final List<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
+        // This mirrors allNets in WaveformDataModel and must be kept in sync
+        // with it.
+        private final List<TransitionVector.Builder> transitionBuilders =
+            new ArrayList<>();
 
         @Override
         public WaveformBuilder setTimescale(int timescale) {
@@ -123,7 +118,8 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
         }
 
         @Override
-        public WaveformBuilder appendTransition(int id, long timestamp, BitVector values) {
+        public WaveformBuilder appendTransition(int id, long timestamp,
+                                                BitVector values) {
             transitionBuilders.get(id).appendTransition(timestamp, values);
             return this;
         }
@@ -155,7 +151,8 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
                 transitionBuilders.add(builder);
             }
 
-            net = new NetDataModel(shortName, fullName.toString(), builder.getTransitionVector());
+            net = new NetDataModel(shortName, fullName.toString(),
+                                   builder.getTransitionVector());
             allNets.add(net);
             treeBuilder.addNet(net);
             fullNameToNetMap.put(fullName.toString(), net);

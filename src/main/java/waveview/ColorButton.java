@@ -42,9 +42,7 @@ final class ColorButton extends JPanel {
         color = initialColor;
     }
 
-    Color getColor() {
-        return color;
-    }
+    Color getColor() { return color; }
 
     private void showColorChooser() {
         Color newColor = JColorChooser.showDialog(this, "Color", color);
@@ -56,20 +54,33 @@ final class ColorButton extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         FontMetrics metrics = g.getFontMetrics();
-        int fontBaseline = (DrawMetrics.COLOR_BUTTON_HEIGHT + metrics.getHeight()) / 2 - metrics.getDescent();
+        int fontBaseline =
+            (DrawMetrics.COLOR_BUTTON_HEIGHT + metrics.getHeight()) / 2 -
+            metrics.getDescent();
 
         g.setColor(color);
-        g.fillRect(DrawMetrics.COLOR_BUTTON_INSET * 2, DrawMetrics.COLOR_BUTTON_INSET * 2,
-                DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
-                DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
+        g.fillRect(DrawMetrics.COLOR_BUTTON_INSET * 2,
+                   DrawMetrics.COLOR_BUTTON_INSET * 2,
+                   DrawMetrics.COLOR_BUTTON_WIDTH -
+                       DrawMetrics.COLOR_BUTTON_INSET * 4,
+                   DrawMetrics.COLOR_BUTTON_HEIGHT -
+                       DrawMetrics.COLOR_BUTTON_INSET * 4);
 
         g.setColor(Color.black);
-        g.drawRect(DrawMetrics.COLOR_BUTTON_INSET * 2, DrawMetrics.COLOR_BUTTON_INSET * 2,
-                DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 4,
-                DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 4);
-        g.drawRect(DrawMetrics.COLOR_BUTTON_INSET, DrawMetrics.COLOR_BUTTON_INSET,
-                DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 2,
-                DrawMetrics.COLOR_BUTTON_HEIGHT - DrawMetrics.COLOR_BUTTON_INSET * 2);
-        g.drawString(label, DrawMetrics.COLOR_BUTTON_INSET + DrawMetrics.COLOR_BUTTON_WIDTH, fontBaseline);
+        g.drawRect(DrawMetrics.COLOR_BUTTON_INSET * 2,
+                   DrawMetrics.COLOR_BUTTON_INSET * 2,
+                   DrawMetrics.COLOR_BUTTON_WIDTH -
+                       DrawMetrics.COLOR_BUTTON_INSET * 4,
+                   DrawMetrics.COLOR_BUTTON_HEIGHT -
+                       DrawMetrics.COLOR_BUTTON_INSET * 4);
+        g.drawRect(
+            DrawMetrics.COLOR_BUTTON_INSET, DrawMetrics.COLOR_BUTTON_INSET,
+            DrawMetrics.COLOR_BUTTON_WIDTH - DrawMetrics.COLOR_BUTTON_INSET * 2,
+            DrawMetrics.COLOR_BUTTON_HEIGHT -
+                DrawMetrics.COLOR_BUTTON_INSET * 2);
+        g.drawString(label,
+                     DrawMetrics.COLOR_BUTTON_INSET +
+                         DrawMetrics.COLOR_BUTTON_WIDTH,
+                     fontBaseline);
     }
 }

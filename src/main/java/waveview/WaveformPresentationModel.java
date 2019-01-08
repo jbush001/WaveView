@@ -22,7 +22,8 @@ import waveview.wavedata.NetDataModel;
 import waveview.wavedata.SortedArrayList;
 
 ///
-/// Contains visible state for a waveform capture (e.g. Cursor position, scale, visible nets, etc.)
+/// Contains visible state for a waveform capture (e.g. Cursor position, scale,
+/// visible nets, etc.)
 ///
 
 public final class WaveformPresentationModel {
@@ -44,11 +45,10 @@ public final class WaveformPresentationModel {
         void scaleChanged(double newScale);
         void markerChanged(long timestamp);
         void formatChanged(int index);
-    };
-
-    public WaveformPresentationModel() {
-        setHorizontalScale(10.0);
     }
+    ;
+
+    public WaveformPresentationModel() { setHorizontalScale(10.0); }
 
     public void clear() {
         int oldSize = visibleNets.size();
@@ -66,14 +66,14 @@ public final class WaveformPresentationModel {
         }
     }
 
-    public void addListener(Listener listener) {
-        listeners.add(listener);
-    }
+    public void addListener(Listener listener) { listeners.add(listener); }
 
     // @param scale Pixels per time unit
     public void setHorizontalScale(double scale) {
         horizontalScale = scale;
-        minorTickInterval = (int) Math.pow(10, Math.ceil(Math.log10(DrawMetrics.MIN_MINOR_TICK_H_SPACE / scale)));
+        minorTickInterval = (int)Math.pow(
+            10,
+            Math.ceil(Math.log10(DrawMetrics.MIN_MINOR_TICK_H_SPACE / scale)));
         if (minorTickInterval <= 0) {
             minorTickInterval = 1;
         }
@@ -84,14 +84,10 @@ public final class WaveformPresentationModel {
     }
 
     // @returns Pixels per time unit
-    public double getHorizontalScale() {
-        return horizontalScale;
-    }
+    public double getHorizontalScale() { return horizontalScale; }
 
     // @returns Duration between horizontal ticks, in time units
-    public long getMinorTickInterval() {
-        return minorTickInterval;
-    }
+    public long getMinorTickInterval() { return minorTickInterval; }
 
     public void addNet(NetDataModel netDataModel) {
         addNet(visibleNets.size(), netDataModel);
@@ -122,12 +118,15 @@ public final class WaveformPresentationModel {
     }
 
     /**
-     * @param fromIndices Indices of items to move. This must be in ascending order.
-     * @param insertionPoint Insertion point in the new list. The items will be inserted
+     * @param fromIndices Indices of items to move. This must be in ascending
+     *     order.
+     * @param insertionPoint Insertion point in the new list. The items will be
+     *     inserted
      *        in the list before the element *currently* at that index.
      */
     public void moveNets(int[] fromIndices, int originalInsertionPoint) {
-        NetPresentationModel[] nets = new NetPresentationModel[fromIndices.length];
+        NetPresentationModel[] nets =
+            new NetPresentationModel[fromIndices.length];
         int insertionPoint = originalInsertionPoint;
         for (int i = fromIndices.length - 1; i >= 0; i--) {
             nets[i] = visibleNets.get(fromIndices[i]);
@@ -142,13 +141,12 @@ public final class WaveformPresentationModel {
         }
 
         for (Listener listener : listeners) {
-            listener.netsAdded(insertionPoint - fromIndices.length, insertionPoint - 1);
+            listener.netsAdded(insertionPoint - fromIndices.length,
+                               insertionPoint - 1);
         }
     }
 
-    public int getVisibleNetCount() {
-        return visibleNets.size();
-    }
+    public int getVisibleNetCount() { return visibleNets.size(); }
 
     /// @param index Index of net in order displayed in net list
     public NetDataModel getVisibleNet(int index) {
@@ -166,13 +164,9 @@ public final class WaveformPresentationModel {
         return visibleNets.get(listIndex).formatter;
     }
 
-    public int getNetSetCount() {
-        return netSets.size();
-    }
+    public int getNetSetCount() { return netSets.size(); }
 
-    public String getNetSetName(int index) {
-        return netSets.get(index).name;
-    }
+    public String getNetSetName(int index) { return netSets.get(index).name; }
 
     public void selectNetSet(int index) {
         int oldSize = visibleNets.size();
@@ -204,9 +198,7 @@ public final class WaveformPresentationModel {
             netSets.add(newNetSet);
     }
 
-    public long getCursorPosition() {
-        return cursorPosition;
-    }
+    public long getCursorPosition() { return cursorPosition; }
 
     public void setCursorPosition(long timestamp, boolean extendSelection) {
         long old = cursorPosition;
@@ -226,8 +218,8 @@ public final class WaveformPresentationModel {
         setCursorPosition(timestamp, false);
     }
 
-    // This is used to display the timestamp at the top of the cursor when the user
-    // is dragging.
+    // This is used to display the timestamp at the top of the cursor when the
+    // user is dragging.
     public void setAdjustingCursor(boolean adjust) {
         adjustingCursor = adjust;
 
@@ -237,13 +229,9 @@ public final class WaveformPresentationModel {
         }
     }
 
-    public boolean isAdjustingCursor() {
-        return adjustingCursor;
-    }
+    public boolean isAdjustingCursor() { return adjustingCursor; }
 
-    public long getSelectionStart() {
-        return selectionStart;
-    }
+    public long getSelectionStart() { return selectionStart; }
 
     public void removeAllMarkers() {
         markers.clear();
@@ -280,7 +268,7 @@ public final class WaveformPresentationModel {
 
         // Because it's hard to click exactly on the marker, allow removing
         // markers a few pixels to the right or left of the current cursor.
-        long markerRemoveSlack = (long) (5.0 / getHorizontalScale());
+        long markerRemoveSlack = (long)(5.0 / getHorizontalScale());
 
         int index = markers.findIndex(timestamp);
         long targetTimestamp = markers.get(index).timestamp;
@@ -320,13 +308,9 @@ public final class WaveformPresentationModel {
         return markers.get(index).timestamp;
     }
 
-    public int getIdForMarker(int index) {
-        return markers.get(index).id;
-    }
+    public int getIdForMarker(int index) { return markers.get(index).id; }
 
-    public int getMarkerCount() {
-        return markers.size();
-    }
+    public int getMarkerCount() { return markers.size(); }
 
     public void prevMarker(boolean extendSelection) {
         int id = findMarkerAtOrBeforeTime(getCursorPosition());
@@ -392,8 +376,6 @@ public final class WaveformPresentationModel {
             this.netDataModel = netDataModel;
         }
 
-        NetDataModel getDataModel() {
-            return netDataModel;
-        }
+        NetDataModel getDataModel() { return netDataModel; }
     }
 }

@@ -28,7 +28,8 @@ import waveview.wavedata.WaveformDataModel;
 ///
 /// Draws the ruler with times at the top of the waveform view.
 ///
-final class TimescaleView extends JPanel implements WaveformPresentationModel.Listener {
+final class TimescaleView
+    extends JPanel implements WaveformPresentationModel.Listener {
     private static final int TIMESTAMP_DISAPPEAR_INTERVAL = 500;
 
     private boolean showTimestamp;
@@ -38,7 +39,8 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
     private final WaveformDataModel waveformDataModel;
     private final Timer timestampDisplayTimer;
 
-    TimescaleView(WaveformPresentationModel waveformPresentationModel, WaveformDataModel waveformDataModel) {
+    TimescaleView(WaveformPresentationModel waveformPresentationModel,
+                  WaveformDataModel waveformDataModel) {
         this.waveformPresentationModel = waveformPresentationModel;
         this.waveformDataModel = waveformDataModel;
         waveformPresentationModel.addListener(this);
@@ -47,8 +49,8 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
         setFont(new Font("SansSerif", Font.PLAIN, 9));
         scaleChanged(waveformPresentationModel.getHorizontalScale());
 
-        // The timestamp is shown when the user clicks to set the cursor position.
-        // This timer makes it disappear after a bit.
+        // The timestamp is shown when the user clicks to set the cursor
+        // position. This timer makes it disappear after a bit.
         timestampDisplayTimer = new Timer(TIMESTAMP_DISAPPEAR_INTERVAL, e -> {
             showTimestamp = false;
             repaint();
@@ -63,10 +65,14 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
 
     @Override
     public void cursorChanged(long oldTimestamp, long newTimestamp) {
-        int oldX = (int) (oldTimestamp * waveformPresentationModel.getHorizontalScale());
-        int newX = (int) (newTimestamp * waveformPresentationModel.getHorizontalScale());
-        int leftEdge = Math.min(oldX, newX) - DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
-        int rightEdge = Math.max(oldX, newX) + DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
+        int oldX = (int)(oldTimestamp *
+                         waveformPresentationModel.getHorizontalScale());
+        int newX = (int)(newTimestamp *
+                         waveformPresentationModel.getHorizontalScale());
+        int leftEdge =
+            Math.min(oldX, newX) - DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
+        int rightEdge =
+            Math.max(oldX, newX) + DrawMetrics.MAX_TIMESTAMP_LABEL_WIDTH;
         repaint(leftEdge, 0, rightEdge - leftEdge, getHeight());
 
         // When the cursor moves, draw the current time in the timescale
@@ -83,8 +89,10 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
         if (timestamp < 0) {
             repaint();
         } else {
-            int x = (int) (timestamp * waveformPresentationModel.getHorizontalScale());
-            repaint(x - (DrawMetrics.MAX_MARKER_LABEL_WIDTH / 2), 0, DrawMetrics.MAX_MARKER_LABEL_WIDTH,
+            int x = (int)(timestamp *
+                          waveformPresentationModel.getHorizontalScale());
+            repaint(x - (DrawMetrics.MAX_MARKER_LABEL_WIDTH / 2), 0,
+                    DrawMetrics.MAX_MARKER_LABEL_WIDTH,
                     DrawMetrics.TIMESCALE_HEIGHT);
         }
     }
@@ -95,12 +103,10 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
     }
 
     @Override
-    public void netsRemoved(int firstIndex, int lastIndex) {
-    }
+    public void netsRemoved(int firstIndex, int lastIndex) {}
 
     @Override
-    public void formatChanged(int index) {
-    }
+    public void formatChanged(int index) {}
 
     @Override
     public void scaleChanged(double newScale) {
@@ -108,8 +114,11 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
 
         // Convert to femto seconds, compute unit, then convert back to
         // time units.
-        long femtoSecondsPerTimeUnit = (long) Math.pow(10, waveformDataModel.getTimescale() + 15);
-        long minorTickIntervalFs = waveformPresentationModel.getMinorTickInterval() * femtoSecondsPerTimeUnit;
+        long femtoSecondsPerTimeUnit =
+            (long)Math.pow(10, waveformDataModel.getTimescale() + 15);
+        long minorTickIntervalFs =
+            waveformPresentationModel.getMinorTickInterval() *
+            femtoSecondsPerTimeUnit;
         long unitMagnitudeFs;
         if (minorTickIntervalFs < 100L) {
             unitMagnitudeFs = 1L;
@@ -137,7 +146,8 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
         // Not sure the best approach for that.
 
         Dimension d = getPreferredSize();
-        d.width = (int) (waveformDataModel.getMaxTimestamp() * waveformPresentationModel.getHorizontalScale());
+        d.width = (int)(waveformDataModel.getMaxTimestamp() *
+                        waveformPresentationModel.getHorizontalScale());
         setPreferredSize(d);
         revalidate();
         repaint();
@@ -148,14 +158,16 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
         super.paintComponent(g);
 
         Rectangle visibleRect = getVisibleRect();
-        long minorTickInterval = waveformPresentationModel.getMinorTickInterval();
+        long minorTickInterval =
+            waveformPresentationModel.getMinorTickInterval();
 
-        // The -100 in start time keeps labels that are to the left of the window from
-        // not being drawn
-        // (which causes artifacts when scrolling). It needs to be bigger than the
-        // largest label.
-        long startTime = (long) ((visibleRect.x - 100) / waveformPresentationModel.getHorizontalScale());
-        long endTime = (long) ((visibleRect.x + visibleRect.width) / waveformPresentationModel.getHorizontalScale());
+        // The -100 in start time keeps labels that are to the left of the
+        // window from not being drawn (which causes artifacts when scrolling).
+        // It needs to be bigger than the largest label.
+        long startTime = (long)((visibleRect.x - 100) /
+                                waveformPresentationModel.getHorizontalScale());
+        long endTime = (long)((visibleRect.x + visibleRect.width) /
+                              waveformPresentationModel.getHorizontalScale());
         if (startTime < 0) {
             startTime = 0;
         }
@@ -175,41 +187,51 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
 
     private void drawTicks(Graphics g, long startTime, long endTime) {
         double horizontalScale = waveformPresentationModel.getHorizontalScale();
-        long minorTickInterval = waveformPresentationModel.getMinorTickInterval();
+        long minorTickInterval =
+            waveformPresentationModel.getMinorTickInterval();
         FontMetrics metrics = g.getFontMetrics();
 
         for (long ts = startTime; ts < endTime; ts += minorTickInterval) {
-            int x = (int) (ts * horizontalScale);
-            if ((ts / minorTickInterval) % DrawMetrics.MINOR_TICKS_PER_MAJOR == 0) {
+            int x = (int)(ts * horizontalScale);
+            if ((ts / minorTickInterval) % DrawMetrics.MINOR_TICKS_PER_MAJOR ==
+                0) {
                 g.drawLine(x, 5, x, DrawMetrics.TIMESCALE_HEIGHT);
-                g.drawString(Long.toString(ts / unitMagnitude) + " " + unitName, x + 3,
-                        DrawMetrics.MINOR_TICK_TOP - metrics.getDescent() - 2);
+                g.drawString(
+                    Long.toString(ts / unitMagnitude) + " " + unitName, x + 3,
+                    DrawMetrics.MINOR_TICK_TOP - metrics.getDescent() - 2);
             } else {
-                g.drawLine(x, DrawMetrics.MINOR_TICK_TOP, x, DrawMetrics.TIMESCALE_HEIGHT);
+                g.drawLine(x, DrawMetrics.MINOR_TICK_TOP, x,
+                           DrawMetrics.TIMESCALE_HEIGHT);
             }
         }
     }
 
     private void drawMarkers(Graphics g, long startTime, long endTime) {
         double horizontalScale = waveformPresentationModel.getHorizontalScale();
-        int markerIndex = waveformPresentationModel.findMarkerAtOrBeforeTime(startTime);
+        int markerIndex =
+            waveformPresentationModel.findMarkerAtOrBeforeTime(startTime);
         while (markerIndex < waveformPresentationModel.getMarkerCount()) {
-            long timestamp = waveformPresentationModel.getTimestampForMarker(markerIndex);
+            long timestamp =
+                waveformPresentationModel.getTimestampForMarker(markerIndex);
             if (timestamp > endTime) {
                 break;
             }
 
-            String labelString = Integer.toString(waveformPresentationModel.getIdForMarker(markerIndex));
+            String labelString = Integer.toString(
+                waveformPresentationModel.getIdForMarker(markerIndex));
             int labelWidth = g.getFontMetrics().stringWidth(labelString);
-            int x = (int) (timestamp * horizontalScale);
+            int x = (int)(timestamp * horizontalScale);
             g.setColor(AppPreferences.getInstance().backgroundColor);
-            g.fillRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP), DrawMetrics.TIMESCALE_HEIGHT - 12,
-                    labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
+            g.fillRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP),
+                       DrawMetrics.TIMESCALE_HEIGHT - 12,
+                       labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
             g.setColor(AppPreferences.getInstance().waveformColor);
-            g.drawRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP), DrawMetrics.TIMESCALE_HEIGHT - 12,
-                    labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
+            g.drawRect(x - (labelWidth / 2 + DrawMetrics.TIMESTAMP_H_GAP),
+                       DrawMetrics.TIMESCALE_HEIGHT - 12,
+                       labelWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 12);
             g.setColor(AppPreferences.getInstance().waveformColor);
-            g.drawString(labelString, x - labelWidth / 2, DrawMetrics.TIMESCALE_HEIGHT - 3);
+            g.drawString(labelString, x - labelWidth / 2,
+                         DrawMetrics.TIMESCALE_HEIGHT - 3);
             markerIndex++;
         }
     }
@@ -217,27 +239,37 @@ final class TimescaleView extends JPanel implements WaveformPresentationModel.Li
     private void drawTimestamp(Graphics g) {
         Rectangle visibleRect = getVisibleRect();
         double horizontalScale = waveformPresentationModel.getHorizontalScale();
-        String timeString = Double.toString((double) waveformPresentationModel.getCursorPosition() / unitMagnitude) + " "
-                + unitName;
+        String timeString =
+            Double.toString(
+                (double)waveformPresentationModel.getCursorPosition() /
+                unitMagnitude) +
+            " " + unitName;
         int timeWidth = g.getFontMetrics().stringWidth(timeString);
-        int cursorX = (int) (waveformPresentationModel.getCursorPosition() * horizontalScale);
-        int labelLeft = cursorX + timeWidth > visibleRect.x + visibleRect.width ? cursorX - timeWidth : cursorX;
+        int cursorX = (int)(waveformPresentationModel.getCursorPosition() *
+                            horizontalScale);
+        int labelLeft = cursorX + timeWidth > visibleRect.x + visibleRect.width
+                            ? cursorX - timeWidth
+                            : cursorX;
 
         g.setColor(AppPreferences.getInstance().backgroundColor);
-        g.fillRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP, DrawMetrics.TIMESCALE_HEIGHT - 15,
-                timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
+        g.fillRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP,
+                   DrawMetrics.TIMESCALE_HEIGHT - 15,
+                   timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
         g.setColor(AppPreferences.getInstance().waveformColor);
-        g.drawRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP, DrawMetrics.TIMESCALE_HEIGHT - 15,
-                timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
+        g.drawRect(labelLeft - DrawMetrics.TIMESTAMP_H_GAP,
+                   DrawMetrics.TIMESCALE_HEIGHT - 15,
+                   timeWidth + DrawMetrics.TIMESTAMP_H_GAP * 2, 15);
         g.setColor(AppPreferences.getInstance().waveformColor);
         g.drawString(timeString, labelLeft + DrawMetrics.TIMESTAMP_H_GAP,
-                DrawMetrics.TIMESCALE_HEIGHT - DrawMetrics.TIMESTAMP_H_GAP);
+                     DrawMetrics.TIMESCALE_HEIGHT -
+                         DrawMetrics.TIMESTAMP_H_GAP);
     }
 
     private void drawUnderline(Graphics g) {
         Rectangle visibleRect = getVisibleRect();
         g.setColor(AppPreferences.getInstance().waveformColor);
-        g.drawLine(visibleRect.x, DrawMetrics.TIMESCALE_HEIGHT, visibleRect.x + visibleRect.width,
-                DrawMetrics.TIMESCALE_HEIGHT);
+        g.drawLine(visibleRect.x, DrawMetrics.TIMESCALE_HEIGHT,
+                   visibleRect.x + visibleRect.width,
+                   DrawMetrics.TIMESCALE_HEIGHT);
     }
 }

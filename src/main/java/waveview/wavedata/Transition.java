@@ -25,11 +25,7 @@ package waveview.wavedata;
 public class Transition extends BitVector {
     private long timestamp;
 
-    public long getTimestamp() {
-        return timestamp;
-    }
+    public long getTimestamp() { return timestamp; }
 
-    void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
+    void setTimestamp(long timestamp) { this.timestamp = timestamp; }
 }

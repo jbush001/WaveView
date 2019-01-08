@@ -25,13 +25,15 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
+import waveview.WaveformPresentationModel;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
-import waveview.WaveformPresentationModel;
 
 public class MarkerTest {
-    private final WaveformPresentationModel model = new WaveformPresentationModel();
-    private final WaveformPresentationModel.Listener listener = mock(WaveformPresentationModel.Listener.class);
+    private final WaveformPresentationModel model =
+        new WaveformPresentationModel();
+    private final WaveformPresentationModel.Listener listener =
+        mock(WaveformPresentationModel.Listener.class);
 
     @Before
     public void setUpTest() {
@@ -67,10 +69,11 @@ public class MarkerTest {
         model.addMarker("marker0", 1000);
         clearInvocations(listener);
 
-        model.removeMarkerAtTime(925);  // less than marker time
+        model.removeMarkerAtTime(925); // less than marker time
 
         verifyZeroInteractions(listener);
-        assertEquals(1, model.getMarkerCount()); // Marker should still be present
+        assertEquals(1,
+                     model.getMarkerCount()); // Marker should still be present
     }
 
     @Test
@@ -81,7 +84,8 @@ public class MarkerTest {
         model.removeMarkerAtTime(1075); // greater than marker time
 
         verifyZeroInteractions(listener);
-        assertEquals(1, model.getMarkerCount()); // Marker should still be present
+        assertEquals(1,
+                     model.getMarkerCount()); // Marker should still be present
     }
 
     @Test
@@ -332,7 +336,9 @@ public class MarkerTest {
     // Ensure removeAllNets doesn't affect markers
     @Test
     public void removeAllNets() {
-        NetDataModel net1 = new NetDataModel("net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
+        NetDataModel net1 = new NetDataModel(
+            "net1", "net1",
+            TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addMarker("a_marker", 1000);
         clearInvocations(listener);

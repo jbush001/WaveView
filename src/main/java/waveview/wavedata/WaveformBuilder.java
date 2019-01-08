@@ -33,20 +33,24 @@ public interface WaveformBuilder {
     WaveformBuilder exitScope();
 
     /// Create a new net
-    /// @param netIndex This will either be the next sequential integer if this is a
-    ///   new net, or less than the highest netId if this is a alias of an existing
-    ///   net (shares transition data; the nets are connected).
+    /// @param netIndex This will either be the next sequential integer if this
+    /// is a
+    ///   new net, or less than the highest netId if this is a alias of an
+    ///   existing net (shares transition data; the nets are connected).
     /// @param shortName Name of the signal. It's called 'short' to distinguish
-    ///   it from a dotted name that includes the full hiearchy of containing modules.
+    ///   it from a dotted name that includes the full hiearchy of containing
+    ///   modules.
     /// @param width Number of bits in this signal.
     WaveformBuilder newNet(int netIndex, String shortName, int width);
 
     /// Add a new transition
-    /// @param netId Identifier of the net for which the transition takes place. This
+    /// @param netId Identifier of the net for which the transition takes place.
+    /// This
     ///    is the value that was returned by newNet.
     /// @param timestamp timestamp of the transition, in time units from start.
     /// @param values New values the signal will take after the transition.
-    WaveformBuilder appendTransition(int netIndex, long timestamp, BitVector values);
+    WaveformBuilder appendTransition(int netIndex, long timestamp,
+                                     BitVector values);
 
     /// Called when all nets and transitions have been added. No other methods
     /// in WaveformBuilder will be called after this.

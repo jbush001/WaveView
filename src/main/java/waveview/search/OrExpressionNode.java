@@ -27,8 +27,9 @@ final class OrExpressionNode extends LogicalExpressionNode {
     }
 
     @Override
-    protected long nextForwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
-            long nextRightTimestamp) {
+    protected long nextForwardHint(boolean leftResult, boolean rightResult,
+                                   long nextLeftTimestamp,
+                                   long nextRightTimestamp) {
         if (leftResult && rightResult) {
             // Both expressions are true. The only way for this to become
             // false is if both change to false.
@@ -42,16 +43,17 @@ final class OrExpressionNode extends LogicalExpressionNode {
             // becomes false.
             return nextRightTimestamp;
         } else {
-            // Both expressions are false. May become true if either subexpression
-            // changes.
+            // Both expressions are false. May become true if either
+            // subexpression changes.
             return Math.min(nextLeftTimestamp, nextRightTimestamp);
         }
     }
 
     // Mirror of above
     @Override
-    protected long nextBackwardHint(boolean leftResult, boolean rightResult, long nextLeftTimestamp,
-            long nextRightTimestamp) {
+    protected long nextBackwardHint(boolean leftResult, boolean rightResult,
+                                    long nextLeftTimestamp,
+                                    long nextRightTimestamp) {
         if (leftResult && rightResult) {
             return Math.min(nextLeftTimestamp, nextRightTimestamp);
         } else if (leftResult) {

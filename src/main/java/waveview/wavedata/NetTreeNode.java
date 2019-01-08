@@ -34,8 +34,8 @@ public final class NetTreeNode {
 
         public void enterScope(String name) {
             if (nodeStack.isEmpty() && root != null) {
-                // If you call $dumpvars more than once with iverilog, it will pop the root
-                // node off and re-push it. Handle this case here.
+                // If you call $dumpvars more than once with iverilog, it will
+                // pop the root node off and re-push it. Handle this case here.
                 nodeStack.addLast(root);
                 return;
             }
@@ -50,17 +50,13 @@ public final class NetTreeNode {
             nodeStack.addLast(node);
         }
 
-        public void leaveScope() {
-            nodeStack.removeLast();
-        }
+        public void leaveScope() { nodeStack.removeLast(); }
 
         public void addNet(NetDataModel netDataModel) {
             nodeStack.peekLast().children.add(new NetTreeNode(netDataModel));
         }
 
-        public NetTreeNode getRoot() {
-            return root;
-        }
+        public NetTreeNode getRoot() { return root; }
     }
 
     // Interior nodes (modules/interfaces) only
@@ -80,13 +76,9 @@ public final class NetTreeNode {
         return name;
     }
 
-    public boolean isLeaf() {
-        return children.isEmpty();
-    }
+    public boolean isLeaf() { return children.isEmpty(); }
 
-    public NetTreeNode getChild(int index) {
-        return children.get(index);
-    }
+    public NetTreeNode getChild(int index) { return children.get(index); }
 
     public int getChildCount() {
         if (isLeaf()) {
@@ -100,7 +92,5 @@ public final class NetTreeNode {
         return children.indexOf(child);
     }
 
-    public NetDataModel getNetDataModel() {
-        return netDataModel;
-    }
+    public NetDataModel getNetDataModel() { return netDataModel; }
 }

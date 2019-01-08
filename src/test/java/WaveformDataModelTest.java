@@ -108,7 +108,7 @@ public class WaveformDataModelTest {
             .setTimescale(-9)
             .enterScope("mod1")
             .newNet(0, "net1", 1)
-            .newNet(0, "net2", 1)    // aliases net1
+            .newNet(0, "net2", 1) // aliases net1
             .exitScope()
             .appendTransition(0, 17, new BitVector("1", 2))
             .loadFinished();
@@ -132,16 +132,16 @@ public class WaveformDataModelTest {
         assertEquals(17, ati.next().getTimestamp());
     }
 
-    // Regression test: when a net is aliased, it doesn't increment the net index.
-    // Make sure WaveformDataModel doesn't get out of sync.
+    // Regression test: when a net is aliased, it doesn't increment the net
+    // index. Make sure WaveformDataModel doesn't get out of sync.
     @Test
     public void netAfterAlias() {
         model.startBuilding()
             .setTimescale(-9)
             .enterScope("mod1")
             .newNet(0, "net1", 1)
-            .newNet(0, "net2", 1)    // aliases net1
-            .newNet(1, "net3", 1)    // not alias
+            .newNet(0, "net2", 1) // aliases net1
+            .newNet(1, "net3", 1) // not alias
             .exitScope()
             .appendTransition(0, 17, new BitVector("1", 2))
             .appendTransition(1, 21, new BitVector("0", 2))

@@ -17,6 +17,7 @@
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+
 import java.io.File;
 import java.io.IOException;
 import org.junit.Test;
@@ -30,7 +31,8 @@ import waveview.wavedata.BitVector;
 public class ValueFormatterTest {
     @Test
     public void enumValueFormatter() throws IOException {
-        File mappingFile = new File("src/test/resources/enum_mapping/test1.txt");
+        File mappingFile =
+            new File("src/test/resources/enum_mapping/test1.txt");
         EnumValueFormatter vf = new EnumValueFormatter(mappingFile);
         assertEquals("STATE_INIT", vf.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", vf.format(new BitVector("2", 10)));
@@ -40,7 +42,8 @@ public class ValueFormatterTest {
 
     @Test
     public void enumValueFormatterBadFile() {
-        File mappingFile = new File("askfkalsd8unskdgsdfghsdfkgsdfkghsdfgksdfuzxcjk");
+        File mappingFile =
+            new File("askfkalsd8unskdgsdfghsdfkgsdfkghsdfgksdfuzxcjk");
         try {
             new EnumValueFormatter(mappingFile);
             fail("didn't throw exception");
@@ -66,12 +69,14 @@ public class ValueFormatterTest {
     @Test
     public void decimalValueFormatter() {
         DecimalValueFormatter df = new DecimalValueFormatter();
-        assertEquals("123843954387523457345345", df.format(new BitVector("123843954387523457345345", 10)));
+        assertEquals("123843954387523457345345",
+                     df.format(new BitVector("123843954387523457345345", 10)));
     }
 
     @Test
     public void hexadecimalValueFormatter() {
         HexadecimalValueFormatter hf = new HexadecimalValueFormatter();
-        assertEquals("ABCDEF12345678", hf.format(new BitVector("ABCDEF12345678", 16)));
+        assertEquals("ABCDEF12345678",
+                     hf.format(new BitVector("ABCDEF12345678", 16)));
     }
 }

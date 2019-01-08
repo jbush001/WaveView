@@ -21,6 +21,6 @@ import waveview.wavedata.BitVector;
 public final class AsciiValueFormatter implements ValueFormatter {
     @Override
     public String format(BitVector bits) {
-        return Character.toString((char) bits.intValue());
+        return Character.toString((char)bits.intValue());
     }
 }

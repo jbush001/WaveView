@@ -27,8 +27,9 @@ import java.util.NoSuchElementException;
 /// Because it is sorted, it supports efficient binary searches for values
 /// at specific timestamps.
 ///
-/// @bug This doesn't propertly handle nets that are uninitalized at the beginning
-/// of the waveform.  They are assumed to have the value of the first transition.
+/// @bug This doesn't propertly handle nets that are uninitalized at the
+/// beginning of the waveform.  They are assumed to have the value of the first
+/// transition.
 ///
 public final class TransitionVector {
     private final int width; // Number of bits for this net
@@ -52,7 +53,7 @@ public final class TransitionVector {
     /// first transition, returns the first transition.
     public Iterator<Transition> findTransition(long timestamp) {
         // Binary search
-        int low = 0; // Lowest possible index
+        int low = 0;                    // Lowest possible index
         int high = transitionCount - 1; // Highest possible index
 
         while (low <= high) {
@@ -80,11 +81,10 @@ public final class TransitionVector {
         return timestamps[transitionCount - 1];
     }
 
-    public int getWidth() {
-        return width;
-    }
+    public int getWidth() { return width; }
 
-    private final class TransitionVectorIterator implements Iterator<Transition> {
+    private final class TransitionVectorIterator
+        implements Iterator<Transition> {
         private int index;
 
         // Reuse the same Transition/BitVector so we don't have to keep
@@ -123,7 +123,8 @@ public final class TransitionVector {
                     bitOffset = 0;
                 }
 
-                transition.setBit(width - i - 1, BitValue.fromOrdinal(currentWord & 3));
+                transition.setBit(width - i - 1,
+                                  BitValue.fromOrdinal(currentWord & 3));
                 bitOffset += 2;
                 currentWord >>= 2;
             }
@@ -148,13 +149,9 @@ public final class TransitionVector {
             return new Builder(new TransitionVector(width));
         }
 
-        private Builder(TransitionVector vector) {
-            this.vector = vector;
-        }
+        private Builder(TransitionVector vector) { this.vector = vector; }
 
-        public TransitionVector getTransitionVector() {
-            return vector;
-        }
+        public TransitionVector getTransitionVector() { return vector; }
 
         // The timestamp must be after the last transition that was appended
         // (transitions must be appended in order)
@@ -171,9 +168,11 @@ public final class TransitionVector {
                 int[] newPackedValues = new int[allocSize * vector.width / 16];
 
                 if (vector.timestamps != null) {
-                    System.arraycopy(vector.timestamps, 0, newTimestamps, 0, vector.transitionCount);
-                    System.arraycopy(vector.packedValues, 0, newPackedValues, 0, vector.transitionCount
-                        * vector.width / 16);
+                    System.arraycopy(vector.timestamps, 0, newTimestamps, 0,
+                                     vector.transitionCount);
+                    System.arraycopy(vector.packedValues, 0, newPackedValues, 0,
+                                     vector.transitionCount * vector.width /
+                                         16);
                 }
 
                 vector.timestamps = newTimestamps;
@@ -181,14 +180,16 @@ public final class TransitionVector {
             }
 
             if (vector.transitionCount > 0) {
-                assert timestamp >= vector.timestamps[vector.transitionCount - 1];
+                assert timestamp >=
+                    vector.timestamps[vector.transitionCount - 1];
             }
 
             vector.timestamps[vector.transitionCount] = timestamp;
 
             int bitIndex = vector.transitionCount * vector.width;
 
-            // If the passed value is smaller than the vector width, pad with zeroes
+            // If the passed value is smaller than the vector width, pad with
+            // zeroes
             if (vector.width > value.getWidth()) {
                 bitIndex += vector.width - value.getWidth();
             }
@@ -198,8 +199,10 @@ public final class TransitionVector {
 
             // If the passed value is wider than the vector width, only copy the
             // low order bits of it.
-            for (int i = Math.min(value.getWidth(), vector.width) - 1; i >= 0; i--) {
-                vector.packedValues[wordOffset] |= value.getBit(i).ordinal() << bitOffset;
+            for (int i = Math.min(value.getWidth(), vector.width) - 1; i >= 0;
+                 i--) {
+                vector.packedValues[wordOffset] |= value.getBit(i).ordinal()
+                                                   << bitOffset;
                 bitOffset += 2;
                 if (bitOffset == 32) {
                     wordOffset++;
