@@ -20,7 +20,7 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Iterator;
 import waveview.wavedata.BitValue;
-import waveview.wavedata.NetDataModel;
+import waveview.wavedata.TransitionVector;
 import waveview.wavedata.Transition;
 
 ///
@@ -29,7 +29,7 @@ import waveview.wavedata.Transition;
 ///
 final class SingleBitPainter implements WaveformPainter {
     @Override
-    public void paint(Graphics g, NetDataModel model, int topOffset,
+    public void paint(Graphics g, TransitionVector transitionVector, int topOffset,
                       Rectangle visibleRect, double horizontalScale,
                       ValueFormatter formatter) {
         g.setColor(AppPreferences.getInstance().waveformColor);
@@ -37,7 +37,7 @@ final class SingleBitPainter implements WaveformPainter {
         BitValue lastValue = BitValue.ZERO;
         int lastX = visibleRect.x + visibleRect.width;
         long firstTimestamp = (long)(visibleRect.x / horizontalScale);
-        Iterator<Transition> i = model.findTransition(firstTimestamp);
+        Iterator<Transition> i = transitionVector.findTransition(firstTimestamp);
         while (true) {
             Transition transition = i.next();
 

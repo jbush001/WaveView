@@ -232,13 +232,13 @@ final class WaveformView
             NetDataModel netDataModel =
                 waveformPresentationModel.getVisibleNet(waveformIndex);
             if (netDataModel.getWidth() > 1) {
-                multiBitPainter.paint(g, netDataModel,
+                multiBitPainter.paint(g, netDataModel.getTransitionVector(),
                                       waveformIndex *
                                               DrawMetrics.WAVEFORM_V_SPACING +
                                           DrawMetrics.WAVEFORM_V_GAP,
                                       visibleRect, horizontalScale, formatter);
             } else {
-                singleBitPainter.paint(g, netDataModel,
+                singleBitPainter.paint(g, netDataModel.getTransitionVector(),
                                        waveformIndex *
                                                DrawMetrics.WAVEFORM_V_SPACING +
                                            DrawMetrics.WAVEFORM_V_GAP,

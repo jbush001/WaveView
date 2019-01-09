@@ -20,7 +20,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Iterator;
-import waveview.wavedata.NetDataModel;
+import waveview.wavedata.TransitionVector;
 import waveview.wavedata.Transition;
 
 ///
@@ -33,7 +33,7 @@ final class MultiBitPainter implements WaveformPainter {
     private final static String ELLIPSIS = "\u2026";
 
     @Override
-    public void paint(Graphics g, NetDataModel model, int topOffset,
+    public void paint(Graphics g, TransitionVector transitionVector, int topOffset,
                       Rectangle visibleRect, double horizontalScale,
                       ValueFormatter formatter) {
         FontMetrics metrics = g.getFontMetrics();
@@ -51,7 +51,7 @@ final class MultiBitPainter implements WaveformPainter {
 
         g.setColor(AppPreferences.getInstance().waveformColor);
 
-        Iterator<Transition> i = model.findTransition(firstTimestamp);
+        Iterator<Transition> i = transitionVector.findTransition(firstTimestamp);
         while (true) {
             // Draw the segment to the left of this transition
             Transition transition = i.next();

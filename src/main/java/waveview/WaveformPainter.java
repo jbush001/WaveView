@@ -18,7 +18,7 @@ package waveview;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import waveview.wavedata.NetDataModel;
+import waveview.wavedata.TransitionVector;
 
 ///
 /// Delegate used to draw a waveform for a single net
@@ -27,7 +27,7 @@ import waveview.wavedata.NetDataModel;
 
 interface WaveformPainter {
     /// @param g Graphics context to draw onto
-    /// @param model Waveform information will be pulled from this model
+    /// @param transitionVector Waveform information will be pulled from this model
     /// @param netId Identifier of net to paint
     /// @param y Vertical offset of top of waveform
     /// @param visibleRect This is used to constrain what subset of the
@@ -35,7 +35,7 @@ interface WaveformPainter {
     /// @param horizontalScale pixels per time unit
     /// @param formatter Used to convert the BitVector to a readable string
     ///        that is drawn on top of the waveform.
-    void paint(Graphics g, NetDataModel model, int topOffset,
+    void paint(Graphics g, TransitionVector transitionVector, int topOffset,
                Rectangle visibleRect, double horizontalScale,
                ValueFormatter formatter);
 }

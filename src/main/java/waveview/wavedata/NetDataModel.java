@@ -37,6 +37,10 @@ public final class NetDataModel {
 
     public String getShortName() { return shortName; }
 
+    public TransitionVector getTransitionVector() {
+        return transitionVector;
+    }
+
     public Iterator<Transition> findTransition(long timestamp) {
         return transitionVector.findTransition(timestamp);
     }
