@@ -16,8 +16,6 @@
 
 package waveview.search;
 
-import waveview.wavedata.WaveformDataModel;
-
 abstract class LogicalExpressionNode extends BooleanExpressionNode {
     protected final BooleanExpressionNode leftChild;
     protected final BooleanExpressionNode rightChild;
@@ -29,9 +27,9 @@ abstract class LogicalExpressionNode extends BooleanExpressionNode {
     }
 
     @Override
-    boolean evaluate(WaveformDataModel model, long timestamp) {
-        boolean leftResult = leftChild.evaluate(model, timestamp);
-        boolean rightResult = rightChild.evaluate(model, timestamp);
+    boolean evaluate(long timestamp) {
+        boolean leftResult = leftChild.evaluate(timestamp);
+        boolean rightResult = rightChild.evaluate(timestamp);
 
         forwardHint =
             nextForwardHint(leftResult, rightResult, leftChild.forwardHint,

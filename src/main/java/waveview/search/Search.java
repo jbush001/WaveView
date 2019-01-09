@@ -65,7 +65,7 @@ public final class Search {
     /// Mainly useful for unit testing
     /// @returns true if this search string matches at the passed timestamp
     public boolean matches(long timestamp) {
-        return searchExpression.evaluate(waveformDataModel, timestamp);
+        return searchExpression.evaluate(timestamp);
     }
 
     ///
@@ -83,7 +83,7 @@ public final class Search {
     public long getNextMatch(long startTimestamp) {
         long currentTime = startTimestamp;
         boolean currentValue =
-            searchExpression.evaluate(waveformDataModel, currentTime);
+            searchExpression.evaluate(currentTime);
 
         // If the start timestamp is already at a region that is true, scan
         // first to find a place where the expression is false.
@@ -94,7 +94,7 @@ public final class Search {
 
             currentTime = searchExpression.forwardHint;
             currentValue =
-                searchExpression.evaluate(waveformDataModel, currentTime);
+                searchExpression.evaluate(currentTime);
         }
 
         // Scan to find where the expression is true
@@ -105,7 +105,7 @@ public final class Search {
 
             currentTime = searchExpression.forwardHint;
             currentValue =
-                searchExpression.evaluate(waveformDataModel, currentTime);
+                searchExpression.evaluate(currentTime);
         }
 
         return currentTime;
@@ -122,7 +122,7 @@ public final class Search {
     public long getPreviousMatch(long startTimestamp) {
         long currentTime = startTimestamp;
         boolean currentValue =
-            searchExpression.evaluate(waveformDataModel, currentTime);
+            searchExpression.evaluate(currentTime);
         while (currentValue) {
             if (searchExpression.backwardHint == Long.MIN_VALUE) {
                 return -1; // End of waveform
@@ -130,7 +130,7 @@ public final class Search {
 
             currentTime = searchExpression.backwardHint;
             currentValue =
-                searchExpression.evaluate(waveformDataModel, currentTime);
+                searchExpression.evaluate(currentTime);
         }
 
         while (!currentValue) {
@@ -140,7 +140,7 @@ public final class Search {
 
             currentTime = searchExpression.backwardHint;
             currentValue =
-                searchExpression.evaluate(waveformDataModel, currentTime);
+                searchExpression.evaluate(currentTime);
         }
 
         return currentTime;

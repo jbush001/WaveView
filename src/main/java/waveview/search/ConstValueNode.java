@@ -17,7 +17,6 @@
 package waveview.search;
 
 import waveview.wavedata.BitVector;
-import waveview.wavedata.WaveformDataModel;
 
 final class ConstValueNode extends ValueNode {
     private final BitVector value;
@@ -25,7 +24,7 @@ final class ConstValueNode extends ValueNode {
     ConstValueNode(BitVector constValue) { value = new BitVector(constValue); }
 
     @Override
-    BitVector evaluate(WaveformDataModel model, long timestamp) {
+    BitVector evaluate(long timestamp) {
         backwardHint = Long.MIN_VALUE;
         forwardHint = Long.MAX_VALUE;
         return value;

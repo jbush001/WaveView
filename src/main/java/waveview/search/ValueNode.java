@@ -17,8 +17,7 @@
 package waveview.search;
 
 import waveview.wavedata.BitVector;
-import waveview.wavedata.WaveformDataModel;
 
 abstract class ValueNode extends ExpressionNode {
-    abstract BitVector evaluate(WaveformDataModel model, long timestamp);
+    abstract BitVector evaluate(long timestamp);
 }

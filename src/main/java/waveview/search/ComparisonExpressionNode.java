@@ -17,7 +17,6 @@
 package waveview.search;
 
 import waveview.wavedata.BitVector;
-import waveview.wavedata.WaveformDataModel;
 
 abstract class ComparisonExpressionNode extends BooleanExpressionNode {
     protected final ValueNode leftChild;
@@ -30,9 +29,9 @@ abstract class ComparisonExpressionNode extends BooleanExpressionNode {
     }
 
     @Override
-    boolean evaluate(WaveformDataModel model, long timestamp) {
-        BitVector leftValue = leftChild.evaluate(model, timestamp);
-        BitVector rightValue = rightChild.evaluate(model, timestamp);
+    boolean evaluate(long timestamp) {
+        BitVector leftValue = leftChild.evaluate(timestamp);
+        BitVector rightValue = rightChild.evaluate(timestamp);
         boolean result = doCompare(leftValue, rightValue);
         backwardHint =
             Math.max(leftChild.backwardHint, rightChild.backwardHint);

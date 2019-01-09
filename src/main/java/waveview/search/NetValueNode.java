@@ -20,7 +20,6 @@ import java.util.Iterator;
 import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.Transition;
-import waveview.wavedata.WaveformDataModel;
 
 final class NetValueNode extends ValueNode {
     private final NetDataModel netDataModel;
@@ -30,7 +29,7 @@ final class NetValueNode extends ValueNode {
     }
 
     @Override
-    BitVector evaluate(WaveformDataModel model, long timestamp) {
+    BitVector evaluate(long timestamp) {
         Iterator<Transition> i = netDataModel.findTransition(timestamp);
         Transition t = i.next();
         BitVector value = new BitVector(t);
