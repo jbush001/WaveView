@@ -16,53 +16,43 @@
 
 package waveview.search;
 
-final class AndExpressionNode extends LogicalExpressionNode {
-    AndExpressionNode(BooleanExpressionNode left, BooleanExpressionNode right) {
-        super(left, right);
+final class AndExpressionNode extends BooleanExpressionNode {
+    protected final BooleanExpressionNode leftChild;
+    protected final BooleanExpressionNode rightChild;
+
+    AndExpressionNode(BooleanExpressionNode leftChild, BooleanExpressionNode rightChild) {
+        this.leftChild = leftChild;
+        this.rightChild = rightChild;
     }
 
     @Override
-    protected boolean compareResults(boolean value1, boolean value2) {
-        return value1 && value2;
-    }
+    boolean evaluate(long timestamp) {
+        boolean leftResult = leftChild.evaluate(timestamp);
+        boolean rightResult = rightChild.evaluate(timestamp);
 
-    @Override
-    protected long nextForwardHint(boolean leftResult, boolean rightResult,
-                                   long nextLeftTimestamp,
-                                   long nextRightTimestamp) {
         if (leftResult && rightResult) {
             // Both expressions are true. Either expression changing
-            // could make it false.
-            return Math.min(nextLeftTimestamp, nextRightTimestamp);
+            // could make it false, so choose the nearest event.
+            forwardHint = Math.min(leftChild.forwardHint, rightChild.forwardHint);
+            backwardHint = Math.max(leftChild.backwardHint, rightChild.backwardHint);
         } else if (leftResult) {
             // Currently false. It can only become true when right result
             // becomes true.
-            return nextRightTimestamp;
+            forwardHint = rightChild.forwardHint;
+            backwardHint = rightChild.backwardHint;
         } else if (rightResult) {
             // Currently false. It can only become true when left result
             // becomes true.
-            return nextLeftTimestamp;
+            forwardHint = leftChild.forwardHint;
+            backwardHint = leftChild.backwardHint;
         } else {
             // Both expressions are false. Both must change before this
-            // may become true.
-            return Math.max(nextLeftTimestamp, nextRightTimestamp);
+            // may become true, so choose the farthest event.
+            forwardHint = Math.max(leftChild.forwardHint, rightChild.forwardHint);
+            backwardHint = Math.min(leftChild.backwardHint, rightChild.backwardHint);
         }
-    }
 
-    // Mirror of above
-    @Override
-    protected long nextBackwardHint(boolean leftResult, boolean rightResult,
-                                    long nextLeftTimestamp,
-                                    long nextRightTimestamp) {
-        if (leftResult && rightResult) {
-            return Math.max(nextLeftTimestamp, nextRightTimestamp);
-        } else if (leftResult) {
-            return nextRightTimestamp;
-        } else if (rightResult) {
-            return nextLeftTimestamp;
-        } else {
-            return Math.min(nextLeftTimestamp, nextRightTimestamp);
-        }
+        return leftResult && rightResult;
     }
 
     @Override
