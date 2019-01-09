@@ -40,7 +40,7 @@ public final class TransitionVector {
     // are stored starting with the first bit as the LSB of each array word
     // up to the MSB. The next bit is then stored in the next higher array
     // entry. There is no padding between adjacent transitions.
-    private int[] packedValues;
+    private long[] packedValues;
     private int transitionCount;
 
     private TransitionVector(int width) {
@@ -85,21 +85,21 @@ public final class TransitionVector {
 
     private final class TransitionVectorIterator
         implements Iterator<Transition> {
-        private int index;
+        private int transitionIndex;
 
         // Reuse the same Transition/BitVector so we don't have to keep
         // reallocating.
         private final Transition transition = new Transition();
 
-        TransitionVectorIterator(int index) {
-            assert index >= 0;
-            this.index = index;
+        TransitionVectorIterator(int transitionIndex) {
+            assert transitionIndex >= 0;
+            this.transitionIndex = transitionIndex;
             transition.setWidth(width);
         }
 
         @Override
         public boolean hasNext() {
-            return index < transitionCount;
+            return transitionIndex < transitionCount;
         }
 
         /// @note the Transition returned from next will be clobbered
@@ -110,27 +110,27 @@ public final class TransitionVector {
             if (!hasNext())
                 throw new NoSuchElementException();
 
-            int bitOffset = index * width * 2;
-            int wordOffset = bitOffset >> 5;
-            bitOffset &= 31;
-            int currentWord = packedValues[wordOffset] >> bitOffset;
+            int encodedBitIndex = transitionIndex * width * 2;
+            int wordIndex = encodedBitIndex / 64;
+            int shiftAmount = encodedBitIndex % 64;
+            long currentWord = packedValues[wordIndex] >> shiftAmount;
 
             // Copy values out of packed array
             for (int i = 0; i < width; i++) {
-                if (bitOffset == 32) {
-                    wordOffset++;
-                    currentWord = packedValues[wordOffset];
-                    bitOffset = 0;
+                if (shiftAmount == 64) {
+                    wordIndex++;
+                    currentWord = packedValues[wordIndex];
+                    shiftAmount = 0;
                 }
 
                 transition.setBit(width - i - 1,
-                                  BitValue.fromOrdinal(currentWord & 3));
-                bitOffset += 2;
+                                  BitValue.fromOrdinal((int)(currentWord & 3)));
+                shiftAmount += 2;
                 currentWord >>= 2;
             }
 
-            transition.setTimestamp(timestamps[index]);
-            index++;
+            transition.setTimestamp(timestamps[transitionIndex]);
+            transitionIndex++;
 
             return transition;
         }
@@ -143,7 +143,7 @@ public final class TransitionVector {
 
     public static final class Builder {
         private final TransitionVector vector;
-        private int allocSize;
+        private int allocatedTransitions;
 
         public static Builder createBuilder(int width) {
             return new Builder(new TransitionVector(width));
@@ -156,23 +156,24 @@ public final class TransitionVector {
         // The timestamp must be after the last transition that was appended
         // (transitions must be appended in order)
         public Builder appendTransition(long timestamp, BitVector value) {
-            if (vector.transitionCount == allocSize) {
+            if (vector.transitionCount == allocatedTransitions) {
                 // Grow the array
-                if (allocSize < 128) {
-                    allocSize = 128;
+                if (allocatedTransitions < 128) {
+                    allocatedTransitions = 128;
                 } else {
-                    allocSize *= 2;
+                    allocatedTransitions *= 2;
                 }
 
-                long[] newTimestamps = new long[allocSize];
-                int[] newPackedValues = new int[allocSize * vector.width / 16];
+                long[] newTimestamps = new long[allocatedTransitions];
+                long[] newPackedValues = new long[allocatedTransitions
+                    * vector.width * 2 / 64];
 
                 if (vector.timestamps != null) {
                     System.arraycopy(vector.timestamps, 0, newTimestamps, 0,
                                      vector.transitionCount);
                     System.arraycopy(vector.packedValues, 0, newPackedValues, 0,
-                                     vector.transitionCount * vector.width /
-                                         16);
+                                     vector.transitionCount * vector.width * 2
+                                     / 64);
                 }
 
                 vector.timestamps = newTimestamps;
@@ -186,27 +187,27 @@ public final class TransitionVector {
 
             vector.timestamps[vector.transitionCount] = timestamp;
 
-            int bitIndex = vector.transitionCount * vector.width;
+            int encodedBitIndex = vector.transitionCount * vector.width * 2;
 
             // If the passed value is smaller than the vector width, pad with
             // zeroes
             if (vector.width > value.getWidth()) {
-                bitIndex += vector.width - value.getWidth();
+                encodedBitIndex += (vector.width - value.getWidth()) * 2;
             }
 
-            int wordOffset = bitIndex / 16;
-            int bitOffset = (bitIndex * 2) % 32;
+            int wordIndex = encodedBitIndex / 64;
+            int shiftAmount = encodedBitIndex % 64;
 
             // If the passed value is wider than the vector width, only copy the
             // low order bits of it.
             for (int i = Math.min(value.getWidth(), vector.width) - 1; i >= 0;
                  i--) {
-                vector.packedValues[wordOffset] |= value.getBit(i).ordinal()
-                                                   << bitOffset;
-                bitOffset += 2;
-                if (bitOffset == 32) {
-                    wordOffset++;
-                    bitOffset = 0;
+                vector.packedValues[wordIndex] |= ((long) value.getBit(i).ordinal())
+                                                   << shiftAmount;
+                shiftAmount += 2;
+                if (shiftAmount == 64) {
+                    wordIndex++;
+                    shiftAmount = 0;
                 }
             }
 
