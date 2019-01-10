@@ -65,7 +65,7 @@ public final class Search {
     /// Mainly useful for unit testing
     /// @returns true if this search string matches at the passed timestamp
     public boolean matches(long timestamp) {
-        return searchExpression.evaluate(timestamp);
+        return searchExpression.evaluate(timestamp, new SearchHint());
     }
 
     ///
@@ -81,31 +81,30 @@ public final class Search {
     /// timestamp of the next forward match otherwise
     ///
     public long getNextMatch(long startTimestamp) {
+        SearchHint hint = new SearchHint();
+
         long currentTime = startTimestamp;
-        boolean currentValue =
-            searchExpression.evaluate(currentTime);
+        boolean currentValue = searchExpression.evaluate(currentTime, hint);
 
         // If the start timestamp is already at a region that is true, scan
         // first to find a place where the expression is false.
         while (currentValue) {
-            if (searchExpression.forwardHint == Long.MAX_VALUE) {
+            if (hint.forward == Long.MAX_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = searchExpression.forwardHint;
-            currentValue =
-                searchExpression.evaluate(currentTime);
+            currentTime = hint.forward;
+            currentValue = searchExpression.evaluate(currentTime, hint);
         }
 
         // Scan to find where the expression is true
         while (!currentValue) {
-            if (searchExpression.forwardHint == Long.MAX_VALUE) {
+            if (hint.forward == Long.MAX_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = searchExpression.forwardHint;
-            currentValue =
-                searchExpression.evaluate(currentTime);
+            currentTime = hint.forward;
+            currentValue = searchExpression.evaluate(currentTime, hint);
         }
 
         return currentTime;
@@ -120,27 +119,25 @@ public final class Search {
     /// timestamp of the next backward match otherwise
     ///
     public long getPreviousMatch(long startTimestamp) {
+        SearchHint hint = new SearchHint();
         long currentTime = startTimestamp;
-        boolean currentValue =
-            searchExpression.evaluate(currentTime);
+        boolean currentValue = searchExpression.evaluate(currentTime, hint);
         while (currentValue) {
-            if (searchExpression.backwardHint == Long.MIN_VALUE) {
+            if (hint.backward == Long.MIN_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = searchExpression.backwardHint;
-            currentValue =
-                searchExpression.evaluate(currentTime);
+            currentTime = hint.backward;
+            currentValue = searchExpression.evaluate(currentTime, hint);
         }
 
         while (!currentValue) {
-            if (searchExpression.backwardHint == Long.MIN_VALUE) {
+            if (hint.backward == Long.MIN_VALUE) {
                 return -1; // End of waveform
             }
 
-            currentTime = searchExpression.backwardHint;
-            currentValue =
-                searchExpression.evaluate(currentTime);
+            currentTime = hint.backward;
+            currentValue = searchExpression.evaluate(currentTime, hint);
         }
 
         return currentTime;

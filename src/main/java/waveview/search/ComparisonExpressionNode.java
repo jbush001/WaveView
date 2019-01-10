@@ -29,13 +29,14 @@ abstract class ComparisonExpressionNode extends BooleanExpressionNode {
     }
 
     @Override
-    boolean evaluate(long timestamp) {
-        BitVector leftValue = leftChild.evaluate(timestamp);
-        BitVector rightValue = rightChild.evaluate(timestamp);
+    boolean evaluate(long timestamp, SearchHint outHint) {
+        SearchHint leftHint = new SearchHint();
+        SearchHint rightHint = new SearchHint();
+        BitVector leftValue = leftChild.evaluate(timestamp, leftHint);
+        BitVector rightValue = rightChild.evaluate(timestamp, rightHint);
         boolean result = doCompare(leftValue, rightValue);
-        backwardHint =
-            Math.max(leftChild.backwardHint, rightChild.backwardHint);
-        forwardHint = Math.min(leftChild.forwardHint, rightChild.forwardHint);
+        outHint.backward = Math.max(leftHint.backward, rightHint.backward);
+        outHint.forward = Math.min(leftHint.forward, rightHint.forward);
         return result;
     }
 

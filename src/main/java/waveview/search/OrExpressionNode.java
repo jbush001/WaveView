@@ -26,30 +26,32 @@ final class OrExpressionNode extends BooleanExpressionNode {
     }
 
     @Override
-    boolean evaluate(long timestamp) {
-        boolean leftResult = leftChild.evaluate(timestamp);
-        boolean rightResult = rightChild.evaluate(timestamp);
+    boolean evaluate(long timestamp, SearchHint outHint) {
+        SearchHint leftHint = new SearchHint();
+        SearchHint rightHint = new SearchHint();
+        boolean leftResult = leftChild.evaluate(timestamp, leftHint);
+        boolean rightResult = rightChild.evaluate(timestamp, rightHint);
 
         if (leftResult && rightResult) {
             // Both expressions are true. The only way for this to become
             // false is if both change to false, so choose the farthest event.
-            forwardHint = Math.max(leftChild.forwardHint, rightChild.forwardHint);
-            backwardHint = Math.min(leftChild.backwardHint, rightChild.backwardHint);
+            outHint.forward = Math.max(leftHint.forward, rightHint.forward);
+            outHint.backward = Math.min(leftHint.backward, rightHint.backward);
         } else if (leftResult) {
             // Currently true. It can only become false when left result
             // becomes false.
-            forwardHint = leftChild.forwardHint;
-            backwardHint = leftChild.backwardHint;
+            outHint.forward = leftHint.forward;
+            outHint.backward = leftHint.backward;
         } else if (rightResult) {
             // Currently true. It can only become false when right result
             // becomes false.
-            forwardHint = rightChild.forwardHint;
-            backwardHint = rightChild.backwardHint;
+            outHint.forward = rightHint.forward;
+            outHint.backward = rightHint.backward;
         } else {
             // Both expressions are false. May become true if either
             // subexpression changes, so choose the nearest event.
-            forwardHint = Math.min(leftChild.forwardHint, rightChild.forwardHint);
-            backwardHint = Math.max(leftChild.backwardHint, rightChild.backwardHint);
+            outHint.forward = Math.min(leftHint.forward, rightHint.forward);
+            outHint.backward = Math.max(leftHint.backward, rightHint.backward);
         }
 
         return leftResult || rightResult;
