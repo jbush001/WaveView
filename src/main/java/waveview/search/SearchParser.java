@@ -137,17 +137,30 @@ public final class SearchParser {
             lookahead = lexer.nextToken();
             if (lookahead.getType() == Token.Type.LBRACKET) {
                 Token highIndexTok = matchToken(Token.Type.LITERAL);
-                matchToken(Token.Type.COLON);
-                Token lowIndexTok = matchToken(Token.Type.LITERAL);
-                matchToken(Token.Type.RBRACKET);
                 int highIndex = highIndexTok.getLiteralValue().intValue();
-                int lowIndex = lowIndexTok.getLiteralValue().intValue();
+                int lowIndex;
 
                 int width = netDataModel.getTransitionVector().getWidth();
-                if (highIndex >= width || highIndex < lowIndex) {
-                    throw new SearchFormatException("Invalid bit slice range", highIndexTok.getStart(),
-                                                    lowIndexTok.getEnd());
+                lookahead = lexer.nextToken();
+                if (lookahead.getType() == Token.Type.COLON) {
+                    Token lowIndexTok = matchToken(Token.Type.LITERAL);
+                    lowIndex = lowIndexTok.getLiteralValue().intValue();
+                    if (highIndex >= width || highIndex < lowIndex) {
+                        throw new SearchFormatException("Invalid bit slice range",
+                                                         highIndexTok.getStart(),
+                                                         lowIndexTok.getEnd());
+                    }
+                } else {
+                    lexer.pushBackToken();
+                    lowIndex = highIndex;
+                    if (highIndex >= width) {
+                        throw new SearchFormatException("Invalid bit slice index",
+                                                         highIndexTok.getStart(),
+                                                         highIndexTok.getEnd());
+                    }
                 }
+
+                matchToken(Token.Type.RBRACKET);
 
                 return new NetValueNode(netDataModel, lowIndex, highIndex);
             } else {

@@ -850,7 +850,16 @@ public class SearchTest {
     // tree correctly, as well as various operators.
     @Test
     public void searchToString() throws SearchFormatException {
-        WaveformDataModel waveformDataModel = makeFourBitModel();
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("m")
+            .newNet(0, "a", 1)
+            .newNet(1, "b", 1)
+            .newNet(2, "c", 1)
+            .newNet(3, "d", 1)
+            .newNet(4, "e", 4)
+            .exitScope();
 
         // Basic comparisons
         assertEquals("(eq m.a m.b)",
@@ -909,6 +918,8 @@ public class SearchTest {
             "(or (or (or (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
             new Search(waveformDataModel, "m.a or m.b or m.c or m.d")
                 .toString());
+        assertEquals("(eq m.e[3:2] m.e[1:0])", new Search(waveformDataModel,
+            "m.e[3:2] = m.e[1:0]").toString());
     }
 
     // Tests that parens are treated as part of an identifier.
@@ -1011,6 +1022,24 @@ public class SearchTest {
     }
 
     @Test
+    public void bitSliceSingleBit() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "a", 8)
+            .exitScope()
+            .appendTransition(0, 0, new BitVector("00000000", 2))
+            .appendTransition(0, 5, new BitVector("10010011", 2))
+            .appendTransition(0, 10, new BitVector("10001011", 2))
+            .appendTransition(0, 15, new BitVector("10011011", 2))
+            .loadFinished();
+
+        Search search1 = new Search(waveformDataModel, "mod1.a[3] = 1");
+        assertEquals(10, search1.getNextMatch(0));
+    }
+
+    @Test
     public void invalidHighBitSliceIndex() throws SearchFormatException {
         WaveformDataModel waveformDataModel = new WaveformDataModel();
         waveformDataModel.startBuilding()
@@ -1063,13 +1092,34 @@ public class SearchTest {
             .loadFinished();
 
         try {
-            new Search(waveformDataModel, "mod1.a[0:3 == 1");
+            new Search(waveformDataModel, "mod1.a[3:0 == 1");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
             // Expected
             assertEquals("unexpected value", exc.getMessage());
             assertEquals(11, exc.getStartOffset());
             assertEquals(11, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void invalidBitSliceIndex() {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "a", 4)
+            .exitScope()
+            .loadFinished();
+
+        try {
+            new Search(waveformDataModel, "mod1.a[4] == 1");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Invalid bit slice index", exc.getMessage());
+            assertEquals(7, exc.getStartOffset());
+            assertEquals(7, exc.getEndOffset());
         }
     }
 }
