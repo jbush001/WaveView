@@ -20,6 +20,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Test;
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
@@ -374,5 +375,51 @@ public class BitVectorTest {
         BitVector bv7 = new BitVector(SRC_VALUE, 2);
         bv7.assign(bv6);
         assertEquals("0", bv7.toString());
+    }
+
+    @Test
+    public void slice() {
+        BitVector bv = new BitVector("010001011101", 2);
+        BitVector sliced = bv.slice(3, 5);
+        assertEquals("011", sliced.toString());
+    }
+
+    @Test
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
+    public void negativeLowSliceIndex() {
+        BitVector bv = new BitVector("11111111", 2);
+        try {
+            bv.slice(-1, 5);
+            fail("Did not throw exception");
+        } catch (IllegalArgumentException exc) {
+            // Expected
+            assertEquals("invalid bit slice range -1:5", exc.getMessage());
+        }
+    }
+
+    @Test
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
+    public void highSliceIndexTooBig() {
+        BitVector bv = new BitVector("11111111", 2);
+        try {
+            bv.slice(0, 8);
+            fail("Did not throw exception");
+        } catch (IllegalArgumentException exc) {
+            // Expected
+            assertEquals("invalid bit slice range 0:8", exc.getMessage());
+        }
+    }
+
+    @Test
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
+    public void lowHighSliceIndexSwapped() {
+        BitVector bv = new BitVector("11111111", 2);
+        try {
+            bv.slice(5, 3);
+            fail("Did not throw exception");
+        } catch (IllegalArgumentException exc) {
+            // Expected
+            assertEquals("invalid bit slice range 5:3", exc.getMessage());
+        }
     }
 }

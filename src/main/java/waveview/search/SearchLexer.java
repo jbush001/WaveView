@@ -61,9 +61,6 @@ final class SearchLexer {
 
         for (;;) {
             int c = nextChar();
-
-            System.out.println("state " + state.toString() + " offset " +
-                               lexerOffset + " char " + (char)c);
             switch (state) {
             case SCAN_INIT:
                 tokenStart = lexerOffset - 1;
@@ -87,6 +84,12 @@ final class SearchLexer {
                     return new Token(Token.Type.RPAREN, lexerOffset - 1, c);
                 } else if (c == '=') {
                     return new Token(Token.Type.EQUAL, lexerOffset - 1, c);
+                } else if (c == '[') {
+                    return new Token(Token.Type.LBRACKET, lexerOffset - 1, c);
+                } else if (c == ']') {
+                    return new Token(Token.Type.RBRACKET, lexerOffset - 1, c);
+                } else if (c == ':') {
+                    return new Token(Token.Type.COLON, lexerOffset - 1, c);
                 } else if (!isSpace(c)) {
                     throw new SearchFormatException(
                         "unknown character " + (char)c, lexerOffset - 1,

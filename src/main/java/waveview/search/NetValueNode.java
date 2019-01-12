@@ -23,9 +23,19 @@ import waveview.wavedata.Transition;
 
 final class NetValueNode extends ValueNode {
     private final NetDataModel netDataModel;
+    private final int lowIndex;
+    private final int highIndex;
 
     NetValueNode(NetDataModel netDataModel) {
         this.netDataModel = netDataModel;
+        lowIndex = -1;
+        highIndex = -1;
+    }
+
+    NetValueNode(NetDataModel netDataModel, int lowIndex, int highIndex) {
+        this.netDataModel = netDataModel;
+        this.lowIndex = lowIndex;
+        this.highIndex = highIndex;
     }
 
     @Override
@@ -46,11 +56,19 @@ final class NetValueNode extends ValueNode {
             outHint.forward = Long.MAX_VALUE;
         }
 
+        if (this.lowIndex != -1) {
+            return value.slice(lowIndex, highIndex);
+        }
+
         return value;
     }
 
     @Override
     public String toString() {
-        return netDataModel.getFullName();
+        if (this.lowIndex == -1) {
+            return netDataModel.getFullName();
+        } else {
+            return netDataModel.getFullName() + "[" + highIndex + ":" + lowIndex + "]";
+        }
     }
 }

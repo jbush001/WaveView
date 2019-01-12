@@ -94,6 +94,21 @@ public class BitVector {
         return value;
     }
 
+    public BitVector slice(int lowBit, int highBit) {
+        if (lowBit < 0
+            || highBit >= values.length
+            || lowBit > highBit) {
+            throw new IllegalArgumentException("invalid bit slice range " + lowBit + ":" + highBit);
+        }
+
+        BitVector newVec = new BitVector(highBit - lowBit + 1);
+        for (int index = lowBit; index <= highBit; index++) {
+            newVec.values[index - lowBit] = values[index];
+        }
+
+        return newVec;
+    }
+
     /// @param radix May be 2, 10, or 16
     public void parseString(String string, int radix)
         throws NumberFormatException {

@@ -30,9 +30,11 @@ final class Token {
         NOT_EQUAL,
         LPAREN,
         RPAREN,
-        EQUAL
-    }
-    ;
+        LBRACKET,
+        RBRACKET,
+        COLON,
+        EQUAL,
+    };
 
     private final Type type;
     private final int start;

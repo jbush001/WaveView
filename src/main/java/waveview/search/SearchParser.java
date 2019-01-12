@@ -37,7 +37,7 @@ public final class SearchParser {
 
     /// Read the next token and throw an exception if the type does
     /// not match the parameter.
-    private void matchToken(Token.Type tokenType) throws SearchFormatException {
+    private Token matchToken(Token.Type tokenType) throws SearchFormatException {
         Token token = lexer.nextToken();
         if (token.getType() != tokenType) {
             if (token.getType() == Token.Type.END) {
@@ -49,6 +49,8 @@ public final class SearchParser {
                     "unexpected value", token.getStart(), token.getEnd());
             }
         }
+
+        return token;
     }
 
     /// Read the next token and check if is an identifier that matches
@@ -132,7 +134,26 @@ public final class SearchParser {
                     lookahead.getStart(), lookahead.getEnd());
             }
 
-            return new NetValueNode(netDataModel);
+            lookahead = lexer.nextToken();
+            if (lookahead.getType() == Token.Type.LBRACKET) {
+                Token highIndexTok = matchToken(Token.Type.LITERAL);
+                matchToken(Token.Type.COLON);
+                Token lowIndexTok = matchToken(Token.Type.LITERAL);
+                matchToken(Token.Type.RBRACKET);
+                int highIndex = highIndexTok.getLiteralValue().intValue();
+                int lowIndex = lowIndexTok.getLiteralValue().intValue();
+
+                int width = netDataModel.getTransitionVector().getWidth();
+                if (highIndex >= width || highIndex < lowIndex) {
+                    throw new SearchFormatException("Invalid bit slice range", highIndexTok.getStart(),
+                                                    lowIndexTok.getEnd());
+                }
+
+                return new NetValueNode(netDataModel, lowIndex, highIndex);
+            } else {
+                lexer.pushBackToken();
+                return new NetValueNode(netDataModel);
+            }
         } else {
             lexer.pushBackToken();
             matchToken(Token.Type.LITERAL);

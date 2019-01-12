@@ -62,8 +62,6 @@ public class SearchTest {
             for (int bit = 0; bit < 4; bit++) {
                 bv.setBit(0, BitValue.fromOrdinal((t >> (3 - bit)) & 1));
                 builder.appendTransition(bit, t, bv);
-                System.out.println("    .appendTransition(" + bit + ", " + t +
-                                   ", " + bv + ")");
             }
         }
 
@@ -363,9 +361,7 @@ public class SearchTest {
             .appendTransition(1, 45, new BitVector("1", 2))
             .loadFinished();
 
-        System.out.println("parse search");
         Search search = new Search(waveformDataModel, "mod1.a and mod1.b");
-        System.out.println("finished parsing");
 
         // Expression is true:
         // 15-19, 25-29, 45-
@@ -432,7 +428,6 @@ public class SearchTest {
             .loadFinished();
 
         Search search = new Search(waveformDataModel, "mod1.a or mod1.b");
-        System.out.println("search is " + search.toString());
 
         // Expression is true:
         // 5-9, 15-29, 35-39, 45-
@@ -991,5 +986,90 @@ public class SearchTest {
         String searchString = Search.generateFromValuesAt(nets, 1);
 
         assertEquals("mod1.a = 'h1 and mod1.b = 'h4", searchString);
+    }
+
+    @Test
+    public void bitSlice() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "a", 8)
+            .exitScope()
+            .appendTransition(0, 0, new BitVector("00000000", 2))
+            .appendTransition(0, 5, new BitVector("10010011", 2))
+            .appendTransition(0, 10, new BitVector("10001011", 2))
+            .appendTransition(0, 15, new BitVector("10011011", 2))
+            .loadFinished();
+
+        Search search1 = new Search(waveformDataModel, "mod1.a[5:3] = 1");
+        assertEquals(10, search1.getNextMatch(0));
+        Search search2 = new Search(waveformDataModel, "mod1.a[5:3] = 2");
+        assertEquals(5, search2.getNextMatch(0));
+        Search search3 = new Search(waveformDataModel, "mod1.a[5:3] = 3");
+        assertEquals(15, search3.getNextMatch(0));
+    }
+
+    @Test
+    public void invalidHighBitSliceIndex() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "a", 4)
+            .exitScope()
+            .loadFinished();
+
+        try {
+            new Search(waveformDataModel, "mod1.a[4:0] = 1");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Invalid bit slice range", exc.getMessage());
+            assertEquals(7, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void reversedBitSliceRange() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "a", 4)
+            .exitScope()
+            .loadFinished();
+
+        try {
+            new Search(waveformDataModel, "mod1.a[0:3] == 1");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Invalid bit slice range", exc.getMessage());
+            assertEquals(7, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void bitSliceParseError() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("mod1")
+            .newNet(0, "a", 4)
+            .exitScope()
+            .loadFinished();
+
+        try {
+            new Search(waveformDataModel, "mod1.a[0:3 == 1");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("unexpected value", exc.getMessage());
+            assertEquals(11, exc.getStartOffset());
+            assertEquals(11, exc.getEndOffset());
+        }
     }
 }
