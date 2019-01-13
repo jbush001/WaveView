@@ -22,8 +22,7 @@ class DrawMetrics {
     public static final int MINOR_TICK_TOP = 18;
     public static final int WAVEFORM_HEIGHT = 20;
     public static final int WAVEFORM_V_GAP = 3;
-    public static final int WAVEFORM_V_SPACING =
-        WAVEFORM_HEIGHT + (WAVEFORM_V_GAP * 2);
+    public static final int WAVEFORM_V_SPACING = WAVEFORM_HEIGHT + (WAVEFORM_V_GAP * 2);
     public static final int WAVEFORM_TRANSITION_WIDTH = 3;
     public static final int TIMESCALE_HEIGHT = 25;
     public static final int MAX_TIMESTAMP_LABEL_WIDTH = 65;

@@ -25,15 +25,17 @@ public final class SearchParser {
     private final WaveformDataModel waveformDataModel;
     private final BooleanExpressionNode searchExpression;
 
-    public SearchParser(WaveformDataModel waveformDataModel,
-                        String searchString) throws SearchFormatException {
+    public SearchParser(WaveformDataModel waveformDataModel, String searchString)
+        throws SearchFormatException {
         this.waveformDataModel = waveformDataModel;
         lexer = new SearchLexer(searchString);
         searchExpression = parseExpression();
         matchToken(Token.Type.END);
     }
 
-    BooleanExpressionNode getExpression() { return searchExpression; }
+    BooleanExpressionNode getExpression() {
+        return searchExpression;
+    }
 
     /// Read the next token and throw an exception if the type does
     /// not match the parameter.
@@ -41,9 +43,8 @@ public final class SearchParser {
         Token token = lexer.nextToken();
         if (token.getType() != tokenType) {
             if (token.getType() == Token.Type.END) {
-                throw new SearchFormatException("Unexpected end of string",
-                                                token.getStart(),
-                                                token.getEnd());
+                throw new SearchFormatException(
+                    "Unexpected end of string", token.getStart(), token.getEnd());
             } else {
                 throw new SearchFormatException(
                     "Unexpected token", token.getStart(), token.getEnd());
@@ -66,8 +67,7 @@ public final class SearchParser {
         return true;
     }
 
-    private BooleanExpressionNode parseExpression()
-        throws SearchFormatException {
+    private BooleanExpressionNode parseExpression() throws SearchFormatException {
         return parseOr();
     }
 
@@ -89,8 +89,7 @@ public final class SearchParser {
         return left;
     }
 
-    private BooleanExpressionNode parseCondition()
-        throws SearchFormatException {
+    private BooleanExpressionNode parseCondition() throws SearchFormatException {
         Token lookahead = lexer.nextToken();
         if (lookahead.getType() == Token.Type.LPAREN) {
             BooleanExpressionNode node = parseExpression();
@@ -102,23 +101,22 @@ public final class SearchParser {
         ValueNode left = parseValue();
         lookahead = lexer.nextToken();
         switch (lookahead.getType()) {
-        case GREATER:
-            return new GreaterThanExpressionNode(left, parseValue());
-        case GREATER_EQUAL:
-            return new GreaterEqualExpressionNode(left, parseValue());
-        case LESS_THAN:
-            return new LessThanExpressionNode(left, parseValue());
-        case LESS_EQUAL:
-            return new LessEqualExpressionNode(left, parseValue());
-        case NOT_EQUAL:
-            return new NotEqualExpressionNode(left, parseValue());
-        case EQUAL:
-            return new EqualExpressionNode(left, parseValue());
-        default:
-            // If there's not an operator, treat as != 0
-            lexer.pushBackToken();
-            return new NotEqualExpressionNode(
-                left, new ConstValueNode(BitVector.ZERO));
+            case GREATER:
+                return new GreaterThanExpressionNode(left, parseValue());
+            case GREATER_EQUAL:
+                return new GreaterEqualExpressionNode(left, parseValue());
+            case LESS_THAN:
+                return new LessThanExpressionNode(left, parseValue());
+            case LESS_EQUAL:
+                return new LessEqualExpressionNode(left, parseValue());
+            case NOT_EQUAL:
+                return new NotEqualExpressionNode(left, parseValue());
+            case EQUAL:
+                return new EqualExpressionNode(left, parseValue());
+            default:
+                // If there's not an operator, treat as != 0
+                lexer.pushBackToken();
+                return new NotEqualExpressionNode(left, new ConstValueNode(BitVector.ZERO));
         }
     }
 
@@ -139,16 +137,14 @@ public final class SearchParser {
                     lowIndex = lowIndexTok.getLiteralValue().intValue();
                     if (highIndex >= width || highIndex < lowIndex) {
                         throw new SearchFormatException("Invalid bit slice range",
-                                                         highIndexTok.getStart(),
-                                                         lowIndexTok.getEnd());
+                            highIndexTok.getStart(), lowIndexTok.getEnd());
                     }
                 } else {
                     lexer.pushBackToken();
                     lowIndex = highIndex;
                     if (highIndex >= width) {
                         throw new SearchFormatException("Invalid bit slice index",
-                                                         highIndexTok.getStart(),
-                                                         highIndexTok.getEnd());
+                            highIndexTok.getStart(), highIndexTok.getEnd());
                     }
                 }
 
@@ -176,15 +172,15 @@ public final class SearchParser {
                 if (match == null) {
                     match = netDataModel;
                 } else if (match.getTransitionVector() != netDataModel.getTransitionVector()) {
-                    throw new SearchFormatException("Ambiguous net \""
-                        + name + "\"", token.getStart(), token.getEnd());
+                    throw new SearchFormatException(
+                        "Ambiguous net \"" + name + "\"", token.getStart(), token.getEnd());
                 }
             }
         }
 
         if (match == null) {
-            throw new SearchFormatException("Unknown net \"" + name + "\"",
-                token.getStart(), token.getEnd());
+            throw new SearchFormatException(
+                "Unknown net \"" + name + "\"", token.getStart(), token.getEnd());
         }
 
         return match;
@@ -212,8 +208,8 @@ public final class SearchParser {
             // beginning of the string.
             int haystackSegmentBegin = haystack.lastIndexOf('.', haystackSegmentEnd - 1);
             int needleSegmentBegin = needle.lastIndexOf('.', needleSegmentEnd - 1);
-            if (!haystack.substring(haystackSegmentBegin + 1, haystackSegmentEnd).equals(
-                needle.substring(needleSegmentBegin + 1, needleSegmentEnd))) {
+            if (!haystack.substring(haystackSegmentBegin + 1, haystackSegmentEnd)
+                     .equals(needle.substring(needleSegmentBegin + 1, needleSegmentEnd))) {
                 // Subpaths don't match
                 return false;
             }

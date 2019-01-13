@@ -20,8 +20,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Iterator;
-import waveview.wavedata.TransitionVector;
 import waveview.wavedata.Transition;
+import waveview.wavedata.TransitionVector;
 
 ///
 /// Delegate that draws the waveform for a single net that has more than one
@@ -34,20 +34,16 @@ final class MultiBitPainter implements WaveformPainter {
 
     @Override
     public void paint(Graphics g, TransitionVector transitionVector, int topOffset,
-                      Rectangle visibleRect, double horizontalScale,
-                      ValueFormatter formatter) {
+        Rectangle visibleRect, double horizontalScale, ValueFormatter formatter) {
         FontMetrics metrics = g.getFontMetrics();
-        int fontBaseline =
-            topOffset +
-            (DrawMetrics.WAVEFORM_HEIGHT + metrics.getHeight()) / 2 -
-            metrics.getDescent();
+        int fontBaseline = topOffset + (DrawMetrics.WAVEFORM_HEIGHT + metrics.getHeight()) / 2
+            - metrics.getDescent();
 
         boolean lastValueWasZ = false;
         boolean lastValueWasX = false;
-        int lastX = visibleRect.x +
-                    visibleRect.width; // Don't draw before the first segment
+        int lastX = visibleRect.x + visibleRect.width; // Don't draw before the first segment
         String previousValue = "";
-        long firstTimestamp = (long)(visibleRect.x / horizontalScale);
+        long firstTimestamp = (long) (visibleRect.x / horizontalScale);
 
         g.setColor(AppPreferences.getInstance().waveformColor);
 
@@ -60,37 +56,31 @@ final class MultiBitPainter implements WaveformPainter {
             boolean isX = !isZ && transition.isX();
 
             // Compute the boundaries of this segment
-            int x = (int)(transition.getTimestamp() * horizontalScale);
+            int x = (int) (transition.getTimestamp() * horizontalScale);
 
             // Draw transition
             if (x - lastX > DrawMetrics.WAVEFORM_TRANSITION_WIDTH * 2) {
                 // Draw left part of twiddle >
                 if (!lastValueWasZ) {
-                    drawTwiddleHalf(g, topOffset, x,
-                                    x - DrawMetrics.WAVEFORM_TRANSITION_WIDTH,
-                                    lastValueWasX);
+                    drawTwiddleHalf(
+                        g, topOffset, x, x - DrawMetrics.WAVEFORM_TRANSITION_WIDTH, lastValueWasX);
                 }
 
                 // Draw right part of twiddle: <
                 if (!isZ) {
-                    drawTwiddleHalf(g, topOffset, x,
-                                    x + DrawMetrics.WAVEFORM_TRANSITION_WIDTH,
-                                    isX);
+                    drawTwiddleHalf(
+                        g, topOffset, x, x + DrawMetrics.WAVEFORM_TRANSITION_WIDTH, isX);
                 }
             } else if (x > lastX) {
                 // Draw squished net values
                 g.fillRect(x - DrawMetrics.WAVEFORM_TRANSITION_WIDTH, topOffset,
-                           DrawMetrics.WAVEFORM_TRANSITION_WIDTH * 2,
-                           DrawMetrics.WAVEFORM_HEIGHT);
+                    DrawMetrics.WAVEFORM_TRANSITION_WIDTH * 2, DrawMetrics.WAVEFORM_HEIGHT);
             }
 
-            drawSpan(g,
-                     Math.max(visibleRect.x,
-                              lastX + DrawMetrics.WAVEFORM_TRANSITION_WIDTH),
-                     Math.min(visibleRect.x + visibleRect.width,
-                              x - DrawMetrics.WAVEFORM_TRANSITION_WIDTH),
-                     topOffset, previousValue, lastValueWasZ, lastValueWasX,
-                     fontBaseline, metrics);
+            drawSpan(g, Math.max(visibleRect.x, lastX + DrawMetrics.WAVEFORM_TRANSITION_WIDTH),
+                Math.min(
+                    visibleRect.x + visibleRect.width, x - DrawMetrics.WAVEFORM_TRANSITION_WIDTH),
+                topOffset, previousValue, lastValueWasZ, lastValueWasX, fontBaseline, metrics);
 
             // Stop drawing when we've gone past the edge of the viewport
             // (waveform is no longer visible).
@@ -105,19 +95,16 @@ final class MultiBitPainter implements WaveformPainter {
             if (!i.hasNext()) {
                 // End of the waveform. Draw remaining span running off to the
                 // right...
-                drawSpan(
-                    g,
-                    Math.max(visibleRect.x,
-                             lastX + DrawMetrics.WAVEFORM_TRANSITION_WIDTH),
-                    visibleRect.x + visibleRect.width, topOffset, previousValue,
-                    lastValueWasZ, lastValueWasX, fontBaseline, metrics);
+                drawSpan(g, Math.max(visibleRect.x, lastX + DrawMetrics.WAVEFORM_TRANSITION_WIDTH),
+                    visibleRect.x + visibleRect.width, topOffset, previousValue, lastValueWasZ,
+                    lastValueWasX, fontBaseline, metrics);
                 break;
             }
         }
     }
 
-    private void drawTwiddleHalf(Graphics g, int topOffset, int transitionX,
-                                 int baseX, boolean conflict) {
+    private void drawTwiddleHalf(
+        Graphics g, int topOffset, int transitionX, int baseX, boolean conflict) {
         if (conflict) {
             polygonXPoints[0] = baseX;
             polygonYPoints[0] = topOffset;
@@ -130,15 +117,13 @@ final class MultiBitPainter implements WaveformPainter {
         }
 
         g.setColor(AppPreferences.getInstance().waveformColor);
-        g.drawLine(baseX, topOffset, transitionX,
-                   topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
+        g.drawLine(baseX, topOffset, transitionX, topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
         g.drawLine(baseX, topOffset + DrawMetrics.WAVEFORM_HEIGHT, transitionX,
-                   topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
+            topOffset + DrawMetrics.WAVEFORM_HEIGHT / 2);
     }
 
-    private void drawSpan(Graphics g, int left, int right, int top,
-                          String label, boolean isZ, boolean isX,
-                          int fontBaseline, FontMetrics metrics) {
+    private void drawSpan(Graphics g, int left, int right, int top, String label, boolean isZ,
+        boolean isX, int fontBaseline, FontMetrics metrics) {
         if (right <= left) {
             return; // Will end up with single pixel boogers in some cases
                     // otherwise
@@ -146,18 +131,17 @@ final class MultiBitPainter implements WaveformPainter {
 
         if (isZ) {
             g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT / 2, right,
-                       top + DrawMetrics.WAVEFORM_HEIGHT / 2);
+                top + DrawMetrics.WAVEFORM_HEIGHT / 2);
         } else {
             if (isX) {
                 g.setColor(AppPreferences.getInstance().conflictColor);
-                g.fillRect(left, top, right - left,
-                           DrawMetrics.WAVEFORM_HEIGHT);
+                g.fillRect(left, top, right - left, DrawMetrics.WAVEFORM_HEIGHT);
                 g.setColor(AppPreferences.getInstance().waveformColor);
             }
 
             g.drawLine(left, top, right, top);
-            g.drawLine(left, top + DrawMetrics.WAVEFORM_HEIGHT, right,
-                       top + DrawMetrics.WAVEFORM_HEIGHT);
+            g.drawLine(
+                left, top + DrawMetrics.WAVEFORM_HEIGHT, right, top + DrawMetrics.WAVEFORM_HEIGHT);
 
             // Draw text label with values
             int stringWidth = metrics.stringWidth(label);

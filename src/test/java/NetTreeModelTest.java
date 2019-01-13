@@ -27,20 +27,15 @@ import waveview.wavedata.TransitionVector;
 public class NetTreeModelTest {
     @Test
     public void lookup() {
-        NetDataModel child1 = new NetDataModel(
-            "child1", "scope1.child1",
+        NetDataModel child1 = new NetDataModel("child1", "scope1.child1",
             TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel child2 = new NetDataModel(
-            "child2", "scope1.child2",
+        NetDataModel child2 = new NetDataModel("child2", "scope1.child2",
             TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel child3 = new NetDataModel(
-            "child3", "scope1.scope2.child3",
+        NetDataModel child3 = new NetDataModel("child3", "scope1.scope2.child3",
             TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel child4 = new NetDataModel(
-            "child4", "scope1.scope2.child4",
+        NetDataModel child4 = new NetDataModel("child4", "scope1.scope2.child4",
             TransitionVector.Builder.createBuilder(1).getTransitionVector());
-        NetDataModel child5 = new NetDataModel(
-            "child5", "scope1.child5",
+        NetDataModel child5 = new NetDataModel("child5", "scope1.child5",
             TransitionVector.Builder.createBuilder(1).getTransitionVector());
 
         NetTreeNode.Builder builder = new NetTreeNode.Builder();
@@ -103,8 +98,7 @@ public class NetTreeModelTest {
     // exit the root node and re-push it. Ensure this is handled properly.
     @Test
     public void doubleRoot() {
-        NetDataModel child1 = new NetDataModel(
-            "child1", "scope1.child1",
+        NetDataModel child1 = new NetDataModel("child1", "scope1.child1",
             TransitionVector.Builder.createBuilder(1).getTransitionVector());
         NetTreeNode.Builder builder = new NetTreeNode.Builder();
         builder.enterScope("scope1");

@@ -28,7 +28,9 @@ public interface WaveformLoader {
     /// etc)
 
     class LoadFormatException extends IOException {
-        LoadFormatException(String description) { super(description); }
+        LoadFormatException(String description) {
+            super(description);
+        }
     }
 
     interface ProgressListener {
@@ -38,6 +40,5 @@ public interface WaveformLoader {
         boolean updateProgress(int percentRead);
     }
 
-    void load(File file, WaveformBuilder builder, ProgressListener listener)
-        throws IOException;
+    void load(File file, WaveformBuilder builder, ProgressListener listener) throws IOException;
 }

@@ -25,8 +25,7 @@ import waveview.MarkerTableModel;
 import waveview.WaveformPresentationModel;
 
 public class MarkerTableModelTest {
-    private final WaveformPresentationModel tdm =
-        new WaveformPresentationModel();
+    private final WaveformPresentationModel tdm = new WaveformPresentationModel();
     private MarkerTableModel mtm;
 
     @Before
@@ -49,13 +48,13 @@ public class MarkerTableModelTest {
         tdm.addMarker("bar", 5678);
 
         assertEquals(2, mtm.getRowCount());
-        assertEquals("1", (String)mtm.getValueAt(0, 0));
-        assertEquals("1234", (String)mtm.getValueAt(0, 1));
-        assertEquals("foo", (String)mtm.getValueAt(0, 2));
+        assertEquals("1", (String) mtm.getValueAt(0, 0));
+        assertEquals("1234", (String) mtm.getValueAt(0, 1));
+        assertEquals("foo", (String) mtm.getValueAt(0, 2));
 
-        assertEquals("2", (String)mtm.getValueAt(1, 0));
-        assertEquals("5678", (String)mtm.getValueAt(1, 1));
-        assertEquals("bar", (String)mtm.getValueAt(1, 2));
+        assertEquals("2", (String) mtm.getValueAt(1, 0));
+        assertEquals("5678", (String) mtm.getValueAt(1, 1));
+        assertEquals("bar", (String) mtm.getValueAt(1, 2));
 
         assertFalse(mtm.isCellEditable(0, 0));
         assertFalse(mtm.isCellEditable(0, 1));
@@ -70,12 +69,12 @@ public class MarkerTableModelTest {
         tdm.addMarker("foo", 1234);
         tdm.addMarker("bar", 5678);
         mtm.setValueAt("baz", 1, 2);
-        assertEquals("baz", (String)mtm.getValueAt(1, 2));
+        assertEquals("baz", (String) mtm.getValueAt(1, 2));
     }
 
     // Column index past end, should check and return empty string.
     @Test
     public void invalidColumn() {
-        assertEquals("", (String)mtm.getValueAt(1, 3));
+        assertEquals("", (String) mtm.getValueAt(1, 3));
     }
 }

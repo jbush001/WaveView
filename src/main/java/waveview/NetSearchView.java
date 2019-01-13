@@ -56,8 +56,7 @@ final class NetSearchView extends JPanel {
             return MOVE;
         }
 
-        private void buildNetListRecursive(NetTreeNode node,
-                                           StringBuilder indexList) {
+        private void buildNetListRecursive(NetTreeNode node, StringBuilder indexList) {
             TreeModel model = tree.getModel();
             if (model.isLeaf(node)) {
                 indexList.append(node.getNetDataModel().getFullName());
@@ -66,8 +65,7 @@ final class NetSearchView extends JPanel {
             }
 
             for (int i = 0; i < model.getChildCount(node); i++) {
-                buildNetListRecursive((NetTreeNode)model.getChild(node, i),
-                                      indexList);
+                buildNetListRecursive((NetTreeNode) model.getChild(node, i), indexList);
             }
         }
 
@@ -75,17 +73,14 @@ final class NetSearchView extends JPanel {
         public Transferable createTransferable(JComponent component) {
             StringBuilder indexList = new StringBuilder();
             for (TreePath selectedPath : tree.getSelectionPaths()) {
-                buildNetListRecursive(
-                    (NetTreeNode)selectedPath.getLastPathComponent(),
-                    indexList);
+                buildNetListRecursive((NetTreeNode) selectedPath.getLastPathComponent(), indexList);
             }
 
             return new StringSelection(indexList.toString());
         }
 
         @Override
-        public void exportDone(JComponent component, Transferable transfer,
-                               int action) {
+        public void exportDone(JComponent component, Transferable transfer, int action) {
             // XXX do nothing
         }
 
@@ -120,7 +115,9 @@ final class NetSearchView extends JPanel {
     private static class TreeModelWrapper implements TreeModel {
         private final NetTreeNode root;
 
-        TreeModelWrapper(NetTreeNode root) { this.root = root; }
+        TreeModelWrapper(NetTreeNode root) {
+            this.root = root;
+        }
 
         // Tree model methods. Listeners are unimplemented because the tree is
         // immutable.
@@ -132,17 +129,17 @@ final class NetSearchView extends JPanel {
 
         @Override
         public Object getChild(Object parent, int index) {
-            return ((NetTreeNode)parent).getChild(index);
+            return ((NetTreeNode) parent).getChild(index);
         }
 
         @Override
         public int getChildCount(Object parent) {
-            return ((NetTreeNode)parent).getChildCount();
+            return ((NetTreeNode) parent).getChildCount();
         }
 
         @Override
         public int getIndexOfChild(Object parent, Object child) {
-            return ((NetTreeNode)parent).getIndexOfChild((NetTreeNode)child);
+            return ((NetTreeNode) parent).getIndexOfChild((NetTreeNode) child);
         }
 
         @Override
@@ -152,7 +149,7 @@ final class NetSearchView extends JPanel {
 
         @Override
         public boolean isLeaf(Object node) {
-            return ((NetTreeNode)node).isLeaf();
+            return ((NetTreeNode) node).isLeaf();
         }
 
         @Override
@@ -179,8 +176,7 @@ final class NetSearchView extends JPanel {
         searchTab.setLayout(new BorderLayout());
         JTextField searchField = new JTextField();
         searchTab.add(searchField, BorderLayout.NORTH);
-        NetSearchListModelAdapter adapter =
-            new NetSearchListModelAdapter(waveformDataModel);
+        NetSearchListModelAdapter adapter = new NetSearchListModelAdapter(waveformDataModel);
         JList<String> netList = new JList<>(adapter);
         searchField.getDocument().addDocumentListener(adapter);
         netList.setDragEnabled(true);
@@ -192,15 +188,11 @@ final class NetSearchView extends JPanel {
 
     private class NetTreeCellRenderer extends DefaultTreeCellRenderer {
         @Override
-        public Component
-        getTreeCellRendererComponent(JTree tree, Object value, boolean sel,
-                                     boolean expanded, boolean leaf, int row,
-                                     boolean hasFocus) {
+        public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel,
+            boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-            super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf,
-                                               row, hasFocus);
-
-            if (((NetTreeNode)value).isLeaf())
+            if (((NetTreeNode) value).isLeaf())
                 setIcon(netIcon);
             else
                 setIcon(moduleIcon);
@@ -210,7 +202,6 @@ final class NetSearchView extends JPanel {
     }
 
     private ImageIcon loadResourceIcon(String name) {
-        return new ImageIcon(
-            this.getClass().getClassLoader().getResource(name));
+        return new ImageIcon(this.getClass().getClassLoader().getResource(name));
     }
 }

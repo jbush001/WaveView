@@ -34,7 +34,6 @@ public class WaveformDataModelTest {
 
     @Test
     public void buildWaveformDataModel() {
-
         model.startBuilding()
             .setTimescale(-9)
             .enterScope("mod1")

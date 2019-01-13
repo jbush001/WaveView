@@ -35,7 +35,6 @@ interface WaveformPainter {
     /// @param horizontalScale pixels per time unit
     /// @param formatter Used to convert the BitVector to a readable string
     ///        that is drawn on top of the waveform.
-    void paint(Graphics g, TransitionVector transitionVector, int topOffset,
-               Rectangle visibleRect, double horizontalScale,
-               ValueFormatter formatter);
+    void paint(Graphics g, TransitionVector transitionVector, int topOffset, Rectangle visibleRect,
+        double horizontalScale, ValueFormatter formatter);
 }

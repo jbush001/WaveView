@@ -33,8 +33,7 @@ public final class Search {
 
     /// Generate a search given a set of nets that matches at the given
     /// timestamp.
-    public static String generateFromValuesAt(NetDataModel[] nets,
-                                              long timestamp) {
+    public static String generateFromValuesAt(NetDataModel[] nets, long timestamp) {
         StringBuilder searchExpr = new StringBuilder();
         boolean first = true;
         for (NetDataModel netDataModel : nets) {
@@ -55,7 +54,7 @@ public final class Search {
     }
 
     public Search(WaveformDataModel waveformDataModel, String searchString)
-            throws SearchFormatException {
+        throws SearchFormatException {
         SearchParser parser = new SearchParser(waveformDataModel, searchString);
         searchExpression = parser.getExpression();
     }

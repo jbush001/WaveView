@@ -49,8 +49,7 @@ public interface WaveformBuilder {
     ///    is the value that was returned by newNet.
     /// @param timestamp timestamp of the transition, in time units from start.
     /// @param values New values the signal will take after the transition.
-    WaveformBuilder appendTransition(int netIndex, long timestamp,
-                                     BitVector values);
+    WaveformBuilder appendTransition(int netIndex, long timestamp, BitVector values);
 
     /// Called when all nets and transitions have been added. No other methods
     /// in WaveformBuilder will be called after this.

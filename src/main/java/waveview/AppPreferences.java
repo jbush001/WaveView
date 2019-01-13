@@ -22,8 +22,7 @@ import java.util.prefs.Preferences;
 
 final class AppPreferences {
     private static AppPreferences instance;
-    private final Preferences prefs =
-        Preferences.userNodeForPackage(MainWindow.class);
+    private final Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);
 
     Color waveformColor;
     Color conflictColor;
@@ -44,7 +43,9 @@ final class AppPreferences {
         return instance;
     }
 
-    private AppPreferences() { readColors(); }
+    private AppPreferences() {
+        readColors();
+    }
 
     void setInitialWaveformDirectory(File file) {
         prefs.put("initialWaveformDirectory", file.toString());
@@ -62,9 +63,13 @@ final class AppPreferences {
         return new File(prefs.get("initialEnumDirectory", ""));
     }
 
-    void setRecentList(String files) { prefs.put("recentFiles", files); }
+    void setRecentList(String files) {
+        prefs.put("recentFiles", files);
+    }
 
-    String getRecentList() { return prefs.get("recentFiles", ""); }
+    String getRecentList() {
+        return prefs.get("recentFiles", "");
+    }
 
     private void readColors() {
         waveformColor = readColor("waveformColor", Color.black);
@@ -72,8 +77,7 @@ final class AppPreferences {
         selectionColor = readColor("selectionColor", new Color(230, 230, 230));
         cursorColor = readColor("cursorColor", Color.red);
         backgroundColor = readColor("backgroundColor", Color.white);
-        timingMarkerColor =
-            readColor("timingMarkerColor", new Color(200, 200, 200));
+        timingMarkerColor = readColor("timingMarkerColor", new Color(200, 200, 200));
         markerColor = readColor("markerColor", Color.green);
         listSelectionBgColor = readColor("listSelectionBgColor", Color.blue);
         listSelectionFgColor = readColor("listSelectionFgColor", Color.white);
@@ -98,13 +102,11 @@ final class AppPreferences {
         if (components == -1)
             return def;
 
-        return new Color((components >> 16) & 0xff, (components >> 8) & 0xff,
-                         components & 0xff);
+        return new Color((components >> 16) & 0xff, (components >> 8) & 0xff, components & 0xff);
     }
 
     private void writeColor(String name, Color color) {
-        int packed =
-            color.getBlue() | (color.getGreen() << 8) | (color.getRed() << 16);
+        int packed = color.getBlue() | (color.getGreen() << 8) | (color.getRed() << 16);
         prefs.putInt(name, packed);
     }
 }

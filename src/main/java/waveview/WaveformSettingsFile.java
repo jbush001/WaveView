@@ -45,7 +45,9 @@ public final class WaveformSettingsFile {
     private final WaveformPresentationModel waveformPresentationModel;
 
     public static class SettingsFileException extends IOException {
-        SettingsFileException(String description) { super(description); }
+        SettingsFileException(String description) {
+            super(description);
+        }
     }
 
     /// @param file Name of a waveform file
@@ -57,15 +59,13 @@ public final class WaveformSettingsFile {
         if (parent == null) {
             path = "." + waveformFile.getName() + ".waveconfig";
         } else {
-            path = waveformFile.getParent() + "/." + waveformFile.getName() +
-                   ".waveconfig";
+            path = waveformFile.getParent() + "/." + waveformFile.getName() + ".waveconfig";
         }
 
         return new File(path);
     }
 
-    public WaveformSettingsFile(
-        File settingsFile, WaveformDataModel waveformDataModel,
+    public WaveformSettingsFile(File settingsFile, WaveformDataModel waveformDataModel,
         WaveformPresentationModel waveformPresentationModel) {
         this.settingsFile = settingsFile;
         this.waveformDataModel = waveformDataModel;
@@ -74,8 +74,7 @@ public final class WaveformSettingsFile {
 
     public void write() throws IOException {
         try {
-            DocumentBuilder builder =
-                DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = builder.newDocument();
 
             Element configuration = document.createElement("configuration");
@@ -83,8 +82,8 @@ public final class WaveformSettingsFile {
 
             Element scale = document.createElement("scale");
             configuration.appendChild(scale);
-            scale.appendChild(document.createTextNode(Double.toString(
-                waveformPresentationModel.getHorizontalScale())));
+            scale.appendChild(document.createTextNode(
+                Double.toString(waveformPresentationModel.getHorizontalScale())));
 
             Element netSetsElement = document.createElement("netsets");
             configuration.appendChild(netSetsElement);
@@ -95,20 +94,17 @@ public final class WaveformSettingsFile {
             netSetsElement.appendChild(netSetElement);
 
             // Write out all of our saved net sets
-            for (int i = 0; i < waveformPresentationModel.getNetSetCount();
-                 i++) {
+            for (int i = 0; i < waveformPresentationModel.getNetSetCount(); i++) {
                 waveformPresentationModel.selectNetSet(i);
                 netSetElement = makeVisibleNetList(document);
-                netSetElement.setAttribute(
-                    "name", waveformPresentationModel.getNetSetName(i));
+                netSetElement.setAttribute("name", waveformPresentationModel.getNetSetName(i));
                 netSetsElement.appendChild(netSetElement);
             }
 
             Element markers = document.createElement("markers");
             configuration.appendChild(markers);
 
-            for (int i = 0; i < waveformPresentationModel.getMarkerCount();
-                 i++) {
+            for (int i = 0; i < waveformPresentationModel.getMarkerCount(); i++) {
                 Element markerElement = document.createElement("marker");
                 markers.appendChild(markerElement);
 
@@ -118,17 +114,16 @@ public final class WaveformSettingsFile {
 
                 Element timestamp = document.createElement("timestamp");
                 markerElement.appendChild(timestamp);
-                timestamp.appendChild(document.createTextNode(Long.toString(
-                    waveformPresentationModel.getTimestampForMarker(i))));
+                timestamp.appendChild(document.createTextNode(
+                    Long.toString(waveformPresentationModel.getTimestampForMarker(i))));
 
                 Element description = document.createElement("description");
                 markerElement.appendChild(description);
-                description.appendChild(document.createTextNode(
-                    waveformPresentationModel.getDescriptionForMarker(i)));
+                description.appendChild(
+                    document.createTextNode(waveformPresentationModel.getDescriptionForMarker(i)));
             }
 
-            Transformer transformer =
-                TransformerFactory.newInstance().newTransformer();
+            Transformer transformer = TransformerFactory.newInstance().newTransformer();
             DOMSource source = new DOMSource(document);
             StreamResult result = new StreamResult(settingsFile);
             transformer.transform(source, result);
@@ -140,10 +135,8 @@ public final class WaveformSettingsFile {
     private Element makeVisibleNetList(Document document) {
         Element netSetElement = document.createElement("netset");
 
-        for (int i = 0; i < waveformPresentationModel.getVisibleNetCount();
-             i++) {
-            NetDataModel netDataModel =
-                waveformPresentationModel.getVisibleNet(i);
+        for (int i = 0; i < waveformPresentationModel.getVisibleNetCount(); i++) {
+            NetDataModel netDataModel = waveformPresentationModel.getVisibleNet(i);
 
             Element sigElement = document.createElement("net");
             netSetElement.appendChild(sigElement);
@@ -157,16 +150,14 @@ public final class WaveformSettingsFile {
             Element format = document.createElement("format");
             sigElement.appendChild(format);
 
-            ValueFormatter formatter =
-                waveformPresentationModel.getValueFormatter(i);
+            ValueFormatter formatter = waveformPresentationModel.getValueFormatter(i);
             Class<? extends ValueFormatter> c = formatter.getClass();
             format.appendChild(document.createTextNode(c.getName()));
 
             if (formatter instanceof EnumValueFormatter) {
-                EnumValueFormatter ivf = (EnumValueFormatter)formatter;
+                EnumValueFormatter ivf = (EnumValueFormatter) formatter;
                 try {
-                    Text path = document.createTextNode(
-                        ivf.getFile().getCanonicalPath());
+                    Text path = document.createTextNode(ivf.getFile().getCanonicalPath());
                     Element pathElement = document.createElement("path");
                     pathElement.appendChild(path);
                     format.appendChild(pathElement);
@@ -180,10 +171,7 @@ public final class WaveformSettingsFile {
     }
 
     private String getSubTag(Element parent, String tagName) {
-        return ((Text)parent.getElementsByTagName(tagName)
-                    .item(0)
-                    .getFirstChild())
-            .getData();
+        return ((Text) parent.getElementsByTagName(tagName).item(0).getFirstChild()).getData();
     }
 
     private void readNetSet(Element element) {
@@ -192,13 +180,12 @@ public final class WaveformSettingsFile {
         NodeList netElements = element.getElementsByTagName("net");
         for (int i = 0; i < netElements.getLength(); i++) {
             // Get the name
-            Element netElem = (Element)netElements.item(i);
+            Element netElem = (Element) netElements.item(i);
             String name = getSubTag(netElem, "name");
 
             ValueFormatter formatter = null;
-            Element formatTag =
-                (Element)netElem.getElementsByTagName("format").item(0);
-            String formatStr = ((Text)formatTag.getFirstChild()).getData();
+            Element formatTag = (Element) netElem.getElementsByTagName("format").item(0);
+            String formatStr = ((Text) formatTag.getFirstChild()).getData();
 
             //
             // My original idea was to allow creating custom formatters by
@@ -209,19 +196,16 @@ public final class WaveformSettingsFile {
                 Class<?> c = Class.forName(formatStr);
                 if (formatStr.equals(EnumValueFormatter.class.getName())) {
                     String pathStr =
-                        ((Text)formatTag.getElementsByTagName("path")
-                             .item(0)
-                             .getFirstChild())
+                        ((Text) formatTag.getElementsByTagName("path").item(0).getFirstChild())
                             .getData();
-                    formatter = (ValueFormatter)c.getConstructor(File.class)
+                    formatter = (ValueFormatter) c.getConstructor(File.class)
                                     .newInstance(new File(pathStr));
                 } else {
-                    formatter =
-                        (ValueFormatter)c.getConstructor().newInstance();
+                    formatter = (ValueFormatter) c.getConstructor().newInstance();
                 }
             } catch (LinkageError | ReflectiveOperationException exc) {
-                System.out.println("unable to instantiate value formatter " +
-                                   formatStr + ": " + exc);
+                System.out.println(
+                    "unable to instantiate value formatter " + formatStr + ": " + exc);
                 formatter = new BinaryValueFormatter();
             }
 
@@ -231,44 +215,40 @@ public final class WaveformSettingsFile {
             } else {
                 waveformPresentationModel.addNet(netDataModel);
                 waveformPresentationModel.setValueFormatter(
-                    waveformPresentationModel.getVisibleNetCount() - 1,
-                    formatter);
+                    waveformPresentationModel.getVisibleNetCount() - 1, formatter);
             }
         }
     }
 
     public void read() throws IOException {
         try {
-            DocumentBuilder builder =
-                DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = builder.parse(settingsFile);
 
-            waveformPresentationModel.setHorizontalScale(Double.parseDouble(
-                getSubTag(document.getDocumentElement(), "scale")));
+            waveformPresentationModel.setHorizontalScale(
+                Double.parseDouble(getSubTag(document.getDocumentElement(), "scale")));
 
             NodeList netSets = document.getElementsByTagName("netset");
             for (int i = 1; i < netSets.getLength(); i++) {
-                Element netSet = (Element)netSets.item(i);
+                Element netSet = (Element) netSets.item(i);
                 readNetSet(netSet);
-                waveformPresentationModel.saveNetSet(
-                    netSet.getAttribute("name"));
+                waveformPresentationModel.saveNetSet(netSet.getAttribute("name"));
             }
 
             // Index zero represents the current state (which isn't saved as a
             // named net set)
             if (netSets.getLength() > 0) {
-                readNetSet((Element)netSets.item(0));
+                readNetSet((Element) netSets.item(0));
             }
 
             NodeList markers = document.getElementsByTagName("marker");
             for (int j = 0; j < markers.getLength(); j++) {
-                Element markerElem = (Element)markers.item(j);
+                Element markerElem = (Element) markers.item(j);
 
                 /// @bug we ignore the ID and assume these are in order
                 /// This will renumber markers if there are gaps. Is that okay?
                 // Integer.parseInt(getSubTag(markerElem, "id"));
-                waveformPresentationModel.addMarker(
-                    getSubTag(markerElem, "description"),
+                waveformPresentationModel.addMarker(getSubTag(markerElem, "description"),
                     Long.parseLong(getSubTag(markerElem, "timestamp")));
             }
         } catch (ParserConfigurationException | SAXException exc) {

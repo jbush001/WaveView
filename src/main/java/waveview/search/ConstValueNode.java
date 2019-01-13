@@ -21,7 +21,9 @@ import waveview.wavedata.BitVector;
 final class ConstValueNode extends ValueNode {
     private final BitVector value;
 
-    ConstValueNode(BitVector constValue) { value = new BitVector(constValue); }
+    ConstValueNode(BitVector constValue) {
+        value = new BitVector(constValue);
+    }
 
     @Override
     BitVector evaluate(long timestamp, SearchHint hint) {

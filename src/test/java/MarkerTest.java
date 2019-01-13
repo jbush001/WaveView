@@ -30,8 +30,7 @@ import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 
 public class MarkerTest {
-    private final WaveformPresentationModel model =
-        new WaveformPresentationModel();
+    private final WaveformPresentationModel model = new WaveformPresentationModel();
     private final WaveformPresentationModel.Listener listener =
         mock(WaveformPresentationModel.Listener.class);
 
@@ -73,7 +72,7 @@ public class MarkerTest {
 
         verifyZeroInteractions(listener);
         assertEquals(1,
-                     model.getMarkerCount()); // Marker should still be present
+            model.getMarkerCount()); // Marker should still be present
     }
 
     @Test
@@ -85,7 +84,7 @@ public class MarkerTest {
 
         verifyZeroInteractions(listener);
         assertEquals(1,
-                     model.getMarkerCount()); // Marker should still be present
+            model.getMarkerCount()); // Marker should still be present
     }
 
     @Test
@@ -337,8 +336,7 @@ public class MarkerTest {
     @Test
     public void removeAllNets() {
         NetDataModel net1 = new NetDataModel(
-            "net1", "net1",
-            TransitionVector.Builder.createBuilder(1).getTransitionVector());
+            "net1", "net1", TransitionVector.Builder.createBuilder(1).getTransitionVector());
         model.addNet(net1);
         model.addMarker("a_marker", 1000);
         clearInvocations(listener);

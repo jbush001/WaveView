@@ -26,16 +26,19 @@ public final class NetDataModel {
     private final String fullName;
     private final TransitionVector transitionVector;
 
-    public NetDataModel(String shortName, String fullName,
-                        TransitionVector transitionVector) {
+    public NetDataModel(String shortName, String fullName, TransitionVector transitionVector) {
         this.shortName = shortName;
         this.fullName = fullName;
         this.transitionVector = transitionVector;
     }
 
-    public String getFullName() { return fullName; }
+    public String getFullName() {
+        return fullName;
+    }
 
-    public String getShortName() { return shortName; }
+    public String getShortName() {
+        return shortName;
+    }
 
     public TransitionVector getTransitionVector() {
         return transitionVector;
@@ -45,7 +48,11 @@ public final class NetDataModel {
         return transitionVector.findTransition(timestamp);
     }
 
-    public long getMaxTimestamp() { return transitionVector.getMaxTimestamp(); }
+    public long getMaxTimestamp() {
+        return transitionVector.getMaxTimestamp();
+    }
 
-    public int getWidth() { return transitionVector.getWidth(); }
+    public int getWidth() {
+        return transitionVector.getWidth();
+    }
 }

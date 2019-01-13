@@ -26,7 +26,11 @@ public class SearchFormatException extends Exception {
         this.endOffset = endOffset;
     }
 
-    public int getStartOffset() { return startOffset; }
+    public int getStartOffset() {
+        return startOffset;
+    }
 
-    public int getEndOffset() { return endOffset; }
+    public int getEndOffset() {
+        return endOffset;
+    }
 }

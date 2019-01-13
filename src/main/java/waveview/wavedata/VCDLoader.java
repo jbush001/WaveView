@@ -52,8 +52,8 @@ public final class VCDLoader implements WaveformLoader {
     }
 
     @Override
-    public void load(File file, WaveformBuilder waveformBuilder,
-                     ProgressListener progressListener) throws IOException {
+    public void load(File file, WaveformBuilder waveformBuilder, ProgressListener progressListener)
+        throws IOException {
         this.waveformBuilder = waveformBuilder;
         this.progressListener = progressListener;
         fileLength = file.length();
@@ -61,8 +61,7 @@ public final class VCDLoader implements WaveformLoader {
         try (InputStream inputStream = Files.newInputStream(file.toPath())) {
             long updateInterval = fileLength / 100;
             InputStream progressStream = new ProgressInputStream(
-                inputStream,
-                (totalRead) -> updateProgress(totalRead), updateInterval);
+                inputStream, (totalRead) -> updateProgress(totalRead), updateInterval);
             initTokenizer(progressStream);
             parseFile();
         }
@@ -72,16 +71,14 @@ public final class VCDLoader implements WaveformLoader {
     }
 
     private void updateProgress(long totalRead) throws IOException {
-        if (progressListener != null &&
-            !progressListener.updateProgress(
-                (int)(totalRead * 100 / fileLength))) {
+        if (progressListener != null
+            && !progressListener.updateProgress((int) (totalRead * 100 / fileLength))) {
             throw new LoadFormatException("load cancelled");
         }
     }
 
     private void initTokenizer(InputStream inputStream) {
-        InputStreamReader reader =
-            new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         tokenizer = new StreamTokenizer(new BufferedReader(reader));
         tokenizer.resetSyntax();
         tokenizer.wordChars(33, 126);
@@ -110,28 +107,28 @@ public final class VCDLoader implements WaveformLoader {
     /// the end of the definitions section
     private void parseDefinition() throws IOException {
         switch (getTokenString()) {
-        case "$scope":
-            parseScope();
-            break;
-        case "$var":
-            parseVar();
-            break;
-        case "$upscope":
-            parseUpscope();
-            break;
-        case "$timescale":
-            parseTimescale();
-            break;
-        case "$enddefinitions":
-            match("$end");
-            break;
-        case "$dumpvars":
-        case "$end":
-            // ignore directive, but not what comes in-between
-            break;
-        default:
-            ignoreUntilDollarEnd();
-            break;
+            case "$scope":
+                parseScope();
+                break;
+            case "$var":
+                parseVar();
+                break;
+            case "$upscope":
+                parseUpscope();
+                break;
+            case "$timescale":
+                parseTimescale();
+                break;
+            case "$enddefinitions":
+                match("$end");
+                break;
+            case "$dumpvars":
+            case "$end":
+                // ignore directive, but not what comes in-between
+                break;
+            default:
+                ignoreUntilDollarEnd();
+                break;
         }
     }
 
@@ -147,8 +144,7 @@ public final class VCDLoader implements WaveformLoader {
         if (nextTimestamp >= currentTime) {
             currentTime = nextTimestamp;
         } else {
-            System.out.println("warning: timestamp out of order line " +
-                               tokenizer.lineno());
+            System.out.println("warning: timestamp out of order line " + tokenizer.lineno());
         }
     }
 
@@ -212,10 +208,9 @@ public final class VCDLoader implements WaveformLoader {
             nextNetIndex++;
         } else {
             if (width != var.width) {
-                throw new LoadFormatException(
-                    "line " + tokenizer.lineno() +
-                    ": alias net does not match width of parent (" + width +
-                    " != " + var.width + ")");
+                throw new LoadFormatException("line " + tokenizer.lineno()
+                    + ": alias net does not match width of parent (" + width + " != " + var.width
+                    + ")");
             }
 
             // Shares data with existing net. Add as alias.
@@ -233,8 +228,7 @@ public final class VCDLoader implements WaveformLoader {
 
         // Check if the unit is part of the same token, e.g. 1ps:
         int unitStart = 0;
-        while (unitStart < s.length() &&
-               !Character.isAlphabetic(s.charAt(unitStart))) {
+        while (unitStart < s.length() && !Character.isAlphabetic(s.charAt(unitStart))) {
             unitStart++;
         }
 
@@ -255,9 +249,8 @@ public final class VCDLoader implements WaveformLoader {
         } else if (timeNumber == 10) {
             order += 1;
         } else if (timeNumber != 1) {
-            throw new LoadFormatException("line " + tokenizer.lineno() +
-                                          ": bad timescale value " +
-                                          getTokenString());
+            throw new LoadFormatException(
+                "line " + tokenizer.lineno() + ": bad timescale value " + getTokenString());
         }
 
         match("$end");
@@ -266,22 +259,21 @@ public final class VCDLoader implements WaveformLoader {
 
     private int timeUnitToOrder(String unit) throws LoadFormatException {
         switch (unit) {
-        case "fs":
-            return -15;
-        case "ps":
-            return -12;
-        case "ns":
-            return -9;
-        case "us":
-            return -6;
-        case "ms":
-            return -3;
-        case "s":
-            return 0;
-        default:
-            throw new LoadFormatException("line " + tokenizer.lineno() +
-                                          ": unknown timescale value " +
-                                          getTokenString());
+            case "fs":
+                return -15;
+            case "ps":
+                return -12;
+            case "ns":
+                return -9;
+            case "us":
+                return -6;
+            case "ms":
+                return -3;
+            case "s":
+                return 0;
+            default:
+                throw new LoadFormatException(
+                    "line " + tokenizer.lineno() + ": unknown timescale value " + getTokenString());
         }
     }
 
@@ -292,45 +284,42 @@ public final class VCDLoader implements WaveformLoader {
         String id;
 
         switch (leadingVal) {
-        case '0':
-        case '1':
-        case 'z':
-        case 'Z':
-        case 'x':
-        case 'X':
-            // Single bit value
-            // 18.2.1 scalar_value_change ::= value identifier_code
-            // (no space)
-            value = getTokenString().substring(0, 1);
-            id = getTokenString().substring(1);
-            break;
-        case 'b':
-            // Multi bit value
-            // 18.2.1 vector_value_change ::= b binary_number
-            // identification_code
-            value = getTokenString().substring(1);
-            nextToken(true);
-            id = getTokenString();
-            break;
-        case 'r':
-        case 'R':
-            throw new LoadFormatException("line " + tokenizer.lineno() +
-                                          ": real values are not supported");
-        default:
-            throw new LoadFormatException("line " + tokenizer.lineno() +
-                                          ": invalid value type '" +
-                                          leadingVal + "'");
+            case '0':
+            case '1':
+            case 'z':
+            case 'Z':
+            case 'x':
+            case 'X':
+                // Single bit value
+                // 18.2.1 scalar_value_change ::= value identifier_code
+                // (no space)
+                value = getTokenString().substring(0, 1);
+                id = getTokenString().substring(1);
+                break;
+            case 'b':
+                // Multi bit value
+                // 18.2.1 vector_value_change ::= b binary_number
+                // identification_code
+                value = getTokenString().substring(1);
+                nextToken(true);
+                id = getTokenString();
+                break;
+            case 'r':
+            case 'R':
+                throw new LoadFormatException(
+                    "line " + tokenizer.lineno() + ": real values are not supported");
+            default:
+                throw new LoadFormatException(
+                    "line " + tokenizer.lineno() + ": invalid value type '" + leadingVal + "'");
         }
 
         Var var = varMap.get(id);
         if (var == null) {
-            throw new LoadFormatException("line " + tokenizer.lineno() +
-                                          ": Unknown var id " + id);
+            throw new LoadFormatException("line " + tokenizer.lineno() + ": Unknown var id " + id);
         }
 
         BitVector decodedValues = decodeBinaryValueString(value, var.width);
-        waveformBuilder.appendTransition(var.netIndex, currentTime,
-                                         decodedValues);
+        waveformBuilder.appendTransition(var.netIndex, currentTime, decodedValues);
     }
 
     private BitVector decodeBinaryValueString(String valueString, int width)
@@ -346,13 +335,11 @@ public final class VCDLoader implements WaveformLoader {
         try {
             // Reading from right to left
             while (outBit < bitsToCopy) {
-                bitValue = BitValue.fromChar(
-                    valueString.charAt(valueLength - outBit - 1));
+                bitValue = BitValue.fromChar(valueString.charAt(valueLength - outBit - 1));
                 value.setBit(outBit++, bitValue);
             }
         } catch (NumberFormatException exc) {
-            throw new LoadFormatException("line " + tokenizer.lineno() +
-                                          ": invalid logic value");
+            throw new LoadFormatException("line " + tokenizer.lineno() + ": invalid logic value");
         }
 
         // Table 83: Rules for left-extending vector values
@@ -376,9 +363,8 @@ public final class VCDLoader implements WaveformLoader {
     private void match(String value) throws IOException {
         nextToken(true);
         if (!getTokenString().equals(value)) {
-            throw new LoadFormatException("line " + tokenizer.lineno() +
-                                          ": parse error, expected " + value +
-                                          " got " + getTokenString());
+            throw new LoadFormatException("line " + tokenizer.lineno() + ": parse error, expected "
+                + value + " got " + getTokenString());
         }
     }
 
@@ -388,8 +374,8 @@ public final class VCDLoader implements WaveformLoader {
     private boolean nextToken(boolean require) throws IOException {
         if (tokenizer.nextToken() == StreamTokenizer.TT_EOF) {
             if (require) {
-                throw new LoadFormatException("line " + tokenizer.lineno() +
-                                              ": unexpected end of file");
+                throw new LoadFormatException(
+                    "line " + tokenizer.lineno() + ": unexpected end of file");
             } else
                 return false;
         }
@@ -397,5 +383,7 @@ public final class VCDLoader implements WaveformLoader {
         return true;
     }
 
-    private String getTokenString() { return tokenizer.sval; }
+    private String getTokenString() {
+        return tokenizer.sval;
+    }
 }

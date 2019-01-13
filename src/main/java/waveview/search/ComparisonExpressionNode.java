@@ -22,8 +22,7 @@ abstract class ComparisonExpressionNode extends BooleanExpressionNode {
     protected final ValueNode leftChild;
     protected final ValueNode rightChild;
 
-    protected ComparisonExpressionNode(ValueNode leftNode,
-                                       ValueNode rightNode) {
+    protected ComparisonExpressionNode(ValueNode leftNode, ValueNode rightNode) {
         this.leftChild = leftNode;
         this.rightChild = rightNode;
     }

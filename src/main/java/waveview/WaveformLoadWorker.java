@@ -39,8 +39,8 @@ public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
         void handleLoadError(String errorMessage);
     }
 
-    public WaveformLoadWorker(File file, ProgressMonitor progressMonitor,
-                              LoadFinishedHandler finishHandler) {
+    public WaveformLoadWorker(
+        File file, ProgressMonitor progressMonitor, LoadFinishedHandler finishHandler) {
         this.file = file;
         this.progressMonitor = progressMonitor;
         this.finishHandler = finishHandler;
@@ -59,8 +59,7 @@ public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
                         if (progressMonitor.isCanceled())
                             return false;
 
-                        SwingUtilities.invokeLater(
-                            () -> progressMonitor.setProgress(percentRead));
+                        SwingUtilities.invokeLater(() -> progressMonitor.setProgress(percentRead));
 
                         return true;
                     }
@@ -68,13 +67,10 @@ public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
 
             Profiler profiler = new Profiler();
             profiler.start();
-            new VCDLoader().load(file, newModel.startBuilding(),
-                                 progressListener);
+            new VCDLoader().load(file, newModel.startBuilding(), progressListener);
             profiler.finish();
-            System.out.println("Loaded in " + profiler.getExecutionTime() +
-                               " ms");
-            System.out.println("Allocated " + profiler.getMemoryAllocated() +
-                               " bytes of memory");
+            System.out.println("Loaded in " + profiler.getExecutionTime() + " ms");
+            System.out.println("Allocated " + profiler.getMemoryAllocated() + " bytes of memory");
         } catch (IOException exc) {
             errorMessage = exc.getMessage();
         }

@@ -39,32 +39,25 @@ public class WaveformSettingsFileTest {
     @Rule public final TemporaryFolder fTempFolder = new TemporaryFolder();
 
     @Test
-    public void saveLoadScale()
-        throws IOException, WaveformSettingsFile.SettingsFileException {
+    public void saveLoadScale() throws IOException, WaveformSettingsFile.SettingsFileException {
         WaveformDataModel dataModel = new WaveformDataModel();
-        WaveformPresentationModel sourcePresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
         sourcePresentationModel.setHorizontalScale(123.0);
 
         // Save and reload contents
-        WaveformPresentationModel destPresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
         File file = fTempFolder.newFile("test1.settings");
-        new WaveformSettingsFile(file, dataModel, sourcePresentationModel)
-            .write();
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
         // Check destPresentationModel
-        assertEquals(123.0, sourcePresentationModel.getHorizontalScale(),
-                     0.001);
+        assertEquals(123.0, sourcePresentationModel.getHorizontalScale(), 0.001);
     }
 
     @Test
-    public void saveLoadNetSets()
-        throws IOException, WaveformSettingsFile.SettingsFileException {
+    public void saveLoadNetSets() throws IOException, WaveformSettingsFile.SettingsFileException {
         WaveformDataModel dataModel = new WaveformDataModel();
-        WaveformPresentationModel sourcePresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
         dataModel.startBuilding()
             .enterScope("mod1")
@@ -98,11 +91,9 @@ public class WaveformSettingsFileTest {
         sourcePresentationModel.saveNetSet("set2");
 
         // Save and reload contents
-        WaveformPresentationModel destPresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
         File file = fTempFolder.newFile("test1.settings");
-        new WaveformSettingsFile(file, dataModel, sourcePresentationModel)
-            .write();
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
         // Check destPresentationModel
@@ -125,8 +116,7 @@ public class WaveformSettingsFileTest {
     @Test
     public void saveLoadValueFormatters() throws IOException {
         WaveformDataModel dataModel = new WaveformDataModel();
-        WaveformPresentationModel sourcePresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
         dataModel.startBuilding()
             .enterScope("mod1")
@@ -149,22 +139,17 @@ public class WaveformSettingsFileTest {
         sourcePresentationModel.addNet(netDataModels[2]);
         sourcePresentationModel.addNet(netDataModels[3]);
 
-        sourcePresentationModel.setValueFormatter(0,
-                                                  new BinaryValueFormatter());
-        sourcePresentationModel.setValueFormatter(1,
-                                                  new DecimalValueFormatter());
-        sourcePresentationModel.setValueFormatter(
-            2, new HexadecimalValueFormatter());
-        EnumValueFormatter enumFormatter = new EnumValueFormatter(
-            new File("src/test/resources/enum_mapping/test1.txt"));
+        sourcePresentationModel.setValueFormatter(0, new BinaryValueFormatter());
+        sourcePresentationModel.setValueFormatter(1, new DecimalValueFormatter());
+        sourcePresentationModel.setValueFormatter(2, new HexadecimalValueFormatter());
+        EnumValueFormatter enumFormatter =
+            new EnumValueFormatter(new File("src/test/resources/enum_mapping/test1.txt"));
         sourcePresentationModel.setValueFormatter(3, enumFormatter);
 
         // Save and reload contents
-        WaveformPresentationModel destPresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
         File file = fTempFolder.newFile("test1.settings");
-        new WaveformSettingsFile(file, dataModel, sourcePresentationModel)
-            .write();
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
         // Check destPresentationModel
@@ -174,29 +159,20 @@ public class WaveformSettingsFileTest {
         assertSame(netDataModels[2], destPresentationModel.getVisibleNet(2));
         assertSame(netDataModels[3], destPresentationModel.getVisibleNet(3));
 
-        assertTrue(destPresentationModel.getValueFormatter(0) instanceof
-                   BinaryValueFormatter);
-        assertTrue(destPresentationModel.getValueFormatter(1) instanceof
-                   DecimalValueFormatter);
-        assertTrue(destPresentationModel.getValueFormatter(2) instanceof
-                   HexadecimalValueFormatter);
-        assertTrue(destPresentationModel.getValueFormatter(3) instanceof
-                   EnumValueFormatter);
-        enumFormatter =
-            (EnumValueFormatter)destPresentationModel.getValueFormatter(3);
-        assertEquals("STATE_INIT",
-                     enumFormatter.format(new BitVector("1", 10)));
-        assertEquals("STATE_LOAD",
-                     enumFormatter.format(new BitVector("2", 10)));
-        assertEquals("STATE_WAIT",
-                     enumFormatter.format(new BitVector("3", 10)));
+        assertTrue(destPresentationModel.getValueFormatter(0) instanceof BinaryValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(1) instanceof DecimalValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(3) instanceof EnumValueFormatter);
+        enumFormatter = (EnumValueFormatter) destPresentationModel.getValueFormatter(3);
+        assertEquals("STATE_INIT", enumFormatter.format(new BitVector("1", 10)));
+        assertEquals("STATE_LOAD", enumFormatter.format(new BitVector("2", 10)));
+        assertEquals("STATE_WAIT", enumFormatter.format(new BitVector("3", 10)));
     }
 
     @Test
     public void saveLoadMarkers() throws IOException {
         WaveformDataModel dataModel = new WaveformDataModel();
-        WaveformPresentationModel sourcePresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
 
         dataModel.startBuilding()
             .enterScope("mod1")
@@ -208,19 +184,15 @@ public class WaveformSettingsFileTest {
         sourcePresentationModel.addMarker("marker2", 5678);
 
         // Save and reload contents
-        WaveformPresentationModel destPresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
         File file = fTempFolder.newFile("test1.settings");
-        new WaveformSettingsFile(file, dataModel, sourcePresentationModel)
-            .write();
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
         // Check destPresentationModel
         assertEquals(2, destPresentationModel.getMarkerCount());
-        assertEquals("marker1",
-                     destPresentationModel.getDescriptionForMarker(0));
-        assertEquals("marker2",
-                     destPresentationModel.getDescriptionForMarker(1));
+        assertEquals("marker1", destPresentationModel.getDescriptionForMarker(0));
+        assertEquals("marker2", destPresentationModel.getDescriptionForMarker(1));
         assertEquals(1234, destPresentationModel.getTimestampForMarker(0));
         assertEquals(5678, destPresentationModel.getTimestampForMarker(1));
         assertEquals(1, destPresentationModel.getIdForMarker(0));
@@ -236,8 +208,7 @@ public class WaveformSettingsFileTest {
     @Test
     public void dataModelChanged() throws IOException {
         WaveformDataModel sourceDataModel = new WaveformDataModel();
-        WaveformPresentationModel sourcePresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
         sourceDataModel.startBuilding()
             .enterScope("mod1")
             .newNet(0, "net1", 1)
@@ -251,8 +222,7 @@ public class WaveformSettingsFileTest {
         sourcePresentationModel.addNet(sourceDataModel.getNetDataModel(2));
 
         WaveformDataModel destDataModel = new WaveformDataModel();
-        WaveformPresentationModel destPresentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
 
         destDataModel.startBuilding()
             .enterScope("mod1")
@@ -263,64 +233,47 @@ public class WaveformSettingsFileTest {
             .loadFinished();
 
         File file = fTempFolder.newFile("test2.settings");
-        new WaveformSettingsFile(file, sourceDataModel, sourcePresentationModel)
-            .write();
-        new WaveformSettingsFile(file, destDataModel, destPresentationModel)
-            .read();
+        new WaveformSettingsFile(file, sourceDataModel, sourcePresentationModel).write();
+        new WaveformSettingsFile(file, destDataModel, destPresentationModel).read();
 
         assertEquals(2, destPresentationModel.getVisibleNetCount());
-        assertSame(destDataModel.getNetDataModel(0),
-                   destPresentationModel.getVisibleNet(0));
-        assertSame(destDataModel.getNetDataModel(2),
-                   destPresentationModel.getVisibleNet(1));
+        assertSame(destDataModel.getNetDataModel(0), destPresentationModel.getVisibleNet(0));
+        assertSame(destDataModel.getNetDataModel(2), destPresentationModel.getVisibleNet(1));
     }
 
     // If the formatter class name is unknown, fall back to binary
     @Test
     public void badFormatter() throws IOException {
-        File file = new File(
-            "src/test/resources/waveform_settings/bad_formatter.waveconfig");
+        File file = new File("src/test/resources/waveform_settings/bad_formatter.waveconfig");
         WaveformDataModel dataModel = new WaveformDataModel();
-        dataModel.startBuilding()
-            .enterScope("foo")
-            .newNet(0, "bar", 1)
-            .exitScope()
-            .loadFinished();
+        dataModel.startBuilding().enterScope("foo").newNet(0, "bar", 1).exitScope().loadFinished();
 
-        WaveformPresentationModel presentationModel =
-            new WaveformPresentationModel();
+        WaveformPresentationModel presentationModel = new WaveformPresentationModel();
         new WaveformSettingsFile(file, dataModel, presentationModel).read();
-        assertTrue(presentationModel.getValueFormatter(0) instanceof
-                   BinaryValueFormatter);
+        assertTrue(presentationModel.getValueFormatter(0) instanceof BinaryValueFormatter);
     }
 
     // Test generating config file name for subdirectory
     @Test
     public void configFileName1() throws IOException {
         assertEquals("foo/bar/.dumpfile.vcd.waveconfig",
-                     WaveformSettingsFile
-                         .settingsFileName(new File("foo/bar/dumpfile.vcd"))
-                         .toString());
+            WaveformSettingsFile.settingsFileName(new File("foo/bar/dumpfile.vcd")).toString());
     }
 
     /// Regression test. In this case, the full path isn't passed.
     /// It was putting 'null' inside the filename.
     @Test
     public void configFileName2() throws IOException {
-        assertEquals(
-            ".dumpfile.vcd.waveconfig",
-            WaveformSettingsFile.settingsFileName(new File("dumpfile.vcd"))
-                .toString());
+        assertEquals(".dumpfile.vcd.waveconfig",
+            WaveformSettingsFile.settingsFileName(new File("dumpfile.vcd")).toString());
     }
 
     @Test
     public void invalidFile() throws IOException {
         try {
             WaveformDataModel dataModel = new WaveformDataModel();
-            WaveformPresentationModel presentationModel =
-                new WaveformPresentationModel();
-            File file = new File(
-                "src/test/resources/waveform_settings/invalid.waveconfig");
+            WaveformPresentationModel presentationModel = new WaveformPresentationModel();
+            File file = new File("src/test/resources/waveform_settings/invalid.waveconfig");
             new WaveformSettingsFile(file, dataModel, presentationModel).read();
             fail("didn't throw exception");
         } catch (WaveformSettingsFile.SettingsFileException exc) {

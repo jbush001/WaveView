@@ -55,10 +55,8 @@ public class BitValueTest {
 
     @Test
     public void fromOrdinal() {
-        assertEquals(BitValue.ZERO,
-                     BitValue.fromOrdinal(BitValue.ZERO.ordinal()));
-        assertEquals(BitValue.ONE,
-                     BitValue.fromOrdinal(BitValue.ONE.ordinal()));
+        assertEquals(BitValue.ZERO, BitValue.fromOrdinal(BitValue.ZERO.ordinal()));
+        assertEquals(BitValue.ONE, BitValue.fromOrdinal(BitValue.ONE.ordinal()));
         assertEquals(BitValue.X, BitValue.fromOrdinal(BitValue.X.ordinal()));
         assertEquals(BitValue.Z, BitValue.fromOrdinal(BitValue.Z.ordinal()));
     }

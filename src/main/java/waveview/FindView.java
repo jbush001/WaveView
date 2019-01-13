@@ -50,27 +50,25 @@ class FindView extends JPanel implements ActionListener {
         searchExprTextArea = new JTextArea(5, 30);
         searchExprTextArea.setLineWrap(true);
         searchExprTextArea.setText(initialSearch);
-        searchExprTextArea.getDocument().addDocumentListener(
-            new DocumentListener() {
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                    invalidateSearch();
-                }
+        searchExprTextArea.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                invalidateSearch();
+            }
 
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    invalidateSearch();
-                }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                invalidateSearch();
+            }
 
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    invalidateSearch();
-                }
-            });
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                invalidateSearch();
+            }
+        });
 
         errorHighlighter = searchExprTextArea.getHighlighter();
-        highlightPainter =
-            new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
+        highlightPainter = new DefaultHighlighter.DefaultHighlightPainter(Color.yellow);
 
         JButton prevButton = new JButton("Prev");
         prevButton.addActionListener(this);
@@ -108,13 +106,11 @@ class FindView extends JPanel implements ActionListener {
             try {
                 mainWindow.setSearch(searchExprTextArea.getText());
             } catch (SearchFormatException exc) {
-                highlightErrorText(exc.getStartOffset(),
-                                   exc.getEndOffset() + 1);
+                highlightErrorText(exc.getStartOffset(), exc.getEndOffset() + 1);
 
                 /// @todo Should this be displayed in the window somewhere?
-                JOptionPane.showMessageDialog(null, exc.getMessage(),
-                                              "Error parsing expression",
-                                              JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(
+                    null, exc.getMessage(), "Error parsing expression", JOptionPane.ERROR_MESSAGE);
             }
 
             needToParseSearch = false;
@@ -135,16 +131,15 @@ class FindView extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         parseSearchIfNeeded();
         switch (e.getActionCommand()) {
-        case "Prev":
-            mainWindow.findPrev(false);
-            break;
-        case "Next":
-            mainWindow.findNext(false);
-            break;
-        default:
-            System.out.println("FindPanel: unknown action " +
-                               e.getActionCommand());
-            break;
+            case "Prev":
+                mainWindow.findPrev(false);
+                break;
+            case "Next":
+                mainWindow.findNext(false);
+                break;
+            default:
+                System.out.println("FindPanel: unknown action " + e.getActionCommand());
+                break;
         }
     }
 }

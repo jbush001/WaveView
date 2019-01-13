@@ -50,8 +50,7 @@ public class WaveformLoadWorkerTest {
     private WaveformDataModel newModel;
     private String errorMessage;
 
-    class MockLoadFinishedHandler
-        implements WaveformLoadWorker.LoadFinishedHandler {
+    class MockLoadFinishedHandler implements WaveformLoadWorker.LoadFinishedHandler {
         @Override
         public void handleLoadError(String errorMessage) {
             synchronized (WaveformLoadWorkerTest.this) {
@@ -100,8 +99,7 @@ public class WaveformLoadWorkerTest {
 
         tempFile = tempFolder.newFile("test.vcd");
         try (OutputStream fos = Files.newOutputStream(tempFile.toPath())) {
-            fos.write(
-                vcdContents.toString().getBytes(StandardCharsets.US_ASCII));
+            fos.write(vcdContents.toString().getBytes(StandardCharsets.US_ASCII));
         }
 
         return tempFile;
@@ -127,11 +125,9 @@ public class WaveformLoadWorkerTest {
             .when(monitor)
             .setProgress(anyInt());
 
-        WaveformLoadWorker.LoadFinishedHandler finishHandler =
-            new MockLoadFinishedHandler();
+        WaveformLoadWorker.LoadFinishedHandler finishHandler = new MockLoadFinishedHandler();
         File loadFile = makeVcdFile();
-        WaveformLoadWorker worker =
-            new WaveformLoadWorker(loadFile, monitor, finishHandler);
+        WaveformLoadWorker worker = new WaveformLoadWorker(loadFile, monitor, finishHandler);
         worker.execute();
         waitUntilFinished();
         verify(monitor, atLeastOnce()).setProgress(anyInt());
@@ -143,12 +139,9 @@ public class WaveformLoadWorkerTest {
     public void loadError() throws TimeoutException {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(false);
-        File loadFile =
-            new File("adsfhadkjhfakldshfasdfadsf"); // Shouldn't exist
-        WaveformLoadWorker.LoadFinishedHandler finishHandler =
-            new MockLoadFinishedHandler();
-        WaveformLoadWorker worker =
-            new WaveformLoadWorker(loadFile, monitor, finishHandler);
+        File loadFile = new File("adsfhadkjhfakldshfasdfadsf"); // Shouldn't exist
+        WaveformLoadWorker.LoadFinishedHandler finishHandler = new MockLoadFinishedHandler();
+        WaveformLoadWorker worker = new WaveformLoadWorker(loadFile, monitor, finishHandler);
         worker.execute();
         waitUntilFinished();
         assertNotSame(null, errorMessage);
@@ -159,10 +152,8 @@ public class WaveformLoadWorkerTest {
         ProgressMonitor monitor = mock(ProgressMonitor.class);
         when(monitor.isCanceled()).thenReturn(true);
         File loadFile = makeVcdFile();
-        WaveformLoadWorker.LoadFinishedHandler finishHandler =
-            new MockLoadFinishedHandler();
-        WaveformLoadWorker worker =
-            new WaveformLoadWorker(loadFile, monitor, finishHandler);
+        WaveformLoadWorker.LoadFinishedHandler finishHandler = new MockLoadFinishedHandler();
+        WaveformLoadWorker worker = new WaveformLoadWorker(loadFile, monitor, finishHandler);
         worker.execute();
         waitUntilFinished();
         assertNotSame(null, errorMessage);
@@ -178,8 +169,7 @@ public class WaveformLoadWorkerTest {
 
                 long now = System.currentTimeMillis();
                 if (now > expiration) {
-                    throw new TimeoutException(
-                        "Timed out waiting for completion");
+                    throw new TimeoutException("Timed out waiting for completion");
                 }
 
                 try {

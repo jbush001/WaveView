@@ -53,24 +53,21 @@ final class PreferenceWindow extends JDialog {
         bodyArea.add(waveformColorButton);
         conflictColorButton = new ColorButton("Conflict", prefs.conflictColor);
         bodyArea.add(conflictColorButton);
-        selectionColorButton =
-            new ColorButton("Selection", prefs.selectionColor);
+        selectionColorButton = new ColorButton("Selection", prefs.selectionColor);
         bodyArea.add(selectionColorButton);
         cursorColorButton = new ColorButton("Cursor", prefs.cursorColor);
         bodyArea.add(cursorColorButton);
-        backgroundColorButton =
-            new ColorButton("Background", prefs.backgroundColor);
+        backgroundColorButton = new ColorButton("Background", prefs.backgroundColor);
         bodyArea.add(backgroundColorButton);
-        timingMarkerColorButton =
-            new ColorButton("Timing Mark", prefs.timingMarkerColor);
+        timingMarkerColorButton = new ColorButton("Timing Mark", prefs.timingMarkerColor);
         bodyArea.add(timingMarkerColorButton);
         markerColorButton = new ColorButton("Marker", prefs.markerColor);
         bodyArea.add(markerColorButton);
-        listSelectionBgColorButton = new ColorButton(
-            "List Selection Background", prefs.listSelectionBgColor);
+        listSelectionBgColorButton =
+            new ColorButton("List Selection Background", prefs.listSelectionBgColor);
         bodyArea.add(listSelectionBgColorButton);
-        listSelectionFgColorButton = new ColorButton(
-            "List Selection Foreground", prefs.listSelectionFgColor);
+        listSelectionFgColorButton =
+            new ColorButton("List Selection Foreground", prefs.listSelectionFgColor);
         bodyArea.add(listSelectionFgColorButton);
         valueColorButton = new ColorButton("Value", prefs.valueColor);
         bodyArea.add(valueColorButton);
@@ -92,7 +89,9 @@ final class PreferenceWindow extends JDialog {
         pack();
     }
 
-    protected void cancel() { dispose(); }
+    protected void cancel() {
+        dispose();
+    }
 
     protected void ok() {
         AppPreferences prefs = AppPreferences.getInstance();

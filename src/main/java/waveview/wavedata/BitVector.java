@@ -29,9 +29,13 @@ public class BitVector {
         parseString(string, radix);
     }
 
-    public BitVector(int width) { values = new BitValue[width]; }
+    public BitVector(int width) {
+        values = new BitValue[width];
+    }
 
-    public BitVector(BitVector from) { assign(from); }
+    public BitVector(BitVector from) {
+        assign(from);
+    }
 
     public final void assign(BitVector from) {
         if (from.values == null) {
@@ -47,17 +51,25 @@ public class BitVector {
 
     /// @param index bit number, where 0 is least significant
     /// @returns Value of bit at position
-    public BitValue getBit(int index) { return values[index]; }
+    public BitValue getBit(int index) {
+        return values[index];
+    }
 
     /// @param index bit number, where 0 is least significant
     /// @param value of bit at position
-    public void setBit(int index, BitValue value) { values[index] = value; }
+    public void setBit(int index, BitValue value) {
+        values[index] = value;
+    }
 
     /// @returns total bits in this vector (which may contain leading zeroes)
-    public int getWidth() { return values.length; }
+    public int getWidth() {
+        return values.length;
+    }
 
     /// @note This will set all bits in the vector to zero as a side effect.
-    public void setWidth(int width) { values = new BitValue[width]; }
+    public void setWidth(int width) {
+        values = new BitValue[width];
+    }
 
     /// @returns true if this is all Zs
     public boolean isZ() {
@@ -95,9 +107,7 @@ public class BitVector {
     }
 
     public BitVector slice(int lowBit, int highBit) {
-        if (lowBit < 0
-            || highBit >= values.length
-            || lowBit > highBit) {
+        if (lowBit < 0 || highBit >= values.length || lowBit > highBit) {
             throw new IllegalArgumentException("invalid bit slice range " + lowBit + ":" + highBit);
         }
 
@@ -110,20 +120,19 @@ public class BitVector {
     }
 
     /// @param radix May be 2, 10, or 16
-    public void parseString(String string, int radix)
-        throws NumberFormatException {
+    public void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
-        case 2:
-            parseBinaryValue(string);
-            break;
-        case 10:
-            parseDecimalValue(string);
-            break;
-        case 16:
-            parseHexadecimalValue(string);
-            break;
-        default:
-            throw new NumberFormatException("bad radix passed to parseString");
+            case 2:
+                parseBinaryValue(string);
+                break;
+            case 10:
+                parseDecimalValue(string);
+                break;
+            case 16:
+                parseHexadecimalValue(string);
+                break;
+            default:
+                throw new NumberFormatException("bad radix passed to parseString");
         }
     }
 
@@ -134,8 +143,7 @@ public class BitVector {
 
         int length = string.length();
         for (int index = 0; index < length; index++) {
-            values[length - index - 1] =
-                BitValue.fromChar(string.charAt(index));
+            values[length - index - 1] = BitValue.fromChar(string.charAt(index));
         }
     }
 
@@ -149,13 +157,11 @@ public class BitVector {
         }
 
         for (int i = 0; i < totalBits; i++) {
-            values[i] = BitValue.fromInt(bytes[bytes.length - (i / 8) - 1] &
-                                         (1 << (i % 8)));
+            values[i] = BitValue.fromInt(bytes[bytes.length - (i / 8) - 1] & (1 << (i % 8)));
         }
     }
 
-    private void parseHexadecimalValue(String string)
-        throws NumberFormatException {
+    private void parseHexadecimalValue(String string) throws NumberFormatException {
         if (values == null || values.length != string.length() * 4) {
             values = new BitValue[string.length() * 4];
         }
@@ -190,8 +196,7 @@ public class BitVector {
                     values[(index + 1) * 4 - offset - 1] = BitValue.Z;
                 }
             } else {
-                throw new NumberFormatException(
-                    "number format exception parsing " + string);
+                throw new NumberFormatException("number format exception parsing " + string);
             }
         }
     }
@@ -209,14 +214,14 @@ public class BitVector {
         }
 
         switch (radix) {
-        case 2:
-            return toBinaryString();
-        case 10:
-            return toDecimalString();
-        case 16:
-            return toHexString();
-        default:
-            throw new NumberFormatException("bad radix");
+            case 2:
+                return toBinaryString();
+            case 10:
+                return toDecimalString();
+            case 16:
+                return toHexString();
+            default:
+                throw new NumberFormatException("bad radix");
         }
     }
 
@@ -239,7 +244,7 @@ public class BitVector {
 
         for (int i = 0; i < values.length; i++) {
             if (values[i] == BitValue.ONE) {
-                bytes[bytes.length - (i / 8) - 1] |= (byte)(1 << (i % 8));
+                bytes[bytes.length - (i / 8) - 1] |= (byte) (1 << (i % 8));
             }
         }
 
@@ -272,15 +277,15 @@ public class BitVector {
         for (int i = count - 1; i >= 0; i--) {
             value <<= 1;
             switch (getBit(i + offset)) {
-            case ZERO:
-                break;
-            case ONE:
-                value |= 1;
-                break;
-            case X:
-                return 'X';
-            case Z: // @bug should only be Z if all bits are Z
-                return 'Z';
+                case ZERO:
+                    break;
+                case ONE:
+                    value |= 1;
+                    break;
+                case X:
+                    return 'X';
+                case Z: // @bug should only be Z if all bits are Z
+                    return 'Z';
             }
         }
 

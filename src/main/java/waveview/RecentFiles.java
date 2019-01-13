@@ -58,5 +58,7 @@ public final class RecentFiles {
         }
     }
 
-    public List<String> getList() { return files; }
+    public List<String> getList() {
+        return files;
+    }
 }

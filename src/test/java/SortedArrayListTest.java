@@ -28,7 +28,9 @@ public class SortedArrayListTest {
     static class KeyedElement implements SortedArrayList.Keyed {
         long keyValue;
 
-        public KeyedElement(long keyValue) { this.keyValue = keyValue; }
+        public KeyedElement(long keyValue) {
+            this.keyValue = keyValue;
+        }
 
         @Override
         public long getKey() {
