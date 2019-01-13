@@ -39,21 +39,21 @@ final class NetValueNode extends ValueNode {
     }
 
     @Override
-    BitVector evaluate(long timestamp, SearchHint outHint) {
+    BitVector evaluate(long timestamp, SearchHint hint) {
         Iterator<Transition> i = netDataModel.findTransition(timestamp);
         Transition t = i.next();
         BitVector value = new BitVector(t);
         if (timestamp >= t.getTimestamp()) {
-            outHint.backward = t.getTimestamp() - 1;
+            hint.backward = t.getTimestamp() - 1;
         } else {
-            outHint.backward = Long.MIN_VALUE;
+            hint.backward = Long.MIN_VALUE;
         }
 
         if (i.hasNext()) {
             t = i.next();
-            outHint.forward = t.getTimestamp();
+            hint.forward = t.getTimestamp();
         } else {
-            outHint.forward = Long.MAX_VALUE;
+            hint.forward = Long.MAX_VALUE;
         }
 
         if (this.lowIndex != -1) {

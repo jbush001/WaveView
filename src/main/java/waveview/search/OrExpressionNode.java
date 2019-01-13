@@ -17,8 +17,8 @@
 package waveview.search;
 
 final class OrExpressionNode extends BooleanExpressionNode {
-    protected final BooleanExpressionNode leftChild;
-    protected final BooleanExpressionNode rightChild;
+    private final BooleanExpressionNode leftChild;
+    private final BooleanExpressionNode rightChild;
 
     OrExpressionNode(BooleanExpressionNode leftChild, BooleanExpressionNode rightChild) {
         this.leftChild = leftChild;
@@ -26,7 +26,7 @@ final class OrExpressionNode extends BooleanExpressionNode {
     }
 
     @Override
-    boolean evaluate(long timestamp, SearchHint outHint) {
+    boolean evaluate(long timestamp, SearchHint hint) {
         SearchHint leftHint = new SearchHint();
         SearchHint rightHint = new SearchHint();
         boolean leftResult = leftChild.evaluate(timestamp, leftHint);
@@ -35,23 +35,23 @@ final class OrExpressionNode extends BooleanExpressionNode {
         if (leftResult && rightResult) {
             // Both expressions are true. The only way for this to become
             // false is if both change to false, so choose the farthest event.
-            outHint.forward = Math.max(leftHint.forward, rightHint.forward);
-            outHint.backward = Math.min(leftHint.backward, rightHint.backward);
+            hint.forward = Math.max(leftHint.forward, rightHint.forward);
+            hint.backward = Math.min(leftHint.backward, rightHint.backward);
         } else if (leftResult) {
             // Currently true. It can only become false when left result
             // becomes false.
-            outHint.forward = leftHint.forward;
-            outHint.backward = leftHint.backward;
+            hint.forward = leftHint.forward;
+            hint.backward = leftHint.backward;
         } else if (rightResult) {
             // Currently true. It can only become false when right result
             // becomes false.
-            outHint.forward = rightHint.forward;
-            outHint.backward = rightHint.backward;
+            hint.forward = rightHint.forward;
+            hint.backward = rightHint.backward;
         } else {
             // Both expressions are false. May become true if either
             // subexpression changes, so choose the nearest event.
-            outHint.forward = Math.min(leftHint.forward, rightHint.forward);
-            outHint.backward = Math.max(leftHint.backward, rightHint.backward);
+            hint.forward = Math.min(leftHint.forward, rightHint.forward);
+            hint.backward = Math.max(leftHint.backward, rightHint.backward);
         }
 
         return leftResult || rightResult;

@@ -29,7 +29,6 @@ import waveview.wavedata.WaveformDataModel;
 /// @todo Support slice multi-net matches
 ///
 public final class Search {
-    private final WaveformDataModel waveformDataModel;
     private final BooleanExpressionNode searchExpression;
 
     /// Generate a search given a set of nets that matches at the given
@@ -56,8 +55,7 @@ public final class Search {
     }
 
     public Search(WaveformDataModel waveformDataModel, String searchString)
-        throws SearchFormatException {
-        this.waveformDataModel = waveformDataModel;
+            throws SearchFormatException {
         SearchParser parser = new SearchParser(waveformDataModel, searchString);
         searchExpression = parser.getExpression();
     }

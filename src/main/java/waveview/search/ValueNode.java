@@ -22,9 +22,9 @@ abstract class ValueNode extends ExpressionNode {
     /// Determine a signal value at the passed timestamp.
     /// @param timestamp Timestamp and which to evaluate. If timestamp
     /// is at a transition, the value after the transition will be used
-    /// @param outHint This will be filled in with the nearest possible
+    /// @param hint This will be filled in with the nearest possible
     ///    forward and backward transitions.
     /// @return A BitVector with the value.
     ///
-    abstract BitVector evaluate(long timestamp, SearchHint outHint);
+    abstract BitVector evaluate(long timestamp, SearchHint hint);
 }

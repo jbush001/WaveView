@@ -20,10 +20,10 @@ abstract class BooleanExpressionNode extends ExpressionNode {
     /// Determine if this subexpression is true at the passed timestamp.
     /// @param timestamp Timestamp and which to evaluate. If timestamp
     /// is at a transition, the value after the transition will be used
-    /// @param outHint This will be filled in with the nearest possible
+    /// @param hint This will be filled in with the nearest possible
     ///    forward and backward transitions.
     /// @return
     /// - true if the value at the timestamp makes this expression true
     /// - false if the value at the timestamp makes this expression true
-    abstract boolean evaluate(long timestamp, SearchHint outHint);
+    abstract boolean evaluate(long timestamp, SearchHint hint);
 }

@@ -118,7 +118,7 @@ final class NetSearchView extends JPanel {
     }
 
     private static class TreeModelWrapper implements TreeModel {
-        private NetTreeNode root;
+        private final NetTreeNode root;
 
         TreeModelWrapper(NetTreeNode root) { this.root = root; }
 

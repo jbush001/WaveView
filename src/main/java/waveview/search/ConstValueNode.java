@@ -24,9 +24,9 @@ final class ConstValueNode extends ValueNode {
     ConstValueNode(BitVector constValue) { value = new BitVector(constValue); }
 
     @Override
-    BitVector evaluate(long timestamp, SearchHint outHint) {
-        outHint.backward = Long.MIN_VALUE;
-        outHint.forward = Long.MAX_VALUE;
+    BitVector evaluate(long timestamp, SearchHint hint) {
+        hint.backward = Long.MIN_VALUE;
+        hint.forward = Long.MAX_VALUE;
         return value;
     }
 
