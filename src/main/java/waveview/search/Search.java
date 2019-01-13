@@ -42,13 +42,13 @@ public final class Search {
             if (first) {
                 first = false;
             } else {
-                searchExpr.append(" and ");
+                searchExpr.append(" && ");
             }
 
             searchExpr.append(netDataModel.getFullName());
 
             Transition t = netDataModel.findTransition(timestamp).next();
-            searchExpr.append(" = 'h");
+            searchExpr.append(" == 'h");
             searchExpr.append(t.toString(16));
         }
 

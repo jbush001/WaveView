@@ -34,6 +34,8 @@ final class Token {
         RBRACKET,
         COLON,
         EQUAL,
+        DOUBLE_AMPERSAND,
+        DOUBLE_PIPE
     };
 
     private final Type type;

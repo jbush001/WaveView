@@ -26,6 +26,10 @@ final class SearchLexer {
         SCAN_GEN_NUM,
         SCAN_GREATER,
         SCAN_LESS,
+        SCAN_BANG,
+        SCAN_EQUAL,
+        SCAN_AMPERSAND,
+        SCAN_PIPE,
         SCAN_BINARY,
         SCAN_DECIMAL,
         SCAN_HEXADECIMAL
@@ -74,34 +78,48 @@ final class SearchLexer {
                 } else if (isNum(c)) {
                     pushBackChar();
                     state = State.SCAN_DECIMAL;
-                } else if (c == '>') {
-                    state = State.SCAN_GREATER;
-                } else if (c == '<') {
-                    state = State.SCAN_LESS;
-                } else if (c == '(') {
-                    return new Token(Token.Type.LPAREN, lexerOffset - 1, c);
-                } else if (c == ')') {
-                    return new Token(Token.Type.RPAREN, lexerOffset - 1, c);
-                } else if (c == '=') {
-                    return new Token(Token.Type.EQUAL, lexerOffset - 1, c);
-                } else if (c == '[') {
-                    return new Token(Token.Type.LBRACKET, lexerOffset - 1, c);
-                } else if (c == ']') {
-                    return new Token(Token.Type.RBRACKET, lexerOffset - 1, c);
-                } else if (c == ':') {
-                    return new Token(Token.Type.COLON, lexerOffset - 1, c);
-                } else if (!isSpace(c)) {
-                    throw new SearchFormatException(
-                        "unknown character " + (char)c, lexerOffset - 1,
-                        lexerOffset - 1);
+                } else {
+                    switch (c) {
+                        case '!':
+                            state = State.SCAN_BANG;
+                            break;
+                        case '=':
+                            state = State.SCAN_EQUAL;
+                            break;
+                        case '&':
+                            state = State.SCAN_AMPERSAND;
+                            break;
+                        case '|':
+                            state = State.SCAN_PIPE;
+                            break;
+                        case '>':
+                            state = State.SCAN_GREATER;
+                            break;
+                        case '<':
+                            state = State.SCAN_LESS;
+                            break;
+                        case '(':
+                            return new Token(Token.Type.LPAREN, lexerOffset - 1, c);
+                        case ')':
+                            return new Token(Token.Type.RPAREN, lexerOffset - 1, c);
+                        case '[':
+                            return new Token(Token.Type.LBRACKET, lexerOffset - 1, c);
+                        case ']':
+                            return new Token(Token.Type.RBRACKET, lexerOffset - 1, c);
+                        case ':':
+                            return new Token(Token.Type.COLON, lexerOffset - 1, c);
+                        default:
+                            if (!isSpace(c)) {
+                                throw new SearchFormatException("Unknown character " + (char) c,
+                                    lexerOffset - 1, lexerOffset - 1);
+                            }
+                    }
                 }
 
                 break;
 
             case SCAN_GREATER:
-                if (c == '<') {
-                    return new Token(Token.Type.NOT_EQUAL, tokenStart, c);
-                } else if (c == '=') {
+                if (c == '=') {
                     return new Token(Token.Type.GREATER_EQUAL, tokenStart, c);
                 } else {
                     pushBackChar();
@@ -109,13 +127,47 @@ final class SearchLexer {
                 }
 
             case SCAN_LESS:
-                if (c == '>') {
-                    return new Token(Token.Type.NOT_EQUAL, tokenStart, c);
-                } else if (c == '=') {
+                if (c == '=') {
                     return new Token(Token.Type.LESS_EQUAL, tokenStart, c);
                 } else {
                     pushBackChar();
                     return new Token(Token.Type.LESS_THAN, tokenStart, c);
+                }
+
+            case SCAN_BANG:
+                if (c == '=') {
+                    return new Token(Token.Type.NOT_EQUAL, tokenStart,
+                        tokenStart + 1,  "!=", null);
+                } else {
+                    throw new SearchFormatException("Unknown character !",
+                        tokenStart, tokenStart);
+                }
+
+            case SCAN_EQUAL:
+                if (c == '=') {
+                    return new Token(Token.Type.EQUAL, tokenStart, tokenStart
+                        + 1, "==", null);
+                } else {
+                    throw new SearchFormatException("Unknown character =",
+                        tokenStart, tokenStart);
+                }
+
+            case SCAN_AMPERSAND:
+                if (c == '&') {
+                    return new Token(Token.Type.DOUBLE_AMPERSAND, tokenStart,
+                        tokenStart + 1, "!=", null);
+                } else {
+                    throw new SearchFormatException("Unknown character &",
+                        tokenStart, tokenStart);
+                }
+
+            case SCAN_PIPE:
+                if (c == '|') {
+                    return new Token(Token.Type.DOUBLE_PIPE, tokenStart,
+                        tokenStart + 1, "!=", null);
+                } else {
+                    throw new SearchFormatException("Unknown character |",
+                        tokenStart, tokenStart);
                 }
 
             case SCAN_IDENTIFIER:
@@ -150,7 +202,7 @@ final class SearchLexer {
                     state = State.SCAN_DECIMAL;
                 } else {
                     throw new SearchFormatException(
-                        "unknown type " + (char)c, tokenStart, lexerOffset - 1);
+                        "Unknown type " + (char)c, tokenStart, lexerOffset - 1);
                 }
 
                 break;

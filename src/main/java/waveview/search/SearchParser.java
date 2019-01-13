@@ -56,10 +56,9 @@ public final class SearchParser {
     /// Read the next token and check if is an identifier that matches
     /// the passed type. If not, push back the token and return false.
     /// @note this is case insensitive
-    private boolean tryToMatchToken(String value) throws SearchFormatException {
+    private boolean tryToMatchToken(Token.Type tokenType) throws SearchFormatException {
         Token lookahead = lexer.nextToken();
-        if (lookahead.getType() != Token.Type.IDENTIFIER ||
-            !lookahead.toString().equalsIgnoreCase(value)) {
+        if (lookahead.getType() != tokenType) {
             lexer.pushBackToken();
             return false;
         }
@@ -74,7 +73,7 @@ public final class SearchParser {
 
     private BooleanExpressionNode parseOr() throws SearchFormatException {
         BooleanExpressionNode left = parseAnd();
-        while (tryToMatchToken("or")) {
+        while (tryToMatchToken(Token.Type.DOUBLE_PIPE)) {
             left = new OrExpressionNode(left, parseAnd());
         }
 
@@ -83,7 +82,7 @@ public final class SearchParser {
 
     private BooleanExpressionNode parseAnd() throws SearchFormatException {
         BooleanExpressionNode left = parseCondition();
-        while (tryToMatchToken("and")) {
+        while (tryToMatchToken(Token.Type.DOUBLE_AMPERSAND)) {
             left = new AndExpressionNode(left, parseCondition());
         }
 

@@ -74,10 +74,10 @@ public class SearchTest {
     @Test
     public void whitespace() throws SearchFormatException {
         Search search = new Search(makeSingleBitModel(),
-                                   "\r  \n \t  mod1.clk          =  1\n");
+                                   "\r  \n \t  mod1.clk          ==  1\n");
         assertEquals(10, search.getNextMatch(4));
 
-        search = new Search(makeSingleBitModel(), "mod1.clk=1");
+        search = new Search(makeSingleBitModel(), "mod1.clk==1");
         assertEquals(10, search.getNextMatch(4));
     }
 
@@ -99,7 +99,7 @@ public class SearchTest {
 
         Search search = new Search(
             waveformDataModel,
-            "mod1._abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 = 1\n");
+            "mod1._abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 == 1\n");
         assertEquals(10, search.getNextMatch(4));
     }
 
@@ -134,19 +134,19 @@ public class SearchTest {
             .appendTransition(0, 23, new BitVector("10", 10))
             .loadFinished();
 
-        Search search = new Search(waveformDataModel, "mod1.value = 10");
+        Search search = new Search(waveformDataModel, "mod1.value == 10");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(waveformDataModel, "mod1.value = 'd10");
+        search = new Search(waveformDataModel, "mod1.value == 'd10");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(waveformDataModel, "mod1.value = 'ha");
+        search = new Search(waveformDataModel, "mod1.value == 'ha");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(waveformDataModel, "mod1.value = 'hA");
+        search = new Search(waveformDataModel, "mod1.value == 'hA");
         assertEquals(23, search.getNextMatch(0));
 
-        search = new Search(waveformDataModel, "mod1.value = 'b1010");
+        search = new Search(waveformDataModel, "mod1.value == 'b1010");
         assertEquals(23, search.getNextMatch(0));
     }
 
@@ -167,21 +167,21 @@ public class SearchTest {
 
         // Try upper and lower case versions of X for hex and decimal
         // bases. Ensure this doesn't throw an exception.
-        new Search(waveformDataModel, "mod1.value = 'bxxxx");
-        new Search(waveformDataModel, "mod1.value = 'bXXXX");
-        new Search(waveformDataModel, "mod1.value = 'hx");
-        new Search(waveformDataModel, "mod1.value = 'hX");
+        new Search(waveformDataModel, "mod1.value == 'bxxxx");
+        new Search(waveformDataModel, "mod1.value == 'bXXXX");
+        new Search(waveformDataModel, "mod1.value == 'hx");
+        new Search(waveformDataModel, "mod1.value == 'hX");
 
         // X and Z with decimal values should fail
         try {
-            new Search(waveformDataModel, "mod1.value = 'dx");
+            new Search(waveformDataModel, "mod1.value == 'dx");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Expected
         }
 
         try {
-            new Search(waveformDataModel, "mod1.value = 'dX");
+            new Search(waveformDataModel, "mod1.value == 'dX");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Expected
@@ -202,20 +202,20 @@ public class SearchTest {
 
         // Try upper and lower case versions of Z for hex and decimal
         // bases. Ensure this doesn't throw an exception.
-        new Search(waveformDataModel, "mod1.value = 'bzzzz");
-        new Search(waveformDataModel, "mod1.value = 'bZZZZ");
-        new Search(waveformDataModel, "mod1.value = 'hz");
-        new Search(waveformDataModel, "mod1.value = 'hZ");
+        new Search(waveformDataModel, "mod1.value == 'bzzzz");
+        new Search(waveformDataModel, "mod1.value == 'bZZZZ");
+        new Search(waveformDataModel, "mod1.value == 'hz");
+        new Search(waveformDataModel, "mod1.value == 'hZ");
 
         try {
-            new Search(waveformDataModel, "mod1.value = 'dz");
+            new Search(waveformDataModel, "mod1.value == 'dz");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Expected
         }
 
         try {
-            new Search(waveformDataModel, "mod1.value = 'dZ");
+            new Search(waveformDataModel, "mod1.value == 'dZ");
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Expected
@@ -225,7 +225,7 @@ public class SearchTest {
     @Test
     public void unknownNet() {
         try {
-            new Search(makeSingleBitModel(), "mod1.stall_pipeline = 2");
+            new Search(makeSingleBitModel(), "mod1.stall_pipeline == 2");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
             // Expected
@@ -239,65 +239,65 @@ public class SearchTest {
     @Test
     public void strayIdentifier() {
         try {
-            new Search(makeSingleBitModel(), "mod1.clk = 'h2 foo");
-            fail("Did not throw exception");
-        } catch (SearchFormatException exc) {
-            // Expected
-            assertEquals("Unexpected token", exc.getMessage());
-            assertEquals(15, exc.getStartOffset());
-            assertEquals(17, exc.getEndOffset());
-        }
-    }
-
-    @Test
-    public void missingCompareValue() {
-        try {
-            new Search(makeSingleBitModel(), "mod1.clk = ");
-            fail("Did not throw exception");
-        } catch (SearchFormatException exc) {
-            // Expected
-            assertEquals("Unexpected end of string", exc.getMessage());
-            assertEquals(11, exc.getStartOffset());
-            assertEquals(11, exc.getEndOffset());
-        }
-    }
-
-    @Test
-    public void missingLiteral() {
-        try {
-            new Search(makeSingleBitModel(), "mod1.clk = >");
-            fail("Did not throw exception");
-        } catch (SearchFormatException exc) {
-            // Expected
-            assertEquals("Unexpected token", exc.getMessage());
-            assertEquals(11, exc.getStartOffset());
-            assertEquals(11, exc.getEndOffset());
-        }
-    }
-
-    @Test
-    public void unknownLiteralType() {
-        try {
-            new Search(makeSingleBitModel(), "mod1.clk = 'q3z");
-            fail("Did not throw exception");
-        } catch (SearchFormatException exc) {
-            // Expected
-            assertEquals("unknown type q", exc.getMessage());
-            assertEquals(11, exc.getStartOffset());
-            assertEquals(12, exc.getEndOffset());
-        }
-    }
-
-    @Test
-    public void missingParen() {
-        try {
-            new Search(makeSingleBitModel(), "(mod1.clk = 'h3 foo");
+            new Search(makeSingleBitModel(), "mod1.clk == 'h2 foo");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
             // Expected
             assertEquals("Unexpected token", exc.getMessage());
             assertEquals(16, exc.getStartOffset());
             assertEquals(18, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void missingCompareValue() {
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk == ");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unexpected end of string", exc.getMessage());
+            assertEquals(12, exc.getStartOffset());
+            assertEquals(12, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void missingLiteral() {
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk == >");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unexpected token", exc.getMessage());
+            assertEquals(12, exc.getStartOffset());
+            assertEquals(12, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void unknownLiteralType() {
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk == 'q3z");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unknown type q", exc.getMessage());
+            assertEquals(12, exc.getStartOffset());
+            assertEquals(13, exc.getEndOffset());
+        }
+    }
+
+    @Test
+    public void missingParen() {
+        try {
+            new Search(makeSingleBitModel(), "(mod1.clk == 'h3 foo");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unexpected token", exc.getMessage());
+            assertEquals(17, exc.getStartOffset());
+            assertEquals(19, exc.getEndOffset());
         }
     }
 
@@ -321,7 +321,7 @@ public class SearchTest {
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
             // Expected
-            assertEquals("unknown character #", exc.getMessage());
+            assertEquals("Unknown character #", exc.getMessage());
             assertEquals(9, exc.getStartOffset());
             assertEquals(9, exc.getEndOffset());
         }
@@ -361,7 +361,7 @@ public class SearchTest {
             .appendTransition(1, 45, new BitVector("1", 2))
             .loadFinished();
 
-        Search search = new Search(waveformDataModel, "mod1.a and mod1.b");
+        Search search = new Search(waveformDataModel, "mod1.a && mod1.b");
 
         // Expression is true:
         // 15-19, 25-29, 45-
@@ -427,7 +427,7 @@ public class SearchTest {
             .appendTransition(1, 45, new BitVector("1", 2))
             .loadFinished();
 
-        Search search = new Search(waveformDataModel, "mod1.a or mod1.b");
+        Search search = new Search(waveformDataModel, "mod1.a || mod1.b");
 
         // Expression is true:
         // 5-9, 15-29, 35-39, 45-
@@ -502,29 +502,29 @@ public class SearchTest {
         search = new Search(waveformDataModel, "'h5 >= mod1.value");
         assertEquals(5, search.getPreviousMatch(10));
 
-        search = new Search(waveformDataModel, "mod1.value = 'h5");
+        search = new Search(waveformDataModel, "mod1.value == 'h5");
         assertEquals(5, search.getNextMatch(0));
 
-        search = new Search(waveformDataModel, "'h5 = mod1.value");
+        search = new Search(waveformDataModel, "'h5 == mod1.value");
         assertEquals(5, search.getNextMatch(0));
 
-        search = new Search(waveformDataModel, "mod1.value <> 'h5");
+        search = new Search(waveformDataModel, "mod1.value != 'h5");
         assertEquals(6, search.getNextMatch(4));
 
-        search = new Search(waveformDataModel, "'h5 <> mod1.value");
+        search = new Search(waveformDataModel, "'h5 != mod1.value");
         assertEquals(6, search.getNextMatch(4));
 
-        search = new Search(waveformDataModel, "mod1.value >< 'h5");
+        search = new Search(waveformDataModel, "mod1.value != 'h5");
         assertEquals(6, search.getNextMatch(4));
 
         // This will never find the next, because it is never false.
         // Ensure it doesn't go into an infinite loop
-        search = new Search(waveformDataModel, "mod1.value = mod1.value");
+        search = new Search(waveformDataModel, "mod1.value == mod1.value");
         assertEquals(-1, search.getNextMatch(4));
 
         // Likewise, this will never find the next, because it is never
         // true
-        search = new Search(waveformDataModel, "mod1.value <> mod1.value");
+        search = new Search(waveformDataModel, "mod1.value != mod1.value");
         assertEquals(-1, search.getNextMatch(4));
     }
 
@@ -532,7 +532,7 @@ public class SearchTest {
     public void precedenceAndAndAnd() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a and m.b and m.c and m.d");
+            new Search(waveformDataModel, "m.a && m.b && m.c && m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -555,7 +555,7 @@ public class SearchTest {
     public void precedenceAndAndOr() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a and m.b and m.c or m.d");
+            new Search(waveformDataModel, "m.a && m.b && m.c || m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertFalse(search.matches(2));
@@ -578,7 +578,7 @@ public class SearchTest {
     public void precedenceAndOrAnd() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a and m.b or m.c and m.d");
+            new Search(waveformDataModel, "m.a && m.b || m.c && m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -601,7 +601,7 @@ public class SearchTest {
     public void precedenceAndOrOr() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a and m.b or m.c or m.d");
+            new Search(waveformDataModel, "m.a && m.b || m.c || m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertTrue(search.matches(2));
@@ -624,7 +624,7 @@ public class SearchTest {
     public void precedenceOrAndAnd() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a or m.b and m.c and m.d");
+            new Search(waveformDataModel, "m.a || m.b && m.c && m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -647,7 +647,7 @@ public class SearchTest {
     public void precedenceOrAndOr() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a or m.b and m.c or m.d");
+            new Search(waveformDataModel, "m.a || m.b && m.c || m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertFalse(search.matches(2));
@@ -670,7 +670,7 @@ public class SearchTest {
     public void precedenceOrOrAnd() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a or m.b or m.c and m.d");
+            new Search(waveformDataModel, "m.a || m.b || m.c && m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -693,7 +693,7 @@ public class SearchTest {
     public void precedenceOrOrOr() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a or m.b or m.c or m.d");
+            new Search(waveformDataModel, "m.a || m.b || m.c || m.d");
         assertFalse(search.matches(0));
         assertTrue(search.matches(1));
         assertTrue(search.matches(2));
@@ -716,7 +716,7 @@ public class SearchTest {
     public void precedenceParen1() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a and (m.b or m.c) and m.d");
+            new Search(waveformDataModel, "m.a && (m.b || m.c) && m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -739,7 +739,7 @@ public class SearchTest {
     public void precedenceParen2() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "m.a and m.b and (m.c or m.d)");
+            new Search(waveformDataModel, "m.a && m.b && (m.c || m.d)");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -762,7 +762,7 @@ public class SearchTest {
     public void precedenceParen3() throws SearchFormatException {
         WaveformDataModel waveformDataModel = makeFourBitModel();
         Search search =
-            new Search(waveformDataModel, "(m.a or m.b) and m.c and m.d");
+            new Search(waveformDataModel, "(m.a || m.b) && m.c && m.d");
         assertFalse(search.matches(0));
         assertFalse(search.matches(1));
         assertFalse(search.matches(2));
@@ -863,63 +863,61 @@ public class SearchTest {
 
         // Basic comparisons
         assertEquals("(eq m.a m.b)",
-                     new Search(waveformDataModel, "m.a = m.b").toString());
+                     new Search(waveformDataModel, "m.a == m.b").toString());
         assertEquals("(eq 00000111 m.b)",
-                     new Search(waveformDataModel, "7 = m.b").toString());
+                     new Search(waveformDataModel, "7 == m.b").toString());
         assertEquals("(eq m.a 00000101)",
-                     new Search(waveformDataModel, "m.a = 5").toString());
+                     new Search(waveformDataModel, "m.a == 5").toString());
         assertEquals("(eq 00001000 00000101)",
-                     new Search(waveformDataModel, "8 = 5").toString());
+                     new Search(waveformDataModel, "8 == 5").toString());
 
         // Use all comparison operators.
         assertEquals(
             "(or (and (ne m.a 0) (lt m.b 00000001)) (and (gt m.c 00000010) (eq m.d 00000000)))",
-            new Search(waveformDataModel,
-                       "m.a and m.b < 1 or m.c > 2 and m.d = 0")
+            new Search(waveformDataModel, "m.a && m.b < 1 || m.c > 2 && m.d == 0")
                 .toString());
 
         assertEquals(
             "(or (and (ne m.a 00000000) (le m.b 00000001)) (and (ge m.c 00000010) (ne m.d 00000101)))",
-            new Search(waveformDataModel,
-                       "m.a >< 0 and m.b <= 1 or m.c >= 2 and m.d <> 5")
+            new Search(waveformDataModel, "m.a != 0 && m.b <= 1 || m.c >= 2 && m.d != 5")
                 .toString());
 
         // Precedence tests. These mirror the test above, but ensure the
         // expression tree was set up correctly.
         assertEquals(
             "(and (and (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(waveformDataModel, "m.a and m.b and m.c and m.d")
+            new Search(waveformDataModel, "m.a && m.b && m.c && m.d")
                 .toString());
         assertEquals(
             "(or (and (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(waveformDataModel, "m.a and m.b and m.c or m.d")
+            new Search(waveformDataModel, "m.a && m.b && m.c || m.d")
                 .toString());
         assertEquals(
             "(or (and (ne m.a 0) (ne m.b 0)) (and (ne m.c 0) (ne m.d 0)))",
-            new Search(waveformDataModel, "m.a and m.b or m.c and m.d")
+            new Search(waveformDataModel, "m.a && m.b || m.c && m.d")
                 .toString());
         assertEquals(
             "(or (or (and (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(waveformDataModel, "m.a and m.b or m.c or m.d")
+            new Search(waveformDataModel, "m.a && m.b || m.c || m.d")
                 .toString());
         assertEquals(
             "(or (ne m.a 0) (and (and (ne m.b 0) (ne m.c 0)) (ne m.d 0)))",
-            new Search(waveformDataModel, "m.a or m.b and m.c and m.d")
+            new Search(waveformDataModel, "m.a || m.b && m.c && m.d")
                 .toString());
         assertEquals(
             "(or (or (ne m.a 0) (and (ne m.b 0) (ne m.c 0))) (ne m.d 0))",
-            new Search(waveformDataModel, "m.a or m.b and m.c or m.d")
+            new Search(waveformDataModel, "m.a || m.b && m.c || m.d")
                 .toString());
         assertEquals(
             "(or (or (ne m.a 0) (ne m.b 0)) (and (ne m.c 0) (ne m.d 0)))",
-            new Search(waveformDataModel, "m.a or m.b or m.c and m.d")
+            new Search(waveformDataModel, "m.a || m.b || m.c && m.d")
                 .toString());
         assertEquals(
             "(or (or (or (ne m.a 0) (ne m.b 0)) (ne m.c 0)) (ne m.d 0))",
-            new Search(waveformDataModel, "m.a or m.b or m.c or m.d")
+            new Search(waveformDataModel, "m.a || m.b || m.c || m.d")
                 .toString());
         assertEquals("(eq m.e[3:2] m.e[1:0])", new Search(waveformDataModel,
-            "m.e[3:2] = m.e[1:0]").toString());
+            "m.e[3:2] == m.e[1:0]").toString());
     }
 
     // Tests that parens are treated as part of an identifier.
@@ -942,7 +940,7 @@ public class SearchTest {
             .loadFinished();
 
         Search search =
-            new Search(waveformDataModel, "mod1.mod_gen(0).mod2.a = 1");
+            new Search(waveformDataModel, "mod1.mod_gen(0).mod2.a == 1");
         assertEquals(5, search.getNextMatch(0));
     }
 
@@ -965,12 +963,12 @@ public class SearchTest {
             .appendTransition(1, 3, new BitVector("1", 10))
             .loadFinished();
 
-        Search search = new Search(waveformDataModel, "mod1.a = mod1.b");
+        Search search = new Search(waveformDataModel, "mod1.a == mod1.b");
         assertEquals(2, search.getNextMatch(0));
         assertEquals(2, search.getPreviousMatch(5));
 
         // Swap the terms to ensure the hint is handled correctly.
-        search = new Search(waveformDataModel, "mod1.b = mod1.a");
+        search = new Search(waveformDataModel, "mod1.b == mod1.a");
         assertEquals(2, search.getNextMatch(0));
         assertEquals(2, search.getPreviousMatch(5));
     }
@@ -996,7 +994,7 @@ public class SearchTest {
 
         String searchString = Search.generateFromValuesAt(nets, 1);
 
-        assertEquals("mod1.a = 'h1 and mod1.b = 'h4", searchString);
+        assertEquals("mod1.a == 'h1 && mod1.b == 'h4", searchString);
     }
 
     @Test
@@ -1013,11 +1011,11 @@ public class SearchTest {
             .appendTransition(0, 15, new BitVector("10011011", 2))
             .loadFinished();
 
-        Search search1 = new Search(waveformDataModel, "mod1.a[5:3] = 1");
+        Search search1 = new Search(waveformDataModel, "mod1.a[5:3] == 1");
         assertEquals(10, search1.getNextMatch(0));
-        Search search2 = new Search(waveformDataModel, "mod1.a[5:3] = 2");
+        Search search2 = new Search(waveformDataModel, "mod1.a[5:3] == 2");
         assertEquals(5, search2.getNextMatch(0));
-        Search search3 = new Search(waveformDataModel, "mod1.a[5:3] = 3");
+        Search search3 = new Search(waveformDataModel, "mod1.a[5:3] == 3");
         assertEquals(15, search3.getNextMatch(0));
     }
 
@@ -1035,7 +1033,7 @@ public class SearchTest {
             .appendTransition(0, 15, new BitVector("10011011", 2))
             .loadFinished();
 
-        Search search1 = new Search(waveformDataModel, "mod1.a[3] = 1");
+        Search search1 = new Search(waveformDataModel, "mod1.a[3] == 1");
         assertEquals(10, search1.getNextMatch(0));
     }
 
@@ -1050,7 +1048,7 @@ public class SearchTest {
             .loadFinished();
 
         try {
-            new Search(waveformDataModel, "mod1.a[4:0] = 1");
+            new Search(waveformDataModel, "mod1.a[4:0] == 1");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
             // Expected
@@ -1098,7 +1096,7 @@ public class SearchTest {
             // Expected
             assertEquals("Unexpected token", exc.getMessage());
             assertEquals(11, exc.getStartOffset());
-            assertEquals(11, exc.getEndOffset());
+            assertEquals(12, exc.getEndOffset());
         }
     }
 
@@ -1138,11 +1136,11 @@ public class SearchTest {
             .loadFinished();
 
         // Unique leaf name
-        Search search = new Search(waveformDataModel, "cc = 'b0101");
+        Search search = new Search(waveformDataModel, "cc == 'b0101");
         assertEquals(17, search.getNextMatch(0));
 
         // Should also work with parent module
-        search = new Search(waveformDataModel, "bbbbb.cc = 'b0101");
+        search = new Search(waveformDataModel, "bbbbb.cc == 'b0101");
         assertEquals(17, search.getNextMatch(0));
     }
 
@@ -1164,7 +1162,7 @@ public class SearchTest {
             .loadFinished();
 
         // In this case, the parent module is necessary to disambiguate the signal.
-        Search search = new Search(waveformDataModel, "bbbbb.cc = 'b0101");
+        Search search = new Search(waveformDataModel, "bbbbb.cc == 'b0101");
         assertEquals(17, search.getNextMatch(0));
     }
 
@@ -1187,7 +1185,7 @@ public class SearchTest {
             .appendTransition(0, 17, new BitVector("0101", 2))
             .loadFinished();
 
-        Search search = new Search(waveformDataModel, "a = 'b0101");
+        Search search = new Search(waveformDataModel, "a == 'b0101");
         assertEquals(17, search.getNextMatch(0));
     }
 
@@ -1206,7 +1204,7 @@ public class SearchTest {
             .loadFinished();
 
         try {
-            new Search(waveformDataModel, "foo = 'b0101");
+            new Search(waveformDataModel, "foo == 'b0101");
             fail("Did not throw exception");
         } catch (SearchFormatException exc) {
             // Expected
