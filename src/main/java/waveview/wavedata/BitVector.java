@@ -17,6 +17,7 @@
 package waveview.wavedata;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public class BitVector {
     // Index 0 is least significant position
@@ -41,11 +42,7 @@ public class BitVector {
         if (from.values == null) {
             values = null;
         } else {
-            if (values == null || values.length != from.values.length) {
-                values = new BitValue[from.values.length];
-            }
-
-            System.arraycopy(from.values, 0, values, 0, from.values.length);
+            values = from.values.clone();
         }
     }
 
@@ -111,11 +108,8 @@ public class BitVector {
             throw new IllegalArgumentException("invalid bit slice range " + lowBit + ":" + highBit);
         }
 
-        BitVector newVec = new BitVector(highBit - lowBit + 1);
-        for (int index = lowBit; index <= highBit; index++) {
-            newVec.values[index - lowBit] = values[index];
-        }
-
+        BitVector newVec = new BitVector();
+        newVec.values = Arrays.copyOfRange(values, lowBit, highBit + 1);
         return newVec;
     }
 

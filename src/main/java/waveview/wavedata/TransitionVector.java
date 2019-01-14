@@ -16,6 +16,7 @@
 
 package waveview.wavedata;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -160,26 +161,17 @@ public final class TransitionVector {
         // The timestamp must be after the last transition that was appended
         // (transitions must be appended in order)
         public Builder appendTransition(long timestamp, BitVector value) {
-            if (vector.transitionCount == allocatedTransitions) {
+            if (vector.transitionCount == 0) {
+                allocatedTransitions = 128;
+                vector.timestamps = new long[allocatedTransitions];
+                vector.packedValues = new long[allocatedTransitions
+                    * vector.width * 2 / 64];
+            } else if (vector.transitionCount == allocatedTransitions) {
                 // Grow the array
-                if (allocatedTransitions < 128) {
-                    allocatedTransitions = 128;
-                } else {
-                    allocatedTransitions *= 2;
-                }
-
-                long[] newTimestamps = new long[allocatedTransitions];
-                long[] newPackedValues = new long[allocatedTransitions * vector.width * 2 / 64];
-
-                if (vector.timestamps != null) {
-                    System.arraycopy(
-                        vector.timestamps, 0, newTimestamps, 0, vector.transitionCount);
-                    System.arraycopy(vector.packedValues, 0, newPackedValues, 0,
-                        vector.transitionCount * vector.width * 2 / 64);
-                }
-
-                vector.timestamps = newTimestamps;
-                vector.packedValues = newPackedValues;
+                allocatedTransitions *= 2;
+                vector.timestamps = Arrays.copyOf(vector.timestamps, allocatedTransitions);
+                vector.packedValues = Arrays.copyOf(vector.packedValues,
+                    allocatedTransitions * vector.width * 2 / 64);
             }
 
             if (vector.transitionCount > 0) {
