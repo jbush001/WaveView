@@ -29,8 +29,6 @@ public class BitVectorTest {
     @Test
     public void parseBinary() {
         BitVector bv = new BitVector("110111010100100100101100101001001010001001", 2);
-        assertFalse(bv.isZ());
-        assertFalse(bv.isX());
         assertEquals(42, bv.getWidth());
         assertEquals("110111010100100100101100101001001010001001", bv.toString(2));
     }
@@ -38,8 +36,6 @@ public class BitVectorTest {
     @Test
     public void parseDecimal() {
         BitVector bv = new BitVector("3492343343482759676947735281634934371324", 10);
-        assertFalse(bv.isZ());
-        assertFalse(bv.isX());
         assertEquals("3492343343482759676947735281634934371324", bv.toString(10));
     }
 
@@ -57,8 +53,6 @@ public class BitVectorTest {
         assertEquals(513, new BitVector("201", 16).intValue());
 
         BitVector bv = new BitVector("1234567890abcdefABCDEF", 16);
-        assertFalse(bv.isZ());
-        assertFalse(bv.isX());
         assertEquals(88, bv.getWidth());
         assertEquals("1234567890ABCDEFABCDEF", bv.toString(16));
     }
@@ -67,54 +61,87 @@ public class BitVectorTest {
     public void parseX() {
         BitVector bv = new BitVector("xxxxxxxxxxx", 2);
         assertEquals(11, bv.getWidth());
-        assertFalse(bv.isZ());
-        assertTrue(bv.isX());
         assertEquals("xxxxxxxxxxx", bv.toString(2));
 
         bv = new BitVector("XXXXX", 2);
         assertEquals(5, bv.getWidth());
-        assertFalse(bv.isZ());
-        assertTrue(bv.isX());
         assertEquals("xxxxx", bv.toString(2));
 
         bv = new BitVector("xxx", 16);
         assertEquals(12, bv.getWidth());
-        assertFalse(bv.isZ());
-        assertTrue(bv.isX());
-        assertEquals("xxxxxxxxxxxx", bv.toString(2));
+        assertEquals("XXX", bv.toString(16));
 
         bv = new BitVector("XXX", 16);
         assertEquals(12, bv.getWidth());
-        assertFalse(bv.isZ());
-        assertTrue(bv.isX());
-        assertEquals("xxxxxxxxxxxx", bv.toString(2));
+        assertEquals("XXX", bv.toString(16));
     }
 
     @Test
     public void parseZ() {
         BitVector bv = new BitVector("zzzzzzzz", 2);
         assertEquals(8, bv.getWidth());
-        assertTrue(bv.isZ());
-        assertTrue(bv.isX());
         assertEquals("zzzzzzzz", bv.toString(2));
 
         bv = new BitVector("ZZZZZZZZ", 2);
         assertEquals(8, bv.getWidth());
-        assertTrue(bv.isZ());
-        assertTrue(bv.isX());
         assertEquals("zzzzzzzz", bv.toString(2));
 
         bv = new BitVector("zz", 16);
         assertEquals(8, bv.getWidth());
-        assertTrue(bv.isZ());
-        assertTrue(bv.isX());
-        assertEquals("zzzzzzzz", bv.toString(2));
+        assertEquals("ZZ", bv.toString(16));
 
         bv = new BitVector("ZZ", 16);
         assertEquals(8, bv.getWidth());
+        assertEquals("ZZ", bv.toString(16));
+
+        bv = new BitVector("zzzzzzzzzzzzzzzzz", 16);
+        assertEquals(68, bv.getWidth());
+        assertEquals("ZZZZZZZZZZZZZZZZZ", bv.toString(16));
+    }
+
+    @Test
+    public void isZX() {
+        BitVector bv = new BitVector("zzzzzzzz", 2);
         assertTrue(bv.isZ());
         assertTrue(bv.isX());
-        assertEquals("zzzzzzzz", bv.toString(2));
+
+        // This is larger than 64 bits (68), and has a partial word
+        // at the beginning.
+        bv = new BitVector("zzzzzzzzzzzzzzzzz", 16);
+        assertTrue(bv.isZ());
+        assertTrue(bv.isX());
+
+        // Larger than 64 bits and top word is not Z
+        bv = new BitVector("0zzzzzzzzzzzzzzzz", 16);
+        assertFalse(bv.isZ());
+        assertTrue(bv.isX());
+
+        // Larger than 64 bits and bottom word is not all Zs
+        bv = new BitVector("0zzzzzzzzzzzzzzxz", 16);
+        assertFalse(bv.isZ());
+        assertTrue(bv.isX());
+
+        // Larger than 64 bits, and has a partial word
+        // that is X at the beginning.
+        bv = new BitVector("x0000000000000000", 16);
+        assertFalse(bv.isZ());
+        assertTrue(bv.isX());
+        assertEquals("X0000000000000000", bv.toString(16));
+
+        // Has an X
+        bv = new BitVector("100000x0", 2);
+        assertFalse(bv.isZ());
+        assertTrue(bv.isX());
+
+        // No Xs or Zs, smaller than 64 bits
+        bv = new BitVector("11111111", 2);
+        assertFalse(bv.isZ());
+        assertFalse(bv.isX());
+
+        // No Xs or Zs, larger than 64 bits
+        bv = new BitVector("0000000000000000", 16);
+        assertFalse(bv.isZ());
+        assertFalse(bv.isX());
     }
 
     @SuppressWarnings("PMD.EmptyCatchBlock")
@@ -237,54 +264,60 @@ public class BitVectorTest {
     }
 
     @Test
-    public void compare() {
-        BitVector bv1 = new BitVector("1", 2); // Shorter than others
-        BitVector bv2 = new BitVector("01001", 2); // Has leading zeros
-        BitVector bv3 = new BitVector("10100", 2);
-        BitVector bv4 = new BitVector("10101", 2); // Same length as last, trailing 1
-        BitVector bv5 = new BitVector("000000", 2); // Wider, but zeroes
+    public void compareWider() {
+        BitVector bv1 = new BitVector("8000000000000000", 16);
+        BitVector bv2 = new BitVector("10000000000000000", 16);
+        BitVector bv3 = new BitVector("00000000000000000", 16);
 
-        assertEquals(0, bv1.compare(bv1));
+        assertEquals(-1, bv1.compare(bv2)); // second is wider, non-zero
+        assertEquals(1, bv1.compare(bv3));  // second is wider, zero
+        assertEquals(1, bv2.compare(bv1)); // first is wider, non-zero
+        assertEquals(-1, bv3.compare(bv1));  // first is wider, zero
+    }
+
+    // Both of the longs in the internal array are positive
+    @Test
+    public void compareBothPositive() {
+        BitVector bv1 = new BitVector("111", 2);
+        BitVector bv2 = new BitVector("11", 2);
+
+        assertEquals(1, bv1.compare(bv2));
+        assertEquals(-1, bv2.compare(bv1));
+    }
+
+    // One of the longs in the internal array is negative
+    @Test
+    public void compareOneNegative() {
+        BitVector bv1 = new BitVector("8000000000000000", 16);
+        BitVector bv2 = new BitVector("7fffffffffffffff", 16);
+
+        assertEquals(1, bv1.compare(bv2));
+        assertEquals(-1, bv2.compare(bv1));
+    }
+
+    // Both of the longs in the internal array are negative
+    @Test
+    public void compareBothNeg() {
+        BitVector bv1 = new BitVector("8000000000000000", 16);
+        BitVector bv2 = new BitVector("8000000000000001", 16);
+
         assertEquals(-1, bv1.compare(bv2));
-        assertEquals(-1, bv1.compare(bv3));
-        assertEquals(-1, bv1.compare(bv4));
-        assertEquals(1, bv1.compare(bv5));
-
         assertEquals(1, bv2.compare(bv1));
-        assertEquals(0, bv2.compare(bv2));
-        assertEquals(-1, bv2.compare(bv3));
-        assertEquals(-1, bv2.compare(bv4));
-        assertEquals(1, bv2.compare(bv5));
+    }
 
-        assertEquals(1, bv3.compare(bv1));
-        assertEquals(1, bv3.compare(bv2));
-        assertEquals(0, bv3.compare(bv3));
-        assertEquals(-1, bv3.compare(bv4));
-        assertEquals(1, bv3.compare(bv5));
-
+    // Ensure x and z values are ignored
+    @Test
+    public void compareXz() {
+        BitVector bv1 = new BitVector("x0z10", 2);
+        BitVector bv2 = new BitVector("10110", 2);
+        BitVector bv3 = new BitVector("00010", 2);
+        BitVector bv4 = new BitVector("01010", 2);
+        assertEquals(0, bv1.compare(bv2));
+        assertEquals(0, bv2.compare(bv1));
+        assertEquals(0, bv1.compare(bv3));
+        assertEquals(0, bv3.compare(bv1));
+        assertEquals(-1, bv1.compare(bv4));
         assertEquals(1, bv4.compare(bv1));
-        assertEquals(1, bv4.compare(bv2));
-        assertEquals(1, bv4.compare(bv3));
-        assertEquals(0, bv4.compare(bv4));
-        assertEquals(1, bv4.compare(bv5));
-
-        assertEquals(-1, bv5.compare(bv1));
-        assertEquals(-1, bv5.compare(bv2));
-        assertEquals(-1, bv5.compare(bv3));
-        assertEquals(-1, bv5.compare(bv4));
-        assertEquals(0, bv5.compare(bv5));
-
-        // Ensure x and z values are ignored
-        BitVector bv6 = new BitVector("x0z10", 2);
-        BitVector bv7 = new BitVector("10110", 2);
-        BitVector bv8 = new BitVector("00010", 2);
-        BitVector bv9 = new BitVector("01010", 2);
-        assertEquals(0, bv6.compare(bv7));
-        assertEquals(0, bv7.compare(bv6));
-        assertEquals(0, bv6.compare(bv8));
-        assertEquals(0, bv8.compare(bv6));
-        assertEquals(-1, bv6.compare(bv9));
-        assertEquals(1, bv9.compare(bv6));
     }
 
     @Test
@@ -373,10 +406,23 @@ public class BitVectorTest {
 
     @Test
     public void slice() {
-        BitVector bv = new BitVector("010001011101", 2);
-        assertEquals("011", bv.slice(3, 5).toString());
-        assertEquals("101", bv.slice(4, 6).toString());
-        assertEquals("0010", bv.slice(5, 8).toString());
+        BitVector bv1 = new BitVector("010001011101", 2);
+        assertEquals("011", bv1.slice(3, 5).toString());
+        assertEquals("101", bv1.slice(4, 6).toString());
+        assertEquals("0010", bv1.slice(5, 8).toString());
+
+        // Larger than 64 bit source, slice spans word boundary, result is
+        // smaller than 64 bits
+        BitVector bv2 = new BitVector("7d4a178d6df770072b6ae59c", 16);
+        assertEquals("10101", bv2.slice(62, 66).toString());
+
+        // Exactly 64 bit result, not 64 bit aligned
+        BitVector bv3 = new BitVector("7d4a178d6df770072b6ae59c", 16);
+        assertEquals("6B6FBB80395B572C", bv3.slice(5, 68).toString(16));
+
+        // Result is exactly 64 bit aligned
+        BitVector bv4 = new BitVector("7d4a178d6df770072b6ae59c", 16);
+        assertEquals("178D", bv4.slice(64, 79).toString(16));
     }
 
     @Test
