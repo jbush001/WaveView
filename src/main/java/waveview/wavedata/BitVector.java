@@ -17,11 +17,19 @@
 package waveview.wavedata;
 
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.nio.ByteBuffer;
 
 public class BitVector {
+    // If a bit in zx_flag is 1, the corresponding bit in the value array
+    // represents either z (0) or x (1). Otherwise, the value bit represents
+    // a 0 or 1.
     // Index 0 is least significant position
-    private BitValue[] values;
+    // All code in this class guarantees that no bits with an index greater than
+    // width will be nonzero.
+    private long[] zxflags;
+    private long[] values;
+    private int width; // Number of valid bits
+
     public static final BitVector ZERO = new BitVector("0", 2);
 
     public BitVector() {}
@@ -31,7 +39,7 @@ public class BitVector {
     }
 
     public BitVector(int width) {
-        values = new BitValue[width];
+        setWidth(width);
     }
 
     public BitVector(BitVector from) {
@@ -41,48 +49,91 @@ public class BitVector {
     public final void assign(BitVector from) {
         if (from.values == null) {
             values = null;
+            zxflags = null;
+            width = 0;
         } else {
             values = from.values.clone();
+            zxflags = from.zxflags.clone();
+            width = from.width;
         }
     }
 
     /// @param index bit number, where 0 is least significant
     /// @returns Value of bit at position
     public BitValue getBit(int index) {
-        return values[index];
+        assert index < width;
+
+        int wordIndex = index / Long.SIZE;
+        int bitOffset = index % Long.SIZE;
+        long bitMask = 1L << bitOffset;
+        if ((zxflags[wordIndex] & bitMask) != 0) {
+            return (values[wordIndex] & bitMask) != 0 ? BitValue.X : BitValue.Z;
+        } else {
+            return (values[wordIndex] & bitMask) != 0 ? BitValue.ONE : BitValue.ZERO;
+        }
     }
 
     /// @param index bit number, where 0 is least significant
     /// @param value of bit at position
     public void setBit(int index, BitValue value) {
-        values[index] = value;
+        assert index < width;
+
+        int wordIndex = index / Long.SIZE;
+        int bitOffset = index % Long.SIZE;
+        long bitMask = 1L << bitOffset;
+        if (value == BitValue.X || value == BitValue.Z) {
+            zxflags[wordIndex] |= bitMask;
+            if (value == BitValue.X) {
+                values[wordIndex] |= bitMask;
+            } else {
+                values[wordIndex] &= ~bitMask;
+            }
+        } else {
+            zxflags[wordIndex] &= ~bitMask;
+            if (value == BitValue.ONE) {
+                values[wordIndex] |= bitMask;
+            } else {
+                values[wordIndex] &= ~bitMask;
+            }
+        }
     }
 
     /// @returns total bits in this vector (which may contain leading zeroes)
     public int getWidth() {
-        return values.length;
+        return width;
     }
 
     /// @note This will set all bits in the vector to zero as a side effect.
     public void setWidth(int width) {
-        values = new BitValue[width];
+        int numWords = (width + Long.SIZE - 1) / Long.SIZE;
+        values = new long[numWords];
+        zxflags = new long[numWords];
+        this.width = width;
     }
 
     /// @returns true if this is all Zs
     public boolean isZ() {
-        for (BitValue value : values) {
-            if (value != BitValue.Z) {
+        int numWords = width / Long.SIZE;
+        for (int i = 0; i < numWords; i++) {
+            if (zxflags[i] != -1 || values[i] != 0) {
                 return false;
             }
+        }
+
+        int remainingBits = width % Long.SIZE;
+        if (remainingBits > 0
+            && (zxflags[numWords] != (1 << remainingBits) - 1
+            || values[numWords] != 0)) {
+            return false;
         }
 
         return true;
     }
 
-    /// @returns true if this contains any Z or X values in any positions
+    /// @returns true if this contains an X or Z values in any position.
     public boolean isX() {
-        for (BitValue val : values) {
-            if (val == BitValue.Z || val == BitValue.X) {
+        for (long zxval : zxflags) {
+            if (zxval != 0) {
                 return true;
             }
         }
@@ -93,23 +144,43 @@ public class BitVector {
     /// @returns int representation of BitVector. Zs and Xs are
     /// treated as zeroes. This is truncated to 32 bits.
     public int intValue() {
-        int value = 0;
-
-        for (int index = getWidth() - 1; index >= 0; index--) {
-            value <<= 1;
-            value |= getBit(index).toInt();
-        }
-
-        return value;
+        return (int)((values[0] & ~zxflags[0]) & 0xffffffff);
     }
 
     public BitVector slice(int lowBit, int highBit) {
-        if (lowBit < 0 || highBit >= values.length || lowBit > highBit) {
-            throw new IllegalArgumentException("invalid bit slice range " + lowBit + ":" + highBit);
+        if (lowBit < 0 || highBit >= width || lowBit > highBit) {
+            throw new IllegalArgumentException("invalid bit slice range "
+                + lowBit + ":" + highBit);
+        }
+
+        int destBits = highBit - lowBit + 1;
+        int destWords = (destBits + Long.SIZE - 1) / Long.SIZE;
+        int sourceIndex = lowBit / Long.SIZE;
+        int rightShift = lowBit % Long.SIZE;
+        int leftShift = Long.SIZE - rightShift;
+        long[] newValues = new long[destWords];
+        long[] newZxFlags = new long[destWords];
+
+        for (int i = 0; i < destWords; i++) {
+            newValues[i] = values[sourceIndex + i] >>> rightShift;
+            newZxFlags[i] = zxflags[sourceIndex + i] >>> rightShift;
+            if (leftShift != 0 && sourceIndex + i + 1 < values.length) {
+                newValues[i] |= values[sourceIndex + i + 1] << leftShift;
+                newZxFlags[i] |= zxflags[sourceIndex + i + 1] << leftShift;
+            }
+        }
+
+        int leadingBits = destBits % Long.SIZE;
+        if (leadingBits != 0) {
+            int mask = (1 << leadingBits) - 1;
+            newValues[destWords - 1] &= mask;
+            newZxFlags[destWords - 1] &= mask;
         }
 
         BitVector newVec = new BitVector();
-        newVec.values = Arrays.copyOfRange(values, lowBit, highBit + 1);
+        newVec.values = newValues;
+        newVec.zxflags = newZxFlags;
+        newVec.width = highBit - lowBit + 1;
         return newVec;
     }
 
@@ -117,80 +188,87 @@ public class BitVector {
     public void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
             case 2:
-                parseBinaryValue(string);
+                parseBinary(string);
                 break;
             case 10:
-                parseDecimalValue(string);
+                parseDecimal(string);
                 break;
             case 16:
-                parseHexadecimalValue(string);
+                parseHexadecimal(string);
                 break;
             default:
                 throw new NumberFormatException("bad radix passed to parseString");
         }
     }
 
-    private void parseBinaryValue(String string) throws NumberFormatException {
-        if (values == null || values.length != string.length()) {
-            values = new BitValue[string.length()];
-        }
-
+    private void parseBinary(String string) throws NumberFormatException {
         int length = string.length();
+        setWidth(length);
         for (int index = 0; index < length; index++) {
-            values[length - index - 1] = BitValue.fromChar(string.charAt(index));
+            int bitIndex = length - index - 1;
+            int wordIndex = bitIndex / Long.SIZE;
+            int bitOffset = bitIndex % Long.SIZE;
+            long mask = 1L << bitOffset;
+            switch (string.charAt(index)) {
+                case 'x':
+                case 'X':
+                    values[wordIndex] |= mask;
+                    zxflags[wordIndex] |= mask;
+                    break;
+                case 'z':
+                case 'Z':
+                    zxflags[wordIndex] |= mask;
+                    break;
+                case '1':
+                    values[wordIndex] |= mask;
+                    break;
+                case '0':
+                    break;
+                default:
+                   throw new NumberFormatException("invalid binary digit " + string);
+            }
         }
     }
 
-    private void parseDecimalValue(String string) throws NumberFormatException {
+    private void parseDecimal(String string) throws NumberFormatException {
         BigInteger bigint = new BigInteger(string);
         byte[] bytes = bigint.toByteArray();
-        int totalBits = bytes.length * 8;
-
-        if (values == null || values.length != totalBits) {
-            values = new BitValue[totalBits];
-        }
-
-        for (int i = 0; i < totalBits; i++) {
-            values[i] = BitValue.fromInt(bytes[bytes.length - (i / 8) - 1] & (1 << (i % 8)));
+        setWidth(bytes.length * Byte.SIZE);
+        for (int i = 0; i < bytes.length; i++) {
+            long byteVal = (((long) bytes[i]) & 0xff);
+            int destByteIndex = bytes.length - i - 1;
+            int shiftAmount = (destByteIndex % 8) * 8;
+            int destWordIndex = destByteIndex / 8;
+            values[destWordIndex] |= byteVal << shiftAmount;
         }
     }
 
-    private void parseHexadecimalValue(String string) throws NumberFormatException {
-        if (values == null || values.length != string.length() * 4) {
-            values = new BitValue[string.length() * 4];
-        }
-
+    private void parseHexadecimal(String string) throws NumberFormatException {
         int length = string.length();
+        setWidth(length * 4);
+        int bitOffset = 0;
+        int wordIndex = 0;
         for (int index = 0; index < length; index++) {
             char c = string.charAt(length - index - 1);
-            if (c >= '0' && c <= '9') {
-                int digitVal = c - '0';
-                for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] =
-                        BitValue.fromInt(digitVal & (8 >> offset));
-                }
-            } else if (c >= 'a' && c <= 'f') {
-                int digitVal = c - 'a' + 10;
-                for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] =
-                        BitValue.fromInt(digitVal & (8 >> offset));
-                }
-            } else if (c >= 'A' && c <= 'F') {
-                int digitVal = c - 'A' + 10;
-                for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] =
-                        BitValue.fromInt(digitVal & (8 >> offset));
-                }
-            } else if (c == 'X' || c == 'x') {
-                for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] = BitValue.X;
-                }
-            } else if (c == 'Z' || c == 'z') {
-                for (int offset = 0; offset < 4; offset++) {
-                    values[(index + 1) * 4 - offset - 1] = BitValue.Z;
-                }
+            if (c == 'x' || c == 'X') {
+                zxflags[wordIndex] |= 0xfL << bitOffset;
+                values[wordIndex] |= 0xfL << bitOffset;
+            } else if (c == 'z' || c == 'Z') {
+                zxflags[wordIndex] |= 0xfL << bitOffset;
             } else {
-                throw new NumberFormatException("number format exception parsing " + string);
+                long digitVal = (long) Character.digit(c, 16);
+                if (digitVal < 0) {
+                    throw new NumberFormatException("number format exception parsing "
+                        + string);
+                }
+
+                values[wordIndex] |= digitVal << bitOffset;
+            }
+
+            bitOffset += 4;
+            if (bitOffset == Long.SIZE) {
+                bitOffset = 0;
+                wordIndex++;
             }
         }
     }
@@ -222,7 +300,7 @@ public class BitVector {
     private String toBinaryString() {
         StringBuilder result = new StringBuilder();
 
-        for (int index = getWidth() - 1; index >= 0; index--) {
+        for (int index = width - 1; index >= 0; index--) {
             result.append(getBit(index).toChar());
         }
 
@@ -234,15 +312,14 @@ public class BitVector {
 
         // Add one leading byte that is always zero so this will
         // be treated as unsigned.
-        byte[] bytes = new byte[(values.length + 7) / 8 + 1];
-
+        ByteBuffer buffer = ByteBuffer.allocate((values.length + 1) * 8);
+        buffer.putLong(0);   // Ensure unsigned by having leading zero
         for (int i = 0; i < values.length; i++) {
-            if (values[i] == BitValue.ONE) {
-                bytes[bytes.length - (i / 8) - 1] |= (byte) (1 << (i % 8));
-            }
+            int sourceIndex = values.length - i - 1;
+            buffer.putLong(values[sourceIndex] & ~zxflags[sourceIndex]);
         }
 
-        return new BigInteger(bytes).toString();
+        return new BigInteger(buffer.array()).toString();
     }
 
     private String toHexString() {
@@ -290,13 +367,13 @@ public class BitVector {
     /// less than, 0 if equal
     /// @bug Ignores X and Z values, should have a rule for those.
     public int compare(BitVector other) {
-        int myWidth = getWidth();
-        int otherWidth = other.getWidth();
+        int myWidth = values.length;
+        int otherWidth = other.values.length;
         if (otherWidth > myWidth) {
             // The other one is wider than me. Check if its leading digits
             // have any ones. If so, it is bigger
             for (int i = otherWidth - 1; i >= myWidth; i--) {
-                if (other.values[i] == BitValue.ONE) {
+                if ((other.values[i] & ~other.zxflags[i]) != 0) {
                     return -1;
                 }
             }
@@ -304,7 +381,7 @@ public class BitVector {
             // I am wider than the other number. Check if my leading digits
             // have any ones. If so, I am bigger.
             for (int i = myWidth - 1; i >= otherWidth; i--) {
-                if (values[i] == BitValue.ONE) {
+                if ((values[i] & ~zxflags[i]) != 0) {
                     return 1;
                 }
             }
@@ -314,9 +391,12 @@ public class BitVector {
 
         // Compare remaining digits
         while (index >= 0) {
-            int comp = values[index].compare(other.values[index]);
-            if (comp != 0) {
-                return comp;
+            // Z and X match everything
+            long ignoremask = ~(zxflags[index] | other.zxflags[index]);
+            long a = values[index] & ignoremask;
+            long b = other.values[index] & ignoremask;
+            if (a != b) {
+                return (a > b) ^ (a < 0) ^ (b < 0) ? 1 : -1;
             }
 
             index--;

@@ -374,8 +374,9 @@ public class BitVectorTest {
     @Test
     public void slice() {
         BitVector bv = new BitVector("010001011101", 2);
-        BitVector sliced = bv.slice(3, 5);
-        assertEquals("011", sliced.toString());
+        assertEquals("011", bv.slice(3, 5).toString());
+        assertEquals("101", bv.slice(4, 6).toString());
+        assertEquals("0010", bv.slice(5, 8).toString());
     }
 
     @Test
