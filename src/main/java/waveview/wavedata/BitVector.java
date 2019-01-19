@@ -66,10 +66,10 @@ public class BitVector {
         int wordIndex = index / Long.SIZE;
         int bitOffset = index % Long.SIZE;
         long bitMask = 1L << bitOffset;
-        if ((zxflags[wordIndex] & bitMask) != 0) {
-            return (values[wordIndex] & bitMask) != 0 ? BitValue.X : BitValue.Z;
+        if ((zxflags[wordIndex] & bitMask) == 0) {
+            return (values[wordIndex] & bitMask) == 0 ? BitValue.ZERO : BitValue.ONE;
         } else {
-            return (values[wordIndex] & bitMask) != 0 ? BitValue.ONE : BitValue.ZERO;
+            return (values[wordIndex] & bitMask) == 0 ? BitValue.Z : BitValue.X;
         }
     }
 
@@ -121,13 +121,9 @@ public class BitVector {
         }
 
         int remainingBits = width % Long.SIZE;
-        if (remainingBits > 0
-            && (zxflags[numWords] != (1 << remainingBits) - 1
-            || values[numWords] != 0)) {
-            return false;
-        }
-
-        return true;
+        return (remainingBits == 0
+            || (zxflags[numWords] == (1 << remainingBits) - 1
+            && values[numWords] == 0));
     }
 
     /// @returns true if this contains an X or Z values in any position.
