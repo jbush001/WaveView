@@ -334,6 +334,46 @@ public class SearchTest {
             assertEquals(9, exc.getStartOffset());
             assertEquals(9, exc.getEndOffset());
         }
+
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk = 'h12");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unknown character =", exc.getMessage());
+            assertEquals(9, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
+        }
+
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk ! 'h12");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unknown character !", exc.getMessage());
+            assertEquals(9, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
+        }
+
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk & 'h12");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unknown character &", exc.getMessage());
+            assertEquals(9, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
+        }
+
+        try {
+            new Search(makeSingleBitModel(), "mod1.clk | 'h12");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unknown character |", exc.getMessage());
+            assertEquals(9, exc.getStartOffset());
+            assertEquals(9, exc.getEndOffset());
+        }
     }
 
     /// Basic test for 'and' search functionailty
@@ -1187,6 +1227,29 @@ public class SearchTest {
             assertEquals("Ambiguous net \"foo\"", exc.getMessage());
             assertEquals(0, exc.getStartOffset());
             assertEquals(2, exc.getEndOffset());
+        }
+    }
+
+    // The last two elements match, but the enclosing module specified
+    // in the search doesn't exist.
+    @Test
+    public void partialNetNameStemMismatch() {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .setTimescale(-9)
+            .enterScope("bar")
+            .newNet(0, "baz", 4)
+            .exitScope()
+            .loadFinished();
+
+        try {
+            new Search(waveformDataModel, "foo.bar.baz == 'b0101");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            // Expected
+            assertEquals("Unknown net \"foo.bar.baz\"", exc.getMessage());
+            assertEquals(0, exc.getStartOffset());
+            assertEquals(10, exc.getEndOffset());
         }
     }
 }
