@@ -26,6 +26,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import waveview.BinaryValueFormatter;
+import waveview.OctalValueFormatter;
 import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
@@ -124,10 +125,11 @@ public class WaveformSettingsFileTest {
             .newNet(1, "net2", 1)
             .newNet(1, "net3", 1)
             .newNet(1, "net4", 1)
+            .newNet(1, "net5", 1)
             .exitScope()
             .loadFinished();
 
-        NetDataModel[] netDataModels = new NetDataModel[4];
+        NetDataModel[] netDataModels = new NetDataModel[5];
         int index = 0;
         for (NetDataModel model : dataModel) {
             netDataModels[index++] = model;
@@ -138,13 +140,15 @@ public class WaveformSettingsFileTest {
         sourcePresentationModel.addNet(netDataModels[1]);
         sourcePresentationModel.addNet(netDataModels[2]);
         sourcePresentationModel.addNet(netDataModels[3]);
+        sourcePresentationModel.addNet(netDataModels[4]);
 
         sourcePresentationModel.setValueFormatter(0, new BinaryValueFormatter());
-        sourcePresentationModel.setValueFormatter(1, new DecimalValueFormatter());
-        sourcePresentationModel.setValueFormatter(2, new HexadecimalValueFormatter());
+        sourcePresentationModel.setValueFormatter(1, new OctalValueFormatter());
+        sourcePresentationModel.setValueFormatter(2, new DecimalValueFormatter());
+        sourcePresentationModel.setValueFormatter(3, new HexadecimalValueFormatter());
         EnumValueFormatter enumFormatter =
             new EnumValueFormatter(new File("src/test/resources/enum_mapping/test1.txt"));
-        sourcePresentationModel.setValueFormatter(3, enumFormatter);
+        sourcePresentationModel.setValueFormatter(4, enumFormatter);
 
         // Save and reload contents
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
@@ -153,17 +157,19 @@ public class WaveformSettingsFileTest {
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
         // Check destPresentationModel
-        assertEquals(4, destPresentationModel.getVisibleNetCount());
+        assertEquals(5, destPresentationModel.getVisibleNetCount());
         assertSame(netDataModels[0], destPresentationModel.getVisibleNet(0));
         assertSame(netDataModels[1], destPresentationModel.getVisibleNet(1));
         assertSame(netDataModels[2], destPresentationModel.getVisibleNet(2));
         assertSame(netDataModels[3], destPresentationModel.getVisibleNet(3));
+        assertSame(netDataModels[4], destPresentationModel.getVisibleNet(4));
 
         assertTrue(destPresentationModel.getValueFormatter(0) instanceof BinaryValueFormatter);
-        assertTrue(destPresentationModel.getValueFormatter(1) instanceof DecimalValueFormatter);
-        assertTrue(destPresentationModel.getValueFormatter(2) instanceof HexadecimalValueFormatter);
-        assertTrue(destPresentationModel.getValueFormatter(3) instanceof EnumValueFormatter);
-        enumFormatter = (EnumValueFormatter) destPresentationModel.getValueFormatter(3);
+        assertTrue(destPresentationModel.getValueFormatter(1) instanceof OctalValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(2) instanceof DecimalValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(3) instanceof HexadecimalValueFormatter);
+        assertTrue(destPresentationModel.getValueFormatter(4) instanceof EnumValueFormatter);
+        enumFormatter = (EnumValueFormatter) destPresentationModel.getValueFormatter(4);
         assertEquals("STATE_INIT", enumFormatter.format(new BitVector("1", 10)));
         assertEquals("STATE_LOAD", enumFormatter.format(new BitVector("2", 10)));
         assertEquals("STATE_WAIT", enumFormatter.format(new BitVector("3", 10)));

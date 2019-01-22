@@ -23,9 +23,11 @@ import java.io.IOException;
 import org.junit.Test;
 import waveview.AsciiValueFormatter;
 import waveview.BinaryValueFormatter;
+import waveview.OctalValueFormatter;
 import waveview.DecimalValueFormatter;
 import waveview.EnumValueFormatter;
 import waveview.HexadecimalValueFormatter;
+import waveview.ValueFormatter;
 import waveview.wavedata.BitVector;
 
 public class ValueFormatterTest {
@@ -52,13 +54,19 @@ public class ValueFormatterTest {
 
     @Test
     public void binaryValueFormatter() {
-        BinaryValueFormatter bf = new BinaryValueFormatter();
+        ValueFormatter bf = new BinaryValueFormatter();
         assertEquals("0101zxz110", bf.format(new BitVector("0101zxz110", 2)));
     }
 
     @Test
+    public void octalValueFormatter() {
+        ValueFormatter bf = new OctalValueFormatter();
+        assertEquals("1234567", bf.format(new BitVector("1234567", 8)));
+    }
+
+    @Test
     public void asciiValueFormatter() {
-        AsciiValueFormatter bf = new AsciiValueFormatter();
+        ValueFormatter bf = new AsciiValueFormatter();
         assertEquals("A", bf.format(new BitVector("01000001", 2)));
         assertEquals("!", bf.format(new BitVector("00100001", 2)));
         assertEquals("{", bf.format(new BitVector("01111011", 2)));
@@ -66,14 +74,14 @@ public class ValueFormatterTest {
 
     @Test
     public void decimalValueFormatter() {
-        DecimalValueFormatter df = new DecimalValueFormatter();
+        ValueFormatter df = new DecimalValueFormatter();
         assertEquals(
             "123843954387523457345345", df.format(new BitVector("123843954387523457345345", 10)));
     }
 
     @Test
     public void hexadecimalValueFormatter() {
-        HexadecimalValueFormatter hf = new HexadecimalValueFormatter();
+        ValueFormatter hf = new HexadecimalValueFormatter();
         assertEquals("ABCDEF12345678", hf.format(new BitVector("ABCDEF12345678", 16)));
     }
 }

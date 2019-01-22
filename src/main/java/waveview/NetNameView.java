@@ -273,7 +273,7 @@ final class NetNameView
         JMenuItem formatMenu = new JMenu("Format");
         popupMenu.add(formatMenu);
 
-        final String[] FORMAT_MENU_ITEMS = {"Hex", "Binary", "Decimal", "ASCII", "Enum"};
+        final String[] FORMAT_MENU_ITEMS = {"Binary", "Octal", "Decimal", "Hex", "ASCII", "Enum"};
         for (String itemName : FORMAT_MENU_ITEMS) {
             JMenuItem subItem = new JMenuItem(itemName);
             formatMenu.add(subItem);
@@ -345,14 +345,17 @@ final class NetNameView
             case "Enum":
                 formatter = createEnumFormatter();
                 break;
-            case "Hex":
-                formatter = new HexadecimalValueFormatter();
-                break;
             case "Binary":
                 formatter = new BinaryValueFormatter();
                 break;
+            case "Octal":
+                formatter = new OctalValueFormatter();
+                break;
             case "Decimal":
                 formatter = new DecimalValueFormatter();
+                break;
+            case "Hex":
+                formatter = new HexadecimalValueFormatter();
                 break;
             case "ASCII":
                 formatter = new AsciiValueFormatter();

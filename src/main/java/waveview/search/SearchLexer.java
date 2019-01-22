@@ -23,16 +23,14 @@ final class SearchLexer {
         SCAN_INIT,
         SCAN_IDENTIFIER,
         SCAN_LITERAL_TYPE,
+        SCAN_LITERAL_VALUE,
         SCAN_GEN_NUM,
         SCAN_GREATER,
         SCAN_LESS,
         SCAN_BANG,
         SCAN_EQUAL,
         SCAN_AMPERSAND,
-        SCAN_PIPE,
-        SCAN_BINARY,
-        SCAN_DECIMAL,
-        SCAN_HEXADECIMAL
+        SCAN_PIPE
     }
 
     private int lexerOffset;
@@ -64,6 +62,7 @@ final class SearchLexer {
         StringBuilder currentTokenValue = new StringBuilder();
         int tokenStart = lexerOffset;
         State state = State.SCAN_INIT;
+        int literalRadix = 10;
 
         for (;;) {
             int c = nextChar();
@@ -79,7 +78,8 @@ final class SearchLexer {
                         state = State.SCAN_IDENTIFIER;
                     } else if (isNum(c)) {
                         pushBackChar();
-                        state = State.SCAN_DECIMAL;
+                        literalRadix = 10;
+                        state = State.SCAN_LITERAL_VALUE;
                     } else {
                         switch (c) {
                             case '!':
@@ -194,12 +194,18 @@ final class SearchLexer {
                     break;
 
                 case SCAN_LITERAL_TYPE:
-                    if (c == 'b') {
-                        state = State.SCAN_BINARY;
-                    } else if (c == 'h') {
-                        state = State.SCAN_HEXADECIMAL;
-                    } else if (c == 'd') {
-                        state = State.SCAN_DECIMAL;
+                    if (c == 'b' || c == 'B') {
+                        state = State.SCAN_LITERAL_VALUE;
+                        literalRadix = 2;
+                    } else if (c == 'o' || c == 'O') {
+                        state = State.SCAN_LITERAL_VALUE;
+                        literalRadix = 8;
+                    } else if (c == 'd' || c == 'D') {
+                        state = State.SCAN_LITERAL_VALUE;
+                        literalRadix = 10;
+                    } else if (c == 'h' || c == 'H') {
+                        state = State.SCAN_LITERAL_VALUE;
+                        literalRadix = 16;
                     } else {
                         throw new SearchFormatException(
                             "Unknown type " + (char) c, tokenStart, lexerOffset - 1);
@@ -207,35 +213,13 @@ final class SearchLexer {
 
                     break;
 
-                case SCAN_BINARY:
-                    if (c == '0' || c == '1' || c == 'x' || c == 'z' || c == 'X' || c == 'Z') {
+                case SCAN_LITERAL_VALUE:
+                    if (isValidDigit(c, literalRadix) || c == 'x' || c == 'z'
+                            || c == 'X' || c == 'Z') {
                         currentTokenValue.append((char) c);
                     } else {
-                        BitVector literalValue = new BitVector(currentTokenValue.toString(), 2);
-                        pushBackChar();
-                        return new Token(Token.Type.LITERAL, tokenStart, lexerOffset - 1,
-                            currentTokenValue.toString(), literalValue);
-                    }
-
-                    break;
-
-                case SCAN_DECIMAL:
-                    if (c >= '0' && c <= '9') {
-                        currentTokenValue.append((char) c);
-                    } else {
-                        BitVector literalValue = new BitVector(currentTokenValue.toString(), 10);
-                        pushBackChar();
-                        return new Token(Token.Type.LITERAL, tokenStart, lexerOffset - 1,
-                            currentTokenValue.toString(), literalValue);
-                    }
-
-                    break;
-
-                case SCAN_HEXADECIMAL:
-                    if (isHexDigit(c) || c == 'x' || c == 'z' || c == 'X' || c == 'Z') {
-                        currentTokenValue.append((char) c);
-                    } else {
-                        BitVector literalValue = new BitVector(currentTokenValue.toString(), 16);
+                        BitVector literalValue = new BitVector(currentTokenValue.toString(),
+                            literalRadix);
                         pushBackChar();
                         return new Token(Token.Type.LITERAL, tokenStart, lexerOffset - 1,
                             currentTokenValue.toString(), literalValue);
@@ -269,9 +253,16 @@ final class SearchLexer {
         return value >= '0' && value <= '9';
     }
 
-    private static boolean isHexDigit(int value) {
-        return (value >= '0' && value <= '9') || (value >= 'a' && value <= 'f')
-            || (value >= 'A' && value <= 'F');
+    private static boolean isValidDigit(int value, int radix) {
+        if (value >= '0' && value <= '9') {
+            return (value - '0') < radix;
+        } else if (value >= 'A' && value <= 'F') {
+            return radix == 16;
+        } else if (value >= 'a' && value <= 'f') {
+            return radix == 16;
+        } else {
+            return false;
+        }
     }
 
     private static boolean isAlphaNum(int value) {

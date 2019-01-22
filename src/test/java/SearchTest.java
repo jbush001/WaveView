@@ -135,13 +135,28 @@ public class SearchTest {
         search = new Search(waveformDataModel, "mod1.value == 'd10");
         assertEquals(23, search.getNextMatch(0));
 
+        search = new Search(waveformDataModel, "mod1.value == 'D10");
+        assertEquals(23, search.getNextMatch(0));
+
         search = new Search(waveformDataModel, "mod1.value == 'ha");
         assertEquals(23, search.getNextMatch(0));
 
         search = new Search(waveformDataModel, "mod1.value == 'hA");
         assertEquals(23, search.getNextMatch(0));
 
+        search = new Search(waveformDataModel, "mod1.value == 'HA");
+        assertEquals(23, search.getNextMatch(0));
+
         search = new Search(waveformDataModel, "mod1.value == 'b1010");
+        assertEquals(23, search.getNextMatch(0));
+
+        search = new Search(waveformDataModel, "mod1.value == 'B1010");
+        assertEquals(23, search.getNextMatch(0));
+
+        search = new Search(waveformDataModel, "mod1.value == 'o12");
+        assertEquals(23, search.getNextMatch(0));
+
+        search = new Search(waveformDataModel, "mod1.value == 'O12");
         assertEquals(23, search.getNextMatch(0));
     }
 

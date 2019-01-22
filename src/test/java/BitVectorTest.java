@@ -34,6 +34,13 @@ public class BitVectorTest {
     }
 
     @Test
+    public void parseOctal() {
+        BitVector bv = new BitVector("145252366215757412216507426", 8);
+        assertEquals(27 * 3, bv.getWidth());
+        assertEquals("145252366215757412216507426", bv.toString(8));
+    }
+
+    @Test
     public void parseDecimal() {
         BitVector bv = new BitVector("3492343343482759676947735281634934371324", 10);
         assertEquals("3492343343482759676947735281634934371324", bv.toString(10));
@@ -150,6 +157,18 @@ public class BitVectorTest {
         // Digits other than 0/1 in binary
         try {
             new BitVector("0110102", 2);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
+    }
+
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void octalNumberFormatException() {
+        // Digits other than 0/1 in binary
+        try {
+            new BitVector("12348", 2);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Expected
@@ -329,9 +348,11 @@ public class BitVectorTest {
         assertEquals("1z01xxxx11110000", bv2.toString());
         assertEquals("1010001001", bv1.toString(2));
         assertEquals("1z01xxxx11110000", bv2.toString(2));
-        assertEquals("289", bv1.toString(16));
-        assertEquals("ZXF0", bv2.toString(16));
+        assertEquals("1211", bv1.toString(8));
+        assertEquals("1XXX60", bv2.toString(8));
         assertEquals("649", bv1.toString(10));
+        assertEquals("289", bv1.toString(16));
+        assertEquals("XXF0", bv2.toString(16));
 
         try {
             bv1.toString(12);
@@ -340,36 +361,6 @@ public class BitVectorTest {
             // Expected
             assertEquals("bad radix", exc.getMessage());
         }
-    }
-
-    @Test
-    public void stringAllocate() {
-        // Ensure we grow a bitvector properly when assigning a larger value
-        BitVector bv = new BitVector(1);
-        bv.parseString("10000001001", 2);
-
-        bv = new BitVector(1);
-        bv.parseString("100000", 10);
-
-        bv = new BitVector(1);
-        bv.parseString("100000", 16);
-
-        // Values are unallocated in empty bitvectors
-        bv = new BitVector();
-        bv.parseString("10", 2);
-
-        bv = new BitVector();
-        bv.parseString("17", 10);
-
-        bv = new BitVector();
-        bv.parseString("17", 16);
-
-        // parse a vector of the same size. Should re-use buffer and
-        // not reallocate.
-        bv = new BitVector(8);
-        bv.parseString("10100011", 2);
-        bv.parseString("ff", 16);
-        bv.parseString("17", 10);
     }
 
     @Test

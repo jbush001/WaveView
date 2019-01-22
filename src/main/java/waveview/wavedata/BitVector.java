@@ -184,45 +184,19 @@ public class BitVector {
     public void parseString(String string, int radix) throws NumberFormatException {
         switch (radix) {
             case 2:
-                parseBinary(string);
+                parsePowerOfTwo(string, 1);
+                break;
+            case 8:
+                parsePowerOfTwo(string, 3);
                 break;
             case 10:
                 parseDecimal(string);
                 break;
             case 16:
-                parseHexadecimal(string);
+                parsePowerOfTwo(string, 4);
                 break;
             default:
                 throw new NumberFormatException("bad radix passed to parseString");
-        }
-    }
-
-    private void parseBinary(String string) throws NumberFormatException {
-        int length = string.length();
-        setWidth(length);
-        for (int index = 0; index < length; index++) {
-            int bitIndex = length - index - 1;
-            int wordIndex = bitIndex / Long.SIZE;
-            int bitOffset = bitIndex % Long.SIZE;
-            long mask = 1L << bitOffset;
-            switch (string.charAt(index)) {
-                case 'x':
-                case 'X':
-                    values[wordIndex] |= mask;
-                    zxflags[wordIndex] |= mask;
-                    break;
-                case 'z':
-                case 'Z':
-                    zxflags[wordIndex] |= mask;
-                    break;
-                case '1':
-                    values[wordIndex] |= mask;
-                    break;
-                case '0':
-                    break;
-                default:
-                   throw new NumberFormatException("invalid binary digit " + string);
-            }
         }
     }
 
@@ -239,31 +213,45 @@ public class BitVector {
         }
     }
 
-    private void parseHexadecimal(String string) throws NumberFormatException {
+    private void parsePowerOfTwo(String string, int bitsPerChar) throws NumberFormatException {
+        int radix = 1 << bitsPerChar;
+        long mask = (long) radix - 1;
         int length = string.length();
-        setWidth(length * 4);
+        setWidth(length * bitsPerChar);
         int bitOffset = 0;
         int wordIndex = 0;
         for (int index = 0; index < length; index++) {
+            long zxdigit = 0;
+            long valdigit = 0;
             char c = string.charAt(length - index - 1);
             if (c == 'x' || c == 'X') {
-                zxflags[wordIndex] |= 0xfL << bitOffset;
-                values[wordIndex] |= 0xfL << bitOffset;
+                zxdigit = mask;
+                valdigit = mask;
             } else if (c == 'z' || c == 'Z') {
-                zxflags[wordIndex] |= 0xfL << bitOffset;
+                zxdigit = mask;
             } else {
-                long digitVal = (long) Character.digit(c, 16);
-                if (digitVal < 0) {
+                valdigit = (long) Character.digit(c, radix);
+                System.out.println("i " + index + " " + c + " " + valdigit);
+                if (valdigit < 0) {
                     throw new NumberFormatException("number format exception parsing "
                         + string);
                 }
-
-                values[wordIndex] |= digitVal << bitOffset;
             }
 
-            bitOffset += 4;
-            if (bitOffset == Long.SIZE) {
-                bitOffset = 0;
+            zxflags[wordIndex] |= zxdigit << bitOffset;
+            values[wordIndex] |= valdigit << bitOffset;
+            bitOffset += bitsPerChar;
+            int spillover = bitOffset - Long.SIZE;
+            if (spillover > 0) {
+                // This digit spans a word boundary (which only happens with
+                // octal values).
+                int rshift = bitsPerChar - spillover;
+                zxflags[wordIndex + 1] |= zxdigit >> rshift;
+                values[wordIndex + 1] |= valdigit >> rshift;
+            }
+
+            if (bitOffset >= Long.SIZE) {
+                bitOffset -= Long.SIZE;
                 wordIndex++;
             }
         }
@@ -283,24 +271,16 @@ public class BitVector {
 
         switch (radix) {
             case 2:
-                return toBinaryString();
+                return toPowerOfTwoString(1);
+            case 8:
+                return toPowerOfTwoString(3);
             case 10:
                 return toDecimalString();
             case 16:
-                return toHexString();
+                return toPowerOfTwoString(4);
             default:
                 throw new NumberFormatException("bad radix");
         }
-    }
-
-    private String toBinaryString() {
-        StringBuilder result = new StringBuilder();
-
-        for (int index = width - 1; index >= 0; index--) {
-            result.append(getBit(index).toChar());
-        }
-
-        return result.toString();
     }
 
     private String toDecimalString() {
@@ -318,45 +298,44 @@ public class BitVector {
         return new BigInteger(buffer.array()).toString();
     }
 
-    private String toHexString() {
-        int lowBit = getWidth();
+    private String toPowerOfTwoString(int bitsPerChar) {
+        char zChar = bitsPerChar == 1 ? 'z' : 'Z';
+        char xChar = bitsPerChar == 1 ? 'x' : 'X';
+        int lowBit = (((width + bitsPerChar - 1) / bitsPerChar) - 1) * bitsPerChar;
+        long digitMask = (1L << bitsPerChar) - 1;
+        int wordIndex = lowBit / Long.SIZE;
+        int bitOffset = lowBit % Long.SIZE;
         StringBuilder result = new StringBuilder();
 
-        // Partial first digit
-        int partial = getWidth() % 4;
-        if (partial > 0) {
-            lowBit -= partial;
-            result.append(bitsToHexDigit(lowBit, partial));
-        }
+        while (wordIndex >= 0) {
+            int digitVal = (int)((values[wordIndex] >> bitOffset) & digitMask);
+            int zxflag = (int)((zxflags[wordIndex] >> bitOffset) & digitMask);
+            int spillover = bitOffset + bitsPerChar - Long.SIZE;
+            if (spillover > 0) {
+                // This digit spans a word boundary (which only happens with
+                // octal values).
+                int lshift = bitsPerChar - spillover;
+                digitVal |= (values[wordIndex + 1] << lshift) & digitMask;
+                zxflag |= (zxflags[wordIndex + 1] << lshift) & digitMask;
+            }
 
-        // Full hex digits
-        while (lowBit >= 4) {
-            lowBit -= 4;
-            result.append(bitsToHexDigit(lowBit, 4));
-        }
+            if (zxflag == digitMask && digitVal == 0) {
+                result.append(zChar);
+            } else if (zxflag != 0) {
+                result.append(xChar);
+            } else {
+                result.append("0123456789ABCDEF".charAt(digitVal));
+            }
 
-        return result.toString();
-    }
-
-    private char bitsToHexDigit(int offset, int count) {
-        int value = 0;
-
-        for (int i = count - 1; i >= 0; i--) {
-            value <<= 1;
-            switch (getBit(i + offset)) {
-                case ZERO:
-                    break;
-                case ONE:
-                    value |= 1;
-                    break;
-                case X:
-                    return 'X';
-                case Z: // @bug should only be Z if all bits are Z
-                    return 'Z';
+            lowBit -= bitsPerChar;
+            bitOffset -= bitsPerChar;
+            if (bitOffset < 0) {
+                bitOffset += Long.SIZE;
+                wordIndex--;
             }
         }
 
-        return "0123456789ABCDEF".charAt(value);
+        return result.toString();
     }
 
     /// @returns 1 if this is greater than the other bit vector, -1 if it is
