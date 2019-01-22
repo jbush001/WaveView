@@ -166,7 +166,6 @@ public class BitVectorTest {
     @SuppressWarnings("PMD.EmptyCatchBlock")
     @Test
     public void octalNumberFormatException() {
-        // Digits other than 0/1 in binary
         try {
             new BitVector("12348", 2);
             fail("Did not throw exception");
