@@ -161,6 +161,20 @@ public class BitVectorTest {
         } catch (NumberFormatException exc) {
             // Expected
         }
+
+        try {
+            new BitVector("011010A", 2);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
+
+        try {
+            new BitVector("011010a", 2);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
     }
 
     @SuppressWarnings("PMD.EmptyCatchBlock")
@@ -168,6 +182,20 @@ public class BitVectorTest {
     public void octalNumberFormatException() {
         try {
             new BitVector("12348", 2);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
+
+        try {
+            new BitVector("123A", 2);
+            fail("Did not throw exception");
+        } catch (NumberFormatException exc) {
+            // Expected
+        }
+
+        try {
+            new BitVector("123a", 2);
             fail("Did not throw exception");
         } catch (NumberFormatException exc) {
             // Expected
