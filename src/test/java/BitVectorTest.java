@@ -363,6 +363,16 @@ public class BitVectorTest {
         }
     }
 
+    // Edge case: when a value who's width is not a multiple of
+    // the octal digit bit width (3) is printed, the first
+    // partial word is printed. If this is at a word boundary, ensure
+    // there isn't an array out-of-bounds exception.
+    @Test
+    public void octalSpillover() {
+        BitVector bv = new BitVector("ffffffffffffffff", 16);
+        assertEquals("1777777777777777777777", bv.toString(8));
+    }
+
     @Test
     public void copy() {
         final String SRC_VALUE = "010001001";

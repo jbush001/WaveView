@@ -308,10 +308,10 @@ public class BitVector {
         StringBuilder result = new StringBuilder();
 
         while (wordIndex >= 0) {
-            int digitVal = (int)((values[wordIndex] >> bitOffset) & digitMask);
-            int zxflag = (int)((zxflags[wordIndex] >> bitOffset) & digitMask);
+            int digitVal = (int)((values[wordIndex] >>> bitOffset) & digitMask);
+            int zxflag = (int)((zxflags[wordIndex] >>> bitOffset) & digitMask);
             int spillover = bitOffset + bitsPerChar - Long.SIZE;
-            if (spillover > 0) {
+            if (spillover > 0 && wordIndex < values.length - 1) {
                 // This digit spans a word boundary (which only happens with
                 // octal values).
                 int lshift = bitsPerChar - spillover;
@@ -327,7 +327,6 @@ public class BitVector {
                 result.append("0123456789ABCDEF".charAt(digitVal));
             }
 
-            lowBit -= bitsPerChar;
             bitOffset -= bitsPerChar;
             if (bitOffset < 0) {
                 bitOffset += Long.SIZE;
