@@ -231,7 +231,6 @@ public class BitVector {
                 zxdigit = mask;
             } else {
                 valdigit = (long) Character.digit(c, radix);
-                System.out.println("i " + index + " " + c + " " + valdigit);
                 if (valdigit < 0) {
                     throw new NumberFormatException("number format exception parsing "
                         + string);
