@@ -16,9 +16,12 @@
 
 package waveview.search;
 
+import java.util.NoSuchElementException;
+
 import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.WaveformDataModel;
+import waveview.wavedata.WaveformDataModel.AmbiguousNetException;
 
 public final class SearchParser {
     private final SearchLexer lexer;
@@ -123,7 +126,19 @@ public final class SearchParser {
     private ValueNode parseValue() throws SearchFormatException {
         Token lookahead = lexer.nextToken();
         if (lookahead.getType() == Token.Type.IDENTIFIER) {
-            NetDataModel netDataModel = tryToFindNet(lookahead);
+            String name = lookahead.toString();
+            NetDataModel netDataModel;
+            try {
+                netDataModel = waveformDataModel.fuzzyFindNet(name);
+            } catch (AmbiguousNetException exc) {
+                throw new SearchFormatException(
+                    "Ambiguous net \"" + name + "\"", lookahead.getStart(),
+                    lookahead.getEnd());
+            } catch (NoSuchElementException exc) {
+                throw new SearchFormatException("Unknown net \"" + name + "\"",
+                    lookahead.getStart(), lookahead.getEnd());
+            }
+
             lookahead = lexer.nextToken();
             if (lookahead.getType() == Token.Type.LBRACKET) {
                 Token highIndexTok = matchToken(Token.Type.LITERAL);
@@ -160,64 +175,5 @@ public final class SearchParser {
             matchToken(Token.Type.LITERAL);
             return new ConstValueNode(lookahead.getLiteralValue());
         }
-    }
-
-    // This does a fuzzy match to find the net. If there is ambiguity (two nets
-    // with the same name that aren't aliases), it will throw a SearchFormatException.
-    private NetDataModel tryToFindNet(Token token) throws SearchFormatException {
-        NetDataModel match = null;
-        String name = token.toString();
-        for (NetDataModel netDataModel : waveformDataModel) {
-            if (isPartialNetNameMatch(netDataModel.getFullName(), name)) {
-                if (match == null) {
-                    match = netDataModel;
-                } else if (match.getTransitionVector() != netDataModel.getTransitionVector()) {
-                    throw new SearchFormatException(
-                        "Ambiguous net \"" + name + "\"", token.getStart(), token.getEnd());
-                }
-            }
-        }
-
-        if (match == null) {
-            throw new SearchFormatException(
-                "Unknown net \"" + name + "\"", token.getStart(), token.getEnd());
-        }
-
-        return match;
-    }
-
-    // Determine if one net name is a subset of another.
-    // This works backward, comparing each dot delimited segment.
-    // @param haystack A fully qualified dot name of a signal. For example,
-    //    mod1.mod2.dat
-    // @param needle A name that may be a subset (including a complete match)
-    private static boolean isPartialNetNameMatch(String haystack, String needle) {
-        int haystackSegmentEnd = haystack.length();
-        int needleSegmentEnd = needle.length();
-        while (needleSegmentEnd > 0) {
-            if (haystackSegmentEnd <= 0) {
-                // There are still elements in needle, but not in haystack.
-                // Since haystack is a full path, this can't be a match.
-                // For example:
-                //  haystack:  bar.baz
-                //  needle:  foo.bar.baz
-                return false;
-            }
-
-            // These may be -1, which will cause code below to check from the
-            // beginning of the string.
-            int haystackSegmentBegin = haystack.lastIndexOf('.', haystackSegmentEnd - 1);
-            int needleSegmentBegin = needle.lastIndexOf('.', needleSegmentEnd - 1);
-            if (!haystack.substring(haystackSegmentBegin + 1, haystackSegmentEnd)
-                     .equals(needle.substring(needleSegmentBegin + 1, needleSegmentEnd))) {
-                // Subpaths don't match
-                return false;
-            }
-
-            needleSegmentEnd = needleSegmentBegin;
-            haystackSegmentEnd = haystackSegmentBegin;
-        }
-
-        return true;
     }
 }

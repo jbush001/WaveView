@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 ///
 /// Contains information about nets and transitions. View state is contained
@@ -32,9 +33,18 @@ import java.util.Map;
 public final class WaveformDataModel implements Iterable<NetDataModel> {
     private long maxTimestamp;
     private Map<String, NetDataModel> fullNameToNetMap = new HashMap<>();
-    private List<NetDataModel> allNets = new ArrayList<>();
+    private List<NetDataModel> nets = new ArrayList<>();
+    private List<NetDataModel> decodedNets = new ArrayList<>();
     private NetTreeNode netTree;
     private int timescale;
+    private int decodeIndex;
+
+    public static class AmbiguousNetException extends Exception {
+        public AmbiguousNetException(String what) {
+            super(what);
+        }
+    }
+
 
     public NetTreeNode getNetTree() {
         return netTree;
@@ -44,13 +54,14 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
     public void copyFrom(WaveformDataModel from) {
         maxTimestamp = from.maxTimestamp;
         fullNameToNetMap = from.fullNameToNetMap;
-        allNets = from.allNets;
+        nets = from.nets;
         netTree = from.netTree;
         timescale = from.timescale;
+        decodedNets = from.decodedNets;
     }
 
     public WaveformBuilder startBuilding() {
-        allNets.clear();
+        nets.clear();
         fullNameToNetMap.clear();
         netTree = null;
 
@@ -58,7 +69,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
     }
 
     public NetDataModel getNetDataModel(int netId) {
-        return allNets.get(netId);
+        return nets.get(netId);
     }
 
     public long getMaxTimestamp() {
@@ -70,24 +81,111 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
     }
 
     public int getTotalNetCount() {
-        return allNets.size();
+        return nets.size();
     }
 
     /// Look up net by full path
     public NetDataModel findNet(String name) {
-        return fullNameToNetMap.get(name);
+        NetDataModel model = fullNameToNetMap.get(name);
+        if (model != null) {
+            return model;
+        }
+
+        for (NetDataModel decoded : decodedNets) {
+            if (decoded.getFullName().equals(name)) {
+                return decoded;
+            }
+        }
+
+        return null;
+    }
+
+    // This does a fuzzy match to find the net. If there is ambiguity (two nets
+    // with the same name that aren't aliases), it will throw a SearchFormatException.
+    public NetDataModel fuzzyFindNet(String name)
+            throws NoSuchElementException, AmbiguousNetException {
+        NetDataModel match = null;
+        for (NetDataModel netDataModel : nets) {
+            if (isPartialNetNameMatch(netDataModel.getFullName(), name)) {
+                if (match == null) {
+                    match = netDataModel;
+                } else if (match.getTransitionVector() != netDataModel.getTransitionVector()) {
+                    throw new AmbiguousNetException("Ambiguous net \"" + name + "\"");
+                }
+            }
+        }
+
+        for (NetDataModel netDataModel : decodedNets) {
+            if (isPartialNetNameMatch(netDataModel.getFullName(), name)) {
+                if (match == null) {
+                    match = netDataModel;
+                } else if (match.getTransitionVector() != netDataModel.getTransitionVector()) {
+                    throw new AmbiguousNetException("Ambiguous net \"" + name + "\"");
+                }
+            }
+        }
+
+        if (match == null) {
+            throw new NoSuchElementException("Unknown net \"" + name + "\"");
+        }
+
+        return match;
+    }
+
+    // Determine if one net name is a subset of another.
+    // This works backward, comparing each dot delimited segment.
+    // @param haystack A fully qualified dot name of a signal. For example,
+    //    mod1.mod2.dat
+    // @param needle A name that may be a subset (including a complete match)
+    private static boolean isPartialNetNameMatch(String haystack, String needle) {
+        int haystackSegmentEnd = haystack.length();
+        int needleSegmentEnd = needle.length();
+        while (needleSegmentEnd > 0) {
+            if (haystackSegmentEnd <= 0) {
+                // There are still elements in needle, but not in haystack.
+                // Since haystack is a full path, this can't be a match.
+                // For example:
+                //  haystack:  bar.baz
+                //  needle:  foo.bar.baz
+                return false;
+            }
+
+            // These may be -1, which will cause code below to check from the
+            // beginning of the string.
+            int haystackSegmentBegin = haystack.lastIndexOf('.', haystackSegmentEnd - 1);
+            int needleSegmentBegin = needle.lastIndexOf('.', needleSegmentEnd - 1);
+
+            if (!haystack.substring(haystackSegmentBegin + 1, haystackSegmentEnd)
+                     .equals(needle.substring(needleSegmentBegin + 1, needleSegmentEnd))) {
+                // Subpaths don't match
+                return false;
+            }
+
+            needleSegmentEnd = needleSegmentBegin;
+            haystackSegmentEnd = haystackSegmentBegin;
+        }
+
+        return true;
     }
 
     @Override
     public Iterator<NetDataModel> iterator() {
-        return allNets.iterator();
+        return nets.iterator();
+    }
+
+    public String generateDecodedName(String decoderName) {
+        return decoderName + '_' + decodeIndex++;
+    }
+
+    public void addDecodedNet(NetDataModel model) {
+        decodedNets.add(model);
     }
 
     private class ConcreteWaveformBuilder implements WaveformBuilder {
         private final Deque<String> scopeStack = new ArrayDeque<>();
         private final NetTreeNode.Builder treeBuilder = new NetTreeNode.Builder();
 
-        // This mirrors allNets in WaveformDataModel and must be kept in sync
+        // This mirrors nets in WaveformDataModel and must be kept in sync
         // with it.
         private final List<TransitionVector.Builder> transitionBuilders = new ArrayList<>();
 
@@ -114,7 +212,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
         @Override
         public WaveformBuilder loadFinished() {
             maxTimestamp = 0;
-            for (NetDataModel model : allNets) {
+            for (NetDataModel model : nets) {
                 maxTimestamp = Math.max(maxTimestamp, model.getMaxTimestamp());
             }
 
@@ -157,7 +255,7 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
             }
 
             net = new NetDataModel(shortName, fullName.toString(), builder.getTransitionVector());
-            allNets.add(net);
+            nets.add(net);
             treeBuilder.addNet(net);
             fullNameToNetMap.put(fullName.toString(), net);
             return this;

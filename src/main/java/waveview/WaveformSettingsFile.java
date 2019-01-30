@@ -147,6 +147,31 @@ public final class WaveformSettingsFile {
             Text nameText = document.createTextNode(netDataModel.getFullName());
             name.appendChild(nameText);
 
+            String decoderName = netDataModel.getDecoderName();
+            if (!decoderName.equals("")) {
+                Element decoderNameElem = document.createElement("decoder");
+                sigElement.appendChild(decoderNameElem);
+                Text classNameText = document.createTextNode(decoderName);
+                decoderNameElem.appendChild(classNameText);
+                Element inputs = document.createElement("inputs");
+                for (String net : netDataModel.getDecoderInputNets()) {
+                    Element input = document.createElement("input");
+                    input.setAttribute("name", net);
+                    inputs.appendChild(input);
+                }
+
+                sigElement.appendChild(inputs);
+
+                Element params = document.createElement("params");
+                for (String paramVal : netDataModel.getDecoderParams()) {
+                    Element netElement = document.createElement("param");
+                    netElement.setAttribute("value", paramVal);
+                    params.appendChild(netElement);
+                }
+
+                sigElement.appendChild(params);
+            }
+
             Element format = document.createElement("format");
             sigElement.appendChild(format);
 
@@ -181,7 +206,7 @@ public final class WaveformSettingsFile {
         for (int i = 0; i < netElements.getLength(); i++) {
             // Get the name
             Element netElem = (Element) netElements.item(i);
-            String name = getSubTag(netElem, "name");
+            String fullName = getSubTag(netElem, "name");
 
             ValueFormatter formatter = null;
             Element formatTag = (Element) netElem.getElementsByTagName("format").item(0);
@@ -195,11 +220,10 @@ public final class WaveformSettingsFile {
             try {
                 Class<?> c = Class.forName(formatStr);
                 if (formatStr.equals(EnumValueFormatter.class.getName())) {
-                    String pathStr =
-                        ((Text) formatTag.getElementsByTagName("path").item(0).getFirstChild())
-                            .getData();
+                    String pathStr =((Text) formatTag.getElementsByTagName("path")
+                        .item(0).getFirstChild()).getData();
                     formatter = (ValueFormatter) c.getConstructor(File.class)
-                                    .newInstance(new File(pathStr));
+                        .newInstance(new File(pathStr));
                 } else {
                     formatter = (ValueFormatter) c.getConstructor().newInstance();
                 }
@@ -209,9 +233,47 @@ public final class WaveformSettingsFile {
                 formatter = new BinaryValueFormatter();
             }
 
-            NetDataModel netDataModel = waveformDataModel.findNet(name);
+            NetDataModel netDataModel;
+            NodeList decoder = netElem.getElementsByTagName("decoder");
+            if (decoder.getLength() == 0) {
+                // Normal waveform
+                netDataModel = waveformDataModel.findNet(fullName);
+            } else {
+                // Decoded waveform.
+                String decoderName = ((Text) decoder.item(0).getFirstChild())
+                    .getData();
+                Element inputSignalTag = (Element) netElem
+                    .getElementsByTagName("inputs").item(0);
+                NodeList inputList = inputSignalTag.getElementsByTagName("input");
+                String[] inputs = new String[inputList.getLength()];
+                for (int j = 0; j < inputList.getLength(); j++) {
+                    inputs[j] = ((Element) inputList.item(j)).getAttribute("name");
+                }
+
+                Element paramsTag = (Element) netElem
+                    .getElementsByTagName("params").item(0);
+                NodeList paramList = paramsTag.getElementsByTagName("param");
+                String[] params = new String[paramList.getLength()];
+                for (int j = 0; j < paramList.getLength(); j++) {
+                    params[j] = ((Element) paramList.item(j)).getAttribute("value");
+                }
+
+                // Shorten name
+                int dot = fullName.lastIndexOf('.');
+                String shortName;
+                if (dot == -1) {
+                    shortName = fullName;
+                } else {
+                    shortName = fullName.substring(dot + 1);
+                }
+
+                netDataModel = new NetDataModel(shortName, fullName, decoderName, inputs,
+                    params, null);
+                waveformDataModel.addDecodedNet(netDataModel);
+            }
+
             if (netDataModel == null) {
-                System.out.println("unknown net " + name);
+                System.out.println("unknown net " + fullName);
             } else {
                 waveformPresentationModel.addNet(netDataModel);
                 waveformPresentationModel.setValueFormatter(

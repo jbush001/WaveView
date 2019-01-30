@@ -15,13 +15,18 @@
 // limitations under the License.
 //
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -203,6 +208,41 @@ public class WaveformSettingsFileTest {
         assertEquals(5678, destPresentationModel.getTimestampForMarker(1));
         assertEquals(1, destPresentationModel.getIdForMarker(0));
         assertEquals(2, destPresentationModel.getIdForMarker(1));
+    }
+
+    @Test
+    public void saveLoadDecodedNet() throws IOException {
+        System.out.println("saveLoadDecodedNet");
+        WaveformDataModel dataModel = new WaveformDataModel();
+        WaveformPresentationModel sourcePresentationModel = new WaveformPresentationModel();
+        dataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "net1", 1)
+            .newNet(1, "net2", 1)
+            .exitScope()
+            .loadFinished();
+
+        String[] sourceInputs = {"mod1.net1", "mod1.net2"};
+        String[] sourceParams = {"foo"};
+        NetDataModel decoded = new NetDataModel("short", "full.name", "SPI",
+            sourceInputs, sourceParams, null);
+        sourcePresentationModel.addNet(decoded);
+
+        WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
+        File file = fTempFolder.newFile("test1.settings");
+        new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
+        new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
+
+        // Check destPresentationModel
+        assertEquals(1, destPresentationModel.getVisibleNetCount());
+        NetDataModel newDecodedModel = destPresentationModel
+            .getVisibleNet(0);
+
+        assertEquals("name", newDecodedModel.getShortName());
+        assertEquals("full.name", newDecodedModel.getFullName());
+        assertArrayEquals(sourceInputs, newDecodedModel.getDecoderInputNets());
+        assertArrayEquals(sourceParams, newDecodedModel.getDecoderParams());
+        assertSame(newDecodedModel, dataModel.findNet("full.name"));
     }
 
     // When the data model changes on disk between the time the settings file

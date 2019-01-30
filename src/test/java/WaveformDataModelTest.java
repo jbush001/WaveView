@@ -20,14 +20,18 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import org.junit.Test;
 import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.NetTreeNode;
 import waveview.wavedata.Transition;
 import waveview.wavedata.WaveformDataModel;
+import waveview.wavedata.WaveformDataModel.AmbiguousNetException;
 
 public class WaveformDataModelTest {
     private final WaveformDataModel model = new WaveformDataModel();
@@ -187,5 +191,63 @@ public class WaveformDataModelTest {
         NetTreeNode kid1 = root.getChild(1);
         assertSame(model.getNetDataModel(0), kid0.getNetDataModel());
         assertSame(model.getNetDataModel(1), kid1.getNetDataModel());
+    }
+
+    @Test
+    public void fuzzyMatch() throws AmbiguousNetException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .enterScope("aaaa")
+            .enterScope("bbbbb")
+            .newNet(0, "cc", 1)
+            .newNet(1, "dd", 1)
+            .newNet(2, "ee", 1)
+            .exitScope()
+            .enterScope("ddddd")
+            .newNet(2, "ee", 1) // Alias of above net
+            .newNet(3, "cc", 1) // Different net with same name
+            .exitScope()
+            .exitScope()
+            .loadFinished();
+
+        NetDataModel aaaa_bbbbb_cc = waveformDataModel.getNetDataModel(0);
+        NetDataModel aaaa_bbbbb_dd = waveformDataModel.getNetDataModel(1);
+        NetDataModel aaaa_bbbbb_ee = waveformDataModel.getNetDataModel(2);
+        NetDataModel ddddd_cc = waveformDataModel.getNetDataModel(4);
+
+        try {
+            waveformDataModel.fuzzyFindNet("cc");
+            fail("Did not throw exception");
+        } catch (AmbiguousNetException exc) {
+            // Expected
+            assertEquals("Ambiguous net \"cc\"", exc.getMessage());
+        }
+
+        assertSame(aaaa_bbbbb_cc, waveformDataModel.fuzzyFindNet("bbbbb.cc"));
+        assertSame(aaaa_bbbbb_cc, waveformDataModel.fuzzyFindNet("aaaa.bbbbb.cc"));
+        assertSame(ddddd_cc, waveformDataModel.fuzzyFindNet("ddddd.cc"));
+        assertSame(aaaa_bbbbb_dd, waveformDataModel.fuzzyFindNet("dd"));
+
+        // Even though there are two matches for this, it isn't ambiguous, because
+        // they are aliases.
+        assertSame(aaaa_bbbbb_ee, waveformDataModel.fuzzyFindNet("ee"));
+
+        // Stem mismatch
+        try {
+            waveformDataModel.fuzzyFindNet("fffff.bbbbb.cc");
+            fail("Did not throw exception");
+        } catch (NoSuchElementException exc) {
+            // Expected
+            assertEquals("Unknown net \"fffff.bbbbb.cc\"", exc.getMessage());
+        }
+
+        // Should only match at dot boundary
+        try {
+            waveformDataModel.fuzzyFindNet("d");
+            fail("Did not throw exception");
+        } catch (NoSuchElementException exc) {
+            // Expected
+            assertEquals("Unknown net \"d\"", exc.getMessage());
+        }
     }
 }

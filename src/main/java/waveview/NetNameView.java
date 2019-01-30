@@ -35,6 +35,7 @@ import java.util.List;
 import javax.swing.DropMode;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -46,6 +47,9 @@ import javax.swing.ListModel;
 import javax.swing.TransferHandler;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
+import javax.swing.SwingUtilities;
+import waveview.plugins.SpiDecoder;
+import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.Transition;
 import waveview.wavedata.WaveformDataModel;
@@ -58,6 +62,7 @@ final class NetNameView
     private final WaveformPresentationModel waveformPresentationModel;
     private final WaveformDataModel waveformDataModel;
     private final JPopupMenu popupMenu;
+    private static final String DECODE_PREFIX = "decode.";
 
     private class NetNameRenderer extends JPanel implements ListCellRenderer<Integer> {
         private int currentNet;
@@ -279,6 +284,16 @@ final class NetNameView
             formatMenu.add(subItem);
             subItem.addActionListener(this);
         }
+
+        JMenuItem decodeMenu = new JMenu("Decode");
+        for (String decoderName : Decoder.getDecoderList()) {
+            JMenuItem subItem = new JMenuItem(decoderName);
+            decodeMenu.add(subItem);
+            subItem.addActionListener(this);
+            subItem.setActionCommand(DECODE_PREFIX + decoderName);
+        }
+
+        popupMenu.add(decodeMenu);
     }
 
     @Override
@@ -361,7 +376,16 @@ final class NetNameView
                 formatter = new AsciiValueFormatter();
                 break;
             default:
-                System.out.println("NetNameView: unknown action " + e.getActionCommand());
+                if (e.getActionCommand().startsWith(DECODE_PREFIX)) {
+                    String decoderName = e.getActionCommand().substring(
+                        DECODE_PREFIX.length());
+                    Decoder decoder = Decoder.createDecoder(decoderName);
+                    decoder = new SpiDecoder();
+                    showDecoderConfigDialog(decoder);
+                } else {
+                    System.out.println("NetNameView: unknown action " + e.getActionCommand());
+                }
+
                 break;
         }
 
@@ -370,6 +394,16 @@ final class NetNameView
                 waveformPresentationModel.setValueFormatter(index, formatter);
             }
         }
+    }
+
+    private void showDecoderConfigDialog(Decoder decoder) {
+        JFrame parentWindow = (JFrame) SwingUtilities.getWindowAncestor(this);
+        DecoderConfigWindow configWindow = new DecoderConfigWindow(
+            parentWindow, decoder, waveformPresentationModel, waveformDataModel,
+            getSelectedIndices());
+        configWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        configWindow.setLocationRelativeTo(parentWindow);
+        configWindow.setVisible(true);
     }
 
     private void removeNets(int[] indices) {

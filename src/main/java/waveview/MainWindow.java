@@ -40,6 +40,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ProgressMonitor;
 import waveview.search.Search;
 import waveview.search.SearchFormatException;
+import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.WaveformDataModel;
 
@@ -291,6 +292,25 @@ public final class MainWindow extends JPanel implements ActionListener {
                 settingsFile, waveformDataModel, waveformPresentationModel);
             if (settingsFile.exists()) {
                 waveformSettingsFile.read();
+            }
+
+            // Generate decoded net values
+            for (int i = 0; i < waveformPresentationModel.getVisibleNetCount(); i++) {
+                NetDataModel model = waveformPresentationModel.getVisibleNet(i);
+                if (!model.getDecoderName().equals("")) {
+                    Decoder decoder = Decoder.createDecoder(model.getDecoderName());
+                    int inputNum = 0;
+                    for (String inputNet : model.getDecoderInputNets()) {
+                        decoder.setInput(inputNum++, waveformDataModel.findNet(inputNet));
+                    }
+
+                    int paramNum = 0;
+                    for (String decoderParam : model.getDecoderParams()) {
+                        decoder.setParam(paramNum++, decoderParam);
+                    }
+
+                    model.setTransitionVector(decoder.decode());
+                }
             }
         } catch (IOException exc) {
             JOptionPane.showMessageDialog(null, exc.getMessage(),

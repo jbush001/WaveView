@@ -1138,7 +1138,7 @@ public class SearchTest {
     }
 
     @Test
-    public void partialNetNameMatch1() throws SearchFormatException {
+    public void fuzzyNetNameMatch() throws SearchFormatException {
         WaveformDataModel waveformDataModel = new WaveformDataModel();
         waveformDataModel.startBuilding()
             .setTimescale(-9)
@@ -1154,59 +1154,10 @@ public class SearchTest {
         // Unique leaf name
         Search search = new Search(waveformDataModel, "cc == 'b0101");
         assertEquals(17, search.getNextMatch(0));
-
-        // Should also work with parent module
-        search = new Search(waveformDataModel, "bbbbb.cc == 'b0101");
-        assertEquals(17, search.getNextMatch(0));
     }
 
     @Test
-    public void partialNetNameMatch2() throws SearchFormatException {
-        WaveformDataModel waveformDataModel = new WaveformDataModel();
-        waveformDataModel.startBuilding()
-            .setTimescale(-9)
-            .enterScope("aaaa")
-            .enterScope("bbbbb")
-            .newNet(0, "cc", 4)
-            .exitScope()
-            .enterScope("ddddd")
-            .newNet(1, "cc", 4)
-            .exitScope()
-            .exitScope()
-            .appendTransition(0, 13, new BitVector("1010", 2))
-            .appendTransition(0, 17, new BitVector("0101", 2))
-            .loadFinished();
-
-        // In this case, the parent module is necessary to disambiguate the signal.
-        Search search = new Search(waveformDataModel, "bbbbb.cc == 'b0101");
-        assertEquals(17, search.getNextMatch(0));
-    }
-
-    // Ensure if two signals end with the same name, but are the same signal,
-    // they will match. A good example of this is 'clk', which appears in almost
-    // every module, but is usually the same signal.
-    @Test
-    public void partialNetNameMatchWithAlias() throws SearchFormatException {
-        WaveformDataModel waveformDataModel = new WaveformDataModel();
-        waveformDataModel.startBuilding()
-            .setTimescale(-9)
-            .enterScope("mod1")
-            .enterScope("mod2")
-            .newNet(0, "a", 4)
-            .exitScope()
-            .enterScope("mod3")
-            .newNet(0, "a", 4)
-            .exitScope()
-            .appendTransition(0, 13, new BitVector("1010", 2))
-            .appendTransition(0, 17, new BitVector("0101", 2))
-            .loadFinished();
-
-        Search search = new Search(waveformDataModel, "a == 'b0101");
-        assertEquals(17, search.getNextMatch(0));
-    }
-
-    @Test
-    public void partialNetNameMatchAmbiguous() {
+    public void fuzzyNetNameMatchAmbiguous() {
         WaveformDataModel waveformDataModel = new WaveformDataModel();
         waveformDataModel.startBuilding()
             .setTimescale(-9)
@@ -1230,26 +1181,5 @@ public class SearchTest {
         }
     }
 
-    // The last two elements match, but the enclosing module specified
-    // in the search doesn't exist.
-    @Test
-    public void partialNetNameStemMismatch() {
-        WaveformDataModel waveformDataModel = new WaveformDataModel();
-        waveformDataModel.startBuilding()
-            .setTimescale(-9)
-            .enterScope("bar")
-            .newNet(0, "baz", 4)
-            .exitScope()
-            .loadFinished();
 
-        try {
-            new Search(waveformDataModel, "foo.bar.baz == 'b0101");
-            fail("Did not throw exception");
-        } catch (SearchFormatException exc) {
-            // Expected
-            assertEquals("Unknown net \"foo.bar.baz\"", exc.getMessage());
-            assertEquals(0, exc.getStartOffset());
-            assertEquals(10, exc.getEndOffset());
-        }
-    }
 }

@@ -24,12 +24,30 @@ import java.util.Iterator;
 public final class NetDataModel {
     private final String shortName;
     private final String fullName;
-    private final TransitionVector transitionVector;
+    private TransitionVector transitionVector;
+    private String decoderName;
+    private String[] decoderInputNets;
+    private String[] decoderParameters;
 
-    public NetDataModel(String shortName, String fullName, TransitionVector transitionVector) {
+    public NetDataModel(String shortName, String fullName,
+            TransitionVector transitionVector) {
         this.shortName = shortName;
         this.fullName = fullName;
         this.transitionVector = transitionVector;
+        decoderName = "";
+        decoderInputNets = new String[0];
+    }
+
+    public NetDataModel(String shortName, String fullName,
+            String decoderName, String[] decoderInputNets,
+            String[] decoderParameters,
+            TransitionVector transitionVector) {
+        this.shortName = shortName;
+        this.fullName = fullName;
+        this.transitionVector = transitionVector;
+        this.decoderName = decoderName;
+        this.decoderParameters = decoderParameters.clone();
+        this.decoderInputNets = decoderInputNets.clone();
     }
 
     public String getFullName() {
@@ -40,8 +58,24 @@ public final class NetDataModel {
         return shortName;
     }
 
+    public String getDecoderName() {
+        return decoderName;
+    }
+
+    public String[] getDecoderInputNets() {
+        return decoderInputNets.clone();
+    }
+
+    public String[] getDecoderParams() {
+        return decoderParameters.clone();
+    }
+
     public TransitionVector getTransitionVector() {
         return transitionVector;
+    }
+
+    public void setTransitionVector(TransitionVector transitionVector) {
+        this.transitionVector = transitionVector;
     }
 
     public Iterator<Transition> findTransition(long timestamp) {
