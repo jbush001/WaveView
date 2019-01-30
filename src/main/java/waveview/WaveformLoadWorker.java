@@ -21,7 +21,7 @@ import java.io.IOException;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
-import waveview.wavedata.VCDLoader;
+import waveview.wavedata.VcdLoader;
 import waveview.wavedata.WaveformDataModel;
 import waveview.wavedata.WaveformLoader;
 
@@ -67,7 +67,7 @@ public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
 
             Profiler profiler = new Profiler();
             profiler.start();
-            new VCDLoader().load(file, newModel.startBuilding(), progressListener);
+            new VcdLoader().load(file, newModel.startBuilding(), progressListener);
             profiler.finish();
             System.out.println("Loaded in " + profiler.getExecutionTime() + " ms");
             System.out.println("Allocated " + profiler.getMemoryAllocated() + " bytes of memory");

@@ -314,8 +314,8 @@ public class BitVector {
                 // This digit spans a word boundary (which only happens with
                 // octal values).
                 int lshift = bitsPerChar - spillover;
-                digitVal |= (values[wordIndex + 1] << lshift) & digitMask;
-                zxflag |= (zxflags[wordIndex + 1] << lshift) & digitMask;
+                digitVal |= (int)((values[wordIndex + 1] << lshift) & digitMask);
+                zxflag |= (int)((zxflags[wordIndex + 1] << lshift) & digitMask);
             }
 
             if (zxflag == digitMask && digitVal == 0) {

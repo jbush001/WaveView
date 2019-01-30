@@ -31,7 +31,7 @@ import java.util.Map;
 /// Parse a value change dump (VCD) formatted text file and push the contents
 /// into a provided waveform model All section references are to IEEE 1364-2001.
 ///
-public final class VCDLoader implements WaveformLoader {
+public final class VcdLoader implements WaveformLoader {
     private StreamTokenizer tokenizer;
     private WaveformBuilder waveformBuilder;
     private long currentTime;
