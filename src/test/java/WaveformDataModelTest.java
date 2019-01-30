@@ -202,10 +202,11 @@ public class WaveformDataModelTest {
             .newNet(0, "cc", 1)
             .newNet(1, "dd", 1)
             .newNet(2, "ee", 1)
+            .newNet(3, "ff", 1)
             .exitScope()
             .enterScope("ddddd")
             .newNet(2, "ee", 1) // Alias of above net
-            .newNet(3, "cc", 1) // Different net with same name
+            .newNet(4, "cc", 1) // Different net with same name
             .exitScope()
             .exitScope()
             .loadFinished();
@@ -213,7 +214,11 @@ public class WaveformDataModelTest {
         NetDataModel aaaa_bbbbb_cc = waveformDataModel.getNetDataModel(0);
         NetDataModel aaaa_bbbbb_dd = waveformDataModel.getNetDataModel(1);
         NetDataModel aaaa_bbbbb_ee = waveformDataModel.getNetDataModel(2);
-        NetDataModel ddddd_cc = waveformDataModel.getNetDataModel(4);
+        NetDataModel ddddd_cc = waveformDataModel.getNetDataModel(5);
+        NetDataModel eeeee_ff = new NetDataModel("ff", "eeeee.ff", null);
+        waveformDataModel.addDecodedNet(eeeee_ff);
+        NetDataModel eeeee_gg = new NetDataModel("gg", "eeeee.gg", null);
+        waveformDataModel.addDecodedNet(eeeee_gg);
 
         try {
             waveformDataModel.fuzzyFindNet("cc");
@@ -232,6 +237,18 @@ public class WaveformDataModelTest {
         // they are aliases.
         assertSame(aaaa_bbbbb_ee, waveformDataModel.fuzzyFindNet("ee"));
 
+        // Find decoded net
+        assertSame(eeeee_gg, waveformDataModel.fuzzyFindNet("gg"));
+
+        // Ambiguous name in decoded nets collides with trace nets
+        try {
+            waveformDataModel.fuzzyFindNet("ff");
+            fail("Did not throw exception");
+        } catch (AmbiguousNetException exc) {
+            // Expected
+            assertEquals("Ambiguous net \"ff\"", exc.getMessage());
+        }
+
         // Stem mismatch
         try {
             waveformDataModel.fuzzyFindNet("fffff.bbbbb.cc");
@@ -249,5 +266,31 @@ public class WaveformDataModelTest {
             // Expected
             assertEquals("Unknown net \"d\"", exc.getMessage());
         }
+    }
+
+    @Test
+    public void findNet() {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "foo", 1)
+            .newNet(1, "bar", 1)
+            .exitScope()
+            .loadFinished();
+
+        waveformDataModel.addDecodedNet(new NetDataModel("baz", "decoded.baz", null));
+        waveformDataModel.addDecodedNet(new NetDataModel("floo", "decoded.floo", null));
+
+        assertEquals("mod1.foo", waveformDataModel.findNet("mod1.foo").getFullName());
+        assertEquals("decoded.baz", waveformDataModel.findNet("decoded.baz").getFullName());
+        assertEquals("decoded.floo", waveformDataModel.findNet("decoded.floo").getFullName());
+        assertSame(null, waveformDataModel.findNet("blargh"));
+    }
+
+    @Test
+    public void generateDecodedName() {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        assertEquals("SPI_0", waveformDataModel.generateDecodedName("SPI"));
+        assertEquals("UART_1", waveformDataModel.generateDecodedName("UART"));
     }
 }

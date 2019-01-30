@@ -42,7 +42,7 @@ import waveview.wavedata.NetDataModel;
 import waveview.wavedata.WaveformDataModel;
 
 public class WaveformSettingsFileTest {
-    @Rule public final TemporaryFolder fTempFolder = new TemporaryFolder();
+    @Rule public final TemporaryFolder tempFolder = new TemporaryFolder();
 
     @Test
     public void saveLoadScale() throws IOException, WaveformSettingsFile.SettingsFileException {
@@ -52,7 +52,7 @@ public class WaveformSettingsFileTest {
 
         // Save and reload contents
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
-        File file = fTempFolder.newFile("test1.settings");
+        File file = tempFolder.newFile("test1.settings");
         new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
@@ -98,7 +98,7 @@ public class WaveformSettingsFileTest {
 
         // Save and reload contents
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
-        File file = fTempFolder.newFile("test1.settings");
+        File file = tempFolder.newFile("test1.settings");
         new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
@@ -157,7 +157,7 @@ public class WaveformSettingsFileTest {
 
         // Save and reload contents
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
-        File file = fTempFolder.newFile("test1.settings");
+        File file = tempFolder.newFile("test1.settings");
         new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
@@ -196,7 +196,7 @@ public class WaveformSettingsFileTest {
 
         // Save and reload contents
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
-        File file = fTempFolder.newFile("test1.settings");
+        File file = tempFolder.newFile("test1.settings");
         new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
@@ -229,7 +229,7 @@ public class WaveformSettingsFileTest {
         sourcePresentationModel.addNet(decoded);
 
         WaveformPresentationModel destPresentationModel = new WaveformPresentationModel();
-        File file = fTempFolder.newFile("test1.settings");
+        File file = tempFolder.newFile("test1.settings");
         new WaveformSettingsFile(file, dataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, dataModel, destPresentationModel).read();
 
@@ -278,7 +278,7 @@ public class WaveformSettingsFileTest {
             .exitScope()
             .loadFinished();
 
-        File file = fTempFolder.newFile("test2.settings");
+        File file = tempFolder.newFile("test2.settings");
         new WaveformSettingsFile(file, sourceDataModel, sourcePresentationModel).write();
         new WaveformSettingsFile(file, destDataModel, destPresentationModel).read();
 

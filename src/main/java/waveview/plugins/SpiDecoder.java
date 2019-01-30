@@ -94,7 +94,7 @@ public class SpiDecoder extends Decoder {
     @Override
     public void setInput(int index, NetDataModel data) {
         if (data.getWidth() != 1) {
-            throw new IllegalArgumentException("Invalid signal " + data.getFullName()
+            throw new IllegalArgumentException("Invalid net " + data.getFullName()
                 + ": must be 1 bit wide");
         }
 
@@ -109,7 +109,7 @@ public class SpiDecoder extends Decoder {
                 this.data = data;
                 break;
             default:
-                throw new IllegalArgumentException("invalid signal index");
+                throw new IllegalArgumentException("invalid input index");
         }
     }
 
