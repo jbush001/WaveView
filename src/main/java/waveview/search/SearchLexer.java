@@ -195,22 +195,19 @@ final class SearchLexer {
 
                 case SCAN_LITERAL_TYPE:
                     if (c == 'b' || c == 'B') {
-                        state = State.SCAN_LITERAL_VALUE;
                         literalRadix = 2;
                     } else if (c == 'o' || c == 'O') {
-                        state = State.SCAN_LITERAL_VALUE;
                         literalRadix = 8;
                     } else if (c == 'd' || c == 'D') {
-                        state = State.SCAN_LITERAL_VALUE;
                         literalRadix = 10;
                     } else if (c == 'h' || c == 'H') {
-                        state = State.SCAN_LITERAL_VALUE;
                         literalRadix = 16;
                     } else {
                         throw new SearchFormatException(
                             "Unknown type " + (char) c, tokenStart, lexerOffset - 1);
                     }
 
+                    state = State.SCAN_LITERAL_VALUE;
                     break;
 
                 case SCAN_LITERAL_VALUE:

@@ -23,12 +23,12 @@ import waveview.wavedata.NetDataModel;
 import waveview.wavedata.WaveformDataModel;
 import waveview.wavedata.WaveformDataModel.AmbiguousNetException;
 
-public final class SearchParser {
+final class SearchParser {
     private final SearchLexer lexer;
     private final WaveformDataModel waveformDataModel;
     private final BooleanExpressionNode searchExpression;
 
-    public SearchParser(WaveformDataModel waveformDataModel, String searchString)
+    SearchParser(WaveformDataModel waveformDataModel, String searchString)
         throws SearchFormatException {
         this.waveformDataModel = waveformDataModel;
         lexer = new SearchLexer(searchString);

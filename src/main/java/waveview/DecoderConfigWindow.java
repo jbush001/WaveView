@@ -18,7 +18,6 @@ package waveview;
 
 import java.awt.Container;
 import java.awt.FlowLayout;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -109,7 +108,7 @@ final class DecoderConfigWindow extends JDialog {
         pack();
     }
 
-    void ok() {
+    private void ok() {
         try {
             String[] inputNames = new String[comboBoxes.length];
             for (int i = 0; i < comboBoxes.length; i++) {
@@ -136,7 +135,7 @@ final class DecoderConfigWindow extends JDialog {
         }
     }
 
-    void cancel() {
+    private void cancel() {
         dispose();
     }
 }

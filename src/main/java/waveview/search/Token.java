@@ -37,7 +37,6 @@ final class Token {
         DOUBLE_AMPERSAND,
         DOUBLE_PIPE
     }
-    ;
 
     private final Type type;
     private final int start;
