@@ -379,9 +379,7 @@ final class NetNameView
                 if (e.getActionCommand().startsWith(DECODE_PREFIX)) {
                     String decoderName = e.getActionCommand().substring(
                         DECODE_PREFIX.length());
-                    Decoder decoder = Decoder.createDecoder(decoderName);
-                    decoder = new SpiDecoder();
-                    showDecoderConfigDialog(decoder);
+                    showDecoderConfigDialog(decoderName);
                 } else {
                     System.out.println("NetNameView: unknown action " + e.getActionCommand());
                 }
@@ -396,11 +394,12 @@ final class NetNameView
         }
     }
 
-    private void showDecoderConfigDialog(Decoder decoder) {
+    private void showDecoderConfigDialog(String decoderName) {
+        Decoder decoder = Decoder.createDecoder(decoderName);
         JFrame parentWindow = (JFrame) SwingUtilities.getWindowAncestor(this);
         DecoderConfigWindow configWindow = new DecoderConfigWindow(
-            parentWindow, decoder, waveformPresentationModel, waveformDataModel,
-            getSelectedIndices());
+            parentWindow, decoderName, decoder, waveformPresentationModel,
+            waveformDataModel, getSelectedIndices());
         configWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         configWindow.setLocationRelativeTo(parentWindow);
         configWindow.setVisible(true);

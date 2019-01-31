@@ -35,15 +35,15 @@ final class DecoderConfigWindow extends JDialog {
     private final NetDataModel[] inputModels;
     private JTextField[] textFields;
     private JComboBox<String>[] comboBoxes;
+    private String decoderName;
     private Decoder decoder;
     private WaveformPresentationModel presentationModel;
     private WaveformDataModel dataModel;
     private int insertionIndex;
 
-    DecoderConfigWindow(JFrame parent, Decoder decoder,
-            WaveformPresentationModel presentationModel,
-            WaveformDataModel dataModel,
-            int[] selectedIndices) {
+    DecoderConfigWindow(JFrame parent, String decoderName,
+            Decoder decoder, WaveformPresentationModel presentationModel,
+            WaveformDataModel dataModel, int[] selectedIndices) {
         super(parent, "Decoder Config", true);
 
         NetDataModel[] inputModels = new NetDataModel[selectedIndices.length];
@@ -59,6 +59,7 @@ final class DecoderConfigWindow extends JDialog {
         Container contentPane = new Container();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 
+        this.decoderName = decoderName;
         this.decoder = decoder;
         this.inputModels = inputModels;
         this.presentationModel = presentationModel;
@@ -123,10 +124,10 @@ final class DecoderConfigWindow extends JDialog {
             }
 
             TransitionVector transitionVector = decoder.decode();
-            String shortName = dataModel.generateDecodedName(decoder.getName());
+            String shortName = dataModel.generateDecodedName(decoderName);
             String fullName = "decoded." + shortName;
             NetDataModel model = new NetDataModel(shortName, fullName,
-                decoder.getName(), inputNames, paramVals, transitionVector);
+                decoderName, inputNames, paramVals, transitionVector);
             dataModel.addDecodedNet(model);
             presentationModel.addNet(insertionIndex, model);
             dispose();

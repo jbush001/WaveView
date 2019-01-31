@@ -22,8 +22,6 @@ import waveview.plugins.SpiDecoder;
 import waveview.wavedata.TransitionVector;
 
 public abstract class Decoder {
-    private String name;
-
     public static Decoder createDecoder(String name) {
         if (name.equals("SPI")) {
             return new SpiDecoder();
@@ -34,14 +32,6 @@ public abstract class Decoder {
 
     public static String[] getDecoderList() {
         return new String[] {"SPI"};
-    }
-
-    public Decoder(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public abstract String[] getInputNames();

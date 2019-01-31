@@ -34,10 +34,6 @@ public class SpiDecoder extends Decoder {
     private ValueBuilder valueBuilder = new ValueBuilder();
     private boolean samplePolarity;
 
-    public SpiDecoder() {
-        super("SPI");
-    }
-
     static class ValueBuilder {
         private int bitCount;
         private BitVector currentByte = new BitVector(BITS_PER_BYTE);
