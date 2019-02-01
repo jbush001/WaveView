@@ -18,13 +18,15 @@
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import waveview.plugins.SpiDecoder;
 import waveview.wavedata.BitVector;
+import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.Transition;
 import waveview.wavedata.TransitionVector;
+
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.junit.Before;
@@ -70,6 +72,11 @@ public class SpiDecoderTest {
         sclk = sclkBuilder.getTransitionVector();
     }
 
+    @Test
+    public void getDecoderList() {
+        assertTrue(Arrays.binarySearch(Decoder.getDecoderList(), "SPI") >= 0);
+    }
+
     // Ensure this properly ignores clocks when slave select is deasserted.
     @Test
     public void selectDeassert() {
@@ -79,7 +86,7 @@ public class SpiDecoderTest {
             .appendTransition(100, new BitVector("1", 2))
             .getTransitionVector();
 
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
         decoder.setParam(0, "0");
         decoder.setInput(0, new NetDataModel("ss", "ss", ss));
         decoder.setInput(1, new NetDataModel("sclk", "sclk", sclk));
@@ -110,7 +117,7 @@ public class SpiDecoderTest {
             .appendTransition(15, new BitVector("0", 2))
             .getTransitionVector();
 
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
         decoder.setParam(0, "0");
         decoder.setInput(0, new NetDataModel("ss", "ss", ss));
         decoder.setInput(1, new NetDataModel("sclk", "sclk", sclk));
@@ -144,7 +151,7 @@ public class SpiDecoderTest {
     // Pass an invalid mode parameter, ensure it throws an exception.
     @Test
     public void invalidMode() {
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
         try {
             decoder.setParam(0, "4");
             fail("didn't throw exception");
@@ -157,7 +164,7 @@ public class SpiDecoderTest {
     // Pass nets that are the wrong width as inputs.
     @Test
     public void invalidNet() {
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
         TransitionVector ss = TransitionVector.Builder.createBuilder(2)
             .getTransitionVector();
         NetDataModel dataModel = new NetDataModel("foo", "foo", ss);
@@ -197,14 +204,14 @@ public class SpiDecoderTest {
 
     @Test
     public void getInputNames() {
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
         String[] expect = {"ss", "sclk", "data"};
         assertArrayEquals(expect, decoder.getInputNames());
     }
 
     @Test
     public void getParamNames() {
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
         String[] expect = {"SPI mode (0-3)"};
         assertArrayEquals(expect, decoder.getParamNames());
     }
@@ -239,7 +246,7 @@ public class SpiDecoderTest {
             .appendTransition(0, new BitVector("0", 2))
             .getTransitionVector();
 
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
         decoder.setParam(0, "0");
         decoder.setInput(0, new NetDataModel("ss", "ss", ss));
         decoder.setInput(1, new NetDataModel("sclk", "sclk", badclk));
@@ -262,7 +269,7 @@ public class SpiDecoderTest {
         }
 
         TransitionVector sclkn = sclknBuilder.getTransitionVector();
-        SpiDecoder decoder = new SpiDecoder();
+        Decoder decoder = Decoder.createDecoder("SPI");
 
         TransitionVector ss = TransitionVector.Builder.createBuilder(1)
             .appendTransition(0, new BitVector("1", 2))

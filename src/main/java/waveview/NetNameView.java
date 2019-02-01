@@ -48,7 +48,6 @@ import javax.swing.TransferHandler;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.SwingUtilities;
-import waveview.plugins.SpiDecoder;
 import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.Transition;
@@ -396,6 +395,7 @@ final class NetNameView
 
     private void showDecoderConfigDialog(String decoderName) {
         Decoder decoder = Decoder.createDecoder(decoderName);
+        decoder.setTimescale(waveformDataModel.getTimescale());
         JFrame parentWindow = (JFrame) SwingUtilities.getWindowAncestor(this);
         DecoderConfigWindow configWindow = new DecoderConfigWindow(
             parentWindow, decoderName, decoder, waveformPresentationModel,

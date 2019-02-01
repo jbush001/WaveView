@@ -76,6 +76,8 @@ public final class WaveformDataModel implements Iterable<NetDataModel> {
         return maxTimestamp;
     }
 
+    /// @returns 10^timescale = seconds per sample.
+    /// For example, if this is -3, each sample is 1 millisecond.
     public int getTimescale() {
         return timescale;
     }

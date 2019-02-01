@@ -299,6 +299,7 @@ public final class MainWindow extends JPanel implements ActionListener {
                 NetDataModel model = waveformPresentationModel.getVisibleNet(i);
                 if (!model.getDecoderName().equals("")) {
                     Decoder decoder = Decoder.createDecoder(model.getDecoderName());
+                    decoder.setTimescale(waveformDataModel.getTimescale());
                     int inputNum = 0;
                     for (String inputNet : model.getDecoderInputNets()) {
                         decoder.setInput(inputNum++, waveformDataModel.findNet(inputNet));

@@ -19,19 +19,25 @@ package waveview.wavedata;
 import java.security.InvalidParameterException;
 
 import waveview.plugins.SpiDecoder;
+import waveview.plugins.UartDecoder;
 import waveview.wavedata.TransitionVector;
 
 public abstract class Decoder {
+    private int timescale;
+
     public static Decoder createDecoder(String name) {
-        if (name.equals("SPI")) {
-            return new SpiDecoder();
-        } else {
-            throw new InvalidParameterException("unknown decoder name");
+        switch (name) {
+            case "SPI":
+                return new SpiDecoder();
+            case "UART":
+                return new UartDecoder();
+            default:
+                throw new InvalidParameterException("unknown decoder name");
         }
     }
 
     public static String[] getDecoderList() {
-        return new String[] {"SPI"};
+        return new String[] {"SPI", "UART"};
     }
 
     public abstract String[] getInputNames();
@@ -39,4 +45,11 @@ public abstract class Decoder {
     public abstract TransitionVector decode();
     public abstract String[] getParamNames();
     public abstract void setParam(int param, String value);
+    public void setTimescale(int timescale) {
+        this.timescale = timescale;
+    }
+
+    protected int getTimescale() {
+        return timescale;
+    }
 }
