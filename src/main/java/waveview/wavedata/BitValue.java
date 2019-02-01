@@ -72,6 +72,21 @@ public enum BitValue {
         return ORDINAL_TABLE[ord];
     }
 
+    public BitValue invert() {
+        switch (this) {
+            case ZERO:
+                return ONE;
+            case ONE:
+                return ZERO;
+            case X:
+                return X;
+            case Z:
+                return X;
+            default:
+                return X;   // Shouldn't happen
+        }
+    }
+
     public int compare(BitValue other) {
         if (this == ONE && other == ZERO) {
             return 1;

@@ -68,7 +68,7 @@ public class UartDecoderTest {
         assertEquals("B1", t.toString(16));
 
         t = dataIterator.next();
-        assertEquals(122, t.getTimestamp());
+        assertEquals(126, t.getTimestamp());
         assertEquals("ZZ", t.toString(16));
 
         t = dataIterator.next();
@@ -76,7 +76,7 @@ public class UartDecoderTest {
         assertEquals("6A", t.toString(16));
 
         t = dataIterator.next();
-        assertEquals(282, t.getTimestamp());
+        assertEquals(286, t.getTimestamp());
         assertEquals("ZZ", t.toString(16));
     }
 

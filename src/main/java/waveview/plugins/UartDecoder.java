@@ -16,20 +16,19 @@
 
 package waveview.plugins;
 
-import java.util.Iterator;
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
 import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
-import waveview.wavedata.Transition;
+import waveview.wavedata.SignalCursor;
 import waveview.wavedata.TransitionVector;
 
 // XXX This doesn't have a way of signaling an error, so it makes a best
 // effort to decode the value.
 public class UartDecoder extends Decoder {
-    private NetDataModel data;
     private static final BitVector Z = new BitVector("zzzzzzzz", 2);
     private static final int BITS_PER_BYTE = 8;
+    private NetDataModel data;
     private int baudRate;
 
     @Override
@@ -52,80 +51,25 @@ public class UartDecoder extends Decoder {
         this.data = data;
     }
 
-    class DataCursor {
-        final Iterator<Transition> dataIterator;
-        long segmentEnd;
-        BitValue currentValue;
-        BitValue nextValue;
-
-        DataCursor(TransitionVector vec) {
-            dataIterator = data.findTransition(0);
-            Transition t = dataIterator.next();
-            nextValue = t.getBit(0);
-            nextSegment();
-        }
-
-        long nextFallingEdge(long timestamp) {
-            while (timestamp > segmentEnd || currentValue != BitValue.ONE) {
-                if (!dataIterator.hasNext()) {
-                    return -1;
-                }
-
-                nextSegment();
-            }
-
-            long segmentBegin = segmentEnd;
-            while (currentValue != BitValue.ZERO) {
-                if (!dataIterator.hasNext()) {
-                    return -1;
-                }
-
-                segmentBegin = segmentEnd;
-                nextSegment();
-            }
-
-            return segmentBegin;
-        }
-
-        // Timestamp must always be >= the last timestamp that was
-        // return from nextFallingEdge and the last one that was passed
-        // to this function.
-        BitValue getValueAt(long timestamp) {
-            while (timestamp > segmentEnd && dataIterator.hasNext()) {
-                nextSegment();
-            }
-
-            return currentValue;
-        }
-
-        private void nextSegment() {
-            // The iterator is always at the end of the current segment
-            currentValue = nextValue;
-            Transition t = dataIterator.next();
-            nextValue = t.getBit(0);
-            segmentEnd = t.getTimestamp();
-        }
-    }
-
     @Override
     public TransitionVector decode() {
         int timescale = getTimescale();
         double timeUnitsPerSecond = Math.pow(10, -timescale);
         double timeUnitsPerBit = timeUnitsPerSecond / baudRate;
-
         TransitionVector.Builder outputBuilder =
             TransitionVector.Builder.createBuilder(BITS_PER_BYTE)
             .appendTransition(0, Z);
         BitVector value = new BitVector(8);
-        DataCursor cursor = new DataCursor(data.getTransitionVector());
+        SignalCursor cursor = new SignalCursor(data.getTransitionVector());
         long currentTime = 0;
+        int loopDetect = 0;
         while (true) {
-            long byteStart = cursor.nextFallingEdge(currentTime);
+            long byteStart = cursor.nextEdge(currentTime, BitValue.ZERO);
             if (byteStart < 0) {
                 break;
             }
 
-            // Sample in middle of bit
+            // Sample in middle of each bit
             for (int i = 0; i < 8; i++) {
                 long sampleTime = byteStart + (long) (((double) i + 1.5)
                     * timeUnitsPerBit);
@@ -133,8 +77,8 @@ public class UartDecoder extends Decoder {
             }
 
             outputBuilder.appendTransition(byteStart, value);
+            outputBuilder.appendTransition(byteStart + (long)(timeUnitsPerBit * 10), Z);
             currentTime = byteStart + (long)(timeUnitsPerBit * 9.5);
-            outputBuilder.appendTransition(currentTime, Z);
         }
 
         return outputBuilder.getTransitionVector();
