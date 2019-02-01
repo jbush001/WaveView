@@ -20,15 +20,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
 import waveview.wavedata.BitVector;
 import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.Transition;
 import waveview.wavedata.TransitionVector;
-
 import java.util.Arrays;
 import java.util.Iterator;
-
 import org.junit.Before;
 import org.junit.Test;
 

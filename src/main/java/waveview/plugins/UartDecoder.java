@@ -17,7 +17,6 @@
 package waveview.plugins;
 
 import java.util.Iterator;
-
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
 import waveview.wavedata.Decoder;

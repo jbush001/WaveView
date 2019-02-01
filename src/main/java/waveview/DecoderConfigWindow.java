@@ -92,6 +92,7 @@ final class DecoderConfigWindow extends JDialog {
             comboBoxes[i] = new JComboBox<>(netNames);
             container.add(comboBoxes[i]);
             contentPane.add(container);
+            comboBoxes[i].setSelectedIndex(i);
         }
 
         Container okCancelContainer = new Container();
