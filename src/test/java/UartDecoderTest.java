@@ -36,23 +36,18 @@ public class UartDecoderTest {
             .appendTransition(40, new BitVector("0", 2)) // start bit
             .appendTransition(49, new BitVector("1", 2)) // lsb
             .appendTransition(57, new BitVector("0", 2))
-            .appendTransition(66, new BitVector("0", 2))
-            .appendTransition(75, new BitVector("0", 2))
             .appendTransition(83, new BitVector("1", 2))
             .appendTransition(92, new BitVector("1", 2))
             .appendTransition(101, new BitVector("0", 2))
-            .appendTransition(109, new BitVector("1", 2)) // msb
-            .appendTransition(118, new BitVector("1", 2)) // stop bit
+            .appendTransition(109, new BitVector("1", 2)) // msb & stop bit
 
             // Second byte (0x6a)
-            .appendTransition(200, new BitVector("0", 2)) // start bit
-            .appendTransition(209, new BitVector("0", 2)) // lsb
+            .appendTransition(200, new BitVector("0", 2)) // start bit & lsb
             .appendTransition(217, new BitVector("1", 2))
             .appendTransition(226, new BitVector("0", 2))
             .appendTransition(235, new BitVector("1", 2))
             .appendTransition(243, new BitVector("0", 2))
             .appendTransition(252, new BitVector("1", 2))
-            .appendTransition(261, new BitVector("1", 2))
             .appendTransition(269, new BitVector("0", 2)) // msb
             .appendTransition(278, new BitVector("1", 2)) // stop bit
             .getTransitionVector();

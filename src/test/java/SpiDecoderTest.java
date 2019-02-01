@@ -39,10 +39,8 @@ public class SpiDecoderTest {
     final TransitionVector data = TransitionVector.Builder.createBuilder(1)
         // 0xda
         .appendTransition(20, new BitVector("1", 2))
-        .appendTransition(30, new BitVector("1", 2))
         .appendTransition(40, new BitVector("0", 2))
         .appendTransition(50, new BitVector("1", 2))
-        .appendTransition(60, new BitVector("1", 2))
         .appendTransition(70, new BitVector("0", 2))
         .appendTransition(80, new BitVector("1", 2))
         .appendTransition(90, new BitVector("0", 2))
@@ -52,10 +50,7 @@ public class SpiDecoderTest {
         .appendTransition(110, new BitVector("0", 2))
         .appendTransition(120, new BitVector("1", 2))
         .appendTransition(130, new BitVector("0", 2))
-        .appendTransition(140, new BitVector("0", 2))
-        .appendTransition(150, new BitVector("0", 2))
         .appendTransition(160, new BitVector("1", 2))
-        .appendTransition(170, new BitVector("1", 2))
         .getTransitionVector();
 
     TransitionVector sclk;
