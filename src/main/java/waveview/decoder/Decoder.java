@@ -16,7 +16,6 @@
 
 package waveview.decoder;
 
-import java.security.InvalidParameterException;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 
@@ -30,7 +29,7 @@ public abstract class Decoder {
             case "UART":
                 return new UartDecoder();
             default:
-                throw new InvalidParameterException("unknown decoder name");
+                throw new IllegalArgumentException("unknown decoder name");
         }
     }
 
