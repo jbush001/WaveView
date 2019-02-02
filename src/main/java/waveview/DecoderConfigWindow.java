@@ -39,7 +39,7 @@ final class DecoderConfigWindow extends JDialog {
     private final Decoder decoder;
     private final WaveformPresentationModel presentationModel;
     private final WaveformDataModel dataModel;
-    private int insertionIndex;
+    private final int insertionIndex;
 
     DecoderConfigWindow(JFrame parent, String decoderName,
             Decoder decoder, WaveformPresentationModel presentationModel,
