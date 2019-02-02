@@ -16,7 +16,6 @@
 
 package waveview.plugins;
 
-import java.lang.IllegalArgumentException;
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
@@ -33,7 +32,7 @@ public class SpiDecoder extends Decoder {
     private NetDataModel data;
     private BitValue clockPolarity;
     private int bitCount;
-    private BitVector currentByte = new BitVector(BITS_PER_BYTE);
+    private final BitVector currentByte = new BitVector(BITS_PER_BYTE);
     private long byteStartTime;
 
     @Override

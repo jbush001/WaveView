@@ -29,7 +29,6 @@ import waveview.wavedata.TransitionVector;
 import java.util.Arrays;
 import java.util.Iterator;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class SpiDecoderTest {

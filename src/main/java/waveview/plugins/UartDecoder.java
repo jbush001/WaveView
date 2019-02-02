@@ -62,7 +62,6 @@ public class UartDecoder extends Decoder {
         BitVector value = new BitVector(8);
         SignalCursor cursor = new SignalCursor(data.getTransitionVector());
         long currentTime = 0;
-        int loopDetect = 0;
         while (true) {
             long byteStart = cursor.nextEdge(currentTime, BitValue.ZERO);
             if (byteStart < 0) {

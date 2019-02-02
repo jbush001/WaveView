@@ -17,9 +17,6 @@
 package waveview.wavedata;
 
 import java.util.Iterator;
-import waveview.wavedata.BitValue;
-import waveview.wavedata.Transition;
-import waveview.wavedata.TransitionVector;
 
 /// Convenience class for decoding waveforms
 public class SignalCursor {

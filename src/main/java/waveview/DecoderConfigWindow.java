@@ -33,12 +33,12 @@ import waveview.wavedata.WaveformDataModel;
 
 final class DecoderConfigWindow extends JDialog {
     private final NetDataModel[] inputModels;
-    private JTextField[] textFields;
-    private JComboBox<String>[] comboBoxes;
-    private String decoderName;
-    private Decoder decoder;
-    private WaveformPresentationModel presentationModel;
-    private WaveformDataModel dataModel;
+    private final JTextField[] textFields;
+    private final JComboBox<String>[] comboBoxes;
+    private final String decoderName;
+    private final Decoder decoder;
+    private final WaveformPresentationModel presentationModel;
+    private final WaveformDataModel dataModel;
     private int insertionIndex;
 
     DecoderConfigWindow(JFrame parent, String decoderName,
