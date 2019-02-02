@@ -1,3 +1,4 @@
+
 //
 // Copyright 2019 Jeff Bush
 //
@@ -14,6 +15,7 @@
 // limitations under the License.
 //
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -83,5 +85,19 @@ public class UartDecoderTest {
     @Test
     public void getDecoderList() {
         assertTrue(Arrays.binarySearch(Decoder.getDecoderList(), "UART") >= 0);
+    }
+
+    @Test
+    public void getInputNames() {
+        Decoder decoder = Decoder.createDecoder("UART");
+        String[] expect = {"data"};
+        assertArrayEquals(expect, decoder.getInputNames());
+    }
+
+    @Test
+    public void getParamNames() {
+        Decoder decoder = Decoder.createDecoder("UART");
+        String[] expect = {"Baud rate"};
+        assertArrayEquals(expect, decoder.getParamNames());
     }
 }

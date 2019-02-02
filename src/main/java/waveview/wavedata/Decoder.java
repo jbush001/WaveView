@@ -20,7 +20,6 @@ import java.security.InvalidParameterException;
 
 import waveview.plugins.SpiDecoder;
 import waveview.plugins.UartDecoder;
-import waveview.wavedata.TransitionVector;
 
 public abstract class Decoder {
     private int timescale;

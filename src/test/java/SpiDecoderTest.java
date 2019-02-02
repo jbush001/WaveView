@@ -104,6 +104,38 @@ public class SpiDecoderTest {
         assertFalse(dataIterator.hasNext());
     }
 
+    // Ensure this skips to next SS active region
+    @Test
+    public void selectReassert() {
+        TransitionVector ss = TransitionVector.Builder.createBuilder(1)
+            .appendTransition(0, new BitVector("0", 2))
+            .appendTransition(10, new BitVector("1", 2))    // Deassert
+            .appendTransition(95, new BitVector("0", 2))    // Reassert
+            .getTransitionVector();
+
+        Decoder decoder = Decoder.createDecoder("SPI");
+        decoder.setParam(0, "0");
+        decoder.setInput(0, new NetDataModel("ss", "ss", ss));
+        decoder.setInput(1, new NetDataModel("sclk", "sclk", sclk));
+        decoder.setInput(2, new NetDataModel("data", "data", data));
+        TransitionVector results = decoder.decode();
+
+        Iterator<Transition> dataIterator = results.findTransition(0);
+        Transition t = dataIterator.next();
+        assertEquals(0, t.getTimestamp());
+        assertEquals("ZZ", t.toString(16));
+
+        t = dataIterator.next();
+        assertEquals(100, t.getTimestamp());
+        assertEquals("A3", t.toString(16));
+
+        t = dataIterator.next();
+        assertEquals(170, t.getTimestamp());
+        assertEquals("ZZ", t.toString(16));
+
+        assertFalse(dataIterator.hasNext());
+    }
+
     // Test decoding multiple bytes in a row
     @Test
     public void decodeMultiple() {

@@ -25,8 +25,8 @@ public final class NetDataModel {
     private final String shortName;
     private final String fullName;
     private TransitionVector transitionVector;
-    private String decoderName;
-    private String[] decoderInputNets;
+    private final String decoderName;
+    private final String[] decoderInputNets;
     private String[] decoderParameters;
 
     public NetDataModel(String shortName, String fullName,

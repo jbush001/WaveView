@@ -83,4 +83,12 @@ public class BitValueTest {
         assertEquals(0, BitValue.X.compare(BitValue.Z));
         assertEquals(0, BitValue.Z.compare(BitValue.Z));
     }
+
+    @Test
+    public void invert() {
+        assertEquals(BitValue.X, BitValue.Z.invert());
+        assertEquals(BitValue.X, BitValue.X.invert());
+        assertEquals(BitValue.ZERO, BitValue.ONE.invert());
+        assertEquals(BitValue.ONE, BitValue.ZERO.invert());
+    }
 }

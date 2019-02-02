@@ -211,14 +211,14 @@ public class WaveformDataModelTest {
             .exitScope()
             .loadFinished();
 
-        NetDataModel aaaa_bbbbb_cc = waveformDataModel.getNetDataModel(0);
-        NetDataModel aaaa_bbbbb_dd = waveformDataModel.getNetDataModel(1);
-        NetDataModel aaaa_bbbbb_ee = waveformDataModel.getNetDataModel(2);
-        NetDataModel ddddd_cc = waveformDataModel.getNetDataModel(5);
-        NetDataModel eeeee_ff = new NetDataModel("ff", "eeeee.ff", null);
-        waveformDataModel.addDecodedNet(eeeee_ff);
-        NetDataModel eeeee_gg = new NetDataModel("gg", "eeeee.gg", null);
-        waveformDataModel.addDecodedNet(eeeee_gg);
+        NetDataModel aaaaBbbbbCc = waveformDataModel.getNetDataModel(0);
+        NetDataModel aaaaBbbbbDd = waveformDataModel.getNetDataModel(1);
+        NetDataModel aaaaBbbbbEe = waveformDataModel.getNetDataModel(2);
+        NetDataModel dddddCc = waveformDataModel.getNetDataModel(5);
+        NetDataModel eeeeeFf = new NetDataModel("ff", "eeeee.ff", null);
+        waveformDataModel.addDecodedNet(eeeeeFf);
+        NetDataModel eeeeeGg = new NetDataModel("gg", "eeeee.gg", null);
+        waveformDataModel.addDecodedNet(eeeeeGg);
 
         try {
             waveformDataModel.fuzzyFindNet("cc");
@@ -228,17 +228,17 @@ public class WaveformDataModelTest {
             assertEquals("Ambiguous net \"cc\"", exc.getMessage());
         }
 
-        assertSame(aaaa_bbbbb_cc, waveformDataModel.fuzzyFindNet("bbbbb.cc"));
-        assertSame(aaaa_bbbbb_cc, waveformDataModel.fuzzyFindNet("aaaa.bbbbb.cc"));
-        assertSame(ddddd_cc, waveformDataModel.fuzzyFindNet("ddddd.cc"));
-        assertSame(aaaa_bbbbb_dd, waveformDataModel.fuzzyFindNet("dd"));
+        assertSame(aaaaBbbbbCc, waveformDataModel.fuzzyFindNet("bbbbb.cc"));
+        assertSame(aaaaBbbbbCc, waveformDataModel.fuzzyFindNet("aaaa.bbbbb.cc"));
+        assertSame(dddddCc, waveformDataModel.fuzzyFindNet("ddddd.cc"));
+        assertSame(aaaaBbbbbDd, waveformDataModel.fuzzyFindNet("dd"));
 
         // Even though there are two matches for this, it isn't ambiguous, because
         // they are aliases.
-        assertSame(aaaa_bbbbb_ee, waveformDataModel.fuzzyFindNet("ee"));
+        assertSame(aaaaBbbbbEe, waveformDataModel.fuzzyFindNet("ee"));
 
         // Find decoded net
-        assertSame(eeeee_gg, waveformDataModel.fuzzyFindNet("gg"));
+        assertSame(eeeeeGg, waveformDataModel.fuzzyFindNet("gg"));
 
         // Ambiguous name in decoded nets collides with trace nets
         try {

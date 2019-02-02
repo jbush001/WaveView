@@ -439,18 +439,20 @@ public class BitVectorTest {
         assertEquals("101", bv1.slice(4, 6).toString());
         assertEquals("0010", bv1.slice(5, 8).toString());
 
-        // Larger than 64 bit source, slice spans word boundary, result is
-        // smaller than 64 bits
-        BitVector bv2 = new BitVector("7d4a178d6df770072b6ae59c", 16);
-        assertEquals("10101", bv2.slice(62, 66).toString());
+        BitVector vec128 = new BitVector("B79B7B6A8AFE8C54ECEF9F1CE6F9B6FA", 16);
+        BitVector vec192 = new BitVector("AA70E91A5517D2BAC8AEB073834AC62DDDD4DEC8EAA6332F", 16);
 
-        // Exactly 64 bit result, not 64 bit aligned
-        BitVector bv3 = new BitVector("7d4a178d6df770072b6ae59c", 16);
-        assertEquals("6B6FBB80395B572C", bv3.slice(5, 68).toString(16));
+        // Crosses 64 bit boundary, result < 64 bits
+        assertEquals("C54E", vec128.slice(60, 75).toString(16));
 
-        // Result is exactly 64 bit aligned
-        BitVector bv4 = new BitVector("7d4a178d6df770072b6ae59c", 16);
-        assertEquals("178D", bv4.slice(64, 79).toString(16));
+        // Crosses 64 bit boundary, result = 64 bits
+        assertEquals("79B7B6A8AFE8C54E", vec128.slice(60, 123).toString(16));
+
+        // Crosses 64 bit boundary, result > 64 bits
+        assertEquals("C8AEB073834AC62DD", vec192.slice(60, 127).toString(16));
+
+        // 64 bit aligned, result < 64 bits
+        assertEquals("8C54", vec128.slice(64, 79).toString(16));
     }
 
     @Test
