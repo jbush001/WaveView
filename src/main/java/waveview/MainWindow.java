@@ -40,7 +40,7 @@ import javax.swing.KeyStroke;
 import javax.swing.ProgressMonitor;
 import waveview.search.Search;
 import waveview.search.SearchFormatException;
-import waveview.wavedata.Decoder;
+import waveview.decoder.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.WaveformDataModel;
 

@@ -14,12 +14,11 @@
 // limitations under the License.
 //
 
-package waveview.wavedata;
+package waveview.decoder;
 
 import java.security.InvalidParameterException;
-
-import waveview.plugins.SpiDecoder;
-import waveview.plugins.UartDecoder;
+import waveview.wavedata.NetDataModel;
+import waveview.wavedata.TransitionVector;
 
 public abstract class Decoder {
     private int timescale;

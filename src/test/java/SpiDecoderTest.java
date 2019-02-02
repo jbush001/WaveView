@@ -21,8 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import waveview.decoder.Decoder;
 import waveview.wavedata.BitVector;
-import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.Transition;
 import waveview.wavedata.TransitionVector;

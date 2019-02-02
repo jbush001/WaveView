@@ -14,13 +14,11 @@
 // limitations under the License.
 //
 
-package waveview.plugins;
+package waveview.decoder;
 
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
-import waveview.wavedata.Decoder;
 import waveview.wavedata.NetDataModel;
-import waveview.wavedata.SignalCursor;
 import waveview.wavedata.TransitionVector;
 
 // XXX This doesn't have a way of signaling an error, so it makes a best

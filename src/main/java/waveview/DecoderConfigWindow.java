@@ -26,7 +26,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
-import waveview.wavedata.Decoder;
+import waveview.decoder.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 import waveview.wavedata.WaveformDataModel;

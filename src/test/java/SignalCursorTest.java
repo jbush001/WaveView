@@ -18,9 +18,9 @@
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+import waveview.decoder.SignalCursor;
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
-import waveview.wavedata.SignalCursor;
 import waveview.wavedata.TransitionVector;
 
 public class SignalCursorTest {

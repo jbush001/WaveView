@@ -48,7 +48,7 @@ import javax.swing.TransferHandler;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import javax.swing.SwingUtilities;
-import waveview.wavedata.Decoder;
+import waveview.decoder.Decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.Transition;
 import waveview.wavedata.WaveformDataModel;

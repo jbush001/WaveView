@@ -14,14 +14,12 @@
 // limitations under the License.
 //
 
-package waveview.plugins;
+package waveview.decoder;
 
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
-import waveview.wavedata.SignalCursor;
 import waveview.wavedata.TransitionVector;
-import waveview.wavedata.Decoder;
 
 public class SpiDecoder extends Decoder {
     private static final BitVector Z = new BitVector("zzzzzzzz", 2);
