@@ -48,12 +48,12 @@ public class SignalCursor {
     public long nextEdge(long timestamp, BitValue expectPolarity) {
         assert timestamp >= 0;
 
-        timestamp = nextLevel(timestamp, expectPolarity.invert());
-        if (timestamp < 0) {
+        long opposite = nextLevel(timestamp, expectPolarity.invert());
+        if (opposite < 0) {
             return -1;
         }
 
-        return nextLevel(timestamp, expectPolarity);
+        return nextLevel(opposite, expectPolarity);
     }
 
     /// Return the next timestamp where the signal is at a given level

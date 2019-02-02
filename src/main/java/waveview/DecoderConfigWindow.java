@@ -47,14 +47,14 @@ final class DecoderConfigWindow extends JDialog {
         super(parent, "Decoder Config", true);
 
         NetDataModel[] inputModels = new NetDataModel[selectedIndices.length];
-        insertionIndex = 0;
+        int maxIndex = 0;
         for (int i = 0; i < selectedIndices.length; i++) {
             inputModels[i] = presentationModel.getVisibleNet(
                 selectedIndices[i]);
-            if (selectedIndices[i] > insertionIndex) {
-                insertionIndex = selectedIndices[i] + 1;
-            }
+            maxIndex = Integer.max(maxIndex, selectedIndices[i] + 1);
         }
+
+        insertionIndex = maxIndex;
 
         Container contentPane = new Container();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));

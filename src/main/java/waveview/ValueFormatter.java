@@ -24,4 +24,6 @@ import waveview.wavedata.BitVector;
 /// this a class was to allow dynamically loading classes to decode custom
 /// logic types.
 ///
-public interface ValueFormatter { String format(BitVector values); }
+public interface ValueFormatter {
+    String format(BitVector values);
+}

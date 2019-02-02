@@ -46,7 +46,6 @@ public final class WaveformPresentationModel {
         void markerChanged(long timestamp);
         void formatChanged(int index);
     }
-    ;
 
     public WaveformPresentationModel() {
         setHorizontalScale(10.0);
