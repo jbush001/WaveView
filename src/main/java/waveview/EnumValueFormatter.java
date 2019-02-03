@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.HashMap;
-import java.util.IllegalFormatException;
 import java.util.Map;
 import waveview.wavedata.BitVector;
 
