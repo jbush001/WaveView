@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.Map;
 import waveview.wavedata.BitVector;
 
@@ -34,15 +35,33 @@ public final class EnumValueFormatter implements ValueFormatter {
     private final Map<Integer, String> mappings = new HashMap<>();
     private final File mappingFile;
 
+    public static class FormatException extends IOException {
+        public FormatException(String message) {
+            super(message);
+        }
+    }
+
     public EnumValueFormatter(File mappingFile) throws IOException {
         this.mappingFile = mappingFile;
         try (BufferedReader br = new BufferedReader(
-                 new InputStreamReader(Files.newInputStream(mappingFile.toPath()), "UTF8"))) {
+                new InputStreamReader(Files.newInputStream(mappingFile.toPath()), "UTF8"))) {
+            int lineNum = 0;
             String line;
             while ((line = br.readLine()) != null) {
+                lineNum++;
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
                 String[] tokens = line.split(" ", 0);
-                if (tokens.length >= 2) {
+                if (tokens.length != 2) {
+                    throw new FormatException("Line " + lineNum + " parse error");
+                }
+
+                try {
                     mappings.put(Integer.parseInt(tokens[0]), tokens[1]);
+                } catch (NumberFormatException exc) {
+                    throw new FormatException("Line " + lineNum + " invalid number format");
                 }
             }
         }

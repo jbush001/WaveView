@@ -426,7 +426,8 @@ final class NetNameView
             try {
                 formatter = new EnumValueFormatter(chooser.getSelectedFile());
             } catch (IOException exc) {
-                JOptionPane.showMessageDialog(this, "Error opening enum mapping file");
+                JOptionPane.showMessageDialog(this, "Error opening enum mapping file: "
+                    + exc.getMessage());
                 formatter = null;
             }
         }

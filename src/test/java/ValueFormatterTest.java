@@ -42,13 +42,53 @@ public class ValueFormatterTest {
     }
 
     @Test
-    public void enumValueFormatterBadFile() {
+    public void enumValueFormatterMissingFile() {
         File mappingFile = new File("askfkalsd8unskdgsdfghsdfkgsdfkghsdfgksdfuzxcjk");
         try {
             new EnumValueFormatter(mappingFile);
             fail("didn't throw exception");
         } catch (IOException exc) {
             // Expected
+        }
+    }
+
+    // Each line should have two parts: a number and an identifier. This
+    // one has more than two.
+    @Test
+    public void enumValueFormatterTooManyTokens() throws IOException {
+        File mappingFile = new File("src/test/resources/enum_mapping/too-many-tokens.txt");
+        try {
+            new EnumValueFormatter(mappingFile);
+            fail("didn't throw exception");
+        } catch (EnumValueFormatter.FormatException exc) {
+            // Expected
+            assertEquals("Line 2 parse error", exc.getMessage());
+        }
+    }
+
+    // Same as above, except missing identifier
+    @Test
+    public void enumValueFormatterTooFewTokens() throws IOException {
+        File mappingFile = new File("src/test/resources/enum_mapping/too-many-tokens.txt");
+        try {
+            new EnumValueFormatter(mappingFile);
+            fail("didn't throw exception");
+        } catch (EnumValueFormatter.FormatException exc) {
+            // Expected
+            assertEquals("Line 2 parse error", exc.getMessage());
+        }
+    }
+
+    // First token can't be parsed as integer
+    @Test
+    public void enumValueFormatterNotNumber() throws IOException {
+        File mappingFile = new File("src/test/resources/enum_mapping/not-number.txt");
+        try {
+            new EnumValueFormatter(mappingFile);
+            fail("didn't throw exception");
+        } catch (EnumValueFormatter.FormatException exc) {
+            // Expected
+            assertEquals("Line 2 invalid number format", exc.getMessage());
         }
     }
 

@@ -222,12 +222,11 @@ public final class WaveformSettingsFile {
                 if (formatStr.equals(EnumValueFormatter.class.getName())) {
                     String pathStr =((Text) formatTag.getElementsByTagName("path")
                         .item(0).getFirstChild()).getData();
-                    formatter = (ValueFormatter) c.getConstructor(File.class)
-                        .newInstance(new File(pathStr));
+                    formatter = new EnumValueFormatter(new File(pathStr));
                 } else {
                     formatter = (ValueFormatter) c.getConstructor().newInstance();
                 }
-            } catch (LinkageError | ReflectiveOperationException exc) {
+            } catch (LinkageError | ReflectiveOperationException | IOException exc) {
                 System.out.println(
                     "unable to instantiate value formatter " + formatStr + ": " + exc);
                 formatter = new BinaryValueFormatter();
