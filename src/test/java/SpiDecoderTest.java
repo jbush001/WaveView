@@ -1,4 +1,3 @@
-
 //
 // Copyright 2019 Jeff Bush
 //
@@ -37,19 +36,19 @@ public class SpiDecoderTest {
 
     final TransitionVector data = TransitionVector.Builder.createBuilder(1)
         // 0xda
-        .appendTransition(20, new BitVector("1", 2))
-        .appendTransition(40, new BitVector("0", 2))
-        .appendTransition(50, new BitVector("1", 2))
-        .appendTransition(70, new BitVector("0", 2))
-        .appendTransition(80, new BitVector("1", 2))
-        .appendTransition(90, new BitVector("0", 2))
+        .appendTransition(20, ONE)
+        .appendTransition(40, ZERO)
+        .appendTransition(50, ONE)
+        .appendTransition(70, ZERO)
+        .appendTransition(80, ONE)
+        .appendTransition(90, ZERO)
 
         // 0xA3
-        .appendTransition(100, new BitVector("1", 2))
-        .appendTransition(110, new BitVector("0", 2))
-        .appendTransition(120, new BitVector("1", 2))
-        .appendTransition(130, new BitVector("0", 2))
-        .appendTransition(160, new BitVector("1", 2))
+        .appendTransition(100, ONE)
+        .appendTransition(110, ZERO)
+        .appendTransition(120, ONE)
+        .appendTransition(130, ZERO)
+        .appendTransition(160, ONE)
         .getTransitionVector();
 
     TransitionVector sclk;
@@ -75,9 +74,9 @@ public class SpiDecoderTest {
     @Test
     public void selectDeassert() {
         TransitionVector ss = TransitionVector.Builder.createBuilder(1)
-            .appendTransition(0, new BitVector("1", 2))
-            .appendTransition(15, new BitVector("0", 2))
-            .appendTransition(100, new BitVector("1", 2))
+            .appendTransition(0, ONE)
+            .appendTransition(15, ZERO)
+            .appendTransition(100, ONE)
             .getTransitionVector();
 
         Decoder decoder = Decoder.createDecoder("SPI");
@@ -107,9 +106,9 @@ public class SpiDecoderTest {
     @Test
     public void selectReassert() {
         TransitionVector ss = TransitionVector.Builder.createBuilder(1)
-            .appendTransition(0, new BitVector("0", 2))
-            .appendTransition(10, new BitVector("1", 2))    // Deassert
-            .appendTransition(95, new BitVector("0", 2))    // Reassert
+            .appendTransition(0, ZERO)
+            .appendTransition(10, ONE)    // Deassert
+            .appendTransition(95, ZERO)    // Reassert
             .getTransitionVector();
 
         Decoder decoder = Decoder.createDecoder("SPI");
@@ -139,8 +138,8 @@ public class SpiDecoderTest {
     @Test
     public void decodeMultiple() {
         TransitionVector ss = TransitionVector.Builder.createBuilder(1)
-            .appendTransition(0, new BitVector("1", 2))
-            .appendTransition(15, new BitVector("0", 2))
+            .appendTransition(0, ONE)
+            .appendTransition(15, ZERO)
             .getTransitionVector();
 
         Decoder decoder = Decoder.createDecoder("SPI");
@@ -248,28 +247,28 @@ public class SpiDecoderTest {
     @Test
     public void redundantClockTransitions() {
         final TransitionVector badclk = TransitionVector.Builder.createBuilder(1)
-            .appendTransition(15, new BitVector("0", 2))
-            .appendTransition(20, new BitVector("1", 2))
-            .appendTransition(22, new BitVector("1", 2))
-            .appendTransition(25, new BitVector("0", 2))
-            .appendTransition(27, new BitVector("0", 2))
-            .appendTransition(30, new BitVector("1", 2))
-            .appendTransition(35, new BitVector("0", 2))
-            .appendTransition(40, new BitVector("1", 2))
-            .appendTransition(45, new BitVector("0", 2))
-            .appendTransition(50, new BitVector("1", 2))
-            .appendTransition(55, new BitVector("0", 2))
-            .appendTransition(60, new BitVector("1", 2))
-            .appendTransition(65, new BitVector("0", 2))
-            .appendTransition(70, new BitVector("1", 2))
-            .appendTransition(75, new BitVector("0", 2))
-            .appendTransition(80, new BitVector("1", 2))
-            .appendTransition(85, new BitVector("0", 2))
-            .appendTransition(90, new BitVector("1", 2))
+            .appendTransition(15, ZERO)
+            .appendTransition(20, ONE)
+            .appendTransition(22, ONE)
+            .appendTransition(25, ZERO)
+            .appendTransition(27, ZERO)
+            .appendTransition(30, ONE)
+            .appendTransition(35, ZERO)
+            .appendTransition(40, ONE)
+            .appendTransition(45, ZERO)
+            .appendTransition(50, ONE)
+            .appendTransition(55, ZERO)
+            .appendTransition(60, ONE)
+            .appendTransition(65, ZERO)
+            .appendTransition(70, ONE)
+            .appendTransition(75, ZERO)
+            .appendTransition(80, ONE)
+            .appendTransition(85, ZERO)
+            .appendTransition(90, ONE)
             .getTransitionVector();
 
         final TransitionVector ss = TransitionVector.Builder.createBuilder(1)
-            .appendTransition(0, new BitVector("0", 2))
+            .appendTransition(0, ZERO)
             .getTransitionVector();
 
         Decoder decoder = Decoder.createDecoder("SPI");
@@ -298,8 +297,8 @@ public class SpiDecoderTest {
         Decoder decoder = Decoder.createDecoder("SPI");
 
         TransitionVector ss = TransitionVector.Builder.createBuilder(1)
-            .appendTransition(0, new BitVector("1", 2))
-            .appendTransition(15, new BitVector("0", 2))
+            .appendTransition(0, ONE)
+            .appendTransition(15, ZERO)
             .getTransitionVector();
 
         decoder.setParam(0, "1");

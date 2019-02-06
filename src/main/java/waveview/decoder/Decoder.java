@@ -28,13 +28,15 @@ public abstract class Decoder {
                 return new SpiDecoder();
             case "UART":
                 return new UartDecoder();
+            case "I2C":
+                return new I2cDecoder();
             default:
                 throw new IllegalArgumentException("unknown decoder name");
         }
     }
 
     public static String[] getDecoderList() {
-        return new String[] {"SPI", "UART"};
+        return new String[] {"SPI", "UART", "I2C"};
     }
 
     public abstract String[] getInputNames();

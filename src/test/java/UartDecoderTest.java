@@ -29,29 +29,32 @@ import waveview.wavedata.Transition;
 import waveview.wavedata.TransitionVector;
 
 public class UartDecoderTest {
+    final BitVector ZERO = new BitVector("0", 2);
+    final BitVector ONE = new BitVector("1", 2);;
+
     @Test
     public void decode() {
         TransitionVector data = TransitionVector.Builder.createBuilder(1)
-            .appendTransition(0, new BitVector("1", 2)) // stop polarity
+            .appendTransition(0, ONE) // stop polarity
 
             // First byte (0xb1)
-            .appendTransition(40, new BitVector("0", 2)) // start bit
-            .appendTransition(49, new BitVector("1", 2)) // lsb
-            .appendTransition(57, new BitVector("0", 2))
-            .appendTransition(83, new BitVector("1", 2))
-            .appendTransition(92, new BitVector("1", 2))
-            .appendTransition(101, new BitVector("0", 2))
-            .appendTransition(109, new BitVector("1", 2)) // msb & stop bit
+            .appendTransition(40, ZERO) // start bit
+            .appendTransition(49, ONE) // lsb
+            .appendTransition(57, ZERO)
+            .appendTransition(83, ONE)
+            .appendTransition(92, ONE)
+            .appendTransition(101, ZERO)
+            .appendTransition(109, ONE) // msb & stop bit
 
             // Second byte (0x6a)
-            .appendTransition(200, new BitVector("0", 2)) // start bit & lsb
-            .appendTransition(217, new BitVector("1", 2))
-            .appendTransition(226, new BitVector("0", 2))
-            .appendTransition(235, new BitVector("1", 2))
-            .appendTransition(243, new BitVector("0", 2))
-            .appendTransition(252, new BitVector("1", 2))
-            .appendTransition(269, new BitVector("0", 2)) // msb
-            .appendTransition(278, new BitVector("1", 2)) // stop bit
+            .appendTransition(200, ZERO) // start bit & lsb
+            .appendTransition(217, ONE)
+            .appendTransition(226, ZERO)
+            .appendTransition(235, ONE)
+            .appendTransition(243, ZERO)
+            .appendTransition(252, ONE)
+            .appendTransition(269, ZERO) // msb
+            .appendTransition(278, ONE) // stop bit
             .getTransitionVector();
 
         Decoder decoder = Decoder.createDecoder("UART");
