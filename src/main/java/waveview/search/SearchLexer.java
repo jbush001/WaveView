@@ -18,6 +18,7 @@ package waveview.search;
 
 import waveview.wavedata.BitVector;
 
+/// Lexical analyzer breaks the search string into tokens.
 final class SearchLexer {
     private enum State {
         SCAN_INIT,

@@ -19,6 +19,10 @@ package waveview.decoder;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 
+///
+/// Base class for implementations that read transitions for one or more
+/// nets and generate a new net with decoded information.
+///
 public abstract class Decoder {
     private int timescale;
 

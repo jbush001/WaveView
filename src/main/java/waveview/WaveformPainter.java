@@ -24,7 +24,6 @@ import waveview.wavedata.TransitionVector;
 /// Delegate used to draw a waveform for a single net
 /// This is subclassed for single and multi-bit nets.
 ///
-
 interface WaveformPainter {
     /// @param g Graphics context to draw onto
     /// @param transitionVector Waveform information will be pulled from this model

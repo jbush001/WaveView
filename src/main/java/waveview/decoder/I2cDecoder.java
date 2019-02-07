@@ -21,6 +21,8 @@ import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 
+/// I²C Inter-Integrated Circuit Protocol
+/// https://en.wikipedia.org/wiki/I%C2%B2C
 class I2cDecoder extends Decoder {
     private NetDataModel sda;
     private NetDataModel sdc;

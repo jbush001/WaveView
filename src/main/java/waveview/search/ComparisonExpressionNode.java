@@ -18,6 +18,8 @@ package waveview.search;
 
 import waveview.wavedata.BitVector;
 
+/// Superclass for nodes that perform a comparison between two binary values
+/// and return a boolean (true or false).
 abstract class ComparisonExpressionNode extends BooleanExpressionNode {
     protected final ValueNode leftChild;
     protected final ValueNode rightChild;

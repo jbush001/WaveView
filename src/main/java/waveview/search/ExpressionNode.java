@@ -16,6 +16,7 @@
 
 package waveview.search;
 
+/// Base class for nodes in a tree that represent a parsed search expression.
 class ExpressionNode {
     protected ExpressionNode() {}
 }

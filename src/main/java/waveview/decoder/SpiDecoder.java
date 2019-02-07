@@ -21,6 +21,10 @@ import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 
+///
+/// Serial Peripheral Interface (SPI) protocol decoder
+/// https://en.wikipedia.org/wiki/Serial_Peripheral_Interface
+///
 public class SpiDecoder extends Decoder {
     private static final BitVector Z = new BitVector("zzzzzzzz", 2);
     private static final int BITS_PER_BYTE = 8;

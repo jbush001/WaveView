@@ -25,6 +25,12 @@ import waveview.wavedata.VcdLoader;
 import waveview.wavedata.WaveformDataModel;
 import waveview.wavedata.WaveformLoader;
 
+///
+/// Loads the waveform in a separate background thread so the UI
+/// doesn't freeze. When this completes loading, it will call into
+/// a handler. The handler is responsible for synchronization with the
+/// main thread.
+///
 public final class WaveformLoadWorker extends SwingWorker<Void, Void> {
     private final File file;
     private final ProgressMonitor progressMonitor;

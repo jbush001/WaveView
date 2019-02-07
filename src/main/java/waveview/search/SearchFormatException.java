@@ -16,6 +16,10 @@
 
 package waveview.search;
 
+///
+/// This is thrown when there is a problem trying to parse a search
+/// string.
+///
 public class SearchFormatException extends Exception {
     private final int startOffset;
     private final int endOffset;

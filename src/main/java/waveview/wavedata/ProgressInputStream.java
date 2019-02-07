@@ -19,6 +19,8 @@ package waveview.wavedata;
 import java.io.IOException;
 import java.io.InputStream;
 
+/// Wrapper around an input stream that tracks the number of bytes that
+/// have been transferred and sends periodic notifications.
 public final class ProgressInputStream extends InputStream {
     private long totalRead;
     private long lastProgressUpdate;
@@ -26,7 +28,9 @@ public final class ProgressInputStream extends InputStream {
     private final InputStream wrapped;
     private final Listener listener;
 
-    public interface Listener { void updateProgress(long totalRead) throws IOException; }
+    public interface Listener {
+        void updateProgress(long totalRead) throws IOException;
+    }
 
     public ProgressInputStream(InputStream wrapped, Listener listener, long updateInterval) {
         this.wrapped = wrapped;

@@ -16,6 +16,8 @@
 
 package waveview.wavedata;
 
+/// This implements four-valued logic, where each value can be
+/// 0, 1, Z (high-impedance), or X (don't care or unknown).
 public enum BitValue {
     ZERO,
     ONE,

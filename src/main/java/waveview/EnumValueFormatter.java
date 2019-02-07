@@ -29,7 +29,6 @@ import waveview.wavedata.BitVector;
 /// Converts a bitvector to one of a set of strings from an enumeration.
 /// Useful for encoding state variables.
 ///
-
 public final class EnumValueFormatter implements ValueFormatter {
     private final Map<Integer, String> mappings = new HashMap<>();
     private final File mappingFile;

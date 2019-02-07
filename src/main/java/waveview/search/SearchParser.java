@@ -17,12 +17,13 @@
 package waveview.search;
 
 import java.util.NoSuchElementException;
-
 import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.WaveformDataModel;
 import waveview.wavedata.WaveformDataModel.AmbiguousNetException;
 
+/// Converts a search string into a tree of expression nodes that
+/// represents the value.
 final class SearchParser {
     private final SearchLexer lexer;
     private final WaveformDataModel waveformDataModel;

@@ -25,7 +25,6 @@ import waveview.wavedata.SortedArrayList;
 /// Contains visible state for a waveform capture (e.g. Cursor position, scale,
 /// visible nets, etc.)
 ///
-
 public final class WaveformPresentationModel {
     private final List<Listener> listeners = new ArrayList<>();
     private final List<NetPresentationModel> visibleNets = new ArrayList<>();

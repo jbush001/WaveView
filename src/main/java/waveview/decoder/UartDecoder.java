@@ -21,8 +21,10 @@ import waveview.wavedata.BitVector;
 import waveview.wavedata.NetDataModel;
 import waveview.wavedata.TransitionVector;
 
-// XXX This doesn't have a way of signaling an error, so it makes a best
-// effort to decode the value.
+/// Asynchronous serial decoder
+/// https://en.wikipedia.org/wiki/Asynchronous_serial_communication
+/// @note This doesn't have a way of signaling an error, so it makes a best
+/// effort to decode the value.
 public class UartDecoder extends Decoder {
     private static final BitVector Z = new BitVector("zzzzzzzz", 2);
     private static final int BITS_PER_BYTE = 8;

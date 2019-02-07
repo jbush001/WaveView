@@ -34,6 +34,10 @@ import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Highlighter;
 import waveview.search.SearchFormatException;
 
+///
+/// Dialog pops up to allow user to enter a search string and jump
+/// to the next or previous match.
+///
 class FindView extends JPanel implements ActionListener {
     private final MainWindow mainWindow;
     private final transient Highlighter errorHighlighter;

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+/// This is used to represent the hierarchy of modules and nets.
 public final class NetTreeNode {
     private final String name;
     private final NetDataModel netDataModel;

@@ -29,7 +29,6 @@ import java.util.NoSuchElementException;
 /// Contains information about nets and transitions. View state is contained
 /// in WaveformPresentationModel.
 ///
-
 public final class WaveformDataModel implements Iterable<NetDataModel> {
     private long maxTimestamp;
     private Map<String, NetDataModel> fullNameToNetMap = new HashMap<>();

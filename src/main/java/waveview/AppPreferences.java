@@ -20,6 +20,9 @@ import java.awt.Color;
 import java.io.File;
 import java.util.prefs.Preferences;
 
+///
+/// This class is a data model for all user configurable preferences.
+///
 final class AppPreferences {
     private static AppPreferences instance;
     private final Preferences prefs = Preferences.userNodeForPackage(MainWindow.class);

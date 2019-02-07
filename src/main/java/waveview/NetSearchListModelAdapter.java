@@ -35,7 +35,6 @@ import waveview.wavedata.WaveformDataModel;
 /// patterns that will refine the list to a smaller set of matches. It registers
 /// itself as a listener on the text field where the user types a pattern.
 ///
-
 public final class NetSearchListModelAdapter implements ListModel<String>, DocumentListener {
     private final List<ListDataListener> listeners = new ArrayList<>();
     private final WaveformDataModel waveformDataModel;

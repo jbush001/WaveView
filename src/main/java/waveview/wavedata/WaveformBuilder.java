@@ -19,7 +19,6 @@ package waveview.wavedata;
 ///
 /// Loader calls this to copy information from a waveform into the model.
 ///
-
 public interface WaveformBuilder {
     /// Set timescale.
     /// @param order 10 raised to this number is the number of seconds per

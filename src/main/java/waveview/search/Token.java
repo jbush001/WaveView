@@ -18,6 +18,9 @@ package waveview.search;
 
 import waveview.wavedata.BitVector;
 
+///
+/// Tokens are returned by SearchLexer while parsing a search string
+///
 final class Token {
     enum Type {
         IDENTIFIER,

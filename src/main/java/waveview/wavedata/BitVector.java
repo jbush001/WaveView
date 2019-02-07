@@ -19,6 +19,9 @@ package waveview.wavedata;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
+/// A BitVector represents a binary value in positional notation as a set of
+/// binary digits. This implements four-valued logic, where each value can be
+/// 0, 1, Z (high-impedance), or X (don't care or unknown).
 public class BitVector {
     // If a bit in zx_flag is 1, the corresponding bit in the value array
     // represents either z (0) or x (1). Otherwise, the value bit represents

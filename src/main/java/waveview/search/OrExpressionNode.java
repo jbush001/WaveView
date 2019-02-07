@@ -16,6 +16,7 @@
 
 package waveview.search;
 
+/// Logical OR: returns true if either of the child experessions are true.
 final class OrExpressionNode extends BooleanExpressionNode {
     private final BooleanExpressionNode leftChild;
     private final BooleanExpressionNode rightChild;

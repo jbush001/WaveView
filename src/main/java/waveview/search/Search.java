@@ -26,8 +26,6 @@ import waveview.wavedata.WaveformDataModel;
 /// builds an expression tree to represent the search criteria. It is optimized
 /// for fast searching, skipping events that cannot meet the criteria.
 ///
-/// @todo Support slice multi-net matches
-///
 public final class Search {
     private final BooleanExpressionNode searchExpression;
 

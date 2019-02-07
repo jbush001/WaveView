@@ -28,8 +28,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 ///
-/// Parse a value change dump (VCD) formatted text file and push the contents
-/// into a provided waveform model All section references are to IEEE 1364-2001.
+/// Parses a value change dump (VCD) formatted text file and push the contents
+/// into a provided waveform model.
+/// https://en.wikipedia.org/wiki/Value_change_dump
+/// All section references are to IEEE 1364-2001.
 ///
 public final class VcdLoader implements WaveformLoader {
     private StreamTokenizer tokenizer;

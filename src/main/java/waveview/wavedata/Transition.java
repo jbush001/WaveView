@@ -21,7 +21,6 @@ package waveview.wavedata;
 /// The is derived from a BitVector and contains the value at and after
 /// the given timestamp.
 ///
-
 public class Transition extends BitVector {
     private long timestamp;
 

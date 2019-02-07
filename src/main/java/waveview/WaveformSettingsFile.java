@@ -35,10 +35,14 @@ import waveview.wavedata.NetDataModel;
 import waveview.wavedata.WaveformDataModel;
 
 ///
-/// Load/Save WaveformPresentationModel state for a waveform file.
+/// Load/Save WaveformPresentationModel state associated with a waveform file.
+/// During the course of debugging, the user will often regenerate the trace
+/// by rerunning the simulation after this file is initially generated.
+/// This may invalidate some of the information in the settings file, for
+/// example, if nets are added or removed or the simulation runs for a different
+/// number of cycles. In this case, this should silently ignore those values.
 /// @bug If markers are past the end offset, this should probably drop them.
 ///
-
 public final class WaveformSettingsFile {
     private final File settingsFile;
     private final WaveformDataModel waveformDataModel;

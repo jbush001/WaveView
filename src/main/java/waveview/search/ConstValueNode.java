@@ -18,6 +18,7 @@ package waveview.search;
 
 import waveview.wavedata.BitVector;
 
+/// Represents a constant binary value (literal) in an expression.
 final class ConstValueNode extends ValueNode {
     private final BitVector value;
 
