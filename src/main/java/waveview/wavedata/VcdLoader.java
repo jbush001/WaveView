@@ -376,8 +376,9 @@ public final class VcdLoader implements WaveformLoader {
             if (require) {
                 throw new LoadFormatException(
                     "line " + tokenizer.lineno() + ": unexpected end of file");
-            } else
+            } else {
                 return false;
+            }
         }
 
         return true;

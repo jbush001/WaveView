@@ -60,12 +60,13 @@ public final class TransitionVector {
         while (low <= high) {
             int mid = (low + high) >>> 1;
             long midKey = timestamps[mid];
-            if (timestamp < midKey)
+            if (timestamp < midKey) {
                 high = mid - 1;
-            else if (timestamp > midKey)
+            } else if (timestamp > midKey) {
                 low = mid + 1;
-            else
+            } else {
                 return new TransitionVectorIterator(mid);
+            }
         }
 
         // No exact match. Low is equal to the index the element would be
@@ -76,8 +77,9 @@ public final class TransitionVector {
     }
 
     public long getMaxTimestamp() {
-        if (transitionCount == 0)
+        if (transitionCount == 0) {
             return 0;
+        }
 
         return timestamps[transitionCount - 1];
     }
@@ -109,8 +111,9 @@ public final class TransitionVector {
         /// reused)
         @Override
         public Transition next() {
-            if (!hasNext())
+            if (!hasNext()) {
                 throw new NoSuchElementException();
+            }
 
             int encodedBitIndex = transitionIndex * width * 2;
             int wordIndex = encodedBitIndex / 64;

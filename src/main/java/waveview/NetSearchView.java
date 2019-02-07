@@ -192,10 +192,11 @@ final class NetSearchView extends JPanel {
             boolean expanded, boolean leaf, int row, boolean hasFocus) {
             super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
-            if (((NetTreeNode) value).isLeaf())
+            if (((NetTreeNode) value).isLeaf()) {
                 setIcon(netIcon);
-            else
+            } else {
                 setIcon(moduleIcon);
+            }
 
             return this;
         }

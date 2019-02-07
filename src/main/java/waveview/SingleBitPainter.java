@@ -86,8 +86,9 @@ final class SingleBitPainter implements WaveformPainter {
     }
 
     private void drawSpan(Graphics g, BitValue value, int left, int right, int top) {
-        if (left >= right)
+        if (left >= right) {
             return;
+        }
 
         switch (value) {
             case ONE:

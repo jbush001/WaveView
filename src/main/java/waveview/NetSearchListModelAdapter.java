@@ -63,9 +63,11 @@ public final class NetSearchListModelAdapter implements ListModel<String>, Docum
                           .collect(Collectors.toList());
         }
 
-        ListDataEvent event =
-            new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, matches.size());
-        for (ListDataListener listener : listeners) listener.contentsChanged(event);
+        ListDataEvent event = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED,
+            0, matches.size());
+        for (ListDataListener listener : listeners) {
+            listener.contentsChanged(event);
+        }
     }
 
     private void filter(Document doc) {

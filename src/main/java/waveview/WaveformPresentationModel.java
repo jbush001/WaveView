@@ -59,11 +59,13 @@ public final class WaveformPresentationModel {
         markers.clear();
         netSets.clear();
         for (Listener listener : listeners) {
-            if (oldSize != 0)
+            if (oldSize != 0) {
                 listener.netsRemoved(0, oldSize);
+            }
 
-            if (hadMarkers)
+            if (hadMarkers) {
                 listener.markerChanged(-1);
+            }
         }
     }
 
@@ -204,8 +206,9 @@ public final class WaveformPresentationModel {
             }
         }
 
-        if (!found)
+        if (!found) {
             netSets.add(newNetSet);
+        }
     }
 
     public long getCursorPosition() {

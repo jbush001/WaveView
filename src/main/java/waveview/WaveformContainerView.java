@@ -114,8 +114,9 @@ final class WaveformContainerView extends JPanel {
         long cursorPositionTimestamp = waveformPresentationModel.getCursorPosition();
 
         // If the selection has a size of zero, can't zoom to it.
-        if (selectionStartTimestamp == cursorPositionTimestamp)
+        if (selectionStartTimestamp == cursorPositionTimestamp) {
             return;
+        }
 
         long lowTimestamp = Math.min(selectionStartTimestamp, cursorPositionTimestamp);
         long highTimestamp = Math.max(selectionStartTimestamp, cursorPositionTimestamp);
