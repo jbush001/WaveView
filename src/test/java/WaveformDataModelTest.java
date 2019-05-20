@@ -266,6 +266,13 @@ public class WaveformDataModelTest {
             // Expected
             assertEquals("Unknown net \"d\"", exc.getMessage());
         }
+
+        try {
+            waveformDataModel.fuzzyFindNet("xxx.aaaa.bbbbb.cc");
+            fail("Did not throw exception");
+        } catch (NoSuchElementException exc) {
+            assertEquals("Unknown net \"xxx.aaaa.bbbbb.cc\"", exc.getMessage());
+        }
     }
 
     @Test

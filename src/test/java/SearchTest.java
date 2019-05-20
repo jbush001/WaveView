@@ -160,6 +160,44 @@ public class SearchTest {
         assertEquals(23, search.getNextMatch(0));
     }
 
+    @SuppressWarnings("PMD.EmptyCatchBlock")
+    @Test
+    public void invalidLiteral() throws SearchFormatException {
+        WaveformDataModel waveformDataModel = new WaveformDataModel();
+        waveformDataModel.startBuilding()
+            .enterScope("mod1")
+            .newNet(0, "value", 4)
+            .exitScope()
+            .loadFinished();
+
+        try {
+            new Search(waveformDataModel, "mod1.value == 'd3A");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            assertEquals("Unexpected token", exc.getMessage());
+            assertEquals(17, exc.getStartOffset());
+            assertEquals(17, exc.getEndOffset());
+        }
+
+        try {
+            new Search(waveformDataModel, "mod1.value == 'd1a");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            assertEquals("Unexpected token", exc.getMessage());
+            assertEquals(17, exc.getStartOffset());
+            assertEquals(17, exc.getEndOffset());
+        }
+
+        try {
+            new Search(waveformDataModel, "mod1.value == 'o19");
+            fail("Did not throw exception");
+        } catch (SearchFormatException exc) {
+            assertEquals("Unexpected token", exc.getMessage());
+            assertEquals(17, exc.getStartOffset());
+            assertEquals(17, exc.getEndOffset());
+        }
+    }
+
     /// @bug This doesn't match correctly yet: Xes are ignored for
     /// matching.
     /// Verify it at least parses the search.
