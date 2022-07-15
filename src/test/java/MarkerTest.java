@@ -21,7 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +51,7 @@ public class MarkerTest {
     @Test
     public void removeMarkerEmpty() {
         model.removeMarkerAtTime(1000);
-        verifyZeroInteractions(listener);
+        verifyNoInteractions(listener);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class MarkerTest {
 
         model.removeMarkerAtTime(925); // less than marker time
 
-        verifyZeroInteractions(listener);
+        verifyNoInteractions(listener);
         assertEquals(1,
             model.getMarkerCount()); // Marker should still be present
     }
@@ -82,7 +82,7 @@ public class MarkerTest {
 
         model.removeMarkerAtTime(1075); // greater than marker time
 
-        verifyZeroInteractions(listener);
+        verifyNoInteractions(listener);
         assertEquals(1,
             model.getMarkerCount()); // Marker should still be present
     }
@@ -211,7 +211,7 @@ public class MarkerTest {
 
         model.nextMarker(false);
 
-        verifyZeroInteractions(listener);
+        verifyNoInteractions(listener);
         assertEquals(200, model.getCursorPosition());
     }
 
@@ -255,7 +255,7 @@ public class MarkerTest {
 
         model.prevMarker(false);
 
-        verifyZeroInteractions(listener);
+        verifyNoInteractions(listener);
         assertEquals(100, model.getCursorPosition());
     }
 

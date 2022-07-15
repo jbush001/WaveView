@@ -5,12 +5,11 @@ mainClassName = "waveview.MainWindow"
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.+'
-    testImplementation 'org.mockito:mockito-core:2.7.22'
+    testImplementation 'org.mockito:mockito-core:4.6.0'
 }
 
 jar {
@@ -38,8 +37,8 @@ buildscript {
 
 jacocoTestReport {
     reports {
-        xml.enabled = true
-        html.enabled = true
+        xml.required = true
+        html.required = true
     }
 }
 

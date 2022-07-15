@@ -24,7 +24,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -153,7 +153,7 @@ public class WaveformPresentationModelTest {
     @Test
     public void removeAllEmpty() {
         model.removeAllNets();
-        verifyZeroInteractions(listener);
+        verifyNoInteractions(listener);
     }
 
     @Test
