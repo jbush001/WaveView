@@ -1,6 +1,5 @@
 apply plugin: 'application'
 apply plugin: 'jacoco'
-apply plugin: 'findbugs'
 
 mainClassName = "waveview.MainWindow"
 
@@ -10,9 +9,8 @@ repositories {
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:2.7.22'
-    compile group: 'com.google.code.findbugs', name: 'annotations', version: '3.0.1'
+    testImplementation group: 'junit', name: 'junit', version: '4.+'
+    testImplementation 'org.mockito:mockito-core:2.7.22'
 }
 
 jar {
@@ -28,13 +26,6 @@ compileJava {
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
 }
 
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled false
-        html.enabled true
-    }
-}
-
 buildscript {
   repositories {
     maven {
@@ -42,11 +33,8 @@ buildscript {
     }
   }
   dependencies {
-    classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.8"
   }
 }
-
-apply plugin: "net.ltgt.errorprone"
 
 jacocoTestReport {
     reports {
