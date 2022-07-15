@@ -1,6 +1,5 @@
 # WaveView
-
-[![Build Status](https://travis-ci.org/jbush001/WaveView.svg?branch=master)](https://travis-ci.org/jbush001/WaveView)
+[![CI](https://github.com/jbush001/WaveView/workflows/CI/badge.svg)](https://github.com/jbush001/WaveView/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/jbush001/WaveView/branch/master/graph/badge.svg)](https://codecov.io/gh/jbush001/WaveView)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8d0a3f5b493d4f548706c2890566ebce)](https://www.codacy.com/app/jbush001/WaveView?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=jbush001/WaveView&amp;utm_campaign=Badge_Grade)
 
