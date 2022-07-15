@@ -108,7 +108,8 @@ public class NetSearchListModelAdapterTest {
         ListDataListener listener2 = mock(ListDataListener.class);
         nslma.addListDataListener(listener2);
         nslma.setPattern("z");
-        verify(listener2).contentsChanged(any(ListDataEvent.class));
+        verify(listener2).contentsChanged(
+            refEq(new ListDataEvent(nslma, ListDataEvent.CONTENTS_CHANGED, 0, 0)));
     }
 
     @Test
