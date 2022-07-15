@@ -20,7 +20,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.Test;
 import waveview.wavedata.BitValue;
 import waveview.wavedata.BitVector;
@@ -456,7 +455,6 @@ public class BitVectorTest {
     }
 
     @Test
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
     public void negativeLowSliceIndex() {
         BitVector bv = new BitVector("11111111", 2);
         try {
@@ -469,7 +467,6 @@ public class BitVectorTest {
     }
 
     @Test
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
     public void highSliceIndexTooBig() {
         BitVector bv = new BitVector("11111111", 2);
         try {
@@ -482,7 +479,6 @@ public class BitVectorTest {
     }
 
     @Test
-    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_INFERRED")
     public void lowHighSliceIndexSwapped() {
         BitVector bv = new BitVector("11111111", 2);
         try {

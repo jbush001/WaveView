@@ -103,7 +103,6 @@ public class ProgressInputStreamTest {
     }
 
     @Test
-    @SuppressFBWarnings({"RR_NOT_CHECKED"})
     public void readArrayProgress() throws IOException {
         when(inputStream.read(any(byte[].class))).thenAnswer(new Answer<Integer>() {
             @Override
@@ -167,7 +166,6 @@ public class ProgressInputStreamTest {
     }
 
     @Test
-    @SuppressFBWarnings({"RR_NOT_CHECKED"})
     public void readArrayWithOffsetProgress() throws IOException {
         when(inputStream.read(any(byte[].class), anyInt(), anyInt()))
             .thenAnswer(new Answer<Integer>() {
