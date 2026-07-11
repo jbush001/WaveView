@@ -1,45 +1,44 @@
-apply plugin: 'application'
-apply plugin: 'jacoco'
+plugins {
+    id 'application'
+}
 
-mainClassName = "waveview.MainWindow"
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+application {
+    mainClass = 'waveview.MainWindow' 
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation group: 'junit', name: 'junit', version: '4.+'
-    testImplementation 'org.mockito:mockito-core:4.6.0'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.23.0'
+}
+
+tasks.named('test') {
+    useJUnit()
+}
+
+tasks.named('startScripts') {
+    doLast {
+        // Appends the export lines directly inside the generated runner file
+        unixScript.text = unixScript.text.replace(
+            '#!/bin/sh',
+            '#!/bin/sh\nexport GDK_SCALE=2\nexport GDK_DPI_SCALE=1.5'
+        )
+    }
 }
 
 jar {
     manifest {
         attributes(
-            'Main-Class': 'waveview.MainWindow'
+            'Main-Class': application.mainClass.get()
         )
     }
 }
-
-compileJava {
-    options.encoding = 'UTF-8'
-    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
-}
-
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-  }
-}
-
-jacocoTestReport {
-    reports {
-        xml.required = true
-        html.required = true
-    }
-}
-
-check.dependsOn jacocoTestReport
